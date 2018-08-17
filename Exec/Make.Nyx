@@ -51,6 +51,11 @@ ifeq ($(USE_FORCING), TRUE)
   DEFINES += -DFORCING
 endif
 
+ifeq ($(USE_AXIONS), TRUE)
+  DEFINES += -DAXIONS
+endif
+
+
 DEFINES += -DBL_NOLINEVALUES
 
 GIMLET_DIR ?= /home/vince/Development/gimlet
