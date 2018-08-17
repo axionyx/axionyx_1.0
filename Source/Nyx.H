@@ -27,6 +27,9 @@ typedef NyxParticleContainer<1+BL_SPACEDIM+3> StellarParticleContainer;
 enum StateType {
     PhiGrav_Type = 0,
     Gravity_Type,
+#ifdef AXIONS
+    Axion_Type,
+#endif
     NUM_STATE_TYPE
 };
 #endif
@@ -41,6 +44,9 @@ enum StateType {
 #endif
 #ifdef SDC
     SDC_IR_Type,
+#endif
+#ifdef AXIONS
+    Axion_Type,
 #endif
     NUM_STATE_TYPE
 };
@@ -382,6 +388,10 @@ public:
     amrex::Real advance_no_hydro(amrex::Real time, amrex::Real dt, int iteration, int ncycle);
     amrex::Real advance_hydro_plus_particles(amrex::Real time, amrex::Real dt, int iteration,
                                       int ncycle);
+#ifdef AXIONS
+    amrex::Real advance_particle_axions(amrex::Real time, amrex::Real dt, int iteration, int ncycle);
+           void just_the_axions(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
+#endif
 
     void strang_hydro(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
 #ifdef SDC
@@ -559,6 +569,13 @@ public:
 
     static int NUM_STATE;
     static int Density, Xmom, Ymom, Zmom, Eden, Eint;
+
+#ifdef AXIONS
+    static int AxDens;
+    static int AxRe;
+    static int AxIm;
+    static int NUM_AX;
+#endif
 
     static int Temp_comp, Ne_comp, Zhi_comp;
 
