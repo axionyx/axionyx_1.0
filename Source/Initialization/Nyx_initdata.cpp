@@ -206,12 +206,17 @@ Nyx::initData ()
 
     if ( (do_santa_barbara == 0) && (do_readin_ics == 0) && (particle_init_type != "Cosmological") )
     {
+#ifdef AXIONS
+        MultiFab&   Ax_new   = get_new_data(Axion_Type);
+        int         na       = Ax_new.nComp();
+#endif
         if (do_hydro == 1) 
         {
             MultiFab&   D_new    = get_new_data(DiagEOS_Type);
             int         nd       = D_new.nComp();
             D_new.setVal(0., Temp_comp);
             D_new.setVal(0.,   Ne_comp);
+
 
             for (MFIter mfi(S_new,true); mfi.isValid(); ++mfi)
             {
@@ -222,6 +227,9 @@ Nyx::initData ()
                     (level, cur_time, bx.loVect(), bx.hiVect(), 
                      ns, BL_TO_FORTRAN(S_new[mfi]), 
                      nd, BL_TO_FORTRAN(D_new[mfi]), 
+#ifdef AXIONS
+                     na, BL_TO_FORTRAN(Ax_new[mfi]),
+#endif
                      dx, gridloc.lo(), gridloc.hi());
             }
 
@@ -241,10 +249,13 @@ Nyx::initData ()
             {
                 const Box& bx = mfi.tilebox();
                 RealBox gridloc = RealBox(bx, geom.CellSize(), geom.ProbLo());
-    
+   //TODO check why ns/S_new is written twice below in the original code. 
                 fort_initdata
                     (level, cur_time, bx.loVect(), bx.hiVect(), 
                      ns, BL_TO_FORTRAN(S_new[mfi]), 
+#ifdef AXIONS
+                     na, BL_TO_FORTRAN(Ax_new[mfi]),
+#endif
                      ns, BL_TO_FORTRAN(S_new[mfi]), 
                      dx, gridloc.lo(), gridloc.hi());
             }

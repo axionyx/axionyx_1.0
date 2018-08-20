@@ -53,6 +53,7 @@ f90EXE_sources += agn_params.f90
 f90EXE_sources += uniform01.f90
 f90EXE_sources += bl_random_f.f90
 
+f90EXE_sources += axion_params.f90
 ifeq (NEUTRINO_PARTICLES, TRUE)
 CEXE_headers += NeutrinoParticleContainer.H
 endif

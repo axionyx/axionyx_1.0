@@ -230,8 +230,10 @@ Nyx::read_particle_params ()
 {
     ParmParse pp("nyx");
     pp.query("do_dm_particles", do_dm_particles);
-
-#ifdef AGN
+#if defined AXIONS || ONLYAXIONS
+        do_dm_particles = 0;
+#endif
+#ifdef AGN || ONLYAXIONS
     pp.get("particle_init_type", particle_init_type);
     pp.get("particle_move_type", particle_move_type);
 #else
@@ -685,6 +687,10 @@ Nyx::init_santa_barbara (int init_sb_vels)
         const Real * dx = geom.CellSize();
         MultiFab& S_new = get_new_data(State_Type);
         MultiFab& D_new = get_new_data(DiagEOS_Type);
+#ifdef AXIONS
+        MultiFab&   Ax_new   = get_new_data(Axion_Type);
+        int         na       = Ax_new.nComp();
+#endif
 
         int ns = S_new.nComp();
         int nd = D_new.nComp(); 
@@ -705,6 +711,9 @@ Nyx::init_santa_barbara (int init_sb_vels)
             fort_initdata
                 (level, cur_time, lo, hi, 
                  ns,BL_TO_FORTRAN(S_new[mfi]), 
+#ifdef AXIONS
+                 na, BL_TO_FORTRAN(Ax_new[mfi]),
+#endif
                  nd,BL_TO_FORTRAN(D_new[mfi]), dx,
                  gridloc.lo(), gridloc.hi());
         }

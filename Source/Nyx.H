@@ -786,7 +786,9 @@ protected:
     static amrex::Real average_dm_density;
     static amrex::Real average_neutr_density;
     static amrex::Real average_total_density;
-
+#ifdef AXIONS
+    static amrex::Real average_ax_density;
+#endif
 
   // for keeping track of the amount of CPU time used -- this will persist
   // after restarts

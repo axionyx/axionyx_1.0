@@ -244,6 +244,13 @@
 
         NDIAG = ndiag_in
 
+        if (use_axions .gt. 0) then
+            NAXVAR  = 3
+            UAXDENS = 1
+            UAXRE   = 2
+            UAXIM   = 3
+        endif
+
         if (do_hydro .eq. 0) then
 
            NVAR = 1

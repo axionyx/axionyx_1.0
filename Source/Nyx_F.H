@@ -85,6 +85,9 @@ extern "C"
   void fort_initdata
     (const int& level, const amrex::Real& time, const int* lo, const int* hi,
      const int& num_state, BL_FORT_FAB_ARG(state),
+#ifdef AXIONS
+    const int& num_ax, BL_FORT_FAB_ARG(axions),
+#endif
      const int& num_diag,  BL_FORT_FAB_ARG(diag_eos), const amrex::Real dx[],
      const amrex::Real xlo[], const amrex::Real xhi[]);
 

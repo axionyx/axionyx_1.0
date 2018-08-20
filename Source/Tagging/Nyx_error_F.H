@@ -117,4 +117,15 @@ BL_FORT_PROC_DECL(SET_TRIGGER, set_trigger)
      const amrex::Real dx[], const amrex::Real xlo[], const amrex::Real problo[],
      const int* level, const amrex::Real* avg_den, const int* trigger);
 
+
+BL_FORT_PROC_DECL(TAG_CENTER, tag_center)
+    (int* tag, ARLIM_P(tag_lo), ARLIM_P(tag_hi),
+      const int* tagval, const int* clearval,
+       BL_FORT_FAB_ARG(axions),
+        const int lo[], const int hi[],
+         const int* ncomp,
+          const int domlo[], const int domhi[],
+           const amrex::Real dx[], const int* level,
+            const amrex::Real* avg);
+
 #endif

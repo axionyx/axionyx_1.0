@@ -99,6 +99,9 @@ int Nyx::Xmom = -1;
 int Nyx::Ymom = -1;
 int Nyx::Zmom = -1;
 
+#ifdef AXIONS
+int Nyx::AxDens = -1;
+#endif
 int Nyx::Temp_comp = -1;
 int Nyx::  Ne_comp = -1;
 int Nyx:: Zhi_comp = -1;
@@ -131,6 +134,9 @@ Real Nyx::average_gas_density = 0;
 Real Nyx::average_dm_density = 0;
 Real Nyx::average_neutr_density = 0;
 Real Nyx::average_total_density = 0;
+#ifdef AXIONS
+Real Nyx::average_ax_density = 0;
+#endif
 
 int         Nyx::inhomo_reion = 0;
 std::string Nyx::inhomo_zhi_file = "";
@@ -782,6 +788,15 @@ Nyx::init (AmrLevel& old)
         IR_new[fpi].copy(fpi());
     }
 #endif
+
+#ifdef AXIONS
+    MultiFab&  Ax_new = get_new_data(Axion_Type);
+    for (FillPatchIterator fpi(old, Ax_new, 0, cur_time, Axion_Type, 0, NUM_AX);
+         fpi.isValid(); ++fpi)
+    {
+        Ax_new[fpi].copy(fpi());
+    }
+#endif
 }
 
 //
@@ -814,6 +829,11 @@ Nyx::init ()
 #ifdef GRAVITY
     MultiFab& Phi_new = get_new_data(PhiGrav_Type);
     FillCoarsePatch(Phi_new, 0, cur_time, PhiGrav_Type, 0, Phi_new.nComp());
+#endif
+
+#ifdef AXIONS
+    MultiFab&  Ax_new = get_new_data(Axion_Type);
+    FillCoarsePatch(Ax_new, 0, cur_time, Axion_Type, 0, NUM_AX);
 #endif
 
     // We set dt to be large for this new level to avoid screwing up
@@ -903,6 +923,11 @@ Nyx::est_time_step (Real dt_old)
 
 #ifdef GRAVITY
     particle_est_time_step(est_dt);
+#endif
+
+#ifdef AXIONS
+//add time step requirements here.
+                                                    
 #endif
 
     if (level==0)
@@ -1947,6 +1972,9 @@ Nyx::average_down ()
     average_down(PhiGrav_Type);
     average_down(Gravity_Type);
 #endif
+#ifdef AXIONS
+    average_down(Axion_Type);
+#endif
 }
 
 #ifndef NO_HYDRO
@@ -2068,6 +2096,12 @@ Nyx::errorEst (TagBoxArray& tags,
             {
                 avg = average_total_density;
             }
+#ifdef AXIONS
+            else if (err_list[j].name() == "AxDens")
+            {
+                avg = average_ax_density;
+            }
+#endif //AXIONS
 #if 0
             else if (err_list[j].name() == "magvort")
             {

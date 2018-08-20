@@ -41,6 +41,11 @@ module meth_params_module
   integer         , save :: heat_cool_type
   integer         , save :: inhomo_reion
   integer         , save :: grav_source_type
+  
+  ! indices for the axion field 
+  integer         , save :: NAXVAR
+  integer         , save :: UAXDENS, UAXRE, UAXIM, UAXMOMX, UAXMOMY, UAXMOMZ
+
 
   integer, save :: npassive
   integer, save, allocatable :: qpass_map(:), upass_map(:)
