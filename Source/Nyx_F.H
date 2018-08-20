@@ -47,7 +47,7 @@ extern "C"
      const int& corner_coupling,
      const int& version_2, const int& use_const_species,
      const amrex::Real& gamma_in, const int& normalize_species,
-     const int& heat_cool_type, const int& inhomo_reion);
+     const int& heat_cool_type, const int& inhomo_reion, const int& use_axions);
 
   void fort_tabulate_rates();
 

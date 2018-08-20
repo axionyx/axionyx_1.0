@@ -192,7 +192,7 @@
                  use_colglaz_in, use_flattening_in, &
                  corner_coupling_in, version_2_in, &
                  use_const_species_in, gamma_in, normalize_species_in, &
-                 heat_cool_in, inhomo_reion_in) &
+                 heat_cool_in, inhomo_reion_in, use_axions) &
                  bind(C, name = "fort_set_method_params")
 
         ! Passing data from C++ into f90
@@ -224,6 +224,8 @@
         integer,  intent(in) :: normalize_species_in
         integer,  intent(in) :: heat_cool_in
         integer,  intent(in) :: inhomo_reion_in
+
+        integer,  intent(in) :: use_axions
 
         integer             :: QNEXT
         integer             :: UNEXT

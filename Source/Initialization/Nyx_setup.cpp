@@ -20,6 +20,10 @@ static Box grow_box_by_one(const Box& b)
 {
     return amrex::grow(b, 1);
 }
+static Box grow_box_by_two(const Box& b)
+{
+        return amrex::grow(b, 2);
+}
 
 typedef StateDescriptor::BndryFunc BndryFunc;
 
@@ -191,6 +195,17 @@ Nyx::hydro_setup()
     }
 
     NUM_STATE = cnt;
+    int use_axions = 0;
+
+#ifdef AXIONS
+        use_axions = 1;
+            AxDens = 0;
+            AxRe   = 1;
+            AxIm   = 2;
+            NUM_AX = 3;
+#endif
+
+
 
     // Define NUM_GROW from the f90 module.
     fort_get_method_params(&NUM_GROW);
@@ -202,7 +217,7 @@ Nyx::hydro_setup()
          ppm_flatten_before_integrals,
          use_colglaz, use_flattening, corner_coupling, version_2,
          use_const_species, gamma, normalize_species,
-         heat_cool_type, inhomo_reion);
+         heat_cool_type, inhomo_reion, use_axions);
 
 #ifdef HEATCOOL
     fort_tabulate_rates();
@@ -256,8 +271,19 @@ Nyx::hydro_setup()
                            store_in_checkpoint);
 #endif
 
+#ifdef AXIONS
+        store_in_checkpoint = true;
+        desc_lst.addDescriptor(Axion_Type, IndexType::TheCellType(),
+                               StateDescriptor::Point, 1, NUM_AX, interp,
+                               state_data_extrap, store_in_checkpoint);
+#endif
+
     Vector<BCRec> bcs(NUM_STATE);
     Vector<std::string> name(NUM_STATE);
+#ifdef AXIONS
+        Vector<BCRec> bcs_ax(NUM_AX);
+        Vector<std::string> name_ax(NUM_AX);
+#endif
 
     BCRec bc;
     cnt = 0;
@@ -272,7 +298,11 @@ Nyx::hydro_setup()
     set_scalar_bc(bc, phys_bc);  bcs[cnt] = bc;  name[cnt] = "rho_E";
     cnt++;
     set_scalar_bc(bc, phys_bc);  bcs[cnt] = bc;  name[cnt] = "rho_e";
-
+#ifdef AXIONS
+    set_scalar_bc(bc, phys_bc);  bcs_ax[0] = bc;  name_ax[0] = "AxDens";
+    set_scalar_bc(bc, phys_bc);  bcs_ax[1] = bc;  name_ax[1] = "AxRe";
+    set_scalar_bc(bc, phys_bc);  bcs_ax[2] = bc;  name_ax[2] = "AxIm";
+#endif
     for (int i = 0; i < NumAdv; ++i)
     {
         cnt++;
@@ -389,6 +419,130 @@ Nyx::hydro_setup()
     }
 #endif
 
+
+#ifdef AXIONS
+    set_scalar_bc(bc, phys_bc);
+    desc_lst.setComponent(Axion_Type, 0, "AxDens", bc,
+                          BndryFunc(generic_fill));
+                          set_scalar_bc(bc, phys_bc);
+    desc_lst.setComponent(Axion_Type, 1, "AxRe", bc,
+                          BndryFunc(generic_fill));
+    set_scalar_bc(bc, phys_bc);
+    desc_lst.setComponent(Axion_Type, 2, "AxIm", bc,
+                          BndryFunc(generic_fill));
+    //
+    // Phase of axion field ( set to zero when density < 1.0d-5 )
+    //
+    derive_lst.add("AxPhase", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXPHASE, ca_axphase), the_same_box);
+    derive_lst.addComponent("AxPhase", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("AxPhase", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxPhase", desc_lst, Axion_Type, AxIm,1);
+
+    //
+    // Velocity of axion field
+    //
+    derive_lst.add("AxVel", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXVEL, ca_axvel), grow_box_by_one);
+    derive_lst.addComponent("AxVel", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("AxVel", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxVel", desc_lst, Axion_Type, AxIm,1);
+    //
+    // Angular Momentum x of axion field
+    //
+    derive_lst.add("AxAngMomx", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXANGMOM_X, ca_axangmom_x), grow_box_by_one);
+    derive_lst.addComponent("AxAngMomx", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("AxAngMomx", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxAngMomx", desc_lst, Axion_Type, AxIm,1);
+
+    //
+    // Angular Momentum y of axion field
+    //
+    derive_lst.add("AxAngMomy", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXANGMOM_Y, ca_axangmom_y), grow_box_by_one);
+    derive_lst.addComponent("AxAngMomy", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("AxAngMomy", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxAngMomy", desc_lst, Axion_Type, AxIm,1);
+
+    //
+    // Angular Momentum z of axion field
+    //
+    derive_lst.add("AxAngMomz", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXANGMOM_Z, ca_axangmom_z), grow_box_by_one);
+    derive_lst.addComponent("AxAngMomz", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("AxAngMomz", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxAngMomz", desc_lst, Axion_Type, AxIm,1);
+
+    //
+    // Error estimator for velocity (AxRe, AxIm) tagging
+    //
+//Six components (AxRe_err_x,AxRe_err_y,AxRe_err_z,AxIm_err_x,AxIm_err_y,AxIm_err_z)
+    //
+    derive_lst.add("AxRe_err_x", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_DERERRX, ca_dererrx), grow_box_by_one);
+    derive_lst.addComponent("AxRe_err_x", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxRe_err_x", desc_lst, Axion_Type, AxDens,1);
+
+    derive_lst.add("AxRe_err_y", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_DERERRY, ca_dererry), grow_box_by_one);
+    derive_lst.addComponent("AxRe_err_y", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxRe_err_y", desc_lst, Axion_Type, AxDens,1);
+
+    derive_lst.add("AxRe_err_z", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_DERERRZ, ca_dererrz), grow_box_by_one);
+    derive_lst.addComponent("AxRe_err_z", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxRe_err_z", desc_lst, Axion_Type, AxDens,1);
+
+    derive_lst.add("AxIm_err_x", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_DERERRX, ca_dererrx), grow_box_by_one);
+    derive_lst.addComponent("AxIm_err_x", desc_lst, Axion_Type, AxIm,1);
+    derive_lst.addComponent("AxIm_err_x", desc_lst, Axion_Type, AxDens,1);
+
+    derive_lst.add("AxIm_err_y", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_DERERRY, ca_dererry), grow_box_by_one);
+    derive_lst.addComponent("AxIm_err_y", desc_lst, Axion_Type, AxIm,1);
+    derive_lst.addComponent("AxIm_err_y", desc_lst, Axion_Type, AxDens,1);
+
+    derive_lst.add("AxIm_err_z", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_DERERRZ, ca_dererrz), grow_box_by_one);
+    derive_lst.addComponent("AxIm_err_z", desc_lst, Axion_Type, AxIm,1);
+    derive_lst.addComponent("AxIm_err_z", desc_lst, Axion_Type, AxDens,1);
+
+    //
+    // Kinetic energy (from velocity) of axion field
+    //
+    derive_lst.add("AxEkinv", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXEKINV, ca_axekinv), grow_box_by_one);
+    derive_lst.addComponent("AxEkinv", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("AxEkinv", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxEkinv", desc_lst, Axion_Type, AxIm,1);
+
+    //
+    // Potential energy of axion field
+    //
+    derive_lst.add("AxEpot", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXEPOT, ca_axepot), the_same_box);
+    derive_lst.addComponent("AxEpot", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("AxEpot", desc_lst, PhiGrav_Type, 0,1);
+
+    //
+    // Kinetic energy of axion field
+    //
+    derive_lst.add("AxEkin", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXEKIN, ca_axekin), grow_box_by_two);
+    derive_lst.addComponent("AxEkin", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("AxEkin", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxEkin", desc_lst, Axion_Type, AxIm,1);
+
+    //
+    // Kinetic energy (from density gradient) of axion field
+    //
+    derive_lst.add("AxEkinrho", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXEKINRHO, ca_axekinrho), grow_box_by_two);
+    derive_lst.addComponent("AxEkinrho", desc_lst, Axion_Type, AxDens,1);
+
+#endif
     //
     // DEFINE DERIVED QUANTITIES
     //
@@ -633,7 +787,14 @@ Nyx::no_hydro_setup()
 
     Density = 0;
     NUM_STATE = 1;
-
+    int use_axions = 0;
+#ifdef AXIONS
+    use_axions = 1;
+    AxDens = 0;
+    AxRe   = 1;
+    AxIm   = 2;
+    NUM_AX = 3;
+#endif
     int NDIAG_C = -1;
 
     // Define NUM_GROW from the f90 module.
@@ -644,7 +805,7 @@ Nyx::no_hydro_setup()
          ppm_flatten_before_integrals,
          use_colglaz, use_flattening, corner_coupling, version_2,
          use_const_species, gamma, normalize_species,
-         heat_cool_type, inhomo_reion);
+         heat_cool_type, inhomo_reion, use_axions);
 
     fort_tabulate_rates();
 
@@ -716,6 +877,137 @@ Nyx::no_hydro_setup()
                       the_same_box);
        derive_lst.addComponent("maggrav", desc_lst, Gravity_Type, 0, BL_SPACEDIM);
     }
+
+#ifdef AXIONS
+    Interpolater* interp = &cell_cons_interp;
+    store_in_checkpoint = true;
+    desc_lst.addDescriptor(Axion_Type, IndexType::TheCellType(),
+                           StateDescriptor::Point, 1, NUM_AX, interp,
+                           state_data_extrap, store_in_checkpoint);
+#endif
+
+#ifdef AXIONS
+       set_scalar_bc(bc, phys_bc);
+       desc_lst.setComponent(Axion_Type, 0, "AxDens", bc,
+                             BndryFunc(generic_fill));
+       set_scalar_bc(bc, phys_bc);
+       desc_lst.setComponent(Axion_Type, 1, "AxRe", bc,
+                             BndryFunc(generic_fill));
+       set_scalar_bc(bc, phys_bc);
+       desc_lst.setComponent(Axion_Type, 2, "AxIm", bc,
+                             BndryFunc(generic_fill));
+    //
+    // Phase of axion field ( set to zero when density < 1.0d-5 )
+    //
+    derive_lst.add("AxPhase", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXPHASE, ca_axphase), the_same_box);
+    derive_lst.addComponent("AxPhase", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("AxPhase", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxPhase", desc_lst, Axion_Type, AxIm,1);
+
+    //
+    // Kinetic energy (from velocity) of axion field
+    //
+    derive_lst.add("AxEkinv", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXEKINV, ca_axekinv), grow_box_by_one);
+    derive_lst.addComponent("AxEkinv", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("AxEkinv", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxEkinv", desc_lst, Axion_Type, AxIm,1);
+
+    //
+    // Velocity of axion field
+    //
+    derive_lst.add("AxVel", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXVEL, ca_axvel), grow_box_by_one);
+    derive_lst.addComponent("AxVel", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("AxVel", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxVel", desc_lst, Axion_Type, AxIm,1);
+
+    //
+    // Angular Momentum x of axion field
+    //
+    derive_lst.add("AxAngMomx", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXANGMOM_X, ca_axangmom_x), grow_box_by_one);
+    derive_lst.addComponent("AxAngMomx", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("AxAngMomx", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxAngMomx", desc_lst, Axion_Type, AxIm,1);
+
+    //
+    // Angular Momentum y of axion field
+    //
+    derive_lst.add("AxAngMomy", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXANGMOM_Y, ca_axangmom_y), grow_box_by_one);
+    derive_lst.addComponent("AxAngMomy", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("AxAngMomy", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxAngMomy", desc_lst, Axion_Type, AxIm,1);
+
+    //
+    // Angular Momentum z of axion field
+    //
+    derive_lst.add("AxAngMomz", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXANGMOM_Z, ca_axangmom_z), grow_box_by_one);
+    derive_lst.addComponent("AxAngMomz", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("AxAngMomz", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxAngMomz", desc_lst, Axion_Type, AxIm,1);
+
+    //
+    // Error estimator for velocity (AxRe, AxIm) tagging
+    //
+    //Six components (AxRe_err_x,AxRe_err_y,AxRe_err_z,AxIm_err_x,AxIm_err_y,AxIm_err_z)
+    //
+    derive_lst.add("AxRe_err_x", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_DERERRX, ca_dererrx), grow_box_by_one);
+    derive_lst.addComponent("AxRe_err_x", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxRe_err_x", desc_lst, Axion_Type, AxDens,1);
+
+    derive_lst.add("AxRe_err_y", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_DERERRY, ca_dererry), grow_box_by_one);
+    derive_lst.addComponent("AxRe_err_y", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxRe_err_y", desc_lst, Axion_Type, AxDens,1);
+
+    derive_lst.add("AxRe_err_z", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_DERERRZ, ca_dererrz), grow_box_by_one);
+    derive_lst.addComponent("AxRe_err_z", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxRe_err_z", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.add("AxIm_err_x", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_DERERRX, ca_dererrx), grow_box_by_one);
+    derive_lst.addComponent("AxIm_err_x", desc_lst, Axion_Type, AxIm,1);
+    derive_lst.addComponent("AxIm_err_x", desc_lst, Axion_Type, AxDens,1);
+
+    derive_lst.add("AxIm_err_y", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_DERERRY, ca_dererry), grow_box_by_one);
+    derive_lst.addComponent("AxIm_err_y", desc_lst, Axion_Type, AxIm,1);
+    derive_lst.addComponent("AxIm_err_y", desc_lst, Axion_Type, AxDens,1);
+
+    derive_lst.add("AxIm_err_z", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_DERERRZ, ca_dererrz), grow_box_by_one);
+    derive_lst.addComponent("AxIm_err_z", desc_lst, Axion_Type, AxIm,1);
+    derive_lst.addComponent("AxIm_err_z", desc_lst, Axion_Type, AxDens,1);
+    //
+    // Potential energy of axion field
+    //
+    derive_lst.add("AxEpot", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXEPOT, ca_axepot), the_same_box);
+    derive_lst.addComponent("AxEpot", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("AxEpot", desc_lst, PhiGrav_Type, 0,1);
+
+    //
+    // Kinetic energy (from density gradient) of axion field
+    //
+    derive_lst.add("AxEkin", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXEKIN, ca_axekin), grow_box_by_two);
+    derive_lst.addComponent("AxEkin", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("AxEkin", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("AxEkin", desc_lst, Axion_Type, AxIm,1);
+
+    //
+    // Kinetic energy (from density gradient) of axion field
+    //
+    derive_lst.add("AxEkinrho", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_AXEKINRHO, ca_axekinrho), grow_box_by_two);
+    derive_lst.addComponent("AxEkinrho", desc_lst, Axion_Type, AxDens,1);
+
+#endif //AXIONS
 
     //
     // We want a derived type that corresponds to the number of particles in

@@ -101,6 +101,9 @@ int Nyx::Zmom = -1;
 
 #ifdef AXIONS
 int Nyx::AxDens = -1;
+int Nyx::AxRe   = -1;
+int Nyx::AxIm   = -1;
+int Nyx::NUM_AX = -1;
 #endif
 int Nyx::Temp_comp = -1;
 int Nyx::  Ne_comp = -1;
