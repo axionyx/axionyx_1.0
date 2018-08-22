@@ -256,7 +256,7 @@ Nyx::initData ()
 #ifdef AXIONS
                      na, BL_TO_FORTRAN(Ax_new[mfi]),
 #endif
-                     nd, BL_TO_FORTRAN(D_new[mfi]), 
+                     ns, BL_TO_FORTRAN(S_new[mfi]), 
                      dx, gridloc.lo(), gridloc.hi());
             }
         }

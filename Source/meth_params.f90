@@ -44,7 +44,7 @@ module meth_params_module
   
   ! indices for the axion field 
   integer         , save :: NAXVAR
-  integer         , save :: UAXDENS, UAXRE, UAXIM, UAXMOMX, UAXMOMY, UAXMOMZ
+  integer         , save :: UAXDENS, UAXRE, UAXIM
 
 
   integer, save :: npassive

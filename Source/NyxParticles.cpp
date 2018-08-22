@@ -230,10 +230,10 @@ Nyx::read_particle_params ()
 {
     ParmParse pp("nyx");
     pp.query("do_dm_particles", do_dm_particles);
-#if defined AXIONS || ONLYAXIONS
+#if defined(AXIONS) || defined(ONLYAXIONS)
         do_dm_particles = 0;
 #endif
-#ifdef AGN || ONLYAXIONS
+#if defined(AGN) || defined(ONLYAXIONS)
     pp.get("particle_init_type", particle_init_type);
     pp.get("particle_move_type", particle_move_type);
 #else
