@@ -32,6 +32,20 @@ Nyx::advance (Real time,
   //    ncycle    : the number of subcycles at this level
 
 {
+#ifdef AXIONS
+    //TODO check if we need this
+    //grav_n_grow = ncycle + 2;
+    if (do_hydro)
+      {
+        return advance_hydro(time, dt, iteration, ncycle);
+      }
+    else
+      {
+        return advance_particle_axions(time, dt, iteration, ncycle);
+      }
+#else
+
+
 #ifndef NO_HYDRO
     if (do_hydro)
     {
@@ -62,6 +76,7 @@ Nyx::advance (Real time,
         amrex::Abort("Nyx::advance -- do_hydro is false but no gravity -- dont know what to do");
     }
 #endif
+#endif //! Axions
     return 0;
 }
 

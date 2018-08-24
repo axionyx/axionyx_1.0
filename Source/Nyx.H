@@ -583,6 +583,7 @@ public:
     static int AxRe;
     static int AxIm;
     static int NUM_AX;
+    static int vonNeumann_dt;
 #endif
 
     static int Temp_comp, Ne_comp, Zhi_comp;
