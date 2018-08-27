@@ -1,4 +1,4 @@
-f90EXE_sources += Prob_3d.f90	probdata.f90
+f90EXE_sources += Prob_3d.f90	probdata.f90 axion_params.f90
 
 f90EXE_sources += bc_fill_3d.f90	
  
