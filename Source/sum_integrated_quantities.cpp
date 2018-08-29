@@ -185,6 +185,9 @@ Nyx::compute_average_density ()
     average_dm_density       = 0;
     average_neutr_density    = 0;
     average_total_density    = 0;
+#ifdef AXIONS
+    average_ax_density    = 0;
+#endif
 
     // Add up the baryonic density
     if (do_hydro == 1)
@@ -197,6 +200,13 @@ Nyx::compute_average_density ()
     }
  
 #ifdef GRAVITY
+#ifdef AXIONS
+        for (int lev = 0; lev <= finest_level; lev++)
+                {
+                    Nyx& nyx_lev = get_level(lev);
+                    average_ax_density += nyx_lev.vol_weight_sum("AxDens", time,true);
+                }
+#endif //AXIONS
     // Define the dark matter density on all levels.
     if (Nyx::theDMPC())
     {
@@ -248,6 +258,10 @@ Nyx::compute_average_density ()
     {
         average_total_density = average_dm_density + average_neutr_density;
     }
+#ifdef AXIONS
+                average_ax_density /= geom.ProbSize();
+                average_total_density += average_ax_density;
+#endif
 
     if (verbose > 0 && ParallelDescriptor::IOProcessor())
     {
@@ -258,6 +272,9 @@ Nyx::compute_average_density ()
         std::cout << "Average       dm density " << average_dm_density << '\n';
 #ifdef NEUTRINO_PARTICLES
         std::cout << "Average neutrino density " << average_neutr_density << '\n';
+#endif
+#ifdef AXIONS
+        std::cout << "Average   axion density " << average_ax_density << '\n';
 #endif
         std::cout << "Average    total density " << average_total_density << '\n';
     }
