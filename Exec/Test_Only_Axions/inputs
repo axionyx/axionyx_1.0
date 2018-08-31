@@ -11,9 +11,9 @@ nyx.inhomo_reion     = 0
 nyx.small_dens = 1e-4
 nyx.initial_z = 0.0
 #nyx.final_a = 1.0
-nyx.initial_dt = 2.e-9
+nyx.initial_dt = 2.e-6
 #nyx.fixed_dt = 2.e-5
-#nyx.max_timestep = 1.e-2
+#nyx.max_timestep = 2.e-6
 nyx.vonNeumann_dt = 1
 
 #File written during the run: nstep | time | dt | redshift | a
@@ -23,26 +23,26 @@ amr.data_log = runlog
 #Leave this commented out in cvs version
 #amr.restart = chk30000
 nyx.dump_old = 1
-max_step = 2
+max_step = 200
 #particles.particle_output_file = particle_output
 particles.write_in_plotfile = 0
 
 gravity.gravity_type = PoissonGrav
-#gravity.no_sync      = 1
-#gravity.no_composite = 1
+gravity.no_sync      = 1
+gravity.no_composite = 1
 
-#gravity.ml_tol    = 1.e-6
-#gravity.sl_tol    = 1.e-6
-#gravity.delta_tol = 1.e-6
-#gravity.use_previous_phi_as_guess = 0
+gravity.ml_tol    = 1.e-12
+gravity.sl_tol    = 1.e-12
+gravity.delta_tol = 1.e-12
+gravity.use_previous_phi_as_guess = 0
 
-#mg.bottom_solver = 1
+mg.bottom_solver = 1
 
 # PROBLEM SIZE & GEOMETRY
 geometry.is_periodic =  0 0 0
 geometry.coord_sys   =  0
-geometry.prob_lo     =  0. 0. 0.
-geometry.prob_hi     =  0.1 0.1 0.1
+geometry.prob_lo     =  -0.05 -0.05 -0.05
+geometry.prob_hi     =  0.05 0.05 0.05
 
 amr.n_cell           =  128 128 128
 #amr.n_cell           =  4 4 4
@@ -117,10 +117,10 @@ amr.check_int       = 5000
 # PLOTFILES
 amr.plot_file       = plot
 #amr.plot_per       = 1.e-6
-amr.plot_int	    = 1
+amr.plot_int	    = 10
 
 amr.derive_plot_vars = AxPhase # these variables appear in the plotfile
-amr.plot_vars = AxDens AxRe AxIm #phi_grav #AxDens AxMomX AxMomY AxMomZ phi_grav #ALL #density xmom ymom zmom phi_grav #
+amr.plot_vars = AxDens AxRe AxIm phi_grav #AxDens AxMomX AxMomY AxMomZ phi_grav #ALL #density xmom ymom zmom phi_grav #
 
 #PROBIN FILENAME
 amr.probin_file = probin

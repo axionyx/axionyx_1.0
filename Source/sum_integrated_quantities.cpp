@@ -385,4 +385,31 @@ Nyx::compute_average_species (int          nspec,
         }
     } // end if not use_const_species
 }
+
+
+#ifdef AXIONS
+void
+Nyx::compute_axion_quantities (Real& mass, Real& epot, Real& ekinrho, Real& ekinv, Real& angmom_x, Real& angmom_y, Real& angmom_z, Real& grav_pot, Real& phase)
+{
+    int             finest_level = parent->finestLevel();
+    Real            time         = state[Axion_Type].curTime();
+    const Geometry& geom         = parent->Geom(0);
+    
+    for (int lev = 0; lev <= finest_level; lev++)
+    {
+        Nyx& nyx_lev = get_level(lev);
+        mass += nyx_lev.vol_weight_sum("AxDens", time,true);	
+        epot += nyx_lev.vol_weight_sum("AxEpot", time,true);
+        ekinrho += nyx_lev.vol_weight_sum("AxEkinrho", time,true);
+        ekinv += nyx_lev.vol_weight_sum("AxEkinv", time,true);
+        angmom_x += nyx_lev.vol_weight_sum("AxAngMomx", time,true);
+        angmom_y += nyx_lev.vol_weight_sum("AxAngMomy", time,true);
+        angmom_z += nyx_lev.vol_weight_sum("AxAngMomz", time,true);
+        grav_pot += nyx_lev.vol_weight_sum("phi_grav", time,true);
+	phase    += nyx_lev.vol_weight_sum("AxPhase",time,true);
+    }
+    //epot -= grav_pot*mass/2;
+}
+#endif
+
 #endif

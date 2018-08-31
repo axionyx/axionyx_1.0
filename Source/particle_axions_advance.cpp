@@ -109,47 +109,47 @@ Nyx::advance_particle_axions (amrex::Real time,
     const amrex::Real a_new     = get_comoving_a(cur_time);
 
 //TODO: once again, this part only concerns particles.
-//#ifdef GRAVITY
-//    //
-//    // We now do a multilevel solve for old Gravity. This goes to the 
-//    // finest level regardless of subcycling behavior. Consequentially,
-//    // If we are subcycling we skip this step on the first iteration of
-//    // finer levels.
-//    if (level == 0 || iteration > 1)
-//    {
-//        // fix fluxes on finer grids
-//        if (do_reflux)
-//        {
-//            for (int lev = level; lev < finest_level; lev++)
-//            {
-//                gravity->zero_phi_flux_reg(lev + 1);
-//            }
-//        }
-//        
-//        // swap grav data
-//        for (int lev = level; lev <= finest_level; lev++)
-//            get_level(lev).gravity->swap_time_levels(lev);
-//
-//        if (show_timings)
-//        {
-//            const int IOProc = ParallelDescriptor::IOProcessorNumber();
-//            amrex::Real end = ParallelDescriptor::second() - strt;
-//            ParallelDescriptor::ReduceRealMax(end,IOProc);
-//            if (ParallelDescriptor::IOProcessor())
-//               std::cout << "Time before solve for old phi " << end << '\n';
-//        }
-//
-//        if (verbose && ParallelDescriptor::IOProcessor())
-//            std::cout << "\n... old-time level solve at level " << level << '\n';
-//            
-//        //
-//        // Solve for phi
-//        // If a single-level calculation we can still use the previous phi as a guess.
-//        // TODO: Check this.
-//        int use_previous_phi_as_guess = 0;
-//        gravity->multilevel_solve_for_old_phi(level, finest_level,
-//                                              use_previous_phi_as_guess);
-//    }
+#ifdef GRAVITY
+    //
+    // We now do a multilevel solve for old Gravity. This goes to the 
+    // finest level regardless of subcycling behavior. Consequentially,
+    // If we are subcycling we skip this step on the first iteration of
+    // finer levels.
+    if (level == 0 || iteration > 1)
+    {
+        // fix fluxes on finer grids
+        if (do_reflux)
+        {
+            for (int lev = level; lev < finest_level; lev++)
+            {
+                gravity->zero_phi_flux_reg(lev + 1);
+            }
+        }
+        
+        // swap grav data
+        for (int lev = level; lev <= finest_level; lev++)
+            get_level(lev).gravity->swap_time_levels(lev);
+
+        if (show_timings)
+        {
+            const int IOProc = ParallelDescriptor::IOProcessorNumber();
+            amrex::Real end = ParallelDescriptor::second() - strt;
+            ParallelDescriptor::ReduceRealMax(end,IOProc);
+            if (ParallelDescriptor::IOProcessor())
+               std::cout << "Time before solve for old phi " << end << '\n';
+        }
+
+        if (verbose && ParallelDescriptor::IOProcessor())
+            std::cout << "\n... old-time level solve at level " << level << '\n';
+            
+        //
+        // Solve for phi
+        // If a single-level calculation we can still use the previous phi as a guess.
+        // TODO: Check this.
+        int use_previous_phi_as_guess = 0;
+        gravity->multilevel_solve_for_old_phi(level, finest_level,
+                                              use_previous_phi_as_guess);
+    }
 //    //
 //    // Advance Particles
 //    //
@@ -186,7 +186,7 @@ Nyx::advance_particle_axions (amrex::Real time,
 //        }
 //    }
 //
-//#endif
+#endif
 
     //Advance Axions
     for (int lev = level; lev <= finest_level_to_advance; lev++)

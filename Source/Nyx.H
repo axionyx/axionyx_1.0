@@ -401,6 +401,10 @@ public:
            void just_the_axions(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
 #endif
 
+#ifdef AXIONS
+    void compute_axion_quantities(amrex::Real& mass, amrex::Real& axepot, amrex::Real& axekinrho, amrex::Real& axekinv, amrex::Real& angmom_x, amrex::Real& angmom_y, amrex::Real& angmom_z,amrex::Real& grav_pot, amrex::Real& phase);
+#endif
+
     void strang_hydro(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
 #ifdef SDC
     void    sdc_hydro(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);

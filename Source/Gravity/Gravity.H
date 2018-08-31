@@ -92,6 +92,9 @@ public:
                            amrex::Real time);
     void get_crse_phi(int level, amrex::MultiFab& phi_crse, amrex::Real time);
 
+    amrex::Real compute_level_average(int level, amrex::MultiFab* mf);
+    amrex::Real compute_multilevel_average(int level, amrex::MultiFab* mf, int flev = -1);
+
     //
     // Sets phi_flux registers to 0
     //

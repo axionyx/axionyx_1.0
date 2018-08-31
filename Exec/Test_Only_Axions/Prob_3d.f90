@@ -37,7 +37,7 @@
 
 !     Compute coordinates of grid center
       do i = 1, 3
-         center(i) = (probhi(i) - problo(i)) / 2 !+ problo(i)
+         center(i) = (probhi(i) + problo(i)) / 2 !+ problo(i)
       end do
       end
 
@@ -110,6 +110,7 @@
          read(un,*) m(i), pos(i,1), pos(i,2), pos(i,3)
       end do
       close(un)
+      !print *,"star is at ", pos
         
       do i=1,length
          do j=1,3
@@ -157,16 +158,12 @@
                
                   lambda = m(h)/3.0d6  ! Scaling factor of halo h 
 
-                  !r = dsqrt((i*delta(1) - pos(h,1) - (center(1)-delta(1)/2.d0)*0.5d0)**2 + &
-                  !          (j*delta(2) - pos(h,2) - (center(2)-delta(2)/2.d0)*0.5d0)**2 + &
-                  !          (k*delta(3) - pos(h,3) - (center(3)-delta(3)/2.d0)*0.5d0)**2)
-                  r = dsqrt((i*delta(1) + 0.5d0*delta(1) - pos(h,1))**2 + &
-                            (j*delta(2) + 0.5d0*delta(2) - pos(h,2))**2 + &
-                            (k*delta(3) + 0.5d0*delta(3) - pos(h,3))**2)
+                  r = dsqrt((xlo(1)+i*delta(1) + 0.5d0*delta(1) - pos(h,1))**2 + &
+                            (xlo(2)+j*delta(2) + 0.5d0*delta(2) - pos(h,2))**2 + &
+                            (xlo(3)+k*delta(3) + 0.5d0*delta(3) - pos(h,3))**2)
 
-                  axion(i,j,k,UAXDENS) =  meandens/((1.d0+9.1d-2*(r/rc*lambda)**2.d0)**8.0d0)*lambda**4.d0
-                  !axion(i,j,k,UAXRE)   = dsqrt(meandens/((1.d0+9.1d-2*(r/rc*lambda)**2.d0)**4.0d0)*lambda**2.d0)
-                  axion(i,j,k,UAXRE)   = dsqrt(axion(i,j,k,UAXDENS))
+                  axion(i,j,k,UAXDENS) =  meandens/((1.d0+9.1d-2*(r/rc*lambda)**2.d0)**8.0d0)!*lambda**4.d0
+                  axion(i,j,k,UAXRE)   =  dsqrt(axion(i,j,k,UAXDENS)/meandens)
                   axion(i,j,k,UAXIM)   = 0.0d0
 
                enddo

@@ -28,6 +28,12 @@ Nyx::write_info ()
                                   hh_mass_frac, hh_vol_frac, igm_mass_frac, igm_vol_frac);
 	}
 #endif
+#ifdef AXIONS
+        Real mass=0.0, epot=0.0, ekinrho=0.0, ekinv=0.0, etot=0.0;
+        Real angmom_x=0.0, angmom_y=0.0, angmom_z=0.0, grav_pot=0.0, phase=0.0;
+        compute_axion_quantities(mass, epot, ekinrho, ekinv, angmom_x, angmom_y, angmom_z, grav_pot, phase);
+         etot = epot + ekinrho + ekinv;
+#endif
 
 #ifdef NO_HYDRO
         Real time  = state[PhiGrav_Type].curTime();
@@ -47,7 +53,13 @@ Nyx::write_info ()
                 data_loga << std::setw(14) <<  "       time    ";
                 data_loga << std::setw(14) <<  "       dt      ";
                 data_loga << std::setw(14) <<  "         z     ";
-                data_loga << std::setw(14) <<  "      a        ";
+#ifdef AXIONS
+                 data_loga << std::setw(14) <<  "     Mass";
+                 data_loga << std::setw(14) <<  "     Epot";
+                 data_loga << std::setw(14) <<  "  Ekinrho";
+                 data_loga << std::setw(14) <<  "    Ekinv";
+                 data_loga << std::setw(14) <<  "     Etot";
+#endif
 #ifndef NO_HYDRO
                 if (do_hydro == 1)
                 {
@@ -72,6 +84,13 @@ Nyx::write_info ()
                 data_loga << std::setw(14) <<  std::setprecision(6) <<  time;
                 data_loga << std::setw(14) <<  std::setprecision(6) <<    dt;
                 data_loga << std::setw(14) <<  std::setprecision(6) << old_z;
+#ifdef AXIONS
+                 data_loga << std::setw(14) <<  std::setprecision(6) << mass;
+                 data_loga << std::setw(14) <<  std::setprecision(6) << epot;
+                 data_loga << std::setw(14) <<  std::setprecision(6) << ekinrho;
+                 data_loga << std::setw(14) <<  std::setprecision(6) << ekinv;
+                 data_loga << std::setw(14) <<  std::setprecision(6) << etot;
+#endif
                 data_loga << std::setw(14) <<  std::setprecision(6) << old_a;
 #ifndef NO_HYDRO
                 if (do_hydro == 1)
@@ -99,6 +118,14 @@ Nyx::write_info ()
                 data_loga << std::setw(14) <<  std::setprecision(6) <<  time;
                 data_loga << std::setw(14) <<  std::setprecision(6) <<    dt;
                 data_loga << std::setw(14) <<  std::setprecision(6) << new_z;
+
+#ifdef AXIONS
+                 data_loga << std::setw(14) <<  std::setprecision(6) << mass;
+                 data_loga << std::setw(14) <<  std::setprecision(6) << epot;
+                 data_loga << std::setw(14) <<  std::setprecision(6) << ekinrho;
+                 data_loga << std::setw(14) <<  std::setprecision(6) << ekinv;
+                 data_loga << std::setw(14) <<  std::setprecision(6) << etot;
+#endif
                 data_loga << std::setw(14) <<  std::setprecision(6) << new_a;
 #ifndef NO_HYDRO
                 if (do_hydro == 1)

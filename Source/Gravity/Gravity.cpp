@@ -345,7 +345,7 @@ Gravity::solve_for_new_phi (int               level,
         MultiFab& Ax_new = LevelData[level]->get_new_data(Axion_Type);
 #endif
 #ifdef AXIONS
-    MultiFab::Add(Rhs, Ax_new, Nyx::AxDens, 0, 1, 0);
+        MultiFab::Add(Rhs, Ax_new, Nyx::AxDens, 0, 1, 0);
 #endif
     AddParticlesToRhs(level,Rhs,ngrow_for_solve);
     AddVirtualParticlesToRhs(level,Rhs,ngrow_for_solve);
@@ -489,6 +489,18 @@ Gravity::solve_for_phi (int               level,
         solve_with_HPGMG(level, phi, grad_phi, Rhs, tol, abs_tol);
     }
 #endif
+
+    //Since the gravitational potential is only defined up to a constant,
+    //we set the average gravitational potential to zero
+    if ( grids[level].contains(parent->Geom(level).Domain()) )
+      {
+        Real sum        = compute_level_average(level, &phi);
+        const Real* dx  = parent->Geom(0).CellSize();
+        Real domain_vol = grids[0].d_numPts() * dx[0] * dx[1] * dx[2];
+        sum /= domain_vol;
+        phi.plus(-sum, 0, 1, 0);
+      }
+
 }
 
 void
@@ -955,6 +967,22 @@ Gravity::actual_multilevel_solve (int                       level,
     // Average grad_phi from fine to coarse level
     for (int lev = finest_level; lev > level; lev--)
         average_fine_ec_onto_crse_ec(lev-1,is_new);
+    //Set the average gravitational potential to zero
+    if ( grids[level].contains(parent->Geom(level).Domain()) )
+      {
+        Real sum = 0;
+        for (int lev = 0; lev < num_levels; lev++)
+          sum += compute_multilevel_average(level+lev, phi_p[lev], finest_level);
+
+        const Real* dx   = parent->Geom(0).CellSize();
+        const Real  dvol = grids[0].d_numPts() * dx[0] * dx[1] * dx[2];
+
+        sum /= dvol;
+        for (int lev = 0; lev < num_levels; lev++)
+        {
+          (*phi_p[lev]).plus(-sum, 0, 1, 0);
+        }
+      }
 }
 
 void
@@ -1744,6 +1772,90 @@ Gravity::solve_with_HPGMG(int level,
   grad_phi[2]->mult(-1.0);
 }
 #endif
+
+amrex::Real
+Gravity::compute_level_average (int       level,
+                                amrex::MultiFab* mf)
+{
+    Real            sum  = 0;
+    const Geometry& geom = parent->Geom(level);
+    const amrex::Real*     dx   = geom.CellSize();
+
+    BL_ASSERT(mf != 0);
+
+    Real s;
+    for (MFIter mfi(*mf); mfi.isValid(); ++mfi)
+    {
+        FArrayBox& fab = (*mf)[mfi];
+
+        const Box& box = mfi.validbox();
+        const int*  lo = box.loVect();
+        const int*  hi = box.hiVect();
+
+        sum_over_level(BL_TO_FORTRAN(fab), lo, hi, dx, &s);
+        sum += s;
+    }
+
+    amrex::ParallelDescriptor::ReduceRealSum(sum);
+
+    return sum;
+}
+
+
+Real
+Gravity::compute_multilevel_average (int       level,
+                                     MultiFab* mf,
+                                     int flev)
+{
+    Real            sum  = 0;
+    const Geometry& geom = parent->Geom(level);
+    const Real*     dx   = geom.CellSize();
+
+    BL_ASSERT(mf != 0);
+
+    if (flev == -1)
+    {
+        int flev = parent->finestLevel();
+        while (!parent->getAmrLevels()[flev])
+            flev--;
+    }
+    
+    BoxArray baf;
+    if (level < flev)
+    {
+        IntVect fine_ratio = parent->refRatio(level);
+        baf = parent->boxArray(level+1);
+        baf.coarsen(fine_ratio);
+    }
+
+    std::vector< std::pair<int,Box> > isects;
+
+    for (MFIter mfi(*mf); mfi.isValid(); ++mfi)
+    {
+        FArrayBox& fab = (*mf)[mfi];
+
+        if (level < flev)
+        {
+            baf.intersections(grids[level][mfi.index()],isects);
+
+            for (int ii = 0; ii < isects.size(); ii++)
+            {
+                fab.setVal(0, isects[ii].second, 0, fab.nComp());
+            }
+        }
+        Real       s;
+        const Box& box = mfi.validbox();
+        const int* lo  = box.loVect();
+        const int* hi  = box.hiVect();
+
+        sum_over_level(BL_TO_FORTRAN(fab), lo, hi, dx, &s);
+        sum += s;
+    }
+
+    ParallelDescriptor::ReduceRealSum(sum);
+
+    return sum;
+}
 
 void
 Gravity::solve_for_phi_with_mlmg (int level, MultiFab& Rhs, MultiFab& phi,
