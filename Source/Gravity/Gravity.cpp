@@ -489,7 +489,7 @@ Gravity::solve_for_phi (int               level,
         solve_with_HPGMG(level, phi, grad_phi, Rhs, tol, abs_tol);
     }
 #endif
-
+    std::cout << "We should never end up here" << std::endl;
     //Since the gravitational potential is only defined up to a constant,
     //we set the average gravitational potential to zero
     if ( grids[level].contains(parent->Geom(level).Domain()) )
@@ -498,8 +498,10 @@ Gravity::solve_for_phi (int               level,
         const Real* dx  = parent->Geom(0).CellSize();
         Real domain_vol = grids[0].d_numPts() * dx[0] * dx[1] * dx[2];
         sum /= domain_vol;
+        std::cout << "subtracting " << sum << std::endl; 
         phi.plus(-sum, 0, 1, 0);
       }
+
 
 }
 
@@ -978,10 +980,17 @@ Gravity::actual_multilevel_solve (int                       level,
         const Real  dvol = grids[0].d_numPts() * dx[0] * dx[1] * dx[2];
 
         sum /= dvol;
+        std::cout << "subtracing " << sum << std::endl;
         for (int lev = 0; lev < num_levels; lev++)
         {
           (*phi_p[lev]).plus(-sum, 0, 1, 0);
         }
+        //check the mean
+        sum = 0.0;
+        for (int lev = 0; lev < num_levels; lev++)
+                       sum += compute_multilevel_average(level+lev, phi_p[lev], finest_level);
+        std::cout << "average is " << sum/dvol << " after subtraction." << std::endl;
+
       }
 }
 

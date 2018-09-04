@@ -93,8 +93,8 @@
       integer un,length
       double precision hubl
       double precision r,rc
-      double precision hbaroverm, d, lambda
-      double precision, allocatable :: m(:), pos(:,:), vfactor(:,:)
+      double precision d
+      double precision, allocatable :: m(:), pos(:,:)
       
       un = 20
       open(un,file='initial.txt',status="old",action="read")
@@ -104,7 +104,6 @@
 
       allocate(m(1:length))
       allocate(pos(1:length,1:3))
-      allocate(vfactor(1:length,1:3))
 
       do i=1,length
          read(un,*) m(i), pos(i,1), pos(i,2), pos(i,3)
@@ -112,22 +111,11 @@
       close(un)
       !print *,"star is at ", pos
         
-      do i=1,length
-         do j=1,3
-            vfactor(i,j) = 0.0d0
-         enddo
-      enddo
 
-
-      !hubl = comoving_h
       hubl = 0.7d0
-      meandens = 2.775d11 * hubl**2 * comoving_OmAx !background density 
-      !hbar/m expressed in Nyx units [Mpc km/s]
-      hbaroverm = 0.01917152d0 / m_tt
+      meandens = 2.775d11 * hubl**2* comoving_OmAx !background density 
       
       rc = 1.3d0 * 0.012513007848917703d0 / (dsqrt(m_tt * hubl) * comoving_OmAx**(0.25d0))
-
-      
 
       !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)
@@ -135,6 +123,7 @@
             do i = lo(1), hi(1)
                
                state(i,j,k,URHO)    = 1.5d0 * small_dens
+               state(i,j,k,URHO)    = 0.0d0
                
                if (UMX .gt. -1) then
                   state(i,j,k,UMX:UMZ) = 0.0d0
@@ -156,16 +145,13 @@
 
                do h = 1,length
                
-                  lambda = m(h)/3.0d6  ! Scaling factor of halo h 
 
-                  r = dsqrt((xlo(1)+i*delta(1) + 0.5d0*delta(1) - pos(h,1))**2 + &
-                            (xlo(2)+j*delta(2) + 0.5d0*delta(2) - pos(h,2))**2 + &
-                            (xlo(3)+k*delta(3) + 0.5d0*delta(3) - pos(h,3))**2)
-
-                  axion(i,j,k,UAXDENS) =  meandens/((1.d0+9.1d-2*(r/rc*lambda)**2.d0)**8.0d0)!*lambda**4.d0
-                  axion(i,j,k,UAXRE)   =  dsqrt(axion(i,j,k,UAXDENS)/meandens)
+                  r = dsqrt((xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1) - pos(h,1))**2 + &
+                            (xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2) - pos(h,2))**2 + &
+                            (xlo(3)+(k-lo(3))*delta(3) + 0.5d0*delta(3) - pos(h,3))**2)
+                  axion(i,j,k,UAXDENS) =  meandens/((1.d0+9.1d-2*(r/rc)**2.d0)**8.0d0)
+                  axion(i,j,k,UAXRE)   =  dsqrt(axion(i,j,k,UAXDENS))
                   axion(i,j,k,UAXIM)   = 0.0d0
-
                enddo
             enddo
          enddo
@@ -174,6 +160,5 @@
 
       deallocate(m)
       deallocate(pos)
-      deallocate(vfactor)
 
       end subroutine fort_initdata

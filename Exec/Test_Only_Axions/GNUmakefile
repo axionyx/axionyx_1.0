@@ -19,7 +19,8 @@ USE_HPGMG = FALSE
 USE_AXIONS = TRUE
 
 PRECISION = DOUBLE
-DEBUG     = TRUE
+DEBUG     = FALSE
+#DEBUG     = TRUE
 
 # physics
 DIM      = 3

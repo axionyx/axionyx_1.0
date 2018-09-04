@@ -211,8 +211,9 @@
 
       ! meandens = 3 * (0.7 * 100)**2 * comoving_OmAx &
       !                / ( 8 * PI * Gconst)
-      meandens = 3 * (comoving_h * 100)**2 * comoving_OmAx &
-                     / ( 8 * PI * Gconst)
+      !meandens = 3 * (comoving_h * 100)**2 * comoving_OmAx &
+      !               / ( 8 * PI * Gconst)
+      !meandens = 2.775d11 * 0.7**2 * comoving_OmAx !background density 
 
       !hbar/m expressed in Nyx units [Mpc km/s]
       hbaroverm = 0.01917152d0 / m_tt
@@ -265,7 +266,8 @@
                delta = init(i,j,k,didx)
                state(i,j,k,UAXRE)   = dsqrt(delta + 1.)*dcos(phase(i,j,k,1))
                state(i,j,k,UAXIM)   = dsqrt(delta + 1.)*dsin(phase(i,j,k,1))
-               state(i,j,k,UAXDENS) = meandens * (delta + 1.)
+               !state(i,j,k,UAXDENS) = meandens * (delta + 1.)
+               state(i,j,k,UAXDENS) = (delta + 1.)
 
                ! state(i,j,k,UAXRE)   = dsqrt(delta + 1.)
                ! state(i,j,k,UAXIM)   = 0.0d0
@@ -375,9 +377,9 @@
       enddo
 
       !We need this, since single scalars are not saved in checkpoint files and therefore meandens=0 after restart! 
-      if (meandens .eq. 0) then
-         meandens = 2.775d11 * 0.7d0**2 * comoving_OmAx !3 * (100)**2 *0.7d0**2 *  comoving_OmAx / ( 8 * PI * Gconst)
-      endif
+      !if (meandens .eq. 0) then
+      !   meandens = 2.775d11 * 0.7d0**2 * comoving_OmAx !3 * (100)**2 *0.7d0**2 *  comoving_OmAx / ( 8 * PI * Gconst)
+      !endif
 
       !hbar/m expressed in Nyx units [Mpc km/s]
       hbaroverm = 0.01917152d0 / m_tt
@@ -561,7 +563,8 @@
 
              uout(i,j,k, UAXRE)   = dreal(  psi(i,j,k) )  
              uout(i,j,k, UAXIM)   = dimag( psi(i,j,k) )  
-             uout(i,j,k, UAXDENS) = meandens * cdabs( psi(i,j,k) )**2 !density in Nyx units
+             !uout(i,j,k, UAXDENS) = meandens * cdabs( psi(i,j,k) )**2 !density in Nyx units
+             uout(i,j,k, UAXDENS) = cdabs( psi(i,j,k) )**2 !density in Nyx units
 
           enddo
         enddo

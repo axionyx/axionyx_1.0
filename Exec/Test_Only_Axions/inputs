@@ -23,7 +23,7 @@ amr.data_log = runlog
 #Leave this commented out in cvs version
 #amr.restart = chk30000
 nyx.dump_old = 1
-max_step = 200
+max_step = 2
 #particles.particle_output_file = particle_output
 particles.write_in_plotfile = 0
 
@@ -31,9 +31,9 @@ gravity.gravity_type = PoissonGrav
 gravity.no_sync      = 1
 gravity.no_composite = 1
 
-gravity.ml_tol    = 1.e-12
-gravity.sl_tol    = 1.e-12
-gravity.delta_tol = 1.e-12
+gravity.ml_tol    = 1.e-10
+gravity.sl_tol    = 1.e-10
+gravity.delta_tol = 1.e-10
 gravity.use_previous_phi_as_guess = 0
 
 mg.bottom_solver = 1
@@ -41,13 +41,19 @@ mg.bottom_solver = 1
 # PROBLEM SIZE & GEOMETRY
 geometry.is_periodic =  0 0 0
 geometry.coord_sys   =  0
-geometry.prob_lo     =  -0.05 -0.05 -0.05
-geometry.prob_hi     =  0.05 0.05 0.05
 
-amr.n_cell           =  128 128 128
+#geometry.prob_lo     =  -0.256 -0.256 -0.256 
+#geometry.prob_hi     =   0.256 0.256 0.256
+
+geometry.prob_lo     =  -0.128 -0.128 -0.128
+geometry.prob_hi     =   0.128 0.128 0.128
+
+amr.n_cell           =  256 256 256
+#amr.n_cell           =  512 512 512
+#amr.n_cell           =  128 128 128
 #amr.n_cell           =  4 4 4
 nyx.n_particles      =  1  1  1 
-amr.max_grid_size    =  128
+amr.max_grid_size    =  256
 
 # >>>>>>>>>>>>>  BC FLAGS <<<<<<<<<<<<<<<<
 # 0 = Interior           3 = Symmetry
