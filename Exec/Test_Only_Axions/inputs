@@ -11,8 +11,7 @@ nyx.inhomo_reion     = 0
 nyx.small_dens = 1e-4
 nyx.initial_z = 0.0
 #nyx.final_a = 1.0
-nyx.initial_dt = 2.e-6
-#nyx.fixed_dt = 2.e-5
+nyx.initial_dt = 1.e-6
 #nyx.max_timestep = 2.e-6
 nyx.vonNeumann_dt = 1
 
@@ -23,7 +22,7 @@ amr.data_log = runlog
 #Leave this commented out in cvs version
 #amr.restart = chk30000
 nyx.dump_old = 1
-max_step = 2
+max_step = 100000
 #particles.particle_output_file = particle_output
 particles.write_in_plotfile = 0
 
@@ -39,17 +38,19 @@ gravity.use_previous_phi_as_guess = 0
 mg.bottom_solver = 1
 
 # PROBLEM SIZE & GEOMETRY
-geometry.is_periodic =  0 0 0
+geometry.is_periodic =  1 1 1
 geometry.coord_sys   =  0
 
-#geometry.prob_lo     =  -0.256 -0.256 -0.256 
-#geometry.prob_hi     =   0.256 0.256 0.256
+geometry.prob_lo     =  -0.256 -0.256 -0.256 
+geometry.prob_hi     =   0.256 0.256 0.256
+#geometry.prob_lo     =  -0.512 -0.512 -0.512
+geometry.prob_lo     =  -0 -0 -0
+geometry.prob_hi     =   0.512 0.512 0.512
+#geometry.prob_lo     =  -0.128 -0.128 -0.128
+#geometry.prob_hi     =   0.128 0.128 0.128
 
-geometry.prob_lo     =  -0.128 -0.128 -0.128
-geometry.prob_hi     =   0.128 0.128 0.128
-
-amr.n_cell           =  256 256 256
-#amr.n_cell           =  512 512 512
+#amr.n_cell           =  256 256 256
+amr.n_cell           =  512 512 512
 #amr.n_cell           =  128 128 128
 #amr.n_cell           =  4 4 4
 nyx.n_particles      =  1  1  1 
@@ -60,8 +61,8 @@ amr.max_grid_size    =  256
 # 1 = Inflow             4 = SlipWall
 # 2 = Outflow
 # >>>>>>>>>>>>>  BC FLAGS <<<<<<<<<<<<<<<<
-nyx.lo_bc       =  2 2 2 #0	  0	0
-nyx.hi_bc       =  2 2 2 #0	  0	0
+nyx.lo_bc       =  0	  0	0
+nyx.hi_bc       =  0	  0	0
 
 # WHICH PHYSICS
 nyx.do_hydro = 0
@@ -123,7 +124,7 @@ amr.check_int       = 5000
 # PLOTFILES
 amr.plot_file       = plot
 #amr.plot_per       = 1.e-6
-amr.plot_int	    = 10
+amr.plot_int	    = 100
 
 amr.derive_plot_vars = AxPhase # these variables appear in the plotfile
 amr.plot_vars = AxDens AxRe AxIm phi_grav #AxDens AxMomX AxMomY AxMomZ phi_grav #ALL #density xmom ymom zmom phi_grav #

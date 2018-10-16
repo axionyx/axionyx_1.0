@@ -355,6 +355,9 @@
 
       xn  = prob_hi(1)            ! Need that the center of the physical problem is at (0,0,0)!!
       xp  = 7.d0/8.d0*prob_hi(1)  ! Inside this radius the 'sponge' is zero.
+      !TODO this effectively disables the sponge
+      xp  = 1.0d10*prob_hi(1)  ! Inside this radius the 'sponge' is zero.
+      !TODO 
       xc  = (xn+xp)/2.d0
       del = xn-xp
       !Vo  = 0.657d0              ! Corresponding to Vo=1 in arXiv:gr-qc/0404014v2 eq.29 when scaled to halo with rho_max=rho_cr
