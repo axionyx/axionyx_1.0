@@ -28,7 +28,7 @@ Nyx::write_info ()
                                   hh_mass_frac, hh_vol_frac, igm_mass_frac, igm_vol_frac);
 	}
 #endif
-#ifdef AXIONS
+#ifdef FDM
         Real mass=0.0, epot=0.0, ekinrho=0.0, ekinv=0.0, etot=0.0;
         Real angmom_x=0.0, angmom_y=0.0, angmom_z=0.0, grav_pot=0.0, phase=0.0;
         compute_axion_quantities(mass, epot, ekinrho, ekinv, angmom_x, angmom_y, angmom_z, grav_pot, phase);
@@ -53,7 +53,7 @@ Nyx::write_info ()
                 data_loga << std::setw(14) <<  "       time    ";
                 data_loga << std::setw(14) <<  "       dt      ";
                 data_loga << std::setw(14) <<  "         z     ";
-#ifdef AXIONS
+#ifdef FDM
                  data_loga << std::setw(14) <<  "     Mass";
                  data_loga << std::setw(14) <<  "     Epot";
                  data_loga << std::setw(14) <<  "  Ekinrho";
@@ -84,7 +84,7 @@ Nyx::write_info ()
                 data_loga << std::setw(14) <<  std::setprecision(6) <<  time;
                 data_loga << std::setw(14) <<  std::setprecision(6) <<    dt;
                 data_loga << std::setw(14) <<  std::setprecision(6) << old_z;
-#ifdef AXIONS
+#ifdef FDM
                  data_loga << std::setw(14) <<  std::setprecision(6) << mass;
                  data_loga << std::setw(14) <<  std::setprecision(6) << epot;
                  data_loga << std::setw(14) <<  std::setprecision(6) << ekinrho;
@@ -119,7 +119,7 @@ Nyx::write_info ()
                 data_loga << std::setw(14) <<  std::setprecision(6) <<    dt;
                 data_loga << std::setw(14) <<  std::setprecision(6) << new_z;
 
-#ifdef AXIONS
+#ifdef FDM
                  data_loga << std::setw(14) <<  std::setprecision(6) << mass;
                  data_loga << std::setw(14) <<  std::setprecision(6) << epot;
                  data_loga << std::setw(14) <<  std::setprecision(6) << ekinrho;

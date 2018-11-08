@@ -1,4 +1,4 @@
-#ifdef AXIONS
+#ifdef FDM
  
 #include "Nyx.H"
 #include "Nyx_F.H"

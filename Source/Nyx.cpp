@@ -99,7 +99,7 @@ int Nyx::Xmom = -1;
 int Nyx::Ymom = -1;
 int Nyx::Zmom = -1;
 
-#ifdef AXIONS
+#ifdef FDM
 int Nyx::AxDens = -1;
 int Nyx::AxRe   = -1;
 int Nyx::AxIm   = -1;
@@ -138,7 +138,7 @@ Real Nyx::average_gas_density = 0;
 Real Nyx::average_dm_density = 0;
 Real Nyx::average_neutr_density = 0;
 Real Nyx::average_total_density = 0;
-#ifdef AXIONS
+#ifdef FDM
 Real Nyx::average_ax_density = 0;
 #endif
 
@@ -266,7 +266,7 @@ Nyx::read_params ()
     pp_nyx.query("do_reflux", do_reflux);
     do_reflux = (do_reflux ? 1 : 0);
     pp_nyx.get("dt_cutoff", dt_cutoff);
-#ifdef AXIONS
+#ifdef FDM
     pp_nyx.query("vonNeumann_dt", vonNeumann_dt);
 #endif
     pp_nyx.query("dump_old", dump_old);
@@ -795,7 +795,7 @@ Nyx::init (AmrLevel& old)
     }
 #endif
 
-#ifdef AXIONS
+#ifdef FDM
     MultiFab&  Ax_new = get_new_data(Axion_Type);
     for (FillPatchIterator fpi(old, Ax_new, 0, cur_time, Axion_Type, 0, NUM_AX);
          fpi.isValid(); ++fpi)
@@ -837,7 +837,7 @@ Nyx::init ()
     FillCoarsePatch(Phi_new, 0, cur_time, PhiGrav_Type, 0, Phi_new.nComp());
 #endif
 
-#ifdef AXIONS
+#ifdef FDM
     MultiFab&  Ax_new = get_new_data(Axion_Type);
     FillCoarsePatch(Ax_new, 0, cur_time, Axion_Type, 0, NUM_AX);
 #endif
@@ -932,7 +932,7 @@ Nyx::est_time_step (Real dt_old)
 #endif
 
 //add time step requirements here.
-#ifdef AXIONS
+#ifdef FDM
     Real a = get_comoving_a(cur_time);
     if (vonNeumann_dt >0){
       const MultiFab& phi = get_new_data(PhiGrav_Type);
@@ -1991,7 +1991,7 @@ Nyx::average_down ()
     average_down(PhiGrav_Type);
     average_down(Gravity_Type);
 #endif
-#ifdef AXIONS
+#ifdef FDM
     average_down(Axion_Type);
 #endif
 }
@@ -2115,12 +2115,12 @@ Nyx::errorEst (TagBoxArray& tags,
             {
                 avg = average_total_density;
             }
-#ifdef AXIONS
+#ifdef FDM
             else if (err_list[j].name() == "AxDens")
             {
                 avg = average_ax_density;
             }
-#endif //AXIONS
+#endif //FDM
 #if 0
             else if (err_list[j].name() == "magvort")
             {

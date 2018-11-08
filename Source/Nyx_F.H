@@ -9,8 +9,8 @@ extern "C"
 {
 #endif
 
-#ifdef AXIONS
-BL_FORT_PROC_DECL(FORT_ADVANCE_AXIONS, fort_advance_axions)
+#ifdef FDM
+BL_FORT_PROC_DECL(FORT_ADVANCE_FDM, fort_advance_axions)
     (const amrex::Real* time,
      const int lo[], const int hi[],
      const BL_FORT_FAB_ARG(state),
@@ -99,7 +99,7 @@ BL_FORT_PROC_DECL(FORT_ADVANCE_AXIONS, fort_advance_axions)
   void fort_initdata
     (const int& level, const amrex::Real& time, const int* lo, const int* hi,
      const int& num_state, BL_FORT_FAB_ARG(state),
-#ifdef AXIONS
+#ifdef FDM
     const int& num_ax, BL_FORT_FAB_ARG(axions),
 #endif
      const int& num_diag,  BL_FORT_FAB_ARG(diag_eos), const amrex::Real dx[],

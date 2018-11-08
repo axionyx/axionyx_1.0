@@ -66,8 +66,8 @@ ifeq ($(USE_FORCING), TRUE)
   DEFINES += -DFORCING
 endif
 
-ifeq ($(USE_AXIONS), TRUE)
-  DEFINES += -DAXIONS
+ifeq ($(USE_FDM), TRUE)
+  DEFINES += -DFDM
 endif
 
 

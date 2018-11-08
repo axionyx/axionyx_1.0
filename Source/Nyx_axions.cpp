@@ -1,4 +1,4 @@
-#ifdef AXIONS
+#ifdef FDM
  
 #include "Nyx.H"
 #include "Nyx_F.H"
@@ -95,7 +95,7 @@ Nyx::just_the_axions (amrex::Real time,
 	}
 
 	//axionout.copy(axion);
-        BL_FORT_PROC_CALL(FORT_ADVANCE_AXIONS, fort_advance_axions)
+        BL_FORT_PROC_CALL(FORT_ADVANCE_FDM, fort_advance_axions)
             (&time, bx.loVect(), bx.hiVect(), 
 	     BL_TO_FORTRAN(axion),
              BL_TO_FORTRAN(axionout),
@@ -149,4 +149,4 @@ Nyx::just_the_axions (amrex::Real time,
 
 }
 
-#endif //AXIONS
+#endif //FDM

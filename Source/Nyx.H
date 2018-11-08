@@ -32,7 +32,7 @@ typedef NyxParticleContainer<1+BL_SPACEDIM+3> StellarParticleContainer;
 enum StateType {
     PhiGrav_Type = 0,
     Gravity_Type,
-#ifdef AXIONS
+#ifdef FDM
     Axion_Type,
 #endif
     NUM_STATE_TYPE
@@ -50,7 +50,7 @@ enum StateType {
 #ifdef SDC
     SDC_IR_Type,
 #endif
-#ifdef AXIONS
+#ifdef FDM
     Axion_Type,
 #endif
     NUM_STATE_TYPE
@@ -396,12 +396,12 @@ public:
     amrex::Real advance_no_hydro(amrex::Real time, amrex::Real dt, int iteration, int ncycle);
     amrex::Real advance_hydro_plus_particles(amrex::Real time, amrex::Real dt, int iteration,
                                       int ncycle);
-#ifdef AXIONS
+#ifdef FDM
     amrex::Real advance_particle_axions(amrex::Real time, amrex::Real dt, int iteration, int ncycle);
            void just_the_axions(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
 #endif
 
-#ifdef AXIONS
+#ifdef FDM
     void compute_axion_quantities(amrex::Real& mass, amrex::Real& axepot, amrex::Real& axekinrho, amrex::Real& axekinv, amrex::Real& angmom_x, amrex::Real& angmom_y, amrex::Real& angmom_z,amrex::Real& grav_pot, amrex::Real& phase);
 #endif
 
@@ -582,7 +582,7 @@ public:
     static int NUM_STATE;
     static int Density, Xmom, Ymom, Zmom, Eden, Eint;
 
-#ifdef AXIONS
+#ifdef FDM
     static int AxDens;
     static int AxRe;
     static int AxIm;
@@ -791,7 +791,7 @@ protected:
     static amrex::Real average_dm_density;
     static amrex::Real average_neutr_density;
     static amrex::Real average_total_density;
-#ifdef AXIONS
+#ifdef FDM
     static amrex::Real average_ax_density;
 #endif
 

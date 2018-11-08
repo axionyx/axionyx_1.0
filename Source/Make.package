@@ -1,4 +1,4 @@
-ifeq ($(USE_AXIONS), TRUE)
+ifeq ($(USE_FDM), TRUE)
 CEXE_sources += particle_axions_advance.cpp
 CEXE_sources += Nyx_axions.cpp
 endif
