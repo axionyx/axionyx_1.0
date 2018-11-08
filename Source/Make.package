@@ -1,6 +1,6 @@
 ifeq ($(USE_FDM), TRUE)
-CEXE_sources += particle_axions_advance.cpp
-CEXE_sources += Nyx_axions.cpp
+CEXE_sources += advance_FDM.cpp
+CEXE_sources += Nyx_FDM.cpp
 endif
 
 #ifneq ($(USE_HENSON), TRUE)

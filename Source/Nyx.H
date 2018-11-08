@@ -397,8 +397,8 @@ public:
     amrex::Real advance_hydro_plus_particles(amrex::Real time, amrex::Real dt, int iteration,
                                       int ncycle);
 #ifdef FDM
-    amrex::Real advance_particle_axions(amrex::Real time, amrex::Real dt, int iteration, int ncycle);
-           void just_the_axions(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
+    amrex::Real advance_FDM(amrex::Real time, amrex::Real dt, int iteration, int ncycle);
+           void advance_FDM_FD(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
 #endif
 
 #ifdef FDM

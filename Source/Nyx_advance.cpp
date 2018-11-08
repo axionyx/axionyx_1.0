@@ -41,7 +41,7 @@ Nyx::advance (Real time,
       }
     else
       {
-        return advance_particle_axions(time, dt, iteration, ncycle);
+        return advance_FDM(time, dt, iteration, ncycle);
       }
 #else
 

@@ -10,7 +10,7 @@ extern "C"
 #endif
 
 #ifdef FDM
-BL_FORT_PROC_DECL(FORT_ADVANCE_FDM, fort_advance_axions)
+BL_FORT_PROC_DECL(FORT_ADVANCE_FDM_FD, fort_advance_fdm_fd)
     (const amrex::Real* time,
      const int lo[], const int hi[],
      const BL_FORT_FAB_ARG(state),
