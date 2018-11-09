@@ -7,7 +7,7 @@ HPGMG_DIR ?= ../../Util/hpgmg/finite-volume
 TOP = ../..
 
 # compilation options
-COMP    = intel  # gnu
+COMP    = gnu
 
 USE_MPI = TRUE
 USE_OMP = FALSE
@@ -17,6 +17,7 @@ REEBER = FALSE
 
 USE_HPGMG = FALSE
 USE_AXIONS = TRUE
+USE_AXPART = TRUE
 
 PRECISION = DOUBLE
 DEBUG     = FALSE

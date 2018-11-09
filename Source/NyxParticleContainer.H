@@ -11,8 +11,8 @@ class NyxParticleContainerBase
 {
 public:
 
-    using MyParIter = amrex::ParIter<1+BL_SPACEDIM>;
-    using MyConstParIter = amrex::ParConstIter<1+BL_SPACEDIM>;
+  using MyParIter = amrex::ParIter<1+BL_SPACEDIM>;
+  using MyConstParIter = amrex::ParConstIter<1+BL_SPACEDIM>;
 
     virtual ~NyxParticleContainerBase() {}
 

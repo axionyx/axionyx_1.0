@@ -226,10 +226,10 @@ Nyx::initData ()
                 fort_initdata
                     (level, cur_time, bx.loVect(), bx.hiVect(), 
                      ns, BL_TO_FORTRAN(S_new[mfi]), 
-                     nd, BL_TO_FORTRAN(D_new[mfi]), 
 #ifdef AXIONS
                      na, BL_TO_FORTRAN(Ax_new[mfi]),
 #endif
+                     nd, BL_TO_FORTRAN(D_new[mfi]), 
                      dx, gridloc.lo(), gridloc.hi());
             }
 

@@ -50,8 +50,8 @@ geometry.prob_hi     =   0.512 0.512 0.512
 #geometry.prob_hi     =   0.128 0.128 0.128
 
 #amr.n_cell           =  256 256 256
-amr.n_cell           =  512 512 512
-#amr.n_cell           =  128 128 128
+#amr.n_cell           =  512 512 512
+amr.n_cell           =  128 128 128
 #amr.n_cell           =  4 4 4
 nyx.n_particles      =  1  1  1 
 amr.max_grid_size    =  256

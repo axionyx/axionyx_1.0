@@ -39,6 +39,17 @@ Nyx::particle_derive (const std::string& name, Real time, int ngrow)
         return derive_dat;
     }
 #endif
+#ifdef FDM
+    else if (Nyx::theFDMPC() && name == "fdm_particle_count")                                                                                                                                                
+      {                                                                                                                                                                                                          
+	std::unique_ptr<MultiFab> derive_dat(new MultiFab(grids, dmap, 1, 0));                                                                                                          
+        MultiFab temp_dat(grids, dmap, 1, 0);                                                                                                                                                               
+        temp_dat.setVal(0);                                                                                                                                                                                      
+	Nyx::theFDMPC()->Increment(temp_dat, level);                                                                                                                                                              
+	MultiFab::Copy(*derive_dat, temp_dat, 0, 0, 1, 0);                                                                                                                                                       
+        return derive_dat;                                                                                                                                                                                       
+      }
+#endif
     else if (Nyx::theDMPC() && name == "total_particle_count")
     {
         //
@@ -158,6 +169,29 @@ Nyx::particle_derive (const std::string& name, Real time, int ngrow)
 
         return derive_dat;
     }
+#endif
+#ifdef FDM
+    else if (Nyx::theFDMPC() && name == "fdm_mass_density")
+      {
+	std::unique_ptr<MultiFab> derive_dat(new MultiFab(grids,dmap,1,0));
+
+	// We need to do the multilevel `assign_density` even though we're only                                                                                                                                
+	// asking for one level's worth because otherwise we don't get the                                                                                                                                      
+	// coarse-fine distribution of particles correct.                                                                                                                                
+	Vector<std::unique_ptr<MultiFab> > particle_mf;
+	Nyx::theFDMPC()->AssignDensity(particle_mf);
+
+        for (int lev = parent->finestLevel()-1; lev >= 0; lev--)
+	  {
+            amrex::average_down(*particle_mf[lev+1], *particle_mf[lev], 
+                                 parent->Geom(lev+1), parent->Geom(lev), 0, 1, 
+                                 parent->refRatio(lev));
+	  }
+
+	MultiFab::Copy(*derive_dat, *particle_mf[level], 0, 0, 1, 0);
+
+        return derive_dat;
+      }
 #endif
 #endif
     else if (name == "total_density")

@@ -27,5 +27,24 @@ module particle_mod
      integer(c_int)  :: id
      integer(c_int)  :: cpu
   end type agn_particle_t
+
+#ifdef FDM
+  public  fdm_particle_t
   
+  type, bind(C)  :: fdm_particle_t
+     real(c_real)    :: pos(3)     !< Position
+     real(c_real)    :: mass       !< Particle mass
+     real(c_real)    :: vel(3)     !< Particle velocity
+     real(c_real)    :: phase      !< Particle phase 
+     real(c_real)    :: amp        !< Particle amplitude
+     real(c_real)    :: width      !< Particle width
+     real(c_real)    :: qq(9)      !< Particle Jacobian qq
+     real(c_real)    :: qp(9)      !< Particle Jacobian qq
+     real(c_real)    :: pq(9)      !< Particle Jacobian qq
+     real(c_real)    :: pp(9)      !< Particle Jacobian qq
+     integer(c_int)  :: id
+     integer(c_int)  :: cpu
+  end type dm_particle_t
+#endif  
+
 end module

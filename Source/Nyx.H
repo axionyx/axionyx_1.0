@@ -15,6 +15,9 @@
 #ifdef NEUTRINO_PARTICLES
 #include "NeutrinoParticleContainer.H"
 #endif
+#ifdef FDM_GB
+#include "FDMParticleContainer.H"
+#endif
 
 #include <iostream>
 
@@ -32,7 +35,7 @@ typedef NyxParticleContainer<1+BL_SPACEDIM+3> StellarParticleContainer;
 enum StateType {
     PhiGrav_Type = 0,
     Gravity_Type,
-#ifdef AXIONS
+#ifdef FDM_FD
     Axion_Type,
 #endif
     NUM_STATE_TYPE
@@ -579,6 +582,12 @@ public:
     static NeutrinoParticleContainer* theGhostNPC();
 #endif
 
+#ifdef FDM_GB
+    static FDMParticleContainer* theFDMPC();
+    static FDMParticleContainer* theVirtFDMPC();
+    static FDMParticleContainer* theGhostFDMPC();
+#endif
+
     static int NUM_STATE;
     static int Density, Xmom, Ymom, Zmom, Eden, Eint;
 
@@ -640,6 +649,9 @@ protected:
     std::string retrieveDM();
 #ifdef AGN
     std::string retrieveAGN();
+#endif
+#ifdef FDM_GB
+  std::string retrieveFDM();
 #endif
 
 #ifndef NO_HYDRO
@@ -729,6 +741,10 @@ protected:
     static int particle_initrandom_iseed;
     static int particle_skip_factor;
 
+#ifdef FDM_GB
+  static long num_particle_fdm;                                                                                                                                                                                     
+#endif
+
     static amrex::IntVect Nrep;  // how many times the initial conditions are replicated in each direction
 
     static amrex::Vector<amrex::Real> plot_z_values;      // These are the value of "z" at which to dump plotfiles.
@@ -791,7 +807,7 @@ protected:
     static amrex::Real average_dm_density;
     static amrex::Real average_neutr_density;
     static amrex::Real average_total_density;
-#ifdef AXIONS
+#ifdef FDM
     static amrex::Real average_ax_density;
 #endif
 

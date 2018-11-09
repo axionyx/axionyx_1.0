@@ -70,6 +70,13 @@ ifeq ($(USE_AXIONS), TRUE)
   DEFINES += -DAXIONS
 endif
 
+ifeq ($(USE_FDM), TRUE)
+  DEFINES += -DFDM
+endif
+
+ifeq ($(USE_FDM_GB), TRUE)
+  DEFINES += -DFDM_GB
+endif
 
 DEFINES += -DBL_NOLINEVALUES
 
@@ -132,6 +139,9 @@ ifeq ($(USE_FORCING), TRUE)
 endif
 ifeq ($(USE_AGN), TRUE)
    Bdirs 	+= Source/AGN
+endif
+ifeq ($(USE_FDM), TRUE)
+   Bdirs 	+= Source/FDM
 endif
 
 Bpack	+= $(foreach dir, $(Bdirs), $(TOP)/$(dir)/Make.package)
