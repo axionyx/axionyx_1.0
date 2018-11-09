@@ -1,4 +1,4 @@
-#ifdef AXIONS
+#ifdef FDM
  
 #include "Nyx.H"
 #include "Nyx_F.H"
@@ -15,7 +15,7 @@ using namespace amrex;
 using std::string;
 
 amrex::Real
-Nyx::advance_particle_axions (amrex::Real time,
+Nyx::advance_FDM (amrex::Real time,
                               amrex::Real dt,
                               int  iteration,
                               int  ncycle)
@@ -190,7 +190,7 @@ Nyx::advance_particle_axions (amrex::Real time,
 
     //Advance Axions
     for (int lev = level; lev <= finest_level_to_advance; lev++)
-        get_level(lev).just_the_axions(time, dt, a_old, a_new);
+        get_level(lev).advance_FDM_FD(time, dt, a_old, a_new);
 
     // Always average down from finer to coarser.
     for (int lev = finest_level_to_advance-1; lev >= level; lev--)

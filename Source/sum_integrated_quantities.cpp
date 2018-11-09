@@ -185,7 +185,7 @@ Nyx::compute_average_density ()
     average_dm_density       = 0;
     average_neutr_density    = 0;
     average_total_density    = 0;
-#ifdef AXIONS
+#ifdef FDM
     average_ax_density    = 0;
 #endif
 
@@ -200,13 +200,13 @@ Nyx::compute_average_density ()
     }
  
 #ifdef GRAVITY
-#ifdef AXIONS
+#ifdef FDM
         for (int lev = 0; lev <= finest_level; lev++)
                 {
                     Nyx& nyx_lev = get_level(lev);
                     average_ax_density += nyx_lev.vol_weight_sum("AxDens", time,true);
                 }
-#endif //AXIONS
+#endif //FDM
     // Define the dark matter density on all levels.
     if (Nyx::theDMPC())
     {
@@ -258,7 +258,7 @@ Nyx::compute_average_density ()
     {
         average_total_density = average_dm_density + average_neutr_density;
     }
-#ifdef AXIONS
+#ifdef FDM
                 average_ax_density /= geom.ProbSize();
                 average_total_density += average_ax_density;
 #endif
@@ -273,7 +273,7 @@ Nyx::compute_average_density ()
 #ifdef NEUTRINO_PARTICLES
         std::cout << "Average neutrino density " << average_neutr_density << '\n';
 #endif
-#ifdef AXIONS
+#ifdef FDM
         std::cout << "Average   axion density " << average_ax_density << '\n';
 #endif
         std::cout << "Average    total density " << average_total_density << '\n';
@@ -387,7 +387,7 @@ Nyx::compute_average_species (int          nspec,
 }
 
 
-#ifdef AXIONS
+#ifdef FDM
 void
 Nyx::compute_axion_quantities (Real& mass, Real& epot, Real& ekinrho, Real& ekinv, Real& angmom_x, Real& angmom_y, Real& angmom_z, Real& grav_pot, Real& phase)
 {

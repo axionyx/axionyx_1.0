@@ -300,11 +300,11 @@ Gravity::solve_for_old_phi (int               level,
        MultiFab::Copy(Rhs, S_old, density, 0, 1, 0);
     }
 #endif
-#ifdef AXIONS
+#ifdef FDM
         MultiFab& Ax_old = LevelData[level]->get_old_data(Axion_Type);
 #endif
     AddParticlesToRhs(level,Rhs,ngrow_for_solve);
-#ifdef AXIONS
+#ifdef FDM
         MultiFab::Add(Rhs, Ax_old, Nyx::AxDens, 0, 1, 0);
 #endif
     // We shouldn't need to use virtual or ghost particles for old phi solves.
@@ -341,10 +341,10 @@ Gravity::solve_for_new_phi (int               level,
     }
 #endif
 
-#ifdef AXIONS
+#ifdef FDM
         MultiFab& Ax_new = LevelData[level]->get_new_data(Axion_Type);
 #endif
-#ifdef AXIONS
+#ifdef FDM
         MultiFab::Add(Rhs, Ax_new, Nyx::AxDens, 0, 1, 0);
 #endif
     AddParticlesToRhs(level,Rhs,ngrow_for_solve);
@@ -876,7 +876,7 @@ Gravity::actual_multilevel_solve (int                       level,
 #endif
         MultiFab::Add(*Rhs_p[lev], *Rhs_particles[lev], 0, 0, 1, 0);
 
-#ifdef AXIONS
+#ifdef FDM
         if (is_new == 1)
         {
            MultiFab::Add(*(Rhs_p[lev]), LevelData[level+lev]->get_new_data(Axion_Type), Nyx::AxDens, 0, 1, 0);
@@ -1448,7 +1448,7 @@ Gravity::set_mass_offset (Real time)
 #endif
             for (int i = 0; i < Nyx::theActiveParticles().size(); i++)
                 mass_offset += Nyx::theActiveParticles()[i]->sumParticleMass(lev);
-#ifdef AXIONS
+#ifdef FDM
             //TODO check if the third argument needs to be true!
             mass_offset += cs->vol_weight_sum("AxDens", time, true);
 #endif

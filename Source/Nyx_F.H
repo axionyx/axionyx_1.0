@@ -9,8 +9,8 @@ extern "C"
 {
 #endif
 
-#ifdef AXIONS
-BL_FORT_PROC_DECL(FORT_ADVANCE_AXIONS, fort_advance_axions)
+#ifdef FDM
+BL_FORT_PROC_DECL(FORT_ADVANCE_FDM_FD, fort_advance_fdm_fd)
     (const amrex::Real* time,
      const int lo[], const int hi[],
      const BL_FORT_FAB_ARG(state),
@@ -32,6 +32,9 @@ BL_FORT_PROC_DECL(FORT_ADVANCE_AXIONS, fort_advance_axions)
   void fort_integrate_comoving_a_to_z 
     (amrex::Real* old_a, amrex::Real* z_value, amrex::Real* dt);
 
+  void fort_integrate_comoving_a_to_a 
+    (amrex::Real* old_a, amrex::Real* a_value, amrex::Real* dt);
+
   void set_simd(const int *simd_width);
 
   //  void fort_get_omm    (amrex::Real* omm);
@@ -49,7 +52,7 @@ BL_FORT_PROC_DECL(FORT_ADVANCE_AXIONS, fort_advance_axions)
 
   void fort_estdt_comoving_a
     (amrex::Real* old_a, amrex::Real* new_dummy_a, amrex::Real* dt, amrex::Real* change_allowed,
-     amrex::Real* final_a, int* dt_modified);
+     amrex::Real* fixed_da_interval, amrex::Real* final_a, int* dt_modified);
 
   void fort_get_method_params(int* HYP_GROW);
 
@@ -99,7 +102,7 @@ BL_FORT_PROC_DECL(FORT_ADVANCE_AXIONS, fort_advance_axions)
   void fort_initdata
     (const int& level, const amrex::Real& time, const int* lo, const int* hi,
      const int& num_state, BL_FORT_FAB_ARG(state),
-#ifdef AXIONS
+#ifdef FDM
     const int& num_ax, BL_FORT_FAB_ARG(axions),
 #endif
      const int& num_diag,  BL_FORT_FAB_ARG(diag_eos), const amrex::Real dx[],

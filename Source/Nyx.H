@@ -35,7 +35,7 @@ typedef NyxParticleContainer<1+BL_SPACEDIM+3> StellarParticleContainer;
 enum StateType {
     PhiGrav_Type = 0,
     Gravity_Type,
-#ifdef FDM_FD
+#ifdef FDM
     Axion_Type,
 #endif
     NUM_STATE_TYPE
@@ -53,7 +53,7 @@ enum StateType {
 #ifdef SDC
     SDC_IR_Type,
 #endif
-#ifdef AXIONS
+#ifdef FDM
     Axion_Type,
 #endif
     NUM_STATE_TYPE
@@ -187,6 +187,16 @@ public:
     // Relative change in a allowed in one timestep
     //
     static amrex::Real relative_max_change_a;
+
+    //
+    // Absolute change in a allowed in one timestep for fixed delta_a
+    //
+    static amrex::Real absolute_max_change_a;
+
+    //
+    // Positive number means use powers of 2 binning for relative dt
+    //
+    static amrex::Real dt_binpow;
 
     //
     // Old and new times at which "old_a" and "new_a" are defined.
@@ -399,12 +409,12 @@ public:
     amrex::Real advance_no_hydro(amrex::Real time, amrex::Real dt, int iteration, int ncycle);
     amrex::Real advance_hydro_plus_particles(amrex::Real time, amrex::Real dt, int iteration,
                                       int ncycle);
-#ifdef AXIONS
-    amrex::Real advance_particle_axions(amrex::Real time, amrex::Real dt, int iteration, int ncycle);
-           void just_the_axions(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
+#ifdef FDM
+    amrex::Real advance_FDM(amrex::Real time, amrex::Real dt, int iteration, int ncycle);
+           void advance_FDM_FD(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
 #endif
 
-#ifdef AXIONS
+#ifdef FDM
     void compute_axion_quantities(amrex::Real& mass, amrex::Real& axepot, amrex::Real& axekinrho, amrex::Real& axekinv, amrex::Real& angmom_x, amrex::Real& angmom_y, amrex::Real& angmom_z,amrex::Real& grav_pot, amrex::Real& phase);
 #endif
 
@@ -591,7 +601,7 @@ public:
     static int NUM_STATE;
     static int Density, Xmom, Ymom, Zmom, Eden, Eint;
 
-#ifdef AXIONS
+#ifdef FDM
     static int AxDens;
     static int AxRe;
     static int AxIm;

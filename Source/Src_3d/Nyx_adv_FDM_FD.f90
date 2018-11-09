@@ -301,7 +301,7 @@
 ! ::: Bose-Einstein condensate of an ultralight scalar field using explicit RK4 and 
 ! ::: directional splitting.
 
-      subroutine fort_advance_axions(time,lo,hi,&
+      subroutine fort_advance_fdm_fd(time,lo,hi,&
            uin,  uin_l1,uin_l2,uin_l3,uin_h1,uin_h2,uin_h3, &
            uout, uout_l1,uout_l2,uout_l3,uout_h1,uout_h2,uout_h3, &
            grav, g_l1,g_l2,g_l3,g_h1,g_h2,g_h3, &
@@ -581,5 +581,5 @@
       deallocate( k4)
       deallocate(  V)
 
-      end subroutine fort_advance_axions
+      end subroutine fort_advance_fdm_fd
 

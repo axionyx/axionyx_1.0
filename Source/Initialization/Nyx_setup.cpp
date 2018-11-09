@@ -197,7 +197,7 @@ Nyx::hydro_setup()
     NUM_STATE = cnt;
     int use_axions = 0;
 
-#ifdef AXIONS
+#ifdef FDM
         use_axions = 1;
             AxDens = 0;
             AxRe   = 1;
@@ -271,7 +271,7 @@ Nyx::hydro_setup()
                            store_in_checkpoint);
 #endif
 
-#ifdef AXIONS
+#ifdef FDM
         store_in_checkpoint = true;
         desc_lst.addDescriptor(Axion_Type, IndexType::TheCellType(),
                                StateDescriptor::Point, 1, NUM_AX, interp,
@@ -280,7 +280,7 @@ Nyx::hydro_setup()
 
     Vector<BCRec> bcs(NUM_STATE);
     Vector<std::string> name(NUM_STATE);
-#ifdef AXIONS
+#ifdef FDM
         Vector<BCRec> bcs_ax(NUM_AX);
         Vector<std::string> name_ax(NUM_AX);
 #endif
@@ -298,7 +298,7 @@ Nyx::hydro_setup()
     set_scalar_bc(bc, phys_bc);  bcs[cnt] = bc;  name[cnt] = "rho_E";
     cnt++;
     set_scalar_bc(bc, phys_bc);  bcs[cnt] = bc;  name[cnt] = "rho_e";
-#ifdef AXIONS
+#ifdef FDM
     set_scalar_bc(bc, phys_bc);  bcs_ax[0] = bc;  name_ax[0] = "AxDens";
     set_scalar_bc(bc, phys_bc);  bcs_ax[1] = bc;  name_ax[1] = "AxRe";
     set_scalar_bc(bc, phys_bc);  bcs_ax[2] = bc;  name_ax[2] = "AxIm";
@@ -420,7 +420,7 @@ Nyx::hydro_setup()
 #endif
 
 
-#ifdef AXIONS
+#ifdef FDM
     set_scalar_bc(bc, phys_bc);
     desc_lst.setComponent(Axion_Type, 0, "AxDens", bc,
                           BndryFunc(generic_fill));
@@ -799,7 +799,7 @@ Nyx::no_hydro_setup()
     Density = 0;
     NUM_STATE = 1;
     int use_axions = 0;
-#ifdef AXIONS
+#ifdef FDM
     use_axions = 1;
     AxDens = 0;
     AxRe   = 1;
@@ -891,7 +891,7 @@ Nyx::no_hydro_setup()
        derive_lst.addComponent("maggrav", desc_lst, Gravity_Type, 0, BL_SPACEDIM);
     }
 
-#ifdef AXIONS
+#ifdef FDM
     Interpolater* interp = &cell_cons_interp;
     store_in_checkpoint = true;
     desc_lst.addDescriptor(Axion_Type, IndexType::TheCellType(),
@@ -899,7 +899,7 @@ Nyx::no_hydro_setup()
                            state_data_extrap, store_in_checkpoint);
 #endif
 
-#ifdef AXIONS
+#ifdef FDM
        set_scalar_bc(bc, phys_bc);
        desc_lst.setComponent(Axion_Type, 0, "AxDens", bc,
                              BndryFunc(generic_fill));
@@ -1020,7 +1020,7 @@ Nyx::no_hydro_setup()
                    BL_FORT_PROC_CALL(CA_AXEKINRHO, ca_axekinrho), grow_box_by_two);
     derive_lst.addComponent("AxEkinrho", desc_lst, Axion_Type, AxDens,1);
 
-#endif //AXIONS
+#endif //FDM
 
     //
     // We want a derived type that corresponds to the number of particles in

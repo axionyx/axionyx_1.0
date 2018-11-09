@@ -32,7 +32,7 @@ Nyx::advance (Real time,
   //    ncycle    : the number of subcycles at this level
 
 {
-#ifdef AXIONS
+#ifdef FDM
     //TODO check if we need this
     //grav_n_grow = ncycle + 2;
     if (do_hydro)
@@ -41,7 +41,7 @@ Nyx::advance (Real time,
       }
     else
       {
-        return advance_particle_axions(time, dt, iteration, ncycle);
+        return advance_FDM(time, dt, iteration, ncycle);
       }
 #else
 

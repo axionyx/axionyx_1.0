@@ -1,4 +1,4 @@
-#ifdef AXIONS
+#ifdef FDM
  
 #include "Nyx.H"
 #include "Nyx_F.H"
@@ -10,7 +10,7 @@
 #endif
 
 void
-Nyx::just_the_axions (amrex::Real time,
+Nyx::advance_FDM_FD (amrex::Real time,
                       amrex::Real dt,
                       amrex::Real a_old,
                       amrex::Real a_new)
@@ -38,7 +38,7 @@ Nyx::just_the_axions (amrex::Real time,
             if (Ax_old.contains_nan(i,1,0))
             {
                 std::cout << "Testing component i for NaNs: " << i << std::endl;
-                amrex::Abort("Ax_old has NaNs in this component::just_the_axions()");
+                amrex::Abort("Ax_old has NaNs in this component::advance_FDM_FD()");
             }
         }
     }
@@ -95,7 +95,7 @@ Nyx::just_the_axions (amrex::Real time,
 	}
 
 	//axionout.copy(axion);
-        BL_FORT_PROC_CALL(FORT_ADVANCE_AXIONS, fort_advance_axions)
+        BL_FORT_PROC_CALL(FORT_ADVANCE_FDM_FD, fort_advance_fdm_fd)
             (&time, bx.loVect(), bx.hiVect(), 
 	     BL_TO_FORTRAN(axion),
              BL_TO_FORTRAN(axionout),
@@ -127,7 +127,7 @@ Nyx::just_the_axions (amrex::Real time,
         if (Ax_new.contains_nan(i, 1, 0))
         {
             std::cout << "Testing component i for NaNs: " << i << std::endl;
-            amrex::Abort("Ax_new has NaNs in this component::just_the_axions()");
+            amrex::Abort("Ax_new has NaNs in this component::advance_FDM_FD()");
         }
     }
     int ang = Ax_new.nGrow();
@@ -141,7 +141,7 @@ Nyx::just_the_axions (amrex::Real time,
         if (Ax_new.contains_nan(i, 1, ang))
         {
             std::cout << "Testing component i for NaNs: " << i << std::endl;
-            amrex::Abort("Ax_new has NaNs _in ghostzones_ in this component::just_the_axions()");
+            amrex::Abort("Ax_new has NaNs _in ghostzones_ in this component::advance_FDM_FD()");
         }
     }
 #endif
@@ -149,4 +149,4 @@ Nyx::just_the_axions (amrex::Real time,
 
 }
 
-#endif //AXIONS
+#endif //FDM

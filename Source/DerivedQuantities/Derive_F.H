@@ -199,7 +199,7 @@ BL_FORT_PROC_DECL(DERFORCEZ,derforcez)
      const amrex::Real* delta, const amrex::Real* xlo,
      const amrex::Real* time, const amrex::Real* dt, const int* bcrec, 
      const int* level, const int* grid_no);
-#ifdef AXIONS
+#ifdef FDM
 BL_FORT_PROC_DECL(CA_AXPHASE,ca_axphase)
     (BL_FORT_FAB_ARG(der),const int* nvar,
      const BL_FORT_FAB_ARG(data),const int* ncomp,

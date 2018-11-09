@@ -206,7 +206,7 @@ Nyx::initData ()
 
     if ( (do_santa_barbara == 0) && (do_readin_ics == 0) && (particle_init_type != "Cosmological") )
     {
-#ifdef AXIONS
+#ifdef FDM
         MultiFab&   Ax_new   = get_new_data(Axion_Type);
         int         na       = Ax_new.nComp();
 #endif
@@ -226,10 +226,10 @@ Nyx::initData ()
                 fort_initdata
                     (level, cur_time, bx.loVect(), bx.hiVect(), 
                      ns, BL_TO_FORTRAN(S_new[mfi]), 
-#ifdef AXIONS
+                     nd, BL_TO_FORTRAN(D_new[mfi]), 
+#ifdef FDM
                      na, BL_TO_FORTRAN(Ax_new[mfi]),
 #endif
-                     nd, BL_TO_FORTRAN(D_new[mfi]), 
                      dx, gridloc.lo(), gridloc.hi());
             }
 
@@ -253,7 +253,7 @@ Nyx::initData ()
                 fort_initdata
                     (level, cur_time, bx.loVect(), bx.hiVect(), 
                      ns, BL_TO_FORTRAN(S_new[mfi]), 
-#ifdef AXIONS
+#ifdef FDM
                      na, BL_TO_FORTRAN(Ax_new[mfi]),
 #endif
                      ns, BL_TO_FORTRAN(S_new[mfi]), 
