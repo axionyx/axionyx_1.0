@@ -187,10 +187,15 @@ Nyx::advance_FDM (amrex::Real time,
 //    }
 //
 #endif
-//TODO_JENS: here is the spot to put the hooks for calling the FFT solver. It is probably easiest to add a routine called advance_FDM_FFT to the Nyx object (in Nyx.H) and in that prepare the data and call the FFT solver in swfft_solver.
+//TODO_JENS: here is the spot to put the hooks for calling the FFT solver.
     //Advance Axions
+    
     for (int lev = level; lev <= finest_level_to_advance; lev++)
-        get_level(lev).advance_FDM_FD(time, dt, a_old, a_new);
+        if(lev==0)
+            //here is the hook:
+            get_level(lev).advance_FDM_FFT(time, dt, a_old, a_new);
+        else
+            get_level(lev).advance_FDM_FD(time, dt, a_old, a_new);
 
     // Always average down from finer to coarser.
     for (int lev = finest_level_to_advance-1; lev >= level; lev--)
