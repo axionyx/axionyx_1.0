@@ -62,6 +62,9 @@
 ! :::              right hand corner of grid.  (does not include
 ! :::		   ghost region).
 ! ::: -----------------------------------------------------------
+!TODO_JENS: you might want to change the initialization code below in
+!order to initialize the fields to sth simpler; right now this is really
+!just the axion star.
       subroutine fort_initdata(level,time,lo,hi, &
                              ns, state   ,s_l1,s_l2,s_l3,s_h1,s_h2,s_h3, &
                              na, axion,   a_l1,a_l2,a_l3,a_h1,a_h2,a_h3, &

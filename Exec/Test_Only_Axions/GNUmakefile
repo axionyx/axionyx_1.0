@@ -1,3 +1,4 @@
+
 # AMREX_HOME defines the directory in which we will find all the BoxLib code
 AMREX_HOME ?= ../../../amrex
 
@@ -28,5 +29,14 @@ USE_GRAV = TRUE
 
 Bpack := ./Make.package
 Blocs := .
+
+#some stuff for using fftw3
+
+LIBRARIES += -L$(FFTW_DIR) -lfftw3_mpi -lfftw3_omp -lfftw3
+INCLUDE_LOCATIONS       += $(FFTW_DIR)/../include
+
+include $(AMREX_HOME)/Src/Extern/SWFFT/Make.package
+INCLUDE_LOCATIONS       += $(AMREX_HOME)/Src/Extern/SWFFT
+VPATH_LOCATIONS         += $(AMREX_HOME)/Src/Extern/SWFFT
 
 include $(TOP)/Exec/Make.Nyx
