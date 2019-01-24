@@ -607,6 +607,14 @@ public:
     static int AxIm;
     static int NUM_AX;
     static int vonNeumann_dt;
+    static amrex::Real m_tt;
+    static amrex::Real hbaroverm; 
+#endif
+
+#ifdef FDM_GB
+    static amrex::Real theta_ax;
+    static amrex::Real sigma_ax;
+    static amrex::Real gamma_ax;
 #endif
 
     static int Temp_comp, Ne_comp, Zhi_comp;

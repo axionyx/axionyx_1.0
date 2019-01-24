@@ -273,7 +273,7 @@ Nyx::read_particle_params ()
 //#if defined(FDM) || defined(ONLYFDM)
 //        do_dm_particles = 0;
 //#endif
-#if defined(AGN) || defined(ONLYFDM)
+#if defined(AGN) || defined(FDM)
     pp.get("particle_init_type", particle_init_type);
     pp.get("particle_move_type", particle_move_type);
 #else
@@ -364,8 +364,6 @@ Nyx::read_particle_params ()
 
 #ifdef FDM_GB
     pp.query("num_particle_fdm", num_particle_fdm);
-    // pp.query("sph_smoothing_length", FDMParticleContainer::smoothing_length);
-    // pp.query("ax_damping", FDMParticleContainer::damping_constant);
 #endif
 
     pp.query("write_particle_density_at_init", write_particle_density_at_init);
@@ -415,6 +413,7 @@ Nyx::init_particles ()
 
 	    GhostPC = new DarkMatterParticleContainer(parent);
             GhostParticles.push_back(GhostPC); }
+
         //
         // Make sure to call RemoveParticlesOnExit() on exit.
         //
@@ -670,16 +669,18 @@ Nyx::init_particles ()
     {
       BL_ASSERT (FDMPC == 0);
       FDMPC = new FDMParticleContainer(parent);
+
       ActiveParticles.push_back(FDMPC);
 
       if (parent->subCycle())
         {
-	  VirtFDMPC = new FDMParticleContainer(parent);
-	  VirtualParticles.push_back(VirtFDMPC);
+      	  VirtFDMPC = new FDMParticleContainer(parent);
+      	  VirtualParticles.push_back(VirtFDMPC);
 
-	  GhostFDMPC = new FDMParticleContainer(parent);
-	  GhostParticles.push_back(GhostFDMPC);
+      	  GhostFDMPC = new FDMParticleContainer(parent);
+      	  GhostParticles.push_back(GhostFDMPC);
         }
+
       //                                                                                                                                                                                                         
       // Make sure to call RemoveParticlesOnExit() on exit.                                                                                                                                                      
       //   (if do_dm_particles then we have already called ExecOnFinalize)                                                                                                                                       
@@ -754,14 +755,12 @@ Nyx::init_particles ()
 	  // moved to Nyx_initcosmo.cpp                                                                                                                                                                      
         }
       //do init                                                                                                                                                                                                  
-      else if(level == 0)
+      else if(particle_init_type == "Bosonstar")
         {
-	  const int initDataDim = 44; //FIXME: depends on setup... I guess                                                                                                                                        
+	  const int initDataDim = 4; //FIXME: depends on setup... I guess                                                                                                                                        
 	  const Real * dx = geom.CellSize();
 	  const Real cur_time = state[State_Type].curTime();
-	  // const BoxArray& ba = get_level(0).get_new_data(State_Type).boxArray();
-	  // MultiFab InitData(ba, initDataDim, 0);
-	  MultiFab InitData(grids,dmap,1,0);
+	  MultiFab InitData(grids,dmap,initDataDim,0);
 
 	  for (MFIter mfi(InitData); mfi.isValid(); ++mfi)
             {
@@ -776,11 +775,30 @@ Nyx::init_particles ()
 		 &initDataDim, BL_TO_FORTRAN(InitData[mfi]),
 		 dx, gridloc.lo(), gridloc.hi());
             }
+
+ 
+	  BoxArray baWhereNot;
+	  if (level < parent->initialBaLevels())
+	    baWhereNot = parent->initialBa(level+1);
+	  BoxArray myBaWhereNot(baWhereNot.size());
+	  for (int i=0; i < baWhereNot.size(); i++)
+	    myBaWhereNot.set(i, baWhereNot[i]);
+	  if (level < parent->initialBaLevels())
+	    myBaWhereNot.coarsen(parent->refRatio(level));
+
 	  if(num_particle_fdm > 0)
-	    FDMPC->InitVarCount(InitData,num_particle_fdm);
+	    FDMPC->InitVarCount(InitData, num_particle_fdm, myBaWhereNot, level, parent->initialBaLevels()+1);
 	  else
 	    amrex::Error("\nNeed num_particle_fdm > 0 for InitVarCount!\n\n");
-	    // FDMPC->InitVarMass(InitData);
+
+        }
+      else if(particle_init_type == "GaussianBeams")
+        {
+	  if(num_particle_fdm > 0)
+	    FDMPC->InitGaussianBeams(num_particle_fdm, level, parent->initialBaLevels()+1, hbaroverm, sigma_ax);
+	  else
+	    amrex::Error("\nNeed num_particle_fdm > 0 for InitGaussianBeams!\n\n");
+	  // FDMPC->DepositFDMParticles(get_new_data(Axion_Type),level,Nyx::NUM_AX);
 
         } else {
 	//FIXME                                                                                                                                                                                                            
@@ -1041,16 +1059,18 @@ Nyx::particle_post_restart (const std::string& restart_file, bool is_checkpoint)
     {
       BL_ASSERT (FDMPC == 0);
       FDMPC = new FDMParticleContainer(parent);
+
       ActiveParticles.push_back(FDMPC);
 
       if (parent->subCycle())
         {
-	  VirtFDMPC = new FDMParticleContainer(parent);
-	  VirtualParticles.push_back(VirtFDMPC);
+      	  VirtFDMPC = new FDMParticleContainer(parent);
+      	  VirtualParticles.push_back(VirtFDMPC);
 
-	  GhostFDMPC = new FDMParticleContainer(parent);
-	  GhostParticles.push_back(GhostFDMPC);
+      	  GhostFDMPC = new FDMParticleContainer(parent);
+      	  GhostParticles.push_back(GhostFDMPC);
         }
+
       //                                                                                                                                                                                                         
       // Make sure to call RemoveParticlesOnExit() on exit.                                                                                                                                                      
       //   (if do_dm_particles then we have already called ExecOnFinalize)                                                                                                                                       
@@ -1067,12 +1087,12 @@ Nyx::particle_post_restart (const std::string& restart_file, bool is_checkpoint)
       //                                                                                                                                                                                                         
       ParmParse pp("particles");
 
-      std::string particle_output_file;
-      pp.query("particle_output_file", particle_output_file);
+      std::string fdm_particle_output_file;
+      pp.query("fdm_particle_output_file", fdm_particle_output_file);
 
-      if (!particle_output_file.empty())
+      if (!fdm_particle_output_file.empty())
         {
-	  FDMPC->WriteAsciiFile(particle_output_file);
+	  FDMPC->WriteAsciiFile(fdm_particle_output_file);
         }
 
     }
@@ -1144,7 +1164,11 @@ void
 Nyx::particle_redistribute (int lbase, bool my_init)
 {
     BL_PROFILE("Nyx::particle_redistribute()");
+#ifdef FDM_GB
+    if (DMPC || FDMPC)
+#else
     if (DMPC)
+#endif
     {
         //  
         // If we are calling with my_init = true, then we want to force the redistribute
@@ -1152,9 +1176,13 @@ Nyx::particle_redistribute (int lbase, bool my_init)
         //  
         if (my_init)
         {
-            DMPC->Redistribute(lbase);
 #ifdef FDM_GB
-            FDMPC->Redistribute(lbase);
+	    if(DMPC)
+	      DMPC->Redistribute(lbase);
+	    if(FDMPC)
+	      FDMPC->Redistribute(lbase);
+#else
+            DMPC->Redistribute(lbase);
 #endif
             return;
         }
@@ -1230,9 +1258,13 @@ Nyx::particle_redistribute (int lbase, bool my_init)
                    amrex::Print() << "Calling redistribute because DistMap changed " << '\n';
             }
 
-            DMPC->Redistribute(lbase);
 #ifdef FDM_GB
-            FDMPC->Redistribute(lbase);
+	    if(DMPC)
+	      DMPC->Redistribute(lbase);
+	    if(FDMPC)
+	      FDMPC->Redistribute(lbase);
+#else
+            DMPC->Redistribute(lbase);
 #endif
             //
             // Use the new BoxArray and DistMap to define ba and dm for next time.
@@ -1266,20 +1298,34 @@ Nyx::particle_move_random ()
 void
 Nyx::setup_virtual_particles()
 {
-    BL_PROFILE("Nyx::setup_virtual_particles()");
-    if(!virtual_particles_set)
+  BL_PROFILE("Nyx::setup_virtual_particles()");
+  if(!virtual_particles_set)
     {
       if(Nyx::theDMPC() != 0){
         DarkMatterParticleContainer::AoS virts;
         if (level < parent->finestLevel())
-        {
+	  {
     	    get_level(level + 1).setup_virtual_particles();
 	    Nyx::theVirtPC()->CreateVirtualParticles(level+1, virts);
 	    Nyx::theVirtPC()->AddParticlesAtLevel(virts, level);
 	    Nyx::theDMPC()->CreateVirtualParticles(level+1, virts);
 	    Nyx::theVirtPC()->AddParticlesAtLevel(virts, level);
-        }
+	  }
       }
+#ifdef FDM_GB
+      if(Nyx::theFDMPC() != 0){
+        FDMParticleContainer::AoS virts;
+        if (level < parent->finestLevel())
+	  {
+	    if(Nyx::theDMPC() == 0)
+	      get_level(level + 1).setup_virtual_particles();
+	    Nyx::theVirtFDMPC()->CreateVirtualParticles(level+1, virts);
+	    Nyx::theVirtFDMPC()->AddParticlesAtLevel(virts, level);
+	    Nyx::theFDMPC()->CreateVirtualParticles(level+1, virts);
+	    Nyx::theVirtFDMPC()->AddParticlesAtLevel(virts, level);
+	  }
+      }
+#endif
       virtual_particles_set = true;
     }
 }
@@ -1294,6 +1340,10 @@ Nyx::remove_virtual_particles()
             VirtualParticles[i]->RemoveParticlesAtLevel(level);
         virtual_particles_set = false;
     }
+// #ifdef FDM_GB
+//     if(theVirtFDMPC())
+//     theVirtFDMPC()->RemoveParticlesAtLevel(level);
+// #endif
 }
 
 void
@@ -1327,8 +1377,13 @@ Nyx::setup_ghost_particles(int ngrow)
     if(Nyx::theFDMPC() != 0)
       {
 	FDMParticleContainer::AoS ghosts;
-	Nyx::theFDMPC()->CreateGhostParticles(level, ngrow, ghosts);
-	Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, level+1, ngrow);
+	for (int lev = level+1; lev < parent->finestLevel(); lev++){
+	  // if(levelmethod[lev]==GaussBeam){
+	  if(true){
+	    Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ngrow, ghosts);
+	    Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ngrow);
+	  }
+	}
       }
 #endif
 
@@ -1343,6 +1398,10 @@ Nyx::remove_ghost_particles()
         if (GhostParticles[i] != 0)
             GhostParticles[i]->RemoveParticlesAtLevel(level);
     }
+// #ifdef FDM_GB
+//     if(theGhostFDMPC())
+//       theGhostFDMPC()->RemoveParticlesAtLevel(level);
+// #endif
 }
 
 //NyxParticleContainerBase::~NyxParticleContainerBase() {}

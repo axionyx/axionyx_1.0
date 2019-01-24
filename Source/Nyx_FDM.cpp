@@ -15,12 +15,12 @@ Nyx::advance_FDM_FD (amrex::Real time,
                       amrex::Real a_old,
                       amrex::Real a_new)
 {
-    amrex::Real se, ske;
-    const amrex::Real prev_time    = state[State_Type].prevTime();
-    const amrex::Real cur_time     = state[State_Type].curTime();
-    const int  finest_level = parent->finestLevel();
+    // amrex::Real se, ske;
+    // const amrex::Real prev_time    = state[State_Type].prevTime();
+    // const amrex::Real cur_time     = state[State_Type].curTime();
+    // const int  finest_level = parent->finestLevel();
 
-    const amrex::Real a_half = 0.5 * (a_old + a_new);
+    // const amrex::Real a_half = 0.5 * (a_old + a_new);
 
     amrex::MultiFab&  Ax_old = get_old_data(Axion_Type);
     amrex::MultiFab&  Ax_new = get_new_data(Axion_Type);
@@ -42,6 +42,8 @@ Nyx::advance_FDM_FD (amrex::Real time,
             }
         }
     }
+    if (Phi_old.contains_nan(0, 1, 0))
+      amrex::Abort("Phi_new has NaNs::advance_FDM_FD()");
 #endif
 
     const amrex::Real* dx      = geom.CellSize();
@@ -75,13 +77,13 @@ Nyx::advance_FDM_FD (amrex::Real time,
       //       fpi.isValid() && pfpi.isValid();
       //       ++fpi,++pfpi)
       for (amrex::FillPatchIterator 
-	     fpi(*this,  Ax_new, 2, time, Axion_Type,   0, Nyx::NUM_AX),
-	     pfpi(*this, Phi_new, 1, time, PhiGrav_Type, 0, 1);
+	     fpi(*this,  Ax_new, 4, time, Axion_Type,   0, Nyx::NUM_AX),
+	     pfpi(*this, Phi_old, 4, time, PhiGrav_Type, 0, 1);
 	     fpi.isValid() && pfpi.isValid();
 	     ++fpi,++pfpi)
        {
         // Create FAB for extended grid values (including boundaries) and fill.
-        const int  mfi_index = fpi.index();
+        // const int  mfi_index = fpi.index();
         const amrex::Box& bx        = fpi.UngrownBox();
         amrex::FArrayBox& axion     = fpi();
         amrex::FArrayBox& axionout  = Ax_new[fpi];

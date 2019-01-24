@@ -746,7 +746,7 @@
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use axion_params_module, only : mindens, meandens
+      ! use axion_params_module, only : mindens, meandens
 
       implicit none
 
@@ -831,7 +831,7 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use axion_params_module, only : m_tt,meandens
+      use axion_params_module, only : m_tt,meandens,hbaroverm
 
       implicit none
 
@@ -846,9 +846,6 @@ end subroutine ca_axphase
       integer    level, grid_no
 
       integer i, j, k
-      double precision hbaroverm
-
-      hbaroverm = 0.01917152d0 / m_tt
 
       !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
@@ -890,7 +887,7 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use axion_params_module, only : m_tt
+      use axion_params_module, only : m_tt,hbaroverm
 
       implicit none
 
@@ -905,9 +902,6 @@ end subroutine ca_axphase
       integer    level, grid_no
 
       integer i, j, k
-      double precision hbaroverm
-
-      hbaroverm = 0.01917152d0 / m_tt
 
       !Unfortunately, the interpolation argorithm sometimes yields a small negative density
       !if the density is close to zero in a specific area. We can't allow that and set it to zero. 
@@ -945,7 +939,7 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use axion_params_module, only : m_tt, mindens
+      use axion_params_module, only : m_tt, hbaroverm!, mindens
       use fundamental_constants_module
 
       implicit none
@@ -962,11 +956,8 @@ end subroutine ca_axphase
       integer    level, grid_no
 
       integer i, j, k
-      double precision hbaroverm
 
       if (nc .eq. 3) then !We solve AxDens,AxIm,AxRe 
-
-      hbaroverm = 0.01917152d0 / m_tt
 
       !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3)-1, hi(3)+1                                                                                                                                                          
@@ -1040,7 +1031,7 @@ end subroutine ca_axphase
                           dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                           lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use axion_params_module, only : m_tt, mindens
+      use axion_params_module, only : m_tt, hbaroverm!, mindens
       use fundamental_constants_module
 
       implicit none
@@ -1057,9 +1048,6 @@ end subroutine ca_axphase
       integer    level, grid_no
 
       integer i, j, k
-      double precision hbaroverm
-
-      hbaroverm = 0.01917152d0 / m_tt
 
       !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3)-1, hi(3)+1                                                                                                                                                          
@@ -1104,7 +1092,7 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use axion_params_module, only : m_tt,meandens
+      use axion_params_module, only : m_tt,meandens,hbaroverm
       use fundamental_constants_module
 
       implicit none
@@ -1117,13 +1105,10 @@ end subroutine ca_axphase
       double precision delta(3), xlo(3), time, dt
       double precision angmom_x(angmom_x_l1:angmom_x_h1,angmom_x_l2:angmom_x_h2,angmom_x_l3:angmom_x_h3,nk)
       double precision dat(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3,nc)
-      double precision phase(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3)
+      ! double precision phase(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3)
       integer    level, grid_no
 
       integer i, j, k
-      double precision hbaroverm,diff(2)
-
-      hbaroverm = 0.01917152d0 / m_tt
 
       !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
@@ -1148,7 +1133,7 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use axion_params_module, only : m_tt,meandens
+      use axion_params_module, only : m_tt,meandens,hbaroverm
       use fundamental_constants_module
 
       implicit none
@@ -1161,13 +1146,10 @@ end subroutine ca_axphase
       double precision delta(3), xlo(3), time, dt
       double precision angmom_y(angmom_y_l1:angmom_y_h1,angmom_y_l2:angmom_y_h2,angmom_y_l3:angmom_y_h3,nk)
       double precision dat(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3,nc)
-      double precision phase(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3)
+      ! double precision phase(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3)
       integer    level, grid_no
 
       integer i, j, k
-      double precision hbaroverm,diff(2)
-
-      hbaroverm = 0.01917152d0 / m_tt
 
       !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
@@ -1192,7 +1174,7 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use axion_params_module, only : m_tt,meandens
+      use axion_params_module, only : m_tt,meandens,hbaroverm
       use fundamental_constants_module
 
       implicit none
@@ -1205,13 +1187,10 @@ end subroutine ca_axphase
       double precision delta(3), xlo(3), time, dt
       double precision angmom_z(angmom_z_l1:angmom_z_h1,angmom_z_l2:angmom_z_h2,angmom_z_l3:angmom_z_h3,nk)
       double precision dat(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3,nc)
-      double precision phase(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3)
+      ! double precision phase(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3)
       integer    level, grid_no
 
       integer i, j, k
-      double precision hbaroverm,diff(3)
-
-      hbaroverm = 0.01917152d0 / m_tt
 
       !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          

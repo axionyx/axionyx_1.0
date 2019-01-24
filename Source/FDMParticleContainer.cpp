@@ -676,9 +676,213 @@ FDMParticleContainer::InitCosmo(
 */
 
 void
-FDMParticleContainer::AssignDensityAndVels (Vector<std::unique_ptr<MultiFab> >& mf, int lev_min) const
+FDMParticleContainer::CreateGhostParticlesFDM (int level, int lev, int nGrow, AoS& ghosts) const
 {
-     AssignDensity(mf, lev_min, BL_SPACEDIM+1);
+  BL_PROFILE("FDMParticleContainer::CreateGhostParticlesFDM()");
+  BL_ASSERT(ghosts.empty());
+  BL_ASSERT(level < finestLevel());
+
+  // if (level >= static_cast<int>(m_particles.size()))
+  //   return;
+  if (level >= static_cast<int>(GetParticles().size()))
+    return;
+
+  const BoxArray& fine = ParticleBoxArray(lev);
+  nGrow *= pow(2,lev);
+
+  std::vector< std::pair<int,Box> > isects;
+
+  // const auto& pmap = m_particles[level];
+  const auto& pmap = GetParticles(level);
+  for (const auto& kv : pmap)
+    {
+      const auto& pbox = kv.second.GetArrayOfStructs();
+      for (auto it = pbox.cbegin(); it != pbox.cend(); ++it)
+        {
+	  const IntVect& iv = Index(*it, lev);
+	  fine.intersections(Box(iv,iv),isects,false,nGrow);
+	  for (const auto& isec : isects)
+            {
+	      amrex::ignore_unused(isec);
+	      ParticleType p = *it;  // yes, make a copy                                                                                                                                                         
+	      p.m_idata.id = GhostParticleID;
+	      ghosts().push_back(p);
+            }
+        }
+    }
+}
+
+// void
+// FDMParticleContainer::DepositFDMParticles(MultiFab& mf, int level)
+// {
+//   BL_PROFILE("FDMParticleContainer::DepositFDMParticles()");
+
+//   // amrex::MultiFab&  Ax_new = get_new_data(Axion_Type);
+//   const int ncomp          = 2;
+//   const Real* plo          = m_gdb->Geom(level).ProbLo();
+//   const Real* dx           = m_gdb->Geom(level).CellSize();
+
+//   for (MyParIter pti(*this, level); pti.isValid(); ++pti) {
+//     const Box& box        = mf[pti].validbox();
+//     const auto& particles = pti.GetArrayOfStructs();
+//     // const int np         = particles.size();
+//     const long np         = pti.numParticles();
+//     // const Box& box        = Ax_new[pti].box();
+//     // const Box& box        = mf[pti].box();
+//     int ng = mf.nGrow();
+//     // amrex::Print() << "ng " << ng <<"\n";
+
+//     // deposit_fdm_particles(particles.data(), &np, Ax_new[pti].dataPtr(), ncomp,
+//     // 			  box.loVect(), box.hiVect(), plo, dx);
+//     deposit_fdm_particles(particles.data(), &np, &ng, mf[pti].dataPtr(), &ncomp,
+// 			  box.loVect(), box.hiVect(), plo, dx);
+//   }
+//   mf.SumBoundary(gm.periodicity());
+// }
+
+void                                                                                                                                                                                                            
+FDMParticleContainer::DepositFDMParticles(MultiFab& mf_to_be_filled, int lev, int ncomp) const
+// NeutrinoParticleContainer::AssignRelativisticDensitySingleLevel (MultiFab& mf_to_be_filled,
+//                                                                  int       lev,
+//                                                                  int       ncomp,
+//                                                                  int       particle_lvl_offset) const
+{
+  BL_PROFILE("FDMParticleContainer::DepositFDMParticles()");
+
+  MultiFab* mf_pointer;
+
+  if (OnSameGrids(lev, mf_to_be_filled)) {
+    // If we are already working with the internal mf defined on the                                                                                                                                             
+    // particle_box_array, then we just work with this.                                                                                                                                                          
+    mf_pointer = &mf_to_be_filled;
+  }
+  else {
+    // If mf_to_be_filled is not defined on the particle_box_array, then we need                                                                                                                                 
+    // to make a temporary here and copy into mf_to_be_filled at the end.                                                                                                                                        
+    mf_pointer = new MultiFab(ParticleBoxArray(lev),
+			      ParticleDistributionMap(lev),
+			      ncomp, mf_to_be_filled.nGrow());
+
+    for (MFIter mfi(*mf_pointer); mfi.isValid(); ++mfi) {
+      (*mf_pointer)[mfi].setVal(0);
+    }
+  }
+
+  // We must have ghost cells for each FAB so that a particle in one grid can spread                                                                                                                             
+  // its effect to an adjacent grid by first putting the value into ghost cells of its                                                                                                                           
+  // own grid.  The mf->sumBoundary call then adds the value from one grid's ghost cell                                                                                                                          
+  // to another grid's valid region.                                                                                                                                                                             
+  // if (mf_pointer->nGrow() < 1)
+  //   amrex::Error("Must have at least one ghost cell when in AssignRelativisticDensitySingleLevel");
+
+// #ifdef _OPENMP
+  const int       ng          = mf_pointer->nGrow();
+// #endif
+  const Real      strttime    = amrex::second();
+  const Geometry& gm          = Geom(lev);
+  const Real*     plo         = gm.ProbLo();
+  const Real*     dx          = gm.CellSize();
+
+  // if (gm.isAnyPeriodic() && ! gm.isAllPeriodic()) {
+  //   amrex::Error("AssignRelativisticDensitySingleLevel: problem must be periodic in no or all directions");
+  // }
+
+  // for (MFIter mfi(*mf_pointer); mfi.isValid(); ++mfi) {
+  //   (*mf_pointer)[mfi].setVal(0);
+  // }
+
+  //  using ParConstIter = ParConstIter<NStructReal, NStructInt, NArrayReal, NArrayInt>;                                                                                                                             
+  amrex::Print() << "FDMParticleContainer::level = : " << lev << '\n';
+
+#ifdef _OPENMP
+#pragma omp parallel
+#endif
+  {
+    FArrayBox local_rho;
+    for (MyConstParIter pti(*this, lev); pti.isValid(); ++pti) {
+      const auto& particles = pti.GetArrayOfStructs();
+      // int nstride = particles.dataShape().first;
+      const long np = pti.numParticles();
+      FArrayBox& fab = (*mf_pointer)[pti];
+      Real* data_ptr;
+      const int *lo, *hi;
+#ifdef _OPENMP
+      Box tile_box = pti.tilebox();
+      tile_box.grow(ng);
+      local_rho.resize(tile_box,ncomp);
+      local_rho = 0.0;
+      data_ptr = local_rho.dataPtr();
+      lo = tile_box.loVect();
+      hi = tile_box.hiVect();
+#else
+      const Box& box = fab.box();
+      data_ptr = fab.dataPtr();
+      lo = box.loVect();
+      hi = box.hiVect();
+#endif
+
+    deposit_fdm_particles(particles.data(), &np, &ng, data_ptr,
+			  lo, hi, plo, dx);
+      // if (dx == dx_particle) {
+      // 	if (m_relativistic) {
+      // 	  neutrino_deposit_relativistic_cic(particles.data(), nstride, np, ncomp,
+      // 					    data_ptr, lo, hi, plo, dx, m_csq);
+      // 	} else {
+      // 	  amrex_deposit_cic(particles.data(), nstride, np, ncomp,
+      // 			    data_ptr, lo, hi, plo, dx);
+      // 	}
+      // } else {
+      // 	if (m_relativistic) {
+      // 	  neutrino_deposit_particle_dx_relativistic_cic(particles.data(), nstride, np, ncomp,
+      // 							data_ptr, lo, hi, plo, dx, dx_particle, m_csq);
+      // 	} else {
+      // 	  amrex_deposit_particle_dx_cic(particles.data(), nstride, np, ncomp,
+      // 					data_ptr, lo, hi, plo, dx, dx_particle);
+      // 	}
+      // }
+
+#ifdef _OPENMP
+    amrex::Print() << "amrex_atomic_accumulate_fab \n";
+      amrex_atomic_accumulate_fab(BL_TO_FORTRAN_3D(local_rho),
+				  BL_TO_FORTRAN_3D(fab), ncomp);
+#endif
+
+    }
+  }
+
+  mf_pointer->SumBoundary(gm.periodicity());
+
+  // // If ncomp > 1, first divide the momenta (component n)                                                                                                                                                        
+  // // by the mass (component 0) in order to get velocities.                                                                                                                                                       
+  // // Be careful not to divide by zero.                                                                                                                                                                           
+  // for (int n = 1; n < ncomp; n++){
+  //   for (MFIter mfi(*mf_pointer); mfi.isValid(); ++mfi) {
+  //     (*mf_pointer)[mfi].protected_divide((*mf_pointer)[mfi],0,n,1);
+  //   }
+  // }
+
+  // // Only multiply the first component by (1/vol) because this converts mass                                                                                                                                     
+  // // to density. If there are additional components (like velocity), we don't                                                                                                                                    
+  // // want to divide those by volume.                                                                                                                                                                             
+  // const Real vol = AMREX_D_TERM(dx[0], *dx[1], *dx[2]);
+
+  // mf_pointer->mult(1.0/vol, 0, 1, mf_pointer->nGrow());
+
+  // If mf_to_be_filled is not defined on the particle_box_array, then we need                                                                                                                                   
+  // to copy here from mf_pointer into mf_to_be_filled. I believe that we don't                                                                                                                                  
+  // need any information in ghost cells so we don't copy those.                                                                                                                                                 
+  if (mf_pointer != &mf_to_be_filled) {
+    mf_to_be_filled.copy(*mf_pointer,0,0,ncomp);
+    delete mf_pointer;
+  }
+
+  if (m_verbose > 1) {
+    Real stoptime = amrex::second() - strttime;
+
+    ParallelDescriptor::ReduceRealMax(stoptime,ParallelDescriptor::IOProcessorNumber());
+
+    amrex::Print() << "FDMParticleContainer::DepositFDMParticles time: " << stoptime << '\n';
+  }
 }
 
 void 
@@ -785,32 +989,30 @@ FDMParticleContainer::InitFromBinaryMortonFile(const std::string& particle_direc
   Redistribute();
 }
 
-
 void
-FDMParticleContainer::InitVarCount (MultiFab& mf, long n_axpart)
+FDMParticleContainer::InitVarCount (MultiFab& mf, long num_particle_fdm, BoxArray &baWhereNot, int lev, int nlevs)
 {
   const int       MyProc      = ParallelDescriptor::MyProc();
-  const int       IOProc      = ParallelDescriptor::IOProcessorNumber();
-  const Real      strttime    = amrex::second();
-  // const Amr*      M_amr       = this->m_amr;
-  // const Geometry& geom        = M_amr->Geom(0);
-  const Geometry& geom        = Geom(0);
+  const Geometry& geom        = m_gdb->Geom(lev);
   const Real*     dx          = geom.CellSize();
-  // Array<PMap>&    M_particles = m_particles;
-  auto& particles = GetParticles();
-  int                         npart;
-  Real                        r;
 
-  Real                        factor          = mf.norm1(0,0)/n_axpart; //compute density per particle                                                                                                           
-
+  static Vector<int> calls;
+  calls.resize(nlevs);
+  calls[lev]++;
+  if (calls[lev] > 1) return;
+  Vector<ParticleLevel>& particles = this->GetParticles();
+  int npart;
+  Real r;
+  Real factor = mf.norm1(0,0)/num_particle_fdm; //compute density per particle                                                                                             
   particles.reserve(15);  // So we don't ever have to do any copying on a resize.                                                                                                                        
+  particles.resize(nlevs);
 
-  particles.resize(finestLevel()+1);
-
-  for (int lev = 0; lev < particles.size(); lev++)
+  for (int i = 0; i < particles.size(); i++)
     {
-      BL_ASSERT(particles[lev].empty());
+      BL_ASSERT(particles[i].empty());
     }
+
+  ParticleType p;
 
   amrex::InitRandom(MyProc);
   //                                                                                                                                                                                                             
@@ -823,9 +1025,7 @@ FDMParticleContainer::InitVarCount (MultiFab& mf, long n_axpart)
       const Box&  vbx    = mfi.validbox();
       const int  *fab_lo = vbx.loVect();
       const int  *fab_hi = vbx.hiVect();
-      const int   fab_ix = fab_hi[0] - fab_lo[0] + 1;
-      const int   fab_jx = fab_hi[1] - fab_lo[1] + 1;
-      const int   fab_kx = fab_hi[2] - fab_lo[2] + 1;
+      ParticleLocData pld;
 
       for (int kx = fab_lo[2]; kx <= fab_hi[2]; kx++)
         {
@@ -847,7 +1047,6 @@ FDMParticleContainer::InitVarCount (MultiFab& mf, long n_axpart)
 		  // --------------------------------------------------------                                                                                                                                    
 
 		  for (int ipart = 0; ipart < npart; ipart++){
-		    ParticleType p;
 
 
 
@@ -874,22 +1073,223 @@ FDMParticleContainer::InitVarCount (MultiFab& mf, long n_axpart)
 		    p.id()      = ParticleType::NextID();
 		    p.cpu()     = MyProc;
 
-		    if (!this->Where(p,M_amr))
+		    if (!this->Where(p,pld))
 		      {
-			this->PeriodicShift(p,M_amr);
+			this->PeriodicShift(p);
 
-			if (!this->Where(p,M_amr))
+			if (!this->Where(p,pld))
 			  amrex::Abort("ParticleContainer<N>::InitVarCount(): invalid particle");
 		      }
 
-		    BL_ASSERT(p.m_lev >= 0 && p.m_lev <= m_gdb->finestLevel());
+		    BL_ASSERT(pld.m_lev >= 0 && pld.m_lev <= m_gdb->finestLevel());
+                    //handle particles that ran out of this level into a finer one.                                                                                                                                
+                    if (baWhereNot.contains(pld.m_cell))
+		      {
+			ParticleLocData new_pld;
+			if (!this->Where(p, new_pld))
+			  {
+			    this->PeriodicShift(p);
+			    
+			    if (!this->Where(p, new_pld))
+			      amrex::Abort("FDMParticleContainer::InitVarCount():invalid particle");
+			  }
+			particles[new_pld.m_lev][std::make_pair(new_pld.m_grid,
+								new_pld.m_tile)].push_back(p);
+			
+		      }
+
+
 		    //                                                                                                                                                                         
 		    // Add it to the appropriate PBox at the appropriate level.                                                                                                                
 		    //                                                                                                                                                                         
-		    particles[p.m_lev][p.m_grid].push_back(p);
+		    else
+		      particles[pld.m_lev][std::make_pair(pld.m_grid, pld.m_tile)].push_back(p);
 		  }
                 }
             }
         }
     }
+
+  if (ParallelDescriptor::IOProcessor() && m_verbose)
+    {
+      std::cout << "Done with Gaussian Beam initilization" << '\n';
+    }
+  //
+  // Let Redistribute() sort out where the particles belong.
+  //
+  Redistribute();
+  
+  if (ParallelDescriptor::IOProcessor() && m_verbose)
+    {
+      std::cout << "Redistribute done" << '\n';
+    }
+}
+
+void
+FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nlevs, const Real hbaroverm, const Real sigma_ax)
+{
+  const int       MyProc      = ParallelDescriptor::MyProc();
+  const Geometry& geom        = m_gdb->Geom(lev);
+  const Real*     dx          = geom.CellSize();
+
+  static Vector<int> calls;
+  calls.resize(nlevs);
+  calls[lev]++;
+  if (calls[lev] > 1) return;
+  Vector<ParticleLevel>& particles = this->GetParticles();
+
+  // Real m_tt = 2.5;                                                                                                                                                                                             
+  // Real hbaroverm = 0.01917152 / m_tt;
+  // Real sigma = 1.1;
+
+  if (ParallelDescriptor::IOProcessor())
+    {
+      std::cout << "hbaroverm: "<< hbaroverm << '\n';
+      std::cout << "sigma_ax : "<< sigma_ax << '\n';
+    }
+
+  int  npart = num_particle_fdm;
+  Real sigma_x = sigma_ax*dx[0];
+  Real gamma = 0.5/sigma_x/sigma_x;
+  Real alpha = 1600.0;
+  Real q[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
+  Real p[]  = {0.0,0.0,0.0};
+  Real q0[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
+  Real p0[] = {0.0,0.0,0.0};
+  Real r, theta, phi, Amp;
+  Real fact = 1.0;
+
+  particles.reserve(15);  // So we don't ever have to do any copying on a resize.
+  particles.resize(nlevs);
+
+  for (int i = 0; i < particles.size(); i++)
+    {
+      BL_ASSERT(particles[i].empty());
+    }
+
+  ParticleType part;
+  ParticleLocData pld;
+
+  amrex::InitRandom(MyProc);
+
+  for(int index=0;index<npart;index++){
+	
+    r = sqrt(-log(1-amrex::Random()));
+    theta  = 2.0*M_PI*amrex::Random();
+    q[0] = r*cos(theta)*sqrt((alpha+gamma)/gamma/alpha) + q0[0];
+    p[0] = r*sin(theta)*2.0*sqrt(alpha+gamma)*hbaroverm + p0[0];
+	
+    r = sqrt(-log(1-amrex::Random()));
+    theta  = 2.0*M_PI*amrex::Random();
+    q[1] = r*cos(theta)*sqrt((alpha+gamma)/gamma/alpha) + q0[1];
+    p[1] = r*sin(theta)*2.0*sqrt(alpha+gamma)*hbaroverm + p0[1];
+	
+    r = sqrt(-log(1-amrex::Random()));
+    theta  = 2.0*M_PI*amrex::Random();
+    q[2] = r*cos(theta)*sqrt((alpha+gamma)/gamma/alpha) + q0[2];
+    p[2] = r*sin(theta)*2.0*sqrt(alpha+gamma)*hbaroverm + p0[2];
+	
+    phi  = ( (p[0]*alpha+p0[0]*gamma)*(q[0]-q0[0]) + (p[1]*alpha+p0[1]*gamma)*(q[1]-q0[1]) + (p[2]*alpha+p0[2]*gamma)*(q[2]-q0[2]) )/(alpha+gamma);
+    Amp  = 2.0*(alpha+gamma)/sqrt(alpha*gamma)/M_PI/sqrt(2*gamma/M_PI)/pow(npart,2.0/3.0);
+    Amp /= sqrt(2.0*alpha/M_PI);
+    Amp *= pow(fact,1.0/3.0);
+
+    // if(true){
+    //   q[0] = generateGaussianNoise(q0[0],sigma*sqrt(2.0));
+    //   q[1] = generateGaussianNoise(q0[1],sigma*sqrt(2.0));
+    //   q[2] = generateGaussianNoise(q0[2],sigma*sqrt(2.0));
+    //   phi  = 0.0;
+    //   p[0] = p0[0];
+    //   p[1] = p0[1];
+    //   p[2] = p0[2];
+    //   Amp  = pow(fact/npart/npart,1.0/3.0)/pi/(alpha/pi);
+    // }
+
+    if(q[0]>geom.ProbLo(0) && q[0]<geom.ProbHi(0) && q[1]>geom.ProbLo(1) && q[1]<geom.ProbHi(1) && q[2]>geom.ProbLo(2) && q[2]<geom.ProbHi(2)){
+
+      part.id()      = ParticleType::NextID();
+      part.cpu()     = MyProc;
+
+      // set position
+      for (int n = 0; n < BL_SPACEDIM; n++)
+	part.pos( n) = 0.5;//q[n];
+      // set mass                                                                                                                                                                
+      part.rdata( 0) =  1.0/npart; //dx[0] * dx[1] * dx[2];
+      // set velocity
+      part.rdata( 1) = 0.0;//p[0];
+      part.rdata( 2) = 0.0;//p[1];
+      part.rdata( 3) = 0.0;//p[2];
+      //set phase
+      part.rdata( 4) = phi;
+      //set amplitude
+      part.rdata( 5) = pow(2.0*gamma/M_PI,0.75);//pow(2.0*gamma*Amp,1.5);
+      part.rdata( 6) = 0.0;
+      //set width
+      part.rdata( 7) = gamma;
+      //set Jacobian qq
+      part.rdata( 8) = Amp;
+      part.rdata( 9) = 0.0;
+      part.rdata(10) = 0.0;
+      part.rdata(11) = 0.0;
+      part.rdata(12) = Amp;
+      part.rdata(13) = 0.0;
+      part.rdata(14) = 0.0;
+      part.rdata(15) = 0.0;
+      part.rdata(16) = Amp;
+      //set Jacobian qp
+      part.rdata(17) = 0.0;
+      part.rdata(18) = 0.0;
+      part.rdata(19) = 0.0;
+      part.rdata(20) = 0.0;
+      part.rdata(21) = 0.0;
+      part.rdata(22) = 0.0;
+      part.rdata(23) = 0.0;
+      part.rdata(24) = 0.0;
+      part.rdata(25) = 0.0;
+      //set Jacobian pq
+      part.rdata(26) = 0.0;
+      part.rdata(27) = 0.0;
+      part.rdata(28) = 0.0;
+      part.rdata(29) = 0.0;
+      part.rdata(30) = 0.0;
+      part.rdata(31) = 0.0;
+      part.rdata(32) = 0.0;
+      part.rdata(33) = 0.0;
+      part.rdata(34) = 0.0;
+      //set Jacobian pp
+      part.rdata(35) = Amp;
+      part.rdata(36) = 0.0;
+      part.rdata(37) = 0.0;
+      part.rdata(38) = 0.0;
+      part.rdata(39) = Amp;
+      part.rdata(40) = 0.0;
+      part.rdata(41) = 0.0;
+      part.rdata(42) = 0.0;
+      part.rdata(43) = Amp;
+
+
+      if (!this->Where(part,pld))
+	amrex::Abort("ParticleContainer<N>::InitGaussianBeams(): invalid particle");
+
+      //add particle
+      particles[pld.m_lev][std::make_pair(pld.m_grid, pld.m_tile)].push_back(part);
+    }
+    else
+      index--;
+  }
+
+  if (ParallelDescriptor::IOProcessor() && m_verbose)
+    {
+      std::cout << "Done with Gaussian Beam initilization" << '\n';
+    }
+  //
+  // Let Redistribute() sort out where the particles belong.
+  //
+  Redistribute();
+  
+  if (ParallelDescriptor::IOProcessor() && m_verbose)
+    {
+      std::cout << "Redistribute done" << '\n';
+    }
+  
 }

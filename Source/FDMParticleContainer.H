@@ -2,22 +2,11 @@
 #ifndef _FDMParticleContainer_H_
 #define _FDMParticleContainer_H_
 
-#include <AMReX_MultiFab.H>
-#include <AMReX_MultiFabUtil.H>
-#include <AMReX_Particles.H>
-#include <AMReX_NeighborParticles.H>
-
 #include "NyxParticleContainer.H"
 
-// We make FDMParticleContainer a class instead of a typedef so that
-//    we can have Nyx-specific functions here instead of in amrex
 class FDMParticleContainer
-  : public NyxParticleContainer<44, 0, 0, 0>
+    : public NyxParticleContainer<44>
 {
-
-    using MyParIter = amrex::ParIter<44>;
-    using MyConstParIter = amrex::ParConstIter<44>;
-
 public:
     FDMParticleContainer (amrex::Amr* amr)
         : NyxParticleContainer<44>(amr)
@@ -69,6 +58,9 @@ public:
       real_comp_names.push_back("pp9");
     }
 
+    using MyParIter = amrex::ParIter<44>;
+    using MyConstParIter = amrex::ParConstIter<44>;
+
     virtual ~FDMParticleContainer () {}
 
     void InitCosmo  (amrex::MultiFab& mf, const amrex::Real vel_fac[], const amrex::Vector<int> n_part, const amrex::Real particleMass);
@@ -79,7 +71,9 @@ public:
                                  const amrex::Real particleMass, int disp_idx, int vel_idx, 
                                  amrex::BoxArray &baWhereNot, int lev, int nlevs);
 
-    void AssignDensityAndVels (amrex::Vector<std::unique_ptr<amrex::MultiFab> >& mf, int lev_min = 0) const;
+    void CreateGhostParticlesFDM (int level, int lev, int nGrow, AoS& ghosts) const;
+
+  void DepositFDMParticles (amrex::MultiFab& mf, int level, int ncomp) const;
 
     virtual void moveKickDrift (amrex::MultiFab& acceleration, int level, amrex::Real timestep,
                                 amrex::Real a_old = 1.0, amrex::Real a_half = 1.0, int where_width = 0);
@@ -88,7 +82,9 @@ public:
 
     void InitFromBinaryMortonFile(const std::string& particle_directory, int nextra, int skip_factor);
  
-    void InitVarCount (amrex::MultiFab& mf, long n_axpart);
+    void InitVarCount (amrex::MultiFab& mf, long n_axpart, amrex::BoxArray &baWhereNot, int lev, int nlevs);
+
+  void InitGaussianBeams (long n_axpart, int lev, int nlevs, const amrex::Real hbaroverm, const amrex::Real sigma_ax);
 };
 
 #endif /* _FDMParticleContainer_H_ */

@@ -1057,11 +1057,11 @@ Nyx::no_hydro_setup()
 #ifdef FDM                                                                                                                                                       
     derive_lst.add("fdm_particle_count", IndexType::TheCellType(), 1,                                                                                                               
                    BL_FORT_PROC_CALL(DERNULL, dernull), the_same_box);                                                                                                                  
-    derive_lst.addComponent("axion_particle_count", desc_lst, State_Type, Density, 1);                                                                                                                  
+    derive_lst.addComponent("fdm_particle_count", desc_lst, State_Type, Density, 1);                                                                                                                  
                                                                                                                                                                                                                   
     derive_lst.add("fdm_mass_density", IndexType::TheCellType(), 1,                                                                                                                
                    BL_FORT_PROC_CALL(DERNULL, dernull), grow_box_by_one);                                                                                                           
-    derive_lst.addComponent("axion_mass_density", desc_lst, State_Type,                                                                                                                           
+    derive_lst.addComponent("fdm_mass_density", desc_lst, State_Type,                                                                                                                           
                             Density, 1);                                                                                                                                                         
 #endif
 

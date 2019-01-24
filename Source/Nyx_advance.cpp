@@ -76,7 +76,7 @@ Nyx::advance (Real time,
         amrex::Abort("Nyx::advance -- do_hydro is false but no gravity -- dont know what to do");
     }
 #endif
-#endif //! Axions
+#endif //! FDM
     return 0;
 }
 

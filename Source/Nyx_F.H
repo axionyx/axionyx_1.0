@@ -22,7 +22,11 @@ BL_FORT_PROC_DECL(FORT_ADVANCE_FDM_FD, fort_advance_fdm_fd)
      const amrex::Real* cflLoc,
      const amrex::Real* a_old, const amrex::Real* a_new,
      const int& verbose);
+
+  BL_FORT_PROC_DECL(FORT_FDM_FIELDS, fort_fdm_fields)
+  (const BL_FORT_FAB_ARG(state));
 #endif
+
   void fort_alloc_simd_vec();
   void fort_dealloc_simd_vec();
 

@@ -1,0 +1,1484 @@
+diff --git a/Exec/Make.Nyx b/Exec/Make.Nyx
+index f1462bd..40b47bb 100644
+--- a/Exec/Make.Nyx
++++ b/Exec/Make.Nyx
+@@ -70,10 +70,6 @@ ifeq ($(USE_FDM), TRUE)
+   DEFINES += -DFDM
+ endif
+ 
+-ifeq ($(USE_FDM), TRUE)
+-  DEFINES += -DFDM
+-endif
+-
+ ifeq ($(USE_FDM_GB), TRUE)
+   DEFINES += -DFDM_GB
+ endif
+diff --git a/Exec/Test_Only_Axions/Prob_3d.f90 b/Exec/Test_Only_Axions/Prob_3d.f90
+index 1a7dd61..523f3fa 100644
+--- a/Exec/Test_Only_Axions/Prob_3d.f90
++++ b/Exec/Test_Only_Axions/Prob_3d.f90
+@@ -76,6 +76,7 @@
+       use axion_params_module
+       use comoving_module, only : comoving_h, comoving_OmAx
+       use interpolate_module
++      use amrex_parmparse_module
+  
+       implicit none
+  
+@@ -95,6 +96,16 @@
+       double precision r,rc
+       double precision d
+       double precision, allocatable :: m(:), pos(:,:)
++
++      type(amrex_parmparse) :: pp
++
++      call amrex_parmparse_build(pp, "nyx")
++      call pp%query("m_tt", m_tt)
++      hbaroverm = 0.01917152d0 / m_tt
++      call pp%query("theta_ax", theta_ax)
++      call pp%query("sigma_ax", theta_ax)
++      call pp%query("gamma_ax", theta_ax)
++      call amrex_parmparse_destroy(pp)
+       
+       un = 20
+       open(un,file='initial.txt',status="old",action="read")
+diff --git a/Exec/Test_Only_Axions/axion_params.f90 b/Exec/Test_Only_Axions/axion_params.f90
+index e7e4b19..c8d4ab8 100644
+--- a/Exec/Test_Only_Axions/axion_params.f90
++++ b/Exec/Test_Only_Axions/axion_params.f90
+@@ -4,7 +4,11 @@ module axion_params_module
+   ! These are only used for the axion model.
+   ! They have to be set/overwritten in Prob_3d.f90.
+   
+-  double precision, save :: m_tt = 2.5d0 !particle mass in units of 10^(-22) eV
++  double precision, save :: m_tt
++  double precision, save :: hbaroverm
++  double precision, save :: theta_ax
++  double precision, save :: sigma_ax
++  double precision, save :: gamma_ax
+   double precision, save :: meandens !background axion density, set in ca_initdata
+ 
+   double complex, parameter :: ii = (0., 1.)   
+diff --git a/Source/DerivedQuantities/Derive_3d.f90 b/Source/DerivedQuantities/Derive_3d.f90
+index 948db0e..07e3528 100644
+--- a/Source/DerivedQuantities/Derive_3d.f90
++++ b/Source/DerivedQuantities/Derive_3d.f90
+@@ -746,7 +746,7 @@
+                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
+                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
+ 
+-      use axion_params_module, only : mindens, meandens
++      ! use axion_params_module, only : mindens, meandens
+ 
+       implicit none
+ 
+@@ -831,7 +831,7 @@ end subroutine ca_axphase
+                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
+                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
+ 
+-      use axion_params_module, only : m_tt,meandens
++      use axion_params_module, only : m_tt,meandens,hbaroverm
+ 
+       implicit none
+ 
+@@ -846,9 +846,6 @@ end subroutine ca_axphase
+       integer    level, grid_no
+ 
+       integer i, j, k
+-      double precision hbaroverm
+-
+-      hbaroverm = 0.01917152d0 / m_tt
+ 
+       !$OMP PARALLEL DO PRIVATE(i,j,k)
+       do k = lo(3), hi(3)                                                                                                                                                          
+@@ -890,7 +887,7 @@ end subroutine ca_axphase
+                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
+                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
+ 
+-      use axion_params_module, only : m_tt
++      use axion_params_module, only : m_tt,hbaroverm
+ 
+       implicit none
+ 
+@@ -905,9 +902,6 @@ end subroutine ca_axphase
+       integer    level, grid_no
+ 
+       integer i, j, k
+-      double precision hbaroverm
+-
+-      hbaroverm = 0.01917152d0 / m_tt
+ 
+       !Unfortunately, the interpolation argorithm sometimes yields a small negative density
+       !if the density is close to zero in a specific area. We can't allow that and set it to zero. 
+@@ -945,7 +939,7 @@ end subroutine ca_axphase
+                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
+                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
+ 
+-      use axion_params_module, only : m_tt, mindens
++      use axion_params_module, only : m_tt, hbaroverm!, mindens
+       use fundamental_constants_module
+ 
+       implicit none
+@@ -962,12 +956,9 @@ end subroutine ca_axphase
+       integer    level, grid_no
+ 
+       integer i, j, k
+-      double precision hbaroverm
+ 
+       if (nc .eq. 3) then !We solve AxDens,AxIm,AxRe 
+ 
+-      hbaroverm = 0.01917152d0 / m_tt
+-
+       !$OMP PARALLEL DO PRIVATE(i,j,k)
+       do k = lo(3)-1, hi(3)+1                                                                                                                                                          
+          do j = lo(2)-1, hi(2)+1                                                                                                                                                       
+@@ -1040,7 +1031,7 @@ end subroutine ca_axphase
+                           dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
+                           lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
+ 
+-      use axion_params_module, only : m_tt, mindens
++      use axion_params_module, only : m_tt, hbaroverm!, mindens
+       use fundamental_constants_module
+ 
+       implicit none
+@@ -1057,9 +1048,6 @@ end subroutine ca_axphase
+       integer    level, grid_no
+ 
+       integer i, j, k
+-      double precision hbaroverm
+-
+-      hbaroverm = 0.01917152d0 / m_tt
+ 
+       !$OMP PARALLEL DO PRIVATE(i,j,k)
+       do k = lo(3)-1, hi(3)+1                                                                                                                                                          
+@@ -1104,7 +1092,7 @@ end subroutine ca_axphase
+                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
+                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
+ 
+-      use axion_params_module, only : m_tt,meandens
++      use axion_params_module, only : m_tt,meandens,hbaroverm
+       use fundamental_constants_module
+ 
+       implicit none
+@@ -1117,13 +1105,10 @@ end subroutine ca_axphase
+       double precision delta(3), xlo(3), time, dt
+       double precision angmom_x(angmom_x_l1:angmom_x_h1,angmom_x_l2:angmom_x_h2,angmom_x_l3:angmom_x_h3,nk)
+       double precision dat(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3,nc)
+-      double precision phase(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3)
++      ! double precision phase(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3)
+       integer    level, grid_no
+ 
+       integer i, j, k
+-      double precision hbaroverm,diff(2)
+-
+-      hbaroverm = 0.01917152d0 / m_tt
+ 
+       !$OMP PARALLEL DO PRIVATE(i,j,k)
+       do k = lo(3), hi(3)                                                                                                                                                          
+@@ -1148,7 +1133,7 @@ end subroutine ca_axphase
+                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
+                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
+ 
+-      use axion_params_module, only : m_tt,meandens
++      use axion_params_module, only : m_tt,meandens,hbaroverm
+       use fundamental_constants_module
+ 
+       implicit none
+@@ -1161,13 +1146,10 @@ end subroutine ca_axphase
+       double precision delta(3), xlo(3), time, dt
+       double precision angmom_y(angmom_y_l1:angmom_y_h1,angmom_y_l2:angmom_y_h2,angmom_y_l3:angmom_y_h3,nk)
+       double precision dat(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3,nc)
+-      double precision phase(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3)
++      ! double precision phase(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3)
+       integer    level, grid_no
+ 
+       integer i, j, k
+-      double precision hbaroverm,diff(2)
+-
+-      hbaroverm = 0.01917152d0 / m_tt
+ 
+       !$OMP PARALLEL DO PRIVATE(i,j,k)
+       do k = lo(3), hi(3)                                                                                                                                                          
+@@ -1192,7 +1174,7 @@ end subroutine ca_axphase
+                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
+                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
+ 
+-      use axion_params_module, only : m_tt,meandens
++      use axion_params_module, only : m_tt,meandens,hbaroverm
+       use fundamental_constants_module
+ 
+       implicit none
+@@ -1205,13 +1187,10 @@ end subroutine ca_axphase
+       double precision delta(3), xlo(3), time, dt
+       double precision angmom_z(angmom_z_l1:angmom_z_h1,angmom_z_l2:angmom_z_h2,angmom_z_l3:angmom_z_h3,nk)
+       double precision dat(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3,nc)
+-      double precision phase(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3)
++      ! double precision phase(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3)
+       integer    level, grid_no
+ 
+       integer i, j, k
+-      double precision hbaroverm,diff(3)
+-
+-      hbaroverm = 0.01917152d0 / m_tt
+ 
+       !$OMP PARALLEL DO PRIVATE(i,j,k)
+       do k = lo(3), hi(3)                                                                                                                                                          
+diff --git a/Source/DerivedQuantities/ParticleDerive.cpp b/Source/DerivedQuantities/ParticleDerive.cpp
+index 1ecfaed..50a4b9c 100644
+--- a/Source/DerivedQuantities/ParticleDerive.cpp
++++ b/Source/DerivedQuantities/ParticleDerive.cpp
+@@ -39,7 +39,7 @@ Nyx::particle_derive (const std::string& name, Real time, int ngrow)
+         return derive_dat;
+     }
+ #endif
+-#ifdef FDM
++#ifdef FDM_GB
+     else if (Nyx::theFDMPC() && name == "fdm_particle_count")                                                                                                                                                
+       {                                                                                                                                                                                                          
+ 	std::unique_ptr<MultiFab> derive_dat(new MultiFab(grids, dmap, 1, 0));                                                                                                          
+@@ -170,29 +170,6 @@ Nyx::particle_derive (const std::string& name, Real time, int ngrow)
+         return derive_dat;
+     }
+ #endif
+-#ifdef FDM
+-    else if (Nyx::theFDMPC() && name == "fdm_mass_density")
+-      {
+-	std::unique_ptr<MultiFab> derive_dat(new MultiFab(grids,dmap,1,0));
+-
+-	// We need to do the multilevel `assign_density` even though we're only                                                                                                                                
+-	// asking for one level's worth because otherwise we don't get the                                                                                                                                      
+-	// coarse-fine distribution of particles correct.                                                                                                                                
+-	Vector<std::unique_ptr<MultiFab> > particle_mf;
+-	Nyx::theFDMPC()->AssignDensity(particle_mf);
+-
+-        for (int lev = parent->finestLevel()-1; lev >= 0; lev--)
+-	  {
+-            amrex::average_down(*particle_mf[lev+1], *particle_mf[lev], 
+-                                 parent->Geom(lev+1), parent->Geom(lev), 0, 1, 
+-                                 parent->refRatio(lev));
+-	  }
+-
+-	MultiFab::Copy(*derive_dat, *particle_mf[level], 0, 0, 1, 0);
+-
+-        return derive_dat;
+-      }
+-#endif
+ #endif
+     else if (name == "total_density")
+     {
+diff --git a/Source/FDM/Make.package b/Source/FDM/Make.package
+index a30acfe..8efb4a2 100644
+--- a/Source/FDM/Make.package
++++ b/Source/FDM/Make.package
+@@ -3,4 +3,5 @@ CEXE_headers   += FDMParticleContainer.H
+ CEXE_sources   += FDMParticleContainer.cpp
+ FEXE_headers   += fdm_F.H
+ f90EXE_sources += fdm_3d.f90
++##CEXE_sources   += FDM_assignfields.cpp
+ endif
+diff --git a/Source/FDM/fdm_3d.f90 b/Source/FDM/fdm_3d.f90
+index 0baa2e9..fe1ed30 100644
+--- a/Source/FDM/fdm_3d.f90
++++ b/Source/FDM/fdm_3d.f90
+@@ -1,3 +1,172 @@
+-#ifdef FDM
++subroutine deposit_fdm_particles(particles, np, state, nc, &!, ghosts, ng, virts, nv
++     lo, hi, plo, dx) &
++     bind(c,name='deposit_fdm_particles')
++  
++  use iso_c_binding
++  use amrex_fort_module, only : amrex_real
++  use particle_mod      , only: fdm_particle_t
++  use fundamental_constants_module, only: pi
++  use axion_params_module, only : hbaroverm, theta_ax, sigma_ax, ii
+ 
+-#endif
++  integer, value                    :: np, nc!, ng, nv
++  integer                           :: lo(3), hi(3)
++  type(fdm_particle_t), intent(in ) :: particles(np)
++  ! type(fdm_particle_t), intent(in ) :: ghosts(ng)
++  ! type(fdm_particle_t), intent(in ) :: virts(nv)
++  real(amrex_real),     intent(out) :: state(lo(1):hi(1), lo(2):hi(2), lo(3):hi(3),nc)
++  real(amrex_real)                  :: plo(3), dx(3)
++  
++  integer i, j, k, n, i1, j1, k1, rad
++  real(amrex_real) pos(3), kernelsize, limit, amp, inv_dx(3)
++  double complex :: A, phi!, ii
++
++  inv_dx = 1.0d0/dx
++  limit = hbaroverm*theta_ax*theta_ax
++
++  do n = 1, np
++
++     A   = cmplx(particles(n)%amp(1),particles(n)%amp(2))
++     rad = ceiling(theta_ax/sqrt(2.0*particles(n)%width)*inv_dx(1))
++     pos = (particles(n)%pos - plo)*inv_dx + 0.5d0
++     
++     i1  = floor(pos(1))
++     j1  = floor(pos(2))
++     k1  = floor(pos(3))
++     
++     do k=-rad,rad,1
++        if ( (k1+k).ge.lo(3) .and. (k1+k).le.hi(3) ) then
++           do j=-rad,rad,1
++              if ( (j1+j).ge.lo(2) .and. (j1+j).le.hi(2) ) then
++                 do i=-rad,rad,1
++                    if ( (i1+i).ge.lo(3) .and. (i1+i).le.hi(1) ) then
++                       
++                       kernelsize = ((real(i1+i)-0.5-pos(1))*(real(i1+i)-0.5-pos(1))+ &
++                            (real(j1+j)-0.5-pos(2))*(real(j1+j)-0.5-pos(2))+ &
++                            (real(k1+k)-0.5-pos(3))*(real(k1+k)-0.5-pos(3)))/ &
++                            sigma_ax/sigma_ax
++                       
++                       if (kernelsize .le. (theta_ax*theta_ax)) then
++                          
++                          phi = amp*exp(-kernelsize/2.0)*exp(ii*(particles(n)%phase+ &
++                               particles(n)%vel(1)*(real(i1+i)-0.5-pos(1))*dx(1)+ &
++                               particles(n)%vel(2)*(real(j1+j)-0.5-pos(2))*dx(2)+ &
++                               particles(n)%vel(3)*(real(k1+k)-0.5-pos(3))*dx(3) )/hbaroverm)
++                          
++                          state(i1+i,j1+j,k1+k,1) = state(i1+i,j1+j,k1+k,1) + real(real(phi))
++                          state(i1+i,j1+j,k1+k,2) = state(i1+i,j1+j,k1+k,2) + real(aimag(phi))
++                          
++                       endif
++                       
++                    endif
++                 enddo
++              endif
++           enddo
++        endif
++     enddo
++     
++  enddo
++
++  ! do n = 1, ng
++
++  !    A   = cmplx(ghosts(n)%amp(1),ghosts(n)%amp(2))
++  !    rad = ceiling(theta_ax/sqrt(2.0*ghosts(n)%width)*inv_dx(1))
++  !    pos = ghosts(n)%pos - plo)*inv_dx + 0.5d0
++     
++  !    i1  = floor(pos(1))
++  !    j1  = floor(pos(2))
++  !    k1  = floor(pos(3))
++     
++  !    do k=-rad,rad,1
++  !       if ( (k1+k).ge.1 .and. (k1+k).le.dim3 ) then
++  !          do j=-rad,rad,1
++  !             if ( (j1+j).ge.1 .and. (j1+j).le.dim2 ) then
++  !                do i=-rad,rad,1
++  !                   if ( (i1+i).ge.1 .and. (i1+i).le.dim1 ) then
++                       
++  !                      kernelsize = ((real(i1+i)-0.5-pos(1))*(real(i1+i)-0.5-pos(1))+ &
++  !                           (real(j1+j)-0.5-pos(2))*(real(j1+j)-0.5-pos(2))+ &
++  !                           (real(k1+k)-0.5-pos(3))*(real(k1+k)-0.5-pos(3)))/ &
++  !                           sigma_ax/sigma_ax
++                       
++  !                      if (kernelsize .le. (theta_ax*theta_ax)) then
++                          
++  !                         phi = amp*exp(-kernelsize/2.0)*exp(ii*(ghosts(n)%phase+ &
++  !                              ghosts(n)%vel(1)*(real(i1+i)-0.5-pos(1))*dx(1)+ &
++  !                              ghosts(n)%vel(2)*(real(j1+j)-0.5-pos(2))*dx(2)+ &
++  !                              ghosts(n)%vel(3)*(real(k1+k)-0.5-pos(3))*dx(3) )/hbaroverm)
++                          
++  !                         state(i1+i,j1+j,k1+k,1) = state(i1+i,j1+j,k1+k,1) + real(real(phi))
++  !                         state(i1+i,j1+j,k1+k,2) = state(i1+i,j1+j,k1+k,2) + real(aimag(phi))
++                          
++  !                      endif
++                       
++  !                   endif
++  !                enddo
++  !             endif
++  !          enddo
++  !       endif
++  !    enddo
++     
++  ! enddo
++
++  ! do n = 1, nv
++
++  !    A   = cmplx(virts(n)%amp(1),virts(n)%amp(2))
++  !    rad = ceiling(theta_ax/sqrt(2.0*virts(n)%width)*inv_dx(1))
++  !    pos = virts(n)%pos - plo)*inv_dx + 0.5d0
++     
++  !    i1  = floor(pos(1))
++  !    j1  = floor(pos(2))
++  !    k1  = floor(pos(3))
++     
++  !    do k=-rad,rad,1
++  !       if ( (k1+k).ge.1 .and. (k1+k).le.dim3 ) then
++  !          do j=-rad,rad,1
++  !             if ( (j1+j).ge.1 .and. (j1+j).le.dim2 ) then
++  !                do i=-rad,rad,1
++  !                   if ( (i1+i).ge.1 .and. (i1+i).le.dim1 ) then
++                       
++  !                      kernelsize = ((real(i1+i)-0.5-pos(1))*(real(i1+i)-0.5-pos(1))+ &
++  !                           (real(j1+j)-0.5-pos(2))*(real(j1+j)-0.5-pos(2))+ &
++  !                           (real(k1+k)-0.5-pos(3))*(real(k1+k)-0.5-pos(3)))/ &
++  !                           sigma_ax/sigma_ax
++                       
++  !                      if (kernelsize .le. (theta_ax*theta_ax)) then
++                          
++  !                         phi = amp*exp(-kernelsize/2.0)*exp(ii*(virts(n)%phase+ &
++  !                              virts(n)%vel(1)*(real(i1+i)-0.5-pos(1))*dx(1)+ &
++  !                              virts(n)%vel(2)*(real(j1+j)-0.5-pos(2))*dx(2)+ &
++  !                              virts(n)%vel(3)*(real(k1+k)-0.5-pos(3))*dx(3) )/hbaroverm)
++                          
++  !                         state(i1+i,j1+j,k1+k,1) = state(i1+i,j1+j,k1+k,1) + real(real(phi))
++  !                         state(i1+i,j1+j,k1+k,2) = state(i1+i,j1+j,k1+k,2) + real(aimag(phi))
++                          
++  !                      endif
++                       
++  !                   endif
++  !                enddo
++  !             endif
++  !          enddo
++  !       endif
++  !    enddo
++     
++  ! enddo
++  
++  ! state(:,:,:,3) = state(:,:,:,1)**2+state(:,:,:,2)**2
++  
++end subroutine deposit_fdm_particles
++
++subroutine fort_fdm_fields( &
++     uout, uout_l1,uout_l2,uout_l3,uout_h1,uout_h2,uout_h3)
++        
++  use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM
++  use fundamental_constants_module
++
++  implicit none
++  
++  integer          uout_l1,uout_l2,uout_l3,uout_h1,uout_h2,uout_h3
++  double precision uout( uout_l1:uout_h1, uout_l2:uout_h2, uout_l3:uout_h3, NAXVAR)
++  
++  uout(:,:,:,UAXDENS) = uout(:,:,:,UAXRE)**2+uout(:,:,:,UAXIM)**2
++
++end subroutine fort_fdm_fields
+diff --git a/Source/FDM/fdm_F.H b/Source/FDM/fdm_F.H
+index ef510a5..4398761 100644
+--- a/Source/FDM/fdm_F.H
++++ b/Source/FDM/fdm_F.H
+@@ -16,6 +16,8 @@ extern "C"
+ 		const double* delta,
+ 		const double* xlo, const double* xhi);
+ 
++  void deposit_fdm_particles(const void* particles, const long* np, const amrex::Real* state, const int* nc,
++			     const int* lo, const int* hi, const double* xlo, const double* delta);
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/Source/FDMParticleContainer.H b/Source/FDMParticleContainer.H
+index ec12bed..698c8f0 100644
+--- a/Source/FDMParticleContainer.H
++++ b/Source/FDMParticleContainer.H
+@@ -2,22 +2,11 @@
+ #ifndef _FDMParticleContainer_H_
+ #define _FDMParticleContainer_H_
+ 
+-#include <AMReX_MultiFab.H>
+-#include <AMReX_MultiFabUtil.H>
+-#include <AMReX_Particles.H>
+-#include <AMReX_NeighborParticles.H>
+-
+ #include "NyxParticleContainer.H"
+ 
+-// We make FDMParticleContainer a class instead of a typedef so that
+-//    we can have Nyx-specific functions here instead of in amrex
+ class FDMParticleContainer
+-  : public NyxParticleContainer<44, 0, 0, 0>
++    : public NyxParticleContainer<44>
+ {
+-
+-    using MyParIter = amrex::ParIter<44>;
+-    using MyConstParIter = amrex::ParConstIter<44>;
+-
+ public:
+     FDMParticleContainer (amrex::Amr* amr)
+         : NyxParticleContainer<44>(amr)
+@@ -69,6 +58,9 @@ public:
+       real_comp_names.push_back("pp9");
+     }
+ 
++    using MyParIter = amrex::ParIter<44>;
++    using MyConstParIter = amrex::ParConstIter<44>;
++
+     virtual ~FDMParticleContainer () {}
+ 
+     void InitCosmo  (amrex::MultiFab& mf, const amrex::Real vel_fac[], const amrex::Vector<int> n_part, const amrex::Real particleMass);
+@@ -79,7 +71,9 @@ public:
+                                  const amrex::Real particleMass, int disp_idx, int vel_idx, 
+                                  amrex::BoxArray &baWhereNot, int lev, int nlevs);
+ 
+-    void AssignDensityAndVels (amrex::Vector<std::unique_ptr<amrex::MultiFab> >& mf, int lev_min = 0) const;
++    void CreateGhostParticlesFDM (int level, int lev, int nGrow, AoS& ghosts) const;
++
++  void DepositFDMParticles (amrex::MultiFab& mf, int level);
+ 
+     virtual void moveKickDrift (amrex::MultiFab& acceleration, int level, amrex::Real timestep,
+                                 amrex::Real a_old = 1.0, amrex::Real a_half = 1.0, int where_width = 0);
+@@ -88,7 +82,9 @@ public:
+ 
+     void InitFromBinaryMortonFile(const std::string& particle_directory, int nextra, int skip_factor);
+  
+-    void InitVarCount (amrex::MultiFab& mf, long n_axpart);
++    void InitVarCount (amrex::MultiFab& mf, long n_axpart, amrex::BoxArray &baWhereNot, int lev, int nlevs);
++
++  void InitGaussianBeams (long n_axpart, int lev, int nlevs, const amrex::Real hbaroverm, const amrex::Real sigma_ax);
+ };
+ 
+ #endif /* _FDMParticleContainer_H_ */
+diff --git a/Source/FDMParticleContainer.cpp b/Source/FDMParticleContainer.cpp
+index 676cc1b..d0b6f07 100644
+--- a/Source/FDMParticleContainer.cpp
++++ b/Source/FDMParticleContainer.cpp
+@@ -676,9 +676,63 @@ FDMParticleContainer::InitCosmo(
+ */
+ 
+ void
+-FDMParticleContainer::AssignDensityAndVels (Vector<std::unique_ptr<MultiFab> >& mf, int lev_min) const
++FDMParticleContainer::CreateGhostParticlesFDM (int level, int lev, int nGrow, AoS& ghosts) const
+ {
+-     AssignDensity(mf, lev_min, BL_SPACEDIM+1);
++  BL_PROFILE("FDMParticleContainer::CreateGhostParticlesFDM()");
++  BL_ASSERT(ghosts.empty());
++  BL_ASSERT(level < finestLevel());
++
++  // if (level >= static_cast<int>(m_particles.size()))
++  //   return;
++  if (level >= static_cast<int>(GetParticles().size()))
++    return;
++
++  const BoxArray& fine = ParticleBoxArray(lev);
++  nGrow *= pow(2,lev);
++
++  std::vector< std::pair<int,Box> > isects;
++
++  // const auto& pmap = m_particles[level];
++  const auto& pmap = GetParticles(level);
++  for (const auto& kv : pmap)
++    {
++      const auto& pbox = kv.second.GetArrayOfStructs();
++      for (auto it = pbox.cbegin(); it != pbox.cend(); ++it)
++        {
++	  const IntVect& iv = Index(*it, lev);
++	  fine.intersections(Box(iv,iv),isects,false,nGrow);
++	  for (const auto& isec : isects)
++            {
++	      amrex::ignore_unused(isec);
++	      ParticleType p = *it;  // yes, make a copy                                                                                                                                                         
++	      p.m_idata.id = GhostParticleID;
++	      ghosts().push_back(p);
++            }
++        }
++    }
++}
++
++void
++FDMParticleContainer::DepositFDMParticles(MultiFab& mf, int level)
++{
++  BL_PROFILE("FDMParticleContainer::DepositFDMParticles()");
++
++  // amrex::MultiFab&  Ax_new = get_new_data(Axion_Type);
++  const int ncomp          = 2;
++  const Real* plo          = m_gdb->Geom(level).ProbLo();
++  const Real* dx           = m_gdb->Geom(level).CellSize();
++
++  for (MyParIter pti(*this, level); pti.isValid(); ++pti) {
++    const auto& particles = pti.GetArrayOfStructs();
++    const long np         = particles.size();
++    // const Box& box        = Ax_new[pti].box();
++    const Box& box        = mf[pti].box();
++
++    // deposit_fdm_particles(particles.data(), &np, Ax_new[pti].dataPtr(), ncomp,
++    // 			  box.loVect(), box.hiVect(), plo, dx);
++    deposit_fdm_particles(particles.data(), &np, mf[pti].dataPtr(), &ncomp,
++			  box.loVect(), box.hiVect(), plo, dx);
++  }
+ }
+ 
+ void 
+@@ -787,31 +841,30 @@ FDMParticleContainer::InitFromBinaryMortonFile(const std::string& particle_direc
+ 
+ 
+ void
+-FDMParticleContainer::InitVarCount (MultiFab& mf, long n_axpart)
++FDMParticleContainer::InitVarCount (MultiFab& mf, long num_particle_fdm, BoxArray &baWhereNot, int lev, int nlevs)
+ {
+   const int       MyProc      = ParallelDescriptor::MyProc();
+-  const int       IOProc      = ParallelDescriptor::IOProcessorNumber();
+-  const Real      strttime    = amrex::second();
+-  // const Amr*      M_amr       = this->m_amr;
+-  // const Geometry& geom        = M_amr->Geom(0);
+-  const Geometry& geom        = Geom(0);
++  const Geometry& geom        = m_gdb->Geom(lev);
+   const Real*     dx          = geom.CellSize();
+-  // Array<PMap>&    M_particles = m_particles;
+-  auto& particles = GetParticles();
+-  int                         npart;
+-  Real                        r;
+-
+-  Real                        factor          = mf.norm1(0,0)/n_axpart; //compute density per particle                                                                                                           
+ 
++  static Vector<int> calls;
++  calls.resize(nlevs);
++  calls[lev]++;
++  if (calls[lev] > 1) return;
++  Vector<ParticleLevel>& particles = this->GetParticles();
++  int npart;
++  Real r;
++  Real factor = mf.norm1(0,0)/num_particle_fdm; //compute density per particle                                                                                             
+   particles.reserve(15);  // So we don't ever have to do any copying on a resize.                                                                                                                        
++  particles.resize(nlevs);
+ 
+-  particles.resize(finestLevel()+1);
+-
+-  for (int lev = 0; lev < particles.size(); lev++)
++  for (int i = 0; i < particles.size(); i++)
+     {
+-      BL_ASSERT(particles[lev].empty());
++      BL_ASSERT(particles[i].empty());
+     }
+ 
++  ParticleType p;
++
+   amrex::InitRandom(MyProc);
+   //                                                                                                                                                                                                             
+   // The grid should be initialized according to the ics...                                                                                                                                                      
+@@ -823,9 +876,7 @@ FDMParticleContainer::InitVarCount (MultiFab& mf, long n_axpart)
+       const Box&  vbx    = mfi.validbox();
+       const int  *fab_lo = vbx.loVect();
+       const int  *fab_hi = vbx.hiVect();
+-      const int   fab_ix = fab_hi[0] - fab_lo[0] + 1;
+-      const int   fab_jx = fab_hi[1] - fab_lo[1] + 1;
+-      const int   fab_kx = fab_hi[2] - fab_lo[2] + 1;
++      ParticleLocData pld;
+ 
+       for (int kx = fab_lo[2]; kx <= fab_hi[2]; kx++)
+         {
+@@ -847,7 +898,6 @@ FDMParticleContainer::InitVarCount (MultiFab& mf, long n_axpart)
+ 		  // --------------------------------------------------------                                                                                                                                    
+ 
+ 		  for (int ipart = 0; ipart < npart; ipart++){
+-		    ParticleType p;
+ 
+ 
+ 
+@@ -874,22 +924,223 @@ FDMParticleContainer::InitVarCount (MultiFab& mf, long n_axpart)
+ 		    p.id()      = ParticleType::NextID();
+ 		    p.cpu()     = MyProc;
+ 
+-		    if (!this->Where(p,M_amr))
++		    if (!this->Where(p,pld))
+ 		      {
+-			this->PeriodicShift(p,M_amr);
++			this->PeriodicShift(p);
+ 
+-			if (!this->Where(p,M_amr))
++			if (!this->Where(p,pld))
+ 			  amrex::Abort("ParticleContainer<N>::InitVarCount(): invalid particle");
+ 		      }
+ 
+-		    BL_ASSERT(p.m_lev >= 0 && p.m_lev <= m_gdb->finestLevel());
++		    BL_ASSERT(pld.m_lev >= 0 && pld.m_lev <= m_gdb->finestLevel());
++                    //handle particles that ran out of this level into a finer one.                                                                                                                                
++                    if (baWhereNot.contains(pld.m_cell))
++		      {
++			ParticleLocData new_pld;
++			if (!this->Where(p, new_pld))
++			  {
++			    this->PeriodicShift(p);
++			    
++			    if (!this->Where(p, new_pld))
++			      amrex::Abort("FDMParticleContainer::InitVarCount():invalid particle");
++			  }
++			particles[new_pld.m_lev][std::make_pair(new_pld.m_grid,
++								new_pld.m_tile)].push_back(p);
++			
++		      }
++
++
+ 		    //                                                                                                                                                                         
+ 		    // Add it to the appropriate PBox at the appropriate level.                                                                                                                
+ 		    //                                                                                                                                                                         
+-		    particles[p.m_lev][p.m_grid].push_back(p);
++		    else
++		      particles[pld.m_lev][std::make_pair(pld.m_grid, pld.m_tile)].push_back(p);
+ 		  }
+                 }
+             }
+         }
+     }
++
++  if (ParallelDescriptor::IOProcessor() && m_verbose)
++    {
++      std::cout << "Done with Gaussian Beam initilization" << '\n';
++    }
++  //
++  // Let Redistribute() sort out where the particles belong.
++  //
++  Redistribute();
++  
++  if (ParallelDescriptor::IOProcessor() && m_verbose)
++    {
++      std::cout << "Redistribute done" << '\n';
++    }
++}
++
++void
++FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nlevs, const Real hbaroverm, const Real sigma_ax)
++{
++  const int       MyProc      = ParallelDescriptor::MyProc();
++  const Geometry& geom        = m_gdb->Geom(lev);
++  const Real*     dx          = geom.CellSize();
++
++  static Vector<int> calls;
++  calls.resize(nlevs);
++  calls[lev]++;
++  if (calls[lev] > 1) return;
++  Vector<ParticleLevel>& particles = this->GetParticles();
++
++  // Real m_tt = 2.5;                                                                                                                                                                                             
++  // Real hbaroverm = 0.01917152 / m_tt;
++  // Real sigma = 1.1;
++
++  if (ParallelDescriptor::IOProcessor())
++    {
++      std::cout << "hbaroverm: "<< hbaroverm << '\n';
++      std::cout << "sigma_ax : "<< sigma_ax << '\n';
++    }
++
++  int  npart = num_particle_fdm;
++  Real sigma_x = sigma_ax*dx[0];
++  Real gamma = 0.5/sigma_x/sigma_x;
++  Real alpha = 1600.0;
++  Real q[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
++  Real p[]  = {0.0,0.0,0.0};
++  Real q0[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
++  Real p0[] = {0.0,0.0,0.0};
++  Real r, theta, phi, Amp;
++  Real fact = 1.0;
++
++  particles.reserve(15);  // So we don't ever have to do any copying on a resize.
++  particles.resize(nlevs);
++
++  for (int i = 0; i < particles.size(); i++)
++    {
++      BL_ASSERT(particles[i].empty());
++    }
++
++  ParticleType part;
++  ParticleLocData pld;
++
++  amrex::InitRandom(MyProc);
++
++  for(int index=0;index<npart;index++){
++	
++    r = sqrt(-log(1-amrex::Random()));
++    theta  = 2.0*M_PI*amrex::Random();
++    q[0] = r*cos(theta)*sqrt((alpha+gamma)/gamma/alpha) + q0[0];
++    p[0] = r*sin(theta)*2.0*sqrt(alpha+gamma)*hbaroverm + p0[0];
++	
++    r = sqrt(-log(1-amrex::Random()));
++    theta  = 2.0*M_PI*amrex::Random();
++    q[1] = r*cos(theta)*sqrt((alpha+gamma)/gamma/alpha) + q0[1];
++    p[1] = r*sin(theta)*2.0*sqrt(alpha+gamma)*hbaroverm + p0[1];
++	
++    r = sqrt(-log(1-amrex::Random()));
++    theta  = 2.0*M_PI*amrex::Random();
++    q[2] = r*cos(theta)*sqrt((alpha+gamma)/gamma/alpha) + q0[2];
++    p[2] = r*sin(theta)*2.0*sqrt(alpha+gamma)*hbaroverm + p0[2];
++	
++    phi  = ( (p[0]*alpha+p0[0]*gamma)*(q[0]-q0[0]) + (p[1]*alpha+p0[1]*gamma)*(q[1]-q0[1]) + (p[2]*alpha+p0[2]*gamma)*(q[2]-q0[2]) )/(alpha+gamma);
++    Amp  = 2.0*(alpha+gamma)/sqrt(alpha*gamma)/M_PI/sqrt(2*gamma/M_PI)/pow(npart,2.0/3.0);
++    Amp /= sqrt(2.0*alpha/M_PI);
++    Amp *= pow(fact,1.0/3.0);
++
++    // if(true){
++    //   q[0] = generateGaussianNoise(q0[0],sigma*sqrt(2.0));
++    //   q[1] = generateGaussianNoise(q0[1],sigma*sqrt(2.0));
++    //   q[2] = generateGaussianNoise(q0[2],sigma*sqrt(2.0));
++    //   phi  = 0.0;
++    //   p[0] = p0[0];
++    //   p[1] = p0[1];
++    //   p[2] = p0[2];
++    //   Amp  = pow(fact/npart/npart,1.0/3.0)/pi/(alpha/pi);
++    // }
++
++    if(q[0]>geom.ProbLo(0) && q[0]<geom.ProbHi(0) && q[1]>geom.ProbLo(1) && q[1]<geom.ProbHi(1) && q[2]>geom.ProbLo(2) && q[2]<geom.ProbHi(2)){
++
++      part.id()      = ParticleType::NextID();
++      part.cpu()     = MyProc;
++
++      // set position
++      for (int n = 0; n < BL_SPACEDIM; n++)
++	part.pos( n) = q[n];
++      // set mass                                                                                                                                                                
++      part.rdata( 0) =  1.0/npart; //dx[0] * dx[1] * dx[2];
++      // set velocity
++      part.rdata( 1) = p[0];
++      part.rdata( 2) = p[1];
++      part.rdata( 3) = p[2];
++      //set phase
++      part.rdata( 4) = phi;
++      //set amplitude
++      part.rdata( 5) = pow(2.0*gamma*Amp,1.5);
++      part.rdata( 6) = 0.0;
++      //set width
++      part.rdata( 7) = gamma;
++      //set Jacobian qq
++      part.rdata( 8) = Amp;
++      part.rdata( 9) = 0.0;
++      part.rdata(10) = 0.0;
++      part.rdata(11) = 0.0;
++      part.rdata(12) = Amp;
++      part.rdata(13) = 0.0;
++      part.rdata(14) = 0.0;
++      part.rdata(15) = 0.0;
++      part.rdata(16) = Amp;
++      //set Jacobian qp
++      part.rdata(17) = 0.0;
++      part.rdata(18) = 0.0;
++      part.rdata(19) = 0.0;
++      part.rdata(20) = 0.0;
++      part.rdata(21) = 0.0;
++      part.rdata(22) = 0.0;
++      part.rdata(23) = 0.0;
++      part.rdata(24) = 0.0;
++      part.rdata(25) = 0.0;
++      //set Jacobian pq
++      part.rdata(26) = 0.0;
++      part.rdata(27) = 0.0;
++      part.rdata(28) = 0.0;
++      part.rdata(29) = 0.0;
++      part.rdata(30) = 0.0;
++      part.rdata(31) = 0.0;
++      part.rdata(32) = 0.0;
++      part.rdata(33) = 0.0;
++      part.rdata(34) = 0.0;
++      //set Jacobian pp
++      part.rdata(35) = Amp;
++      part.rdata(36) = 0.0;
++      part.rdata(37) = 0.0;
++      part.rdata(38) = 0.0;
++      part.rdata(39) = Amp;
++      part.rdata(40) = 0.0;
++      part.rdata(41) = 0.0;
++      part.rdata(42) = 0.0;
++      part.rdata(43) = Amp;
++
++
++      if (!this->Where(part,pld))
++	amrex::Abort("ParticleContainer<N>::InitGaussianBeams(): invalid particle");
++
++      //add particle
++      particles[pld.m_lev][std::make_pair(pld.m_grid, pld.m_tile)].push_back(part);
++    }
++    else
++      index--;
++  }
++
++  if (ParallelDescriptor::IOProcessor() && m_verbose)
++    {
++      std::cout << "Done with Gaussian Beam initilization" << '\n';
++    }
++  //
++  // Let Redistribute() sort out where the particles belong.
++  //
++  Redistribute();
++  
++  if (ParallelDescriptor::IOProcessor() && m_verbose)
++    {
++      std::cout << "Redistribute done" << '\n';
++    }
++  
+ }
+diff --git a/Source/Gravity/Gravity.cpp b/Source/Gravity/Gravity.cpp
+index 4e01b90..1ccbc73 100644
+--- a/Source/Gravity/Gravity.cpp
++++ b/Source/Gravity/Gravity.cpp
+@@ -341,16 +341,36 @@ Gravity::solve_for_new_phi (int               level,
+     }
+ #endif
+ 
+-#ifdef FDM
+-        MultiFab& Ax_new = LevelData[level]->get_new_data(Axion_Type);
+-#endif
+-#ifdef FDM
+-        MultiFab::Add(Rhs, Ax_new, Nyx::AxDens, 0, 1, 0);
+-#endif
+     AddParticlesToRhs(level,Rhs,ngrow_for_solve);
+     AddVirtualParticlesToRhs(level,Rhs,ngrow_for_solve);
+     AddGhostParticlesToRhs(level,Rhs);
+ 
++#ifdef FDM_GB
++    std::cout << "Depositing FDM particles 1" << '\n';
++    for (int lev = level; lev <= finest_level; lev++)
++      {
++	MultiFab& Ax_new = LevelData[lev]->get_new_data(Axion_Type);
++	Ax_new.setVal(0.);
++	if(Nyx::theFDMPC())
++	  Nyx::theFDMPC()->DepositFDMParticles(Ax_new,lev);
++	if(Nyx::theGhostFDMPC())
++	  Nyx::theGhostFDMPC()->DepositFDMParticles(Ax_new,lev);
++	if(Nyx::theVirtFDMPC())
++	  Nyx::theVirtFDMPC()->DepositFDMParticles(Ax_new,lev);
++	AmrLevel* amrlev = &parent->getLevel(lev);
++	
++	for (amrex::FillPatchIterator fpi(*amrlev,  Ax_new); fpi.isValid(); ++fpi)
++	  {
++	    if (Ax_new[fpi].contains_nan())
++ 	      amrex::Abort("Nans in state just before fortran call");
++	    BL_FORT_PROC_CALL(FORT_FDM_FIELDS, fort_fdm_fields)
++	      (BL_TO_FORTRAN(Ax_new[fpi]));
++	    if (Ax_new[fpi].contains_nan())
++ 	      amrex::Abort("Nans in state just before fortran call");
++	  }
++      }
++#endif
++
+     const Real time = LevelData[level]->get_state_data(PhiGrav_Type).curTime();
+     solve_for_phi(level, Rhs, phi, grad_phi, time, fill_interior);
+ }
+@@ -819,6 +839,39 @@ Gravity::actual_multilevel_solve (int                       level,
+     AddGhostParticlesToRhs(level,rpp);
+     AddVirtualParticlesToRhs(finest_level,rpp);
+ 
++#ifdef FDM_GB
++    std::cout << "Depositing FDM particles 2" << '\n';
++    for (int lev = level; lev <= finest_level; lev++)
++      {
++	MultiFab& Ax_new = LevelData[lev]->get_new_data(Axion_Type);
++	Ax_new.setVal(0.);
++	if(Nyx::theFDMPC()){
++	  std::cout << "Depositing FDM particles 2a" << '\n';
++	  Nyx::theFDMPC()->DepositFDMParticles(Ax_new,lev);
++	}
++	if(Nyx::theGhostFDMPC()){
++	  std::cout << "Depositing FDM particles 2b" << '\n';
++	  Nyx::theGhostFDMPC()->DepositFDMParticles(Ax_new,lev);
++	}
++	if(Nyx::theVirtFDMPC()){
++	  std::cout << "Depositing FDM particles 2c" << '\n';
++	  Nyx::theVirtFDMPC()->DepositFDMParticles(Ax_new,lev);
++	}
++	AmrLevel* amrlev = &parent->getLevel(lev);
++	
++	for (amrex::FillPatchIterator fpi(*amrlev,  Ax_new); fpi.isValid(); ++fpi)
++	  {
++	    if (Ax_new[fpi].contains_nan())
++ 	      amrex::Abort("Nans in state just before fortran call");
++	    BL_FORT_PROC_CALL(FORT_FDM_FIELDS, fort_fdm_fields)
++	      (BL_TO_FORTRAN(Ax_new[fpi]));
++	    if (Ax_new[fpi].contains_nan())
++ 	      amrex::Abort("Nans in state just before fortran call");
++	  }
++	Ax_new.FillBoundary(parent->Geom(level).periodicity());
++      }
++#endif
++
+     Nyx* cs = dynamic_cast<Nyx*>(&parent->getLevel(level));
+ 
+     BL_ASSERT(cs != 0);
+diff --git a/Source/Initialization/Nyx_setup.cpp b/Source/Initialization/Nyx_setup.cpp
+index 66dc270..bf684e6 100644
+--- a/Source/Initialization/Nyx_setup.cpp
++++ b/Source/Initialization/Nyx_setup.cpp
+@@ -1057,11 +1057,11 @@ Nyx::no_hydro_setup()
+ #ifdef FDM                                                                                                                                                       
+     derive_lst.add("fdm_particle_count", IndexType::TheCellType(), 1,                                                                                                               
+                    BL_FORT_PROC_CALL(DERNULL, dernull), the_same_box);                                                                                                                  
+-    derive_lst.addComponent("axion_particle_count", desc_lst, State_Type, Density, 1);                                                                                                                  
++    derive_lst.addComponent("fdm_particle_count", desc_lst, State_Type, Density, 1);                                                                                                                  
+                                                                                                                                                                                                                   
+     derive_lst.add("fdm_mass_density", IndexType::TheCellType(), 1,                                                                                                                
+                    BL_FORT_PROC_CALL(DERNULL, dernull), grow_box_by_one);                                                                                                           
+-    derive_lst.addComponent("axion_mass_density", desc_lst, State_Type,                                                                                                                           
++    derive_lst.addComponent("fdm_mass_density", desc_lst, State_Type,                                                                                                                           
+                             Density, 1);                                                                                                                                                         
+ #endif
+ 
+diff --git a/Source/Nyx.H b/Source/Nyx.H
+index 806e9e7..c61a42c 100644
+--- a/Source/Nyx.H
++++ b/Source/Nyx.H
+@@ -607,6 +607,14 @@ public:
+     static int AxIm;
+     static int NUM_AX;
+     static int vonNeumann_dt;
++    static amrex::Real m_tt;
++    static amrex::Real hbaroverm; 
++#endif
++
++#ifdef FDM_GB
++    static amrex::Real theta_ax;
++    static amrex::Real sigma_ax;
++    static amrex::Real gamma_ax;
+ #endif
+ 
+     static int Temp_comp, Ne_comp, Zhi_comp;
+diff --git a/Source/Nyx.cpp b/Source/Nyx.cpp
+index f3479d2..8d14297 100644
+--- a/Source/Nyx.cpp
++++ b/Source/Nyx.cpp
+@@ -104,7 +104,13 @@ int Nyx::AxDens = -1;
+ int Nyx::AxRe   = -1;
+ int Nyx::AxIm   = -1;
+ int Nyx::NUM_AX = -1;
+-int Nyx::vonNeumann_dt =   0;
++int Nyx::vonNeumann_dt = 0;
++Real Nyx::m_tt = 2.5;
++Real Nyx::hbaroverm = 0.01917152 / m_tt;
++#endif
++#ifdef FDM_GB
++Real Nyx::theta_ax = 1.0;
++Real Nyx::sigma_ax = 1.0;
+ #endif
+ int Nyx::Temp_comp = -1;
+ int Nyx::  Ne_comp = -1;
+@@ -268,6 +274,12 @@ Nyx::read_params ()
+     pp_nyx.get("dt_cutoff", dt_cutoff);
+ #ifdef FDM
+     pp_nyx.query("vonNeumann_dt", vonNeumann_dt);
++    pp_nyx.query("m_tt", m_tt);
++    hbaroverm = 0.01917152 / m_tt;
++#endif
++#ifdef FDM_GB
++    pp_nyx.query("theta_ax", theta_ax);
++    pp_nyx.query("sigma_ax", sigma_ax);
+ #endif
+     pp_nyx.query("dump_old", dump_old);
+ 
+@@ -937,14 +949,14 @@ Nyx::est_time_step (Real dt_old)
+ 
+ //add time step requirements here.
+ #ifdef FDM
+-    Real a = get_comoving_a(cur_time);
+     if (vonNeumann_dt >0){
++      Real a = get_comoving_a(cur_time);
+       const MultiFab& phi = get_new_data(PhiGrav_Type);
+       Real phi_max = phi.max(0);
+       const Real* dx = geom.CellSize();
+       //from BODO
+-      Real m_tt = 2.5;
+-      Real hbaroverm = 0.01917152 / m_tt;
++      // Real m_tt = 2.5;
++      // Real hbaroverm = 0.01917152 / m_tt;
+       Real time_step = std::min(dx[0]*dx[0]*a*a/6/hbaroverm,hbaroverm/phi_max); 
+       //Real time_step = std::min(10.0*dx[0]*dx[0]*a*a,0.002/phi_max);
+       if (verbose && ParallelDescriptor::IOProcessor())
+@@ -2120,7 +2132,7 @@ Nyx::errorEst (TagBoxArray& tags,
+                 avg = average_total_density;
+             }
+ #ifdef FDM
+-            else if (err_list[j].name() == "AxDens")
++            else if (err_list[j].name() == "AxDens" || err_list[j].name() == "fdm_mass_density")
+             {
+                 avg = average_ax_density;
+             }
+diff --git a/Source/NyxParticles.cpp b/Source/NyxParticles.cpp
+index f09d5be..056df99 100644
+--- a/Source/NyxParticles.cpp
++++ b/Source/NyxParticles.cpp
+@@ -273,7 +273,7 @@ Nyx::read_particle_params ()
+ //#if defined(FDM) || defined(ONLYFDM)
+ //        do_dm_particles = 0;
+ //#endif
+-#if defined(AGN) || defined(ONLYFDM)
++#if defined(AGN) || defined(FDM)
+     pp.get("particle_init_type", particle_init_type);
+     pp.get("particle_move_type", particle_move_type);
+ #else
+@@ -364,8 +364,6 @@ Nyx::read_particle_params ()
+ 
+ #ifdef FDM_GB
+     pp.query("num_particle_fdm", num_particle_fdm);
+-    // pp.query("sph_smoothing_length", FDMParticleContainer::smoothing_length);
+-    // pp.query("ax_damping", FDMParticleContainer::damping_constant);
+ #endif
+ 
+     pp.query("write_particle_density_at_init", write_particle_density_at_init);
+@@ -670,16 +668,20 @@ Nyx::init_particles ()
+     {
+       BL_ASSERT (FDMPC == 0);
+       FDMPC = new FDMParticleContainer(parent);
+-      ActiveParticles.push_back(FDMPC);
+ 
+-      if (parent->subCycle())
+-        {
+-	  VirtFDMPC = new FDMParticleContainer(parent);
+-	  VirtualParticles.push_back(VirtFDMPC);
++      // !!!Gauss Beams contribute separately to density!!!
++
++      // ActiveParticles.push_back(FDMPC);
++
++      // if (parent->subCycle())
++      //   {
++      // 	  VirtFDMPC = new FDMParticleContainer(parent);
++      // 	  VirtualParticles.push_back(VirtFDMPC);
++
++      // 	  GhostFDMPC = new FDMParticleContainer(parent);
++      // 	  GhostParticles.push_back(GhostFDMPC);
++      //   }
+ 
+-	  GhostFDMPC = new FDMParticleContainer(parent);
+-	  GhostParticles.push_back(GhostFDMPC);
+-        }
+       //                                                                                                                                                                                                         
+       // Make sure to call RemoveParticlesOnExit() on exit.                                                                                                                                                      
+       //   (if do_dm_particles then we have already called ExecOnFinalize)                                                                                                                                       
+@@ -754,14 +756,12 @@ Nyx::init_particles ()
+ 	  // moved to Nyx_initcosmo.cpp                                                                                                                                                                      
+         }
+       //do init                                                                                                                                                                                                  
+-      else if(level == 0)
++      else if(particle_init_type == "Bosonstar")
+         {
+-	  const int initDataDim = 44; //FIXME: depends on setup... I guess                                                                                                                                        
++	  const int initDataDim = 4; //FIXME: depends on setup... I guess                                                                                                                                        
+ 	  const Real * dx = geom.CellSize();
+ 	  const Real cur_time = state[State_Type].curTime();
+-	  // const BoxArray& ba = get_level(0).get_new_data(State_Type).boxArray();
+-	  // MultiFab InitData(ba, initDataDim, 0);
+-	  MultiFab InitData(grids,dmap,1,0);
++	  MultiFab InitData(grids,dmap,initDataDim,0);
+ 
+ 	  for (MFIter mfi(InitData); mfi.isValid(); ++mfi)
+             {
+@@ -776,11 +776,29 @@ Nyx::init_particles ()
+ 		 &initDataDim, BL_TO_FORTRAN(InitData[mfi]),
+ 		 dx, gridloc.lo(), gridloc.hi());
+             }
++
++ 
++	  BoxArray baWhereNot;
++	  if (level < parent->initialBaLevels())
++	    baWhereNot = parent->initialBa(level+1);
++	  BoxArray myBaWhereNot(baWhereNot.size());
++	  for (int i=0; i < baWhereNot.size(); i++)
++	    myBaWhereNot.set(i, baWhereNot[i]);
++	  if (level < parent->initialBaLevels())
++	    myBaWhereNot.coarsen(parent->refRatio(level));
++
+ 	  if(num_particle_fdm > 0)
+-	    FDMPC->InitVarCount(InitData,num_particle_fdm);
++	    FDMPC->InitVarCount(InitData, num_particle_fdm, myBaWhereNot, level, parent->initialBaLevels()+1);
+ 	  else
+ 	    amrex::Error("\nNeed num_particle_fdm > 0 for InitVarCount!\n\n");
+-	    // FDMPC->InitVarMass(InitData);
++
++        }
++      else if(particle_init_type == "GaussianBeams")
++        {
++	  if(num_particle_fdm > 0)
++	    FDMPC->InitGaussianBeams(num_particle_fdm, level, parent->initialBaLevels()+1, hbaroverm, sigma_ax);
++	  else
++	    amrex::Error("\nNeed num_particle_fdm > 0 for InitGaussianBeams!\n\n");
+ 
+         } else {
+ 	//FIXME                                                                                                                                                                                                            
+@@ -1041,16 +1059,20 @@ Nyx::particle_post_restart (const std::string& restart_file, bool is_checkpoint)
+     {
+       BL_ASSERT (FDMPC == 0);
+       FDMPC = new FDMParticleContainer(parent);
+-      ActiveParticles.push_back(FDMPC);
+ 
+-      if (parent->subCycle())
+-        {
+-	  VirtFDMPC = new FDMParticleContainer(parent);
+-	  VirtualParticles.push_back(VirtFDMPC);
++      // !!!Gauss Beams contribute separately to density!!!
++
++      // ActiveParticles.push_back(FDMPC);
++
++      // if (parent->subCycle())
++      //   {
++      // 	  VirtFDMPC = new FDMParticleContainer(parent);
++      // 	  VirtualParticles.push_back(VirtFDMPC);
++
++      // 	  GhostFDMPC = new FDMParticleContainer(parent);
++      // 	  GhostParticles.push_back(GhostFDMPC);
++      //   }
+ 
+-	  GhostFDMPC = new FDMParticleContainer(parent);
+-	  GhostParticles.push_back(GhostFDMPC);
+-        }
+       //                                                                                                                                                                                                         
+       // Make sure to call RemoveParticlesOnExit() on exit.                                                                                                                                                      
+       //   (if do_dm_particles then we have already called ExecOnFinalize)                                                                                                                                       
+@@ -1272,13 +1294,27 @@ Nyx::setup_virtual_particles()
+       if(Nyx::theDMPC() != 0){
+         DarkMatterParticleContainer::AoS virts;
+         if (level < parent->finestLevel())
+-        {
++	{
+     	    get_level(level + 1).setup_virtual_particles();
+ 	    Nyx::theVirtPC()->CreateVirtualParticles(level+1, virts);
+ 	    Nyx::theVirtPC()->AddParticlesAtLevel(virts, level);
+ 	    Nyx::theDMPC()->CreateVirtualParticles(level+1, virts);
+ 	    Nyx::theVirtPC()->AddParticlesAtLevel(virts, level);
+         }
++#ifdef FDM_GB
++      if(Nyx::theFDMPC() != 0){
++        FDMParticleContainer::AoS virts;
++        if (level < parent->finestLevel())
++        {
++	    if(Nyx::theDMPC() == 0)
++    	      get_level(level + 1).setup_virtual_particles();
++	    Nyx::theVirtFDMPC()->CreateVirtualParticles(level+1, virts);
++	    Nyx::theVirtFDMPC()->AddParticlesAtLevel(virts, level);
++	    Nyx::theFDMPC()->CreateVirtualParticles(level+1, virts);
++	    Nyx::theVirtFDMPC()->AddParticlesAtLevel(virts, level);
++        }
++      }
++#endif
+       }
+       virtual_particles_set = true;
+     }
+@@ -1327,8 +1363,13 @@ Nyx::setup_ghost_particles(int ngrow)
+     if(Nyx::theFDMPC() != 0)
+       {
+ 	FDMParticleContainer::AoS ghosts;
+-	Nyx::theFDMPC()->CreateGhostParticles(level, ngrow, ghosts);
+-	Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, level+1, ngrow);
++	for (int lev = level+1; lev < parent->finestLevel(); lev++){
++	  // if(levelmethod[lev]==GaussBeam){
++	  if(true){
++	    Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ngrow, ghosts);
++	    Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ngrow);
++	  }
++	}
+       }
+ #endif
+ 
+diff --git a/Source/Nyx_F.H b/Source/Nyx_F.H
+index c1b338d..fcdfb04 100644
+--- a/Source/Nyx_F.H
++++ b/Source/Nyx_F.H
+@@ -22,7 +22,11 @@ BL_FORT_PROC_DECL(FORT_ADVANCE_FDM_FD, fort_advance_fdm_fd)
+      const amrex::Real* cflLoc,
+      const amrex::Real* a_old, const amrex::Real* a_new,
+      const int& verbose);
++
++  BL_FORT_PROC_DECL(FORT_FDM_FIELDS, fort_fdm_fields)
++  (const BL_FORT_FAB_ARG(state));
+ #endif
++
+   void fort_alloc_simd_vec();
+   void fort_dealloc_simd_vec();
+ 
+diff --git a/Source/Nyx_FDM.cpp b/Source/Nyx_FDM.cpp
+index 4f2c94a..0bb508c 100644
+--- a/Source/Nyx_FDM.cpp
++++ b/Source/Nyx_FDM.cpp
+@@ -15,16 +15,16 @@ Nyx::advance_FDM_FD (amrex::Real time,
+                       amrex::Real a_old,
+                       amrex::Real a_new)
+ {
+-    amrex::Real se, ske;
+-    const amrex::Real prev_time    = state[State_Type].prevTime();
+-    const amrex::Real cur_time     = state[State_Type].curTime();
+-    const int  finest_level = parent->finestLevel();
++    // amrex::Real se, ske;
++    // const amrex::Real prev_time    = state[State_Type].prevTime();
++    // const amrex::Real cur_time     = state[State_Type].curTime();
++    // const int  finest_level = parent->finestLevel();
+ 
+-    const amrex::Real a_half = 0.5 * (a_old + a_new);
++    // const amrex::Real a_half = 0.5 * (a_old + a_new);
+ 
+     amrex::MultiFab&  Ax_old = get_old_data(Axion_Type);
+     amrex::MultiFab&  Ax_new = get_new_data(Axion_Type);
+-    amrex::MultiFab& Phi_old = get_old_data(PhiGrav_Type);
++    // amrex::MultiFab& Phi_old = get_old_data(PhiGrav_Type);
+     amrex::MultiFab& Phi_new = get_new_data(PhiGrav_Type);
+ 
+     if ( amrex::ParallelDescriptor::IOProcessor() ){
+@@ -42,6 +42,9 @@ Nyx::advance_FDM_FD (amrex::Real time,
+             }
+         }
+     }
++    std::cout << "hbaroverm: " << hbaroverm << std::endl;
++    if (Phi_new.contains_nan(0, 1, 0))
++      amrex::Abort("Phi_new has NaNs::advance_FDM_FD()");
+ #endif
+ 
+     const amrex::Real* dx      = geom.CellSize();
+@@ -75,13 +78,13 @@ Nyx::advance_FDM_FD (amrex::Real time,
+       //       fpi.isValid() && pfpi.isValid();
+       //       ++fpi,++pfpi)
+       for (amrex::FillPatchIterator 
+-	     fpi(*this,  Ax_new, 2, time, Axion_Type,   0, Nyx::NUM_AX),
+-	     pfpi(*this, Phi_new, 1, time, PhiGrav_Type, 0, 1);
++	     fpi(*this,  Ax_new, 4, time, Axion_Type,   0, Nyx::NUM_AX),
++	     pfpi(*this, Phi_new, 4, time, PhiGrav_Type, 0, 1);
+ 	     fpi.isValid() && pfpi.isValid();
+ 	     ++fpi,++pfpi)
+        {
+         // Create FAB for extended grid values (including boundaries) and fill.
+-        const int  mfi_index = fpi.index();
++        // const int  mfi_index = fpi.index();
+         const amrex::Box& bx        = fpi.UngrownBox();
+         amrex::FArrayBox& axion     = fpi();
+         amrex::FArrayBox& axionout  = Ax_new[fpi];
+diff --git a/Source/Src_3d/Nyx_adv_FDM_FD.f90 b/Source/Src_3d/Nyx_adv_FDM_FD.f90
+index 7dacc4f..d8f6da2 100644
+--- a/Source/Src_3d/Nyx_adv_FDM_FD.f90
++++ b/Source/Src_3d/Nyx_adv_FDM_FD.f90
+@@ -44,7 +44,7 @@
+                     uout, uout_l1,uout_l2,uout_l3,uout_h1,uout_h2,uout_h3, &
+                     dt_old, dt_new, delta, maxchange, x)
+ 
+-      use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM
++      use meth_params_module, only : UAXRE, UAXIM
+       use fundamental_constants_module
+       !use axion_params_module, only: ax_maxchange,ax_x,ax_y,ax_z
+ 
+@@ -59,7 +59,7 @@
+       double precision  uin(  uin_l1:uin_h1,   uin_l2:uin_h2,   uin_l3:uin_h3, 1)
+       double precision uout( uout_l1:uout_h1, uout_l2:uout_h2, uout_l3:uout_h3, 1)
+       double precision dt_old, dt_new
+-      double precision ampin, ampout, phasein, phaseout, maxchange_temp, maxchange 
++      double precision ampin, ampout, maxchange_temp, maxchange 
+       double precision delta(3), x(3)
+ 
+       dt_new = dt_old
+@@ -114,7 +114,7 @@
+                              vdx, nvar, delta, ProbLo,ProbHi &
+                              )
+ 
+-      use axion_params_module
++      use axion_params_module, only : hbaroverm
+ 
+       implicit none
+ 
+@@ -125,15 +125,15 @@
+ 
+       double precision uin(   uin_l1:uin_h1,  uin_l2:uin_h2,   uin_l3:uin_h3,  nvar)
+       double precision uout(uout_l1:uout_h1, uout_l2:uout_h2, uout_l3:uout_h3, 1) 
+-      double precision dx, delvx, delvy, delvz
+-      double precision hbaroverm,delta(3), ProbLo(3),ProbHi(3),center(3),r
++      double precision delvx, delvy, delvz
++      double precision delta(3), ProbLo(3),ProbHi(3),center(3)
+ 
+       do i = 1,3
+          center(i) = (ProbHi(i)-ProbLo(i))/2.d0
+       end do      
+ 
+       !hbar/m expressed in Nyx units [Mpc km/s]
+-      hbaroverm = 0.01917152d0 / m_tt
++      ! hbaroverm = 0.01917152d0 / m_tt
+ 
+ 
+       ! do k = uout_l3, uout_h3
+@@ -200,11 +200,11 @@
+       double precision state(s_l1:s_h1,s_l2:s_h2,s_l3:s_h3,NAXVAR)
+       double precision divvel(d_l1:d_h1,d_l2:d_h2,d_l3:d_h3,1)
+       double precision phase(p_l1:p_h1,p_l2:p_h2,p_l3:p_h3,1)
+-      integer          i, j, k, n 
++      integer          i, j, k 
+       
+ 
+       !double precision mean_ax_dens
+-      double precision delta, dx(3), hbaroverm!, maxchange, maxchange_temp
++      double precision delta, dx(3)!, hbaroverm!, maxchange, maxchange_temp
+       ! double precision weights(4) 
+       ! double precision, allocatable   ::  temp(:,:,:,:)
+       ! integer          s
+@@ -216,7 +216,7 @@
+       !meandens = 2.775d11 * 0.7**2 * comoving_OmAx !background density 
+ 
+       !hbar/m expressed in Nyx units [Mpc km/s]
+-      hbaroverm = 0.01917152d0 / m_tt
++      ! hbaroverm = 0.01917152d0 / m_tt
+ 
+       ! weights(:) = (/ 1.0/8.0, 1.0/16.0, 1.0/32.0, 1.0/64.0 /)
+       ! s = 1
+@@ -310,8 +310,7 @@
+            courno,a_old,a_new,verbose)
+ 
+       use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM
+-      use axion_params_module
+-      use comoving_module, only : comoving_h, comoving_OmAx
++      use axion_params_module, only : hbaroverm, ii
+       use fundamental_constants_module
+       use probdata_module
+ 
+@@ -329,11 +328,10 @@
+       double precision  phi(   p_l1:p_h1,     p_l2:p_h2,     p_l3:p_h3)
+       double precision delta(3),prob_lo(3),prob_hi(3),dt,time,courno
+       double precision a_old, a_new
+-      double precision e_added, ke_added
+ 
+       !additional variables
+       integer          i,j,k
+-      double precision hbaroverm, invdeltasq(3)
++      double precision invdeltasq(3)
+       double precision xn,xp,xc,del,Vo,r
+ 
+       !(complex) axion field
+@@ -385,7 +383,7 @@
+       !endif
+ 
+       !hbar/m expressed in Nyx units [Mpc km/s]
+-      hbaroverm = 0.01917152d0 / m_tt
++      !hbaroverm = 0.01917152d0 / m_tt
+ 
+       do i = 1, 3
+        invdeltasq(i) = 1.d0 / ( a_new * delta(i) )**2 ! differentiate w.r.t. proper distance
+diff --git a/Source/Src_3d/update_particles_3d.f90 b/Source/Src_3d/update_particles_3d.f90
+index 3023295..9d394cb 100644
+--- a/Source/Src_3d/update_particles_3d.f90
++++ b/Source/Src_3d/update_particles_3d.f90
+@@ -177,7 +177,6 @@
+ 
+   end subroutine update_agn_particles
+ 
+-#ifdef FDM
+   subroutine update_fdm_particles(np, particles, accel, accel_lo, accel_hi, &
+                                  plo, dx, dt, a_prev, a_cur, do_move) &
+        bind(c,name='update_fdm_particles')
+@@ -185,7 +184,7 @@
+     use iso_c_binding
+     use amrex_error_module
+     use amrex_fort_module, only : amrex_real
+-    use particle_mod      , only: dm_particle_t
++    use particle_mod      , only: fdm_particle_t
+ 
+     integer,              intent(in   )        :: np
+     type(fdm_particle_t), intent(inout)        :: particles(np)
+@@ -266,4 +265,3 @@
+     end do
+ 
+   end subroutine update_fdm_particles
+-#endif
+diff --git a/Source/particle_mod.f90 b/Source/particle_mod.f90
+index b68e8d5..2ee2b80 100644
+--- a/Source/particle_mod.f90
++++ b/Source/particle_mod.f90
+@@ -28,7 +28,6 @@ module particle_mod
+      integer(c_int)  :: cpu
+   end type agn_particle_t
+ 
+-#ifdef FDM
+   public  fdm_particle_t
+   
+   type, bind(C)  :: fdm_particle_t
+@@ -36,7 +35,7 @@ module particle_mod
+      real(c_real)    :: mass       !< Particle mass
+      real(c_real)    :: vel(3)     !< Particle velocity
+      real(c_real)    :: phase      !< Particle phase 
+-     real(c_real)    :: amp        !< Particle amplitude
++     real(c_real)    :: amp(2)     !< Particle amplitude
+      real(c_real)    :: width      !< Particle width
+      real(c_real)    :: qq(9)      !< Particle Jacobian qq
+      real(c_real)    :: qp(9)      !< Particle Jacobian qq
+@@ -44,7 +43,6 @@ module particle_mod
+      real(c_real)    :: pp(9)      !< Particle Jacobian qq
+      integer(c_int)  :: id
+      integer(c_int)  :: cpu
+-  end type dm_particle_t
+-#endif  
++  end type fdm_particle_t
+ 
+ end module

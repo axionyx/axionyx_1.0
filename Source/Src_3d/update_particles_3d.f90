@@ -177,7 +177,6 @@
 
   end subroutine update_agn_particles
 
-#ifdef FDM
   subroutine update_fdm_particles(np, particles, accel, accel_lo, accel_hi, &
                                  plo, dx, dt, a_prev, a_cur, do_move) &
        bind(c,name='update_fdm_particles')
@@ -185,7 +184,7 @@
     use iso_c_binding
     use amrex_error_module
     use amrex_fort_module, only : amrex_real
-    use particle_mod      , only: dm_particle_t
+    use particle_mod      , only: fdm_particle_t
 
     integer,              intent(in   )        :: np
     type(fdm_particle_t), intent(inout)        :: particles(np)
@@ -266,4 +265,3 @@
     end do
 
   end subroutine update_fdm_particles
-#endif

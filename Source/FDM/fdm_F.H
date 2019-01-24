@@ -16,6 +16,8 @@ extern "C"
 		const double* delta,
 		const double* xlo, const double* xhi);
 
+  void deposit_fdm_particles(const void* particles, const long* np, const int* ng, const amrex::Real* state,
+			     const int* lo, const int* hi, const double* xlo, const double* delta);
 #ifdef __cplusplus
 }
 #endif

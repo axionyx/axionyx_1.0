@@ -44,7 +44,7 @@
                     uout, uout_l1,uout_l2,uout_l3,uout_h1,uout_h2,uout_h3, &
                     dt_old, dt_new, delta, maxchange, x)
 
-      use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM
+      use meth_params_module, only : UAXRE, UAXIM
       use fundamental_constants_module
       !use axion_params_module, only: ax_maxchange,ax_x,ax_y,ax_z
 
@@ -59,7 +59,7 @@
       double precision  uin(  uin_l1:uin_h1,   uin_l2:uin_h2,   uin_l3:uin_h3, 1)
       double precision uout( uout_l1:uout_h1, uout_l2:uout_h2, uout_l3:uout_h3, 1)
       double precision dt_old, dt_new
-      double precision ampin, ampout, phasein, phaseout, maxchange_temp, maxchange 
+      double precision ampin, ampout, maxchange_temp, maxchange 
       double precision delta(3), x(3)
 
       dt_new = dt_old
@@ -114,7 +114,7 @@
                              vdx, nvar, delta, ProbLo,ProbHi &
                              )
 
-      use axion_params_module
+      use axion_params_module, only : hbaroverm
 
       implicit none
 
@@ -125,15 +125,15 @@
 
       double precision uin(   uin_l1:uin_h1,  uin_l2:uin_h2,   uin_l3:uin_h3,  nvar)
       double precision uout(uout_l1:uout_h1, uout_l2:uout_h2, uout_l3:uout_h3, 1) 
-      double precision dx, delvx, delvy, delvz
-      double precision hbaroverm,delta(3), ProbLo(3),ProbHi(3),center(3),r
+      double precision delvx, delvy, delvz
+      double precision delta(3), ProbLo(3),ProbHi(3),center(3)
 
       do i = 1,3
          center(i) = (ProbHi(i)-ProbLo(i))/2.d0
       end do      
 
       !hbar/m expressed in Nyx units [Mpc km/s]
-      hbaroverm = 0.01917152d0 / m_tt
+      ! hbaroverm = 0.01917152d0 / m_tt
 
 
       ! do k = uout_l3, uout_h3
@@ -200,11 +200,11 @@
       double precision state(s_l1:s_h1,s_l2:s_h2,s_l3:s_h3,NAXVAR)
       double precision divvel(d_l1:d_h1,d_l2:d_h2,d_l3:d_h3,1)
       double precision phase(p_l1:p_h1,p_l2:p_h2,p_l3:p_h3,1)
-      integer          i, j, k, n 
+      integer          i, j, k 
       
 
       !double precision mean_ax_dens
-      double precision delta, dx(3), hbaroverm!, maxchange, maxchange_temp
+      double precision delta, dx(3)!, hbaroverm!, maxchange, maxchange_temp
       ! double precision weights(4) 
       ! double precision, allocatable   ::  temp(:,:,:,:)
       ! integer          s
@@ -216,7 +216,7 @@
       !meandens = 2.775d11 * 0.7**2 * comoving_OmAx !background density 
 
       !hbar/m expressed in Nyx units [Mpc km/s]
-      hbaroverm = 0.01917152d0 / m_tt
+      ! hbaroverm = 0.01917152d0 / m_tt
 
       ! weights(:) = (/ 1.0/8.0, 1.0/16.0, 1.0/32.0, 1.0/64.0 /)
       ! s = 1
@@ -310,8 +310,7 @@
            courno,a_old,a_new,verbose)
 
       use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM
-      use axion_params_module
-      use comoving_module, only : comoving_h, comoving_OmAx
+      use axion_params_module, only : hbaroverm, ii
       use fundamental_constants_module
       use probdata_module
 
@@ -329,11 +328,10 @@
       double precision  phi(   p_l1:p_h1,     p_l2:p_h2,     p_l3:p_h3)
       double precision delta(3),prob_lo(3),prob_hi(3),dt,time,courno
       double precision a_old, a_new
-      double precision e_added, ke_added
 
       !additional variables
       integer          i,j,k
-      double precision hbaroverm, invdeltasq(3)
+      double precision invdeltasq(3)
       double precision xn,xp,xc,del,Vo,r
 
       !(complex) axion field
@@ -385,7 +383,7 @@
       !endif
 
       !hbar/m expressed in Nyx units [Mpc km/s]
-      hbaroverm = 0.01917152d0 / m_tt
+      !hbaroverm = 0.01917152d0 / m_tt
 
       do i = 1, 3
        invdeltasq(i) = 1.d0 / ( a_new * delta(i) )**2 ! differentiate w.r.t. proper distance

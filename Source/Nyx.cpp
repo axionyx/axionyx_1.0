@@ -104,7 +104,13 @@ int Nyx::AxDens = -1;
 int Nyx::AxRe   = -1;
 int Nyx::AxIm   = -1;
 int Nyx::NUM_AX = -1;
-int Nyx::vonNeumann_dt =   0;
+int Nyx::vonNeumann_dt = 0;
+Real Nyx::m_tt = 2.5;
+Real Nyx::hbaroverm = 0.01917152 / m_tt;
+#endif
+#ifdef FDM_GB
+Real Nyx::theta_ax = 1.0;
+Real Nyx::sigma_ax = 1.0;
 #endif
 int Nyx::Temp_comp = -1;
 int Nyx::  Ne_comp = -1;
@@ -268,6 +274,12 @@ Nyx::read_params ()
     pp_nyx.get("dt_cutoff", dt_cutoff);
 #ifdef FDM
     pp_nyx.query("vonNeumann_dt", vonNeumann_dt);
+    pp_nyx.query("m_tt", m_tt);
+    hbaroverm = 0.01917152 / m_tt;
+#endif
+#ifdef FDM_GB
+    pp_nyx.query("theta_ax", theta_ax);
+    pp_nyx.query("sigma_ax", sigma_ax);
 #endif
     pp_nyx.query("dump_old", dump_old);
 
@@ -937,14 +949,14 @@ Nyx::est_time_step (Real dt_old)
 
 //add time step requirements here.
 #ifdef FDM
-    Real a = get_comoving_a(cur_time);
     if (vonNeumann_dt >0){
+      Real a = get_comoving_a(cur_time);
       const MultiFab& phi = get_new_data(PhiGrav_Type);
       Real phi_max = phi.max(0);
       const Real* dx = geom.CellSize();
       //from BODO
-      Real m_tt = 2.5;
-      Real hbaroverm = 0.01917152 / m_tt;
+      // Real m_tt = 2.5;
+      // Real hbaroverm = 0.01917152 / m_tt;
       Real time_step = std::min(dx[0]*dx[0]*a*a/6/hbaroverm,hbaroverm/phi_max); 
       //Real time_step = std::min(10.0*dx[0]*dx[0]*a*a,0.002/phi_max);
       if (verbose && ParallelDescriptor::IOProcessor())
@@ -1352,6 +1364,11 @@ Nyx::post_timestep (int iteration)
             theActiveParticles()[i]->Redistribute(level,
                                                   theActiveParticles()[i]->finestLevel(),
                                                   iteration);
+#ifdef FDM_GB
+	theFDMPC()->Redistribute(level,
+				 theFDMPC()->finestLevel(),
+				 iteration);
+#endif
     }
 
 #ifndef NO_HYDRO
@@ -2120,7 +2137,7 @@ Nyx::errorEst (TagBoxArray& tags,
                 avg = average_total_density;
             }
 #ifdef FDM
-            else if (err_list[j].name() == "AxDens")
+            else if (err_list[j].name() == "AxDens" || err_list[j].name() == "fdm_mass_density")
             {
                 avg = average_ax_density;
             }
