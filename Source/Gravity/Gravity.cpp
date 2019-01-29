@@ -348,18 +348,28 @@ Gravity::solve_for_new_phi (int               level,
 #ifdef FDM
     MultiFab& Ax_new = LevelData[level]->get_new_data(Axion_Type);
 #ifdef FDM_GB
-    Ax_new.setVal(0.);
+    // Ax_new.setVal(0.);
+    // int ncomp = Nyx::NUM_AX;
+    // if(Nyx::theFDMPC())
+    //   Nyx::theFDMPC()->DepositFDMParticles(Ax_new,level,ncomp);
+    // if(Nyx::theGhostFDMPC())
+    //   Nyx::theGhostFDMPC()->DepositFDMParticles(Ax_new,level,ncomp);
+    // if(Nyx::theVirtFDMPC())
+    //   Nyx::theVirtFDMPC()->DepositFDMParticles(Ax_new,level,ncomp);
+    int ng = 10;
+    MultiFab fdm(Ax_new.boxArray(), Ax_new.DistributionMap(), Nyx::NUM_AX, ng);
+    fdm.setVal(0.);
     int ncomp = Nyx::NUM_AX;
     if(Nyx::theFDMPC())
-      Nyx::theFDMPC()->DepositFDMParticles(Ax_new,level,ncomp);
+      Nyx::theFDMPC()->DepositFDMParticles(fdm,level,ncomp);
     if(Nyx::theGhostFDMPC())
-      Nyx::theGhostFDMPC()->DepositFDMParticles(Ax_new,level,ncomp);
-    if(Nyx::theVirtFDMPC()){
-      Nyx::theVirtFDMPC()->DepositFDMParticles(Ax_new,level,ncomp);
-      amrex::Print() << "FDM :: Deposit virtual FDM particles at level =  " << level << '\n'; 
-    }
+      Nyx::theGhostFDMPC()->DepositFDMParticles(fdm,level,ncomp);
+    if(Nyx::theVirtFDMPC())
+      Nyx::theVirtFDMPC()->DepositFDMParticles(fdm,level,ncomp);
+    Ax_new.ParallelCopy(fdm, 0, Nyx::AxDens, Nyx::NUM_AX, fdm.nGrow(), 
+			Ax_new.nGrow(), parent->Geom(level).periodicity());
     AmrLevel* amrlev = &parent->getLevel(level);
-    
+
     for (amrex::FillPatchIterator fpi(*amrlev,  Ax_new); fpi.isValid(); ++fpi)
       {
 	if (Ax_new[fpi].contains_nan())
@@ -842,38 +852,39 @@ Gravity::actual_multilevel_solve (int                       level,
     AddVirtualParticlesToRhs(finest_level,rpp);
 
 #ifdef FDM_GB
-    // for (int lev = level; lev <= finest_level; lev++)
-    //   {
-
-    // 	if (parent->LevelDefined(lev)){
-
-    int lev = level;
-
-	MultiFab& Ax_new = LevelData[lev]->get_new_data(Axion_Type);
-	Ax_new.setVal(0.);
-	int ncomp = Nyx::NUM_AX;
-	if(Nyx::theFDMPC())
-	  Nyx::theFDMPC()->DepositFDMParticles(Ax_new,lev,ncomp);
-	if(Nyx::theGhostFDMPC())
-	  Nyx::theGhostFDMPC()->DepositFDMParticles(Ax_new,lev,ncomp);
-	if(Nyx::theVirtFDMPC()){
-	  Nyx::theVirtFDMPC()->DepositFDMParticles(Ax_new,lev,ncomp);
-	  amrex::Print() << "FDM :: Deposit virtual FDM particles at level =  " << level << '\n'; 
-	}
-	AmrLevel* amrlev = &parent->getLevel(lev);
-	
-	for (amrex::FillPatchIterator fpi(*amrlev,  Ax_new); fpi.isValid(); ++fpi)
-	  {
-	    if (Ax_new[fpi].contains_nan())
- 	      amrex::Abort("Nans in state just before fortran call");
-	    BL_FORT_PROC_CALL(FORT_FDM_FIELDS, fort_fdm_fields)
-	      (BL_TO_FORTRAN(Ax_new[fpi]));
-	    if (Ax_new[fpi].contains_nan())
- 	      amrex::Abort("Nans in state just before fortran call");
-	  }
-	Ax_new.FillBoundary(parent->Geom(level).periodicity());
-      // }
-      // }
+    MultiFab& Ax_new = LevelData[level]->get_new_data(Axion_Type);
+    // Ax_new.setVal(0.);
+    // int ncomp = Nyx::NUM_AX;
+    // if(Nyx::theFDMPC())
+    //   Nyx::theFDMPC()->DepositFDMParticles(Ax_new,level,ncomp);
+    // if(Nyx::theGhostFDMPC())
+    //   Nyx::theGhostFDMPC()->DepositFDMParticles(Ax_new,level,ncomp);
+    // if(Nyx::theVirtFDMPC())
+    //   Nyx::theVirtFDMPC()->DepositFDMParticles(Ax_new,level,ncomp);
+    int ng = 10;
+    MultiFab fdm(Ax_new.boxArray(), Ax_new.DistributionMap(), Nyx::NUM_AX, ng);
+    fdm.setVal(0.);
+    int ncomp = Nyx::NUM_AX;
+    if(Nyx::theFDMPC())
+      Nyx::theFDMPC()->DepositFDMParticles(fdm,level,ncomp);
+    if(Nyx::theGhostFDMPC())
+      Nyx::theGhostFDMPC()->DepositFDMParticles(fdm,level,ncomp);
+    if(Nyx::theVirtFDMPC())
+      Nyx::theVirtFDMPC()->DepositFDMParticles(fdm,level,ncomp);
+    Ax_new.ParallelCopy(fdm, 0, Nyx::AxDens, Nyx::NUM_AX, fdm.nGrow(), 
+			Ax_new.nGrow(), parent->Geom(level).periodicity());
+    AmrLevel* amrlev = &parent->getLevel(level);
+    
+    for (amrex::FillPatchIterator fpi(*amrlev,  Ax_new); fpi.isValid(); ++fpi)
+      {
+	if (Ax_new[fpi].contains_nan())
+	  amrex::Abort("Nans in state just before fortran call");
+	BL_FORT_PROC_CALL(FORT_FDM_FIELDS, fort_fdm_fields)
+	  (BL_TO_FORTRAN(Ax_new[fpi]));
+	if (Ax_new[fpi].contains_nan())
+	  amrex::Abort("Nans in state just before fortran call");
+      }
+    Ax_new.FillBoundary(parent->Geom(level).periodicity());
 #endif
 
     Nyx* cs = dynamic_cast<Nyx*>(&parent->getLevel(level));

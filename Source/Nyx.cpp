@@ -1364,11 +1364,11 @@ Nyx::post_timestep (int iteration)
             theActiveParticles()[i]->Redistribute(level,
                                                   theActiveParticles()[i]->finestLevel(),
                                                   iteration);
-#ifdef FDM_GB
-	theFDMPC()->Redistribute(level,
-				 theFDMPC()->finestLevel(),
-				 iteration);
-#endif
+// #ifdef FDM_GB
+// 	theFDMPC()->Redistribute(level,
+// 				 theFDMPC()->finestLevel(),
+// 				 iteration);
+// #endif
     }
 
 #ifndef NO_HYDRO

@@ -121,10 +121,10 @@ FDMParticleContainer::moveKickDrift (amrex::MultiFab&       acceleration,
         {
            const Box& ac_box = (*ac_ptr)[pti].box();
 
-           update_fdm_particles(&Np, particles.data(),
-				(*ac_ptr)[pti].dataPtr(),
-				ac_box.loVect(), ac_box.hiVect(),
-				plo,dx,dt,a_old,a_half,&do_move);
+           // update_fdm_particles(&Np, particles.data(),
+	   // 			(*ac_ptr)[pti].dataPtr(),
+	   // 			ac_box.loVect(), ac_box.hiVect(),
+	   // 			plo,dx,dt,a_old,a_half,&do_move);
         }
     }
 
@@ -211,10 +211,10 @@ FDMParticleContainer::moveKick (MultiFab&       acceleration,
         {
            const Box& ac_box = (*ac_ptr)[pti].box();
 
-           update_fdm_particles(&Np, particles.data(),
-				(*ac_ptr)[pti].dataPtr(),
-				ac_box.loVect(), ac_box.hiVect(),
-				plo,dx,dt,a_half,a_new,&do_move);
+           // update_fdm_particles(&Np, particles.data(),
+	   // 			(*ac_ptr)[pti].dataPtr(),
+	   // 			ac_box.loVect(), ac_box.hiVect(),
+	   // 			plo,dx,dt,a_half,a_new,&do_move);
         }
     }
     
@@ -688,7 +688,7 @@ FDMParticleContainer::CreateGhostParticlesFDM (int level, int lev, int nGrow, Ao
     return;
 
   const BoxArray& fine = ParticleBoxArray(lev);
-  nGrow *= pow(2,lev);
+  // nGrow *= pow(2,lev);
 
   std::vector< std::pair<int,Box> > isects;
 
@@ -777,6 +777,7 @@ FDMParticleContainer::DepositFDMParticles(MultiFab& mf_to_be_filled, int lev, in
 
 // #ifdef _OPENMP
   const int       ng          = mf_pointer->nGrow();
+  // const int       ng          = 10;
 // #endif
   const Real      strttime    = amrex::second();
   const Geometry& gm          = Geom(lev);
@@ -792,8 +793,6 @@ FDMParticleContainer::DepositFDMParticles(MultiFab& mf_to_be_filled, int lev, in
   // }
 
   //  using ParConstIter = ParConstIter<NStructReal, NStructInt, NArrayReal, NArrayInt>;                                                                                                                             
-  amrex::Print() << "FDMParticleContainer::level = : " << lev << '\n';
-
 #ifdef _OPENMP
 #pragma omp parallel
 #endif
@@ -816,6 +815,8 @@ FDMParticleContainer::DepositFDMParticles(MultiFab& mf_to_be_filled, int lev, in
       hi = tile_box.hiVect();
 #else
       const Box& box = fab.box();
+      // fab.resize(box,ng);
+      // amrex::grow(box,ng);
       data_ptr = fab.dataPtr();
       lo = box.loVect();
       hi = box.hiVect();
@@ -846,7 +847,6 @@ FDMParticleContainer::DepositFDMParticles(MultiFab& mf_to_be_filled, int lev, in
       amrex_atomic_accumulate_fab(BL_TO_FORTRAN_3D(local_rho),
 				  BL_TO_FORTRAN_3D(fab), ncomp);
 #endif
-
     }
   }
 

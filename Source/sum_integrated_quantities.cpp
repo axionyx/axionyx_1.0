@@ -259,8 +259,8 @@ Nyx::compute_average_density ()
         average_total_density = average_dm_density + average_neutr_density;
     }
 #ifdef FDM
-                average_ax_density /= geom.ProbSize();
-                average_total_density += average_ax_density;
+    average_ax_density /= crse_geom.ProbSize();
+    average_total_density += average_ax_density;
 #endif
 
     if (verbose > 0 && ParallelDescriptor::IOProcessor())

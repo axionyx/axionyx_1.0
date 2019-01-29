@@ -28,9 +28,9 @@ subroutine deposit_fdm_particles(particles, np, ng, state, &!, ghosts, ng, virts
 
      A   = cmplx(particles(n)%amp(1),particles(n)%amp(2))
      rad = ceiling(theta_ax/sqrt(2.0*particles(n)%width)*inv_dx(1))
-     pos = (particles(n)%pos - plo)*inv_dx + 0.5d0 - real(ng)
+     pos = (particles(n)%pos - plo)*inv_dx + 0.5d0! - real(ng)
      
-     print *, A, particles(n)%phase, inv_dx(1)
+     ! print *, A, particles(n)%phase, inv_dx(1)
 
      i1  = floor(pos(1))
      j1  = floor(pos(2))

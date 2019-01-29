@@ -51,7 +51,7 @@ Nyx::advance_FDM (amrex::Real time,
 
     bool show_timings=false;
     //I put this here; its value is set differently in Nyx_advance (advance_hydro_plus_particles), but in the old version of the code, it was set to 3.
-    grav_n_grow = 3;
+    // grav_n_grow = 3;
     // Sanity checks
     if (do_hydro)
         amrex::Abort("In `advance_particles_only` but `do_hydro` is true");
@@ -179,53 +179,55 @@ Nyx::advance_FDM (amrex::Real time,
         gravity->multilevel_solve_for_old_phi(level, finest_level,
                                               use_previous_phi_as_guess);
     }
-//    //
-//    // Advance Particles
-//    //
-//    if (Nyx::theActiveParticles().size() > 0)
-//    {
-//        // Advance the particle velocities to the half-time and the positions to the new time
-//        // We use the cell-centered gravity to correctly interpolate onto particle locations
-//        if (particle_move_type == "Gravitational")
-//        {
-//            const amrex::Real a_half = 0.5 * (a_old + a_new);
-//
-//            if (particle_verbose && ParallelDescriptor::IOProcessor())
-//                std::cout << "moveKickDrift ... updating particle positions and velocity\n";
-//
-//            for (int lev = level; lev <= finest_level_to_advance; lev++)
-//            {
-//                // We need grav_n_grow grow cells to track boundary particles
-//                const BoxArray& ba = get_level(lev).get_new_data(State_Type).boxArray();
-//                MultiFab grav_vec_old(ba, BL_SPACEDIM, grav_n_grow);
-//                get_level(lev).gravity->get_old_grav_vector(lev, grav_vec_old, time);
-//                
-//                for (int i = 0; i < Nyx::theActiveParticles().size(); i++)
-//                    Nyx::theActiveParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_old, a_half);
-//
-//                // Only need the coarsest virtual particles here.
-//                if (lev == level && level < finest_level)
-//                    for (int i = 0; i < Nyx::theVirtualParticles().size(); i++)
-//                        Nyx::theVirtualParticles()[i]->moveKickDrift(grav_vec_old, level, dt, a_old, a_half);
-//
-//                // Miiiight need all Ghosts
-//                for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
-//                    Nyx::theGhostParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_new, a_half);
-//            }
-//        }
-//    }
-//
+   //
+   // Advance Particles
+   //
+   if (Nyx::theActiveParticles().size() > 0)
+   {
+       // Advance the particle velocities to the half-time and the positions to the new time
+       // We use the cell-centered gravity to correctly interpolate onto particle locations
+       if (particle_move_type == "Gravitational")
+       {
+           const amrex::Real a_half = 0.5 * (a_old + a_new);
+
+           if (particle_verbose && ParallelDescriptor::IOProcessor())
+               std::cout << "moveKickDrift ... updating particle positions and velocity\n";
+
+           for (int lev = level; lev <= finest_level_to_advance; lev++)
+           {
+               // We need grav_n_grow grow cells to track boundary particles
+               const BoxArray& ba = get_level(lev).get_new_data(State_Type).boxArray();
+               const auto& dm = get_level(lev).get_new_data(PhiGrav_Type).DistributionMap();
+               MultiFab grav_vec_old(ba, dm, BL_SPACEDIM, grav_n_grow);
+               get_level(lev).gravity->get_old_grav_vector(lev, grav_vec_old, time);
+               
+               for (int i = 0; i < Nyx::theActiveParticles().size(); i++)
+                   Nyx::theActiveParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_old, a_half);
+
+               // Only need the coarsest virtual particles here.
+               if (lev == level && level < finest_level)
+                   for (int i = 0; i < Nyx::theVirtualParticles().size(); i++)
+                       Nyx::theVirtualParticles()[i]->moveKickDrift(grav_vec_old, level, dt, a_old, a_half);
+
+               // Miiiight need all Ghosts
+               for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
+                   Nyx::theGhostParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_new, a_half);
+           }
+       }
+   }
+
 #endif
 
 #ifndef FDM_GB
     //Advance Axions
     for (int lev = level; lev <= finest_level_to_advance; lev++)
         get_level(lev).advance_FDM_FD(time, dt, a_old, a_new);
-#endif
 
     // Always average down from finer to coarser.
     for (int lev = finest_level_to_advance-1; lev >= level; lev--)
         get_level(lev).average_down();
+#endif
+
 
 #ifdef GRAVITY
 
@@ -248,43 +250,44 @@ Nyx::advance_FDM (amrex::Real time,
         if (ParallelDescriptor::IOProcessor())
            std::cout << "Time before solve for new phi " << end << '\n';
     }
-//TODO: same here
-//
-//    // Must average down again after doing the gravity correction;
-//    //      always average down from finer to coarser.
-//    //    for (int lev = finest_level_to_advance-1; lev >= level; lev--)
-//    //        get_level(lev).average_down();
-//
-//    if (Nyx::theActiveParticles().size() > 0)
-//    {
-//        // Advance the particle velocities by dt/2 to the new time. We use the
-//        // cell-centered gravity to correctly interpolate onto particle
-//        // locations.
-//        if (particle_move_type == "Gravitational")
-//        {
-//            const amrex::Real a_half = 0.5 * (a_old + a_new);
-//
-//            if (particle_verbose && ParallelDescriptor::IOProcessor())
-//                std::cout << "moveKick ... updating velocity only\n";
-//
-//            for (int lev = level; lev <= finest_level_to_advance; lev++)
-//            {
-//                const BoxArray& ba = get_level(lev).get_new_data(State_Type).boxArray();
-//                MultiFab grav_vec_new(ba, BL_SPACEDIM, grav_n_grow);
-//                get_level(lev).gravity->get_new_grav_vector(lev, grav_vec_new, cur_time);
-//
-//                for (int i = 0; i < Nyx::theActiveParticles().size(); i++)
-//                    Nyx::theActiveParticles()[i]->moveKick(grav_vec_new, lev, dt, a_new, a_half);
-//
-//                // Virtual particles will be recreated, so we need not kick them.
-//
-//                // Ghost particles need to be kicked except during the final iteration.
-//                if (iteration != ncycle)
-//                    for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
-//                        Nyx::theGhostParticles()[i]->moveKick(grav_vec_new, lev, dt, a_new, a_half);
-//            }
-//        }
-//    }
+// TODO: same here
+
+   // Must average down again after doing the gravity correction;
+   //      always average down from finer to coarser.
+   //    for (int lev = finest_level_to_advance-1; lev >= level; lev--)
+   //        get_level(lev).average_down();
+
+   if (Nyx::theActiveParticles().size() > 0)
+   {
+       // Advance the particle velocities by dt/2 to the new time. We use the
+       // cell-centered gravity to correctly interpolate onto particle
+       // locations.
+       if (particle_move_type == "Gravitational")
+       {
+           const amrex::Real a_half = 0.5 * (a_old + a_new);
+
+           if (particle_verbose && ParallelDescriptor::IOProcessor())
+               std::cout << "moveKick ... updating velocity only\n";
+
+           for (int lev = level; lev <= finest_level_to_advance; lev++)
+           {
+               const BoxArray& ba = get_level(lev).get_new_data(State_Type).boxArray();
+	       const auto& dm = get_level(lev).get_new_data(PhiGrav_Type).DistributionMap();
+               MultiFab grav_vec_new(ba, dm, BL_SPACEDIM, grav_n_grow);
+               get_level(lev).gravity->get_new_grav_vector(lev, grav_vec_new, cur_time);
+
+               for (int i = 0; i < Nyx::theActiveParticles().size(); i++)
+                   Nyx::theActiveParticles()[i]->moveKick(grav_vec_new, lev, dt, a_new, a_half);
+
+               // Virtual particles will be recreated, so we need not kick them.
+
+               // Ghost particles need to be kicked except during the final iteration.
+               if (iteration != ncycle)
+                   for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
+                       Nyx::theGhostParticles()[i]->moveKick(grav_vec_new, lev, dt, a_new, a_half);
+           }
+       }
+   }
 
     //we need to get new grids, since it implicitely fills the new part of the
     //Gravity_Type, which we need for the interpolated values of G at higher 

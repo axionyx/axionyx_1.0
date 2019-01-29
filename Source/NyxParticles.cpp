@@ -799,7 +799,13 @@ Nyx::init_particles ()
 	  else
 	    amrex::Error("\nNeed num_particle_fdm > 0 for InitGaussianBeams!\n\n");
 	  // FDMPC->DepositFDMParticles(get_new_data(Axion_Type),level,Nyx::NUM_AX);
-
+	  get_new_data(Axion_Type).setVal(0.);
+	  if(FDMPC)
+	    FDMPC->DepositFDMParticles(get_new_data(Axion_Type),level,Nyx::NUM_AX);
+	  if(GhostFDMPC)
+	    GhostFDMPC->DepositFDMParticles(get_new_data(Axion_Type),level,Nyx::NUM_AX);
+	  if(VirtFDMPC)
+	    VirtFDMPC->DepositFDMParticles(get_new_data(Axion_Type),level,Nyx::NUM_AX);
         } else {
 	//FIXME                                                                                                                                                                                                            
 	std::cout << "multilevel init not implemented, yet!" << std::endl;
@@ -1377,13 +1383,18 @@ Nyx::setup_ghost_particles(int ngrow)
     if(Nyx::theFDMPC() != 0)
       {
 	FDMParticleContainer::AoS ghosts;
-	for (int lev = level+1; lev < parent->finestLevel(); lev++){
-	  // if(levelmethod[lev]==GaussBeam){
-	  if(true){
-	    Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ngrow, ghosts);
-	    Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ngrow);
-	  }
-	}
+	// // Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ngrow, ghosts);
+	// // Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ngrow);
+	Nyx::theFDMPC()->CreateGhostParticles(level, ngrow, ghosts);
+	Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, level+1, ngrow);
+
+	// for (int lev = level+1; lev < parent->finestLevel(); lev++){
+	//   // if(levelmethod[lev]==GaussBeam){
+	//   if(true){
+	//     Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ngrow, ghosts);
+	//     Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ngrow);
+	//   }
+	// }
       }
 #endif
 
