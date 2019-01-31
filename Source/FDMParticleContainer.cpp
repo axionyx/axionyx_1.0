@@ -682,17 +682,14 @@ FDMParticleContainer::CreateGhostParticlesFDM (int level, int lev, int nGrow, Ao
   BL_ASSERT(ghosts.empty());
   BL_ASSERT(level < finestLevel());
 
-  // if (level >= static_cast<int>(m_particles.size()))
-  //   return;
   if (level >= static_cast<int>(GetParticles().size()))
     return;
 
   const BoxArray& fine = ParticleBoxArray(lev);
-  // nGrow *= pow(2,lev);
+  nGrow *= pow(2,lev);
 
   std::vector< std::pair<int,Box> > isects;
 
-  // const auto& pmap = m_particles[level];
   const auto& pmap = GetParticles(level);
   for (const auto& kv : pmap)
     {
@@ -757,6 +754,9 @@ FDMParticleContainer::DepositFDMParticles(MultiFab& mf_to_be_filled, int lev, in
     mf_pointer = &mf_to_be_filled;
   }
   else {
+
+      amrex::Print() <<"FDM:: mf_to_be_filled different!!\n";
+
     // If mf_to_be_filled is not defined on the particle_box_array, then we need                                                                                                                                 
     // to make a temporary here and copy into mf_to_be_filled at the end.                                                                                                                                        
     mf_pointer = new MultiFab(ParticleBoxArray(lev),
@@ -820,6 +820,9 @@ FDMParticleContainer::DepositFDMParticles(MultiFab& mf_to_be_filled, int lev, in
       data_ptr = fab.dataPtr();
       lo = box.loVect();
       hi = box.hiVect();
+
+      amrex::Print() <<"FDM:: box.Vect: "<<  box.loVect()[2]<<" "<<box.hiVect()[0]<<" "<<plo[2]<<"\n";
+
 #endif
 
     deposit_fdm_particles(particles.data(), &np, &ng, data_ptr,
@@ -850,7 +853,7 @@ FDMParticleContainer::DepositFDMParticles(MultiFab& mf_to_be_filled, int lev, in
     }
   }
 
-  mf_pointer->SumBoundary(gm.periodicity());
+  // mf_pointer->SumBoundary(gm.periodicity());
 
   // // If ncomp > 1, first divide the momenta (component n)                                                                                                                                                        
   // // by the mass (component 0) in order to get velocities.                                                                                                                                                       
@@ -1213,6 +1216,8 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
       // set position
       for (int n = 0; n < BL_SPACEDIM; n++)
 	part.pos( n) = 0.5;//q[n];
+      if(index==0)
+	part.pos( 0) = 0.4;
       // set mass                                                                                                                                                                
       part.rdata( 0) =  1.0/npart; //dx[0] * dx[1] * dx[2];
       // set velocity
@@ -1222,6 +1227,9 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
       //set phase
       part.rdata( 4) = phi;
       //set amplitude
+      if(index==0)
+      part.rdata( 5) = 0.01*pow(2.0*gamma/M_PI,0.75);//pow(2.0*gamma*Amp,1.5);
+      else
       part.rdata( 5) = pow(2.0*gamma/M_PI,0.75);//pow(2.0*gamma*Amp,1.5);
       part.rdata( 6) = 0.0;
       //set width

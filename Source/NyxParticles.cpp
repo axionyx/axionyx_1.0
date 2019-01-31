@@ -1383,18 +1383,15 @@ Nyx::setup_ghost_particles(int ngrow)
     if(Nyx::theFDMPC() != 0)
       {
 	FDMParticleContainer::AoS ghosts;
-	// // Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ngrow, ghosts);
-	// // Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ngrow);
-	Nyx::theFDMPC()->CreateGhostParticles(level, ngrow, ghosts);
-	Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, level+1, ngrow);
+	// Nyx::theFDMPC()->CreateGhostParticles(level, ngrow, ghosts);
+	// Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, level+1, ngrow);
 
-	// for (int lev = level+1; lev < parent->finestLevel(); lev++){
-	//   // if(levelmethod[lev]==GaussBeam){
-	//   if(true){
-	//     Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ngrow, ghosts);
-	//     Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ngrow);
-	//   }
-	// }
+	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
+	  // if(levelmethod[lev]==GaussBeam){
+	    Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ngrow, ghosts);
+	    Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ngrow);
+	  // }
+	}
       }
 #endif
 

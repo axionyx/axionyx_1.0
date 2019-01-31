@@ -28,14 +28,18 @@ subroutine deposit_fdm_particles(particles, np, ng, state, &!, ghosts, ng, virts
 
      A   = cmplx(particles(n)%amp(1),particles(n)%amp(2))
      rad = ceiling(theta_ax/sqrt(2.0*particles(n)%width)*inv_dx(1))
-     pos = (particles(n)%pos - plo)*inv_dx + 0.5d0! - real(ng)
-     
-     ! print *, A, particles(n)%phase, inv_dx(1)
+     pos = (particles(n)%pos - plo)*inv_dx + 0.5d0! + real(ng)
 
      i1  = floor(pos(1))
      j1  = floor(pos(2))
      k1  = floor(pos(3))
      
+     ! if (dx(1) .eq. 1.0/32.0) then
+     print *, rad, lo, hi, pos, particles(n)%width, inv_dx, i1, j1, k1, theta_ax, ng
+     ! else
+     !    print *, state(:,:,:,:)
+     ! endif
+
      do k=-rad,rad,1
         if ( (k1+k).ge.lo(3) .and. (k1+k).le.hi(3) ) then
            do j=-rad,rad,1
@@ -43,17 +47,17 @@ subroutine deposit_fdm_particles(particles, np, ng, state, &!, ghosts, ng, virts
                  do i=-rad,rad,1
                     if ( (i1+i).ge.lo(1) .and. (i1+i).le.hi(1) ) then
                        
-                       kernelsize = ((real(i1+i)-pos(1))*dx(1)*(real(i1+i)-pos(1))*dx(1)+ &
-                            (real(j1+j)-pos(2))*dx(2)*(real(j1+j)-pos(2))*dx(2)+ &
-                            (real(k1+k)-pos(3))*dx(3)*(real(k1+k)-pos(3))*dx(3))* &
+                       kernelsize = ((real(i1+i)+1.0-pos(1))*dx(1)*(real(i1+i)+1.0-pos(1))*dx(1)+ &
+                            (real(j1+j)+1.0-pos(2))*dx(2)*(real(j1+j)+1.0-pos(2))*dx(2)+ &
+                            (real(k1+k)+1.0-pos(3))*dx(3)*(real(k1+k)+1.0-pos(3))*dx(3))* &
                             particles(n)%width
                        
                        if (kernelsize .le. (theta_ax*theta_ax/2.0)) then
                           
                           phi = A*exp(-kernelsize)*exp(ii*(particles(n)%phase+ &
-                               particles(n)%vel(1)*(real(i1+i)-0.5-pos(1))*dx(1)+ &
-                               particles(n)%vel(2)*(real(j1+j)-0.5-pos(2))*dx(2)+ &
-                               particles(n)%vel(3)*(real(k1+k)-0.5-pos(3))*dx(3) )/hbaroverm)
+                               particles(n)%vel(1)*(real(i1+i)-1.0-pos(1))*dx(1)+ &
+                               particles(n)%vel(2)*(real(j1+j)-1.0-pos(2))*dx(2)+ &
+                               particles(n)%vel(3)*(real(k1+k)-1.0-pos(3))*dx(3) )/hbaroverm)
                           
                           state(i1+i,j1+j,k1+k,UAXRE) = state(i1+i,j1+j,k1+k,UAXRE) + real(real(phi))
                           state(i1+i,j1+j,k1+k,UAXIM) = state(i1+i,j1+j,k1+k,UAXIM) + real(aimag(phi))

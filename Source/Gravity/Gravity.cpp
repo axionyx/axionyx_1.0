@@ -348,7 +348,7 @@ Gravity::solve_for_new_phi (int               level,
 #ifdef FDM
     MultiFab& Ax_new = LevelData[level]->get_new_data(Axion_Type);
 #ifdef FDM_GB
-    // Ax_new.setVal(0.);
+    Ax_new.setVal(0.);
     // int ncomp = Nyx::NUM_AX;
     // if(Nyx::theFDMPC())
     //   Nyx::theFDMPC()->DepositFDMParticles(Ax_new,level,ncomp);
@@ -356,7 +356,7 @@ Gravity::solve_for_new_phi (int               level,
     //   Nyx::theGhostFDMPC()->DepositFDMParticles(Ax_new,level,ncomp);
     // if(Nyx::theVirtFDMPC())
     //   Nyx::theVirtFDMPC()->DepositFDMParticles(Ax_new,level,ncomp);
-    int ng = 10;
+    int ng = 9;
     MultiFab fdm(Ax_new.boxArray(), Ax_new.DistributionMap(), Nyx::NUM_AX, ng);
     fdm.setVal(0.);
     int ncomp = Nyx::NUM_AX;
@@ -366,8 +366,11 @@ Gravity::solve_for_new_phi (int               level,
       Nyx::theGhostFDMPC()->DepositFDMParticles(fdm,level,ncomp);
     if(Nyx::theVirtFDMPC())
       Nyx::theVirtFDMPC()->DepositFDMParticles(fdm,level,ncomp);
-    Ax_new.ParallelCopy(fdm, 0, Nyx::AxDens, Nyx::NUM_AX, fdm.nGrow(), 
-			Ax_new.nGrow(), parent->Geom(level).periodicity());
+    // fdm.SumBoundary(parent->Geom(level).periodicity());
+    Ax_new.ParallelCopy(fdm, 0, 0, Nyx::NUM_AX, fdm.nGrow(), 
+			Ax_new.nGrow(), parent->Geom(level).periodicity(),FabArrayBase::ADD);
+    // Ax_new.ParallelCopy(fdm, 0, Nyx::AxDens, Nyx::NUM_AX, fdm.nGrow(), 
+    // 			Ax_new.nGrow(), parent->Geom(level).periodicity());
     AmrLevel* amrlev = &parent->getLevel(level);
 
     for (amrex::FillPatchIterator fpi(*amrlev,  Ax_new); fpi.isValid(); ++fpi)
@@ -853,7 +856,7 @@ Gravity::actual_multilevel_solve (int                       level,
 
 #ifdef FDM_GB
     MultiFab& Ax_new = LevelData[level]->get_new_data(Axion_Type);
-    // Ax_new.setVal(0.);
+    Ax_new.setVal(0.);
     // int ncomp = Nyx::NUM_AX;
     // if(Nyx::theFDMPC())
     //   Nyx::theFDMPC()->DepositFDMParticles(Ax_new,level,ncomp);
@@ -861,7 +864,7 @@ Gravity::actual_multilevel_solve (int                       level,
     //   Nyx::theGhostFDMPC()->DepositFDMParticles(Ax_new,level,ncomp);
     // if(Nyx::theVirtFDMPC())
     //   Nyx::theVirtFDMPC()->DepositFDMParticles(Ax_new,level,ncomp);
-    int ng = 10;
+    int ng = 9;
     MultiFab fdm(Ax_new.boxArray(), Ax_new.DistributionMap(), Nyx::NUM_AX, ng);
     fdm.setVal(0.);
     int ncomp = Nyx::NUM_AX;
@@ -871,8 +874,9 @@ Gravity::actual_multilevel_solve (int                       level,
       Nyx::theGhostFDMPC()->DepositFDMParticles(fdm,level,ncomp);
     if(Nyx::theVirtFDMPC())
       Nyx::theVirtFDMPC()->DepositFDMParticles(fdm,level,ncomp);
-    Ax_new.ParallelCopy(fdm, 0, Nyx::AxDens, Nyx::NUM_AX, fdm.nGrow(), 
-			Ax_new.nGrow(), parent->Geom(level).periodicity());
+    // fdm.SumBoundary(parent->Geom(level).periodicity());
+    Ax_new.ParallelCopy(fdm, 0, 0, Nyx::NUM_AX, fdm.nGrow(), 
+			Ax_new.nGrow(), parent->Geom(level).periodicity(),FabArrayBase::ADD);
     AmrLevel* amrlev = &parent->getLevel(level);
     
     for (amrex::FillPatchIterator fpi(*amrlev,  Ax_new); fpi.isValid(); ++fpi)
@@ -884,7 +888,7 @@ Gravity::actual_multilevel_solve (int                       level,
 	if (Ax_new[fpi].contains_nan())
 	  amrex::Abort("Nans in state just before fortran call");
       }
-    Ax_new.FillBoundary(parent->Geom(level).periodicity());
+    // Ax_new.FillBoundary(parent->Geom(level).periodicity());
 #endif
 
     Nyx* cs = dynamic_cast<Nyx*>(&parent->getLevel(level));
