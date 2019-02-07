@@ -798,14 +798,46 @@ Nyx::init_particles ()
 	    FDMPC->InitGaussianBeams(num_particle_fdm, level, parent->initialBaLevels()+1, hbaroverm, sigma_ax);
 	  else
 	    amrex::Error("\nNeed num_particle_fdm > 0 for InitGaussianBeams!\n\n");
-	  // FDMPC->DepositFDMParticles(get_new_data(Axion_Type),level,Nyx::NUM_AX);
-	  get_new_data(Axion_Type).setVal(0.);
-	  if(FDMPC)
-	    FDMPC->DepositFDMParticles(get_new_data(Axion_Type),level,Nyx::NUM_AX);
-	  if(GhostFDMPC)
-	    GhostFDMPC->DepositFDMParticles(get_new_data(Axion_Type),level,Nyx::NUM_AX);
-	  if(VirtFDMPC)
-	    VirtFDMPC->DepositFDMParticles(get_new_data(Axion_Type),level,Nyx::NUM_AX);
+
+	  // //Define neccessary number of ghost cells                                                                                                                                              
+	  // int ng = ceiling(sigma_ax*theta_ax)*pow(2,level);
+
+	  //Initialize MultiFabs                                                                                                                                                                      
+	  MultiFab& Ax_new = get_new_data(Axion_Type);
+	  Ax_new.setVal(0.);
+	  // MultiFab fdmreal(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
+	  // fdmreal.setVal(0.);
+	  // MultiFab fdmimag(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
+	  // fdmimag.setVal(0.);
+
+	  // //Deposit Gaussian Beams                                                                                                                                                         
+	  // if(Nyx::theFDMPC())
+	  //   Nyx::theFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level);
+	  // if(Nyx::theGhostFDMPC())
+	  //   Nyx::theGhostFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level);
+	  // if(Nyx::theVirtFDMPC())
+	  //   Nyx::theVirtFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level);
+
+	  // //Update real part in FDM state                                                                                                                                                            
+	  // Ax_new.ParallelCopy(fdmreal, 0, Nyx::AxRe, 1, fdmreal.nGrow(),
+	  // 		      Ax_new.nGrow(), parent->Geom(level).periodicity(),FabArrayBase::ADD);
+
+	  // //Update imaginary part in FDM state                                                                                                                                                   
+	  // Ax_new.ParallelCopy(fdmimag, 0, Nyx::AxIm, 1, fdmimag.nGrow(),
+	  // 		      Ax_new.nGrow(), parent->Geom(level).periodicity(),FabArrayBase::ADD);
+
+	  // //Update density in FDM state                                                                                                                                                                 
+	  // AmrLevel* amrlev = &parent->getLevel(level);
+	  // for (amrex::FillPatchIterator fpi(*amrlev,Ax_new); fpi.isValid(); ++fpi)
+	  //   {
+	  //     if (Ax_new[fpi].contains_nan())
+	  // 	amrex::Abort("Nans in state just before FDM density update");
+	  //     BL_FORT_PROC_CALL(FORT_FDM_FIELDS, fort_fdm_fields)
+	  // 	(BL_TO_FORTRAN(Ax_new[fpi]));
+	  //     if (Ax_new[fpi].contains_nan())
+	  // 	amrex::Abort("Nans in state just after FDM density update");
+	  //   }
+
         } else {
 	//FIXME                                                                                                                                                                                                            
 	std::cout << "multilevel init not implemented, yet!" << std::endl;
@@ -1386,10 +1418,14 @@ Nyx::setup_ghost_particles(int ngrow)
 	// Nyx::theFDMPC()->CreateGhostParticles(level, ngrow, ghosts);
 	// Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, level+1, ngrow);
 
+	int ng;// = parent->nCycle(level)+ceil(sigma_ax*theta_ax)*pow(2,level);
+
 	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
 	  // if(levelmethod[lev]==GaussBeam){
-	    Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ngrow, ghosts);
-	    Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ngrow);
+	  ng = parent->nCycle(level)+ceil(sigma_ax*theta_ax)*pow(2,lev);
+	  // ng *=2;
+	  Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);
+	  Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ng);
 	  // }
 	}
       }

@@ -199,7 +199,7 @@
     real(amrex_real) lx, ly, lz
     real(amrex_real) half_dt, a_cur_inv, dt_a_cur_inv
     real(amrex_real) inv_dx(3)
-    real(amrex_real) part_accel
+    real(amrex_real) part_accel, part_phi, vel_square
 
     inv_dx = 1.0d0/dx
 
@@ -224,7 +224,7 @@
        if (i-1 .lt. accel_lo(1) .or. i .gt. accel_hi(1) .or. &
            j-1 .lt. accel_lo(2) .or. j .gt. accel_hi(2) .or. &
            k-1 .lt. accel_lo(3) .or. k .gt. accel_hi(3)) then
-          print *,'PARTICLE ID ', particles(n)%id,' REACHING OUT OF BOUNDS AT (I,J,K) = ',i,j,k
+          print *,'PARTICLE ID ', particles(n)%id,' REACHING OUT OF BOUNDS AT (I,J,K) (accel)= ',i,j,k
           call amrex_error('Aborting in move_kick_drift')
        end if
 
@@ -255,11 +255,41 @@
 
        end do
 
+       ! part_phi = &
+       !      wx_lo*wy_lo*wz_lo*phi(i-1, j-1, k-1, nc) + &
+       !          wx_lo*wy_lo*wz_hi*phi(i-1, j-1, k  , nc) + &
+       !          wx_lo*wy_hi*wz_lo*phi(i-1, j,   k-1, nc) + &
+       !          wx_lo*wy_hi*wz_hi*phi(i-1, j,   k  , nc) + &
+       !          wx_hi*wy_lo*wz_lo*phi(i,   j-1, k-1, nc) + &
+       !          wx_hi*wy_lo*wz_hi*phi(i,   j-1, k  , nc) + &
+       !          wx_hi*wy_hi*wz_lo*phi(i,   j,   k-1, nc) + &
+       !          wx_hi*wy_hi*wz_hi*phi(i,   j,   k  , nc)
+
+       ! particles(n)%phase = particles(n)%phase - half_dt * part_phi
+
+       ! do nc = 1, 9
+       !    particles(n)%pq(nc) = particles(n)%pq(nc) - half_dt * particles(n)%qq(nc)
+       !    particles(n)%pp(nc) = particles(n)%pp(nc) - half_dt * particles(n)%qp(nc)
+       ! enddo
+
        ! moveKickDrift: Update position by full dt: x^new = x^old + dt u^half / a^half
        if (do_move .eq. 1) then
+
           do nc = 1, 3
              particles(n)%pos(nc) = particles(n)%pos(nc) + dt_a_cur_inv * particles(n)%vel(nc)
           end do
+          
+          ! vel_square = particles(n)%vel(1)*particles(n)%vel(1) + &
+          !              particles(n)%vel(2)*particles(n)%vel(2) + &
+          !              particles(n)%vel(3)*particles(n)%vel(3) 
+
+          ! particles(n)%phase = particles(n)%phase + half_dt * vel_square
+
+          ! do nc = 1, 9
+          !    particles(n)%qq(nc) = particles(n)%qq(nc) + dt_a_cur_inv * a_cur_inv * particles(n)%pq(nc)
+          !    particles(n)%qp(nc) = particles(n)%qp(nc) + dt_a_cur_inv * a_cur_inv * particles(n)%pp(nc)
+          ! end do
+
        end if
 
     end do

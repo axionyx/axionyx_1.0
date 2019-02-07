@@ -38,9 +38,9 @@ module particle_mod
      real(c_real)    :: amp(2)     !< Particle amplitude
      real(c_real)    :: width      !< Particle width
      real(c_real)    :: qq(9)      !< Particle Jacobian qq
-     real(c_real)    :: qp(9)      !< Particle Jacobian qq
-     real(c_real)    :: pq(9)      !< Particle Jacobian qq
-     real(c_real)    :: pp(9)      !< Particle Jacobian qq
+     real(c_real)    :: qp(9)      !< Particle Jacobian qp
+     real(c_real)    :: pq(9)      !< Particle Jacobian pq
+     real(c_real)    :: pp(9)      !< Particle Jacobian pp
      integer(c_int)  :: id
      integer(c_int)  :: cpu
   end type fdm_particle_t
