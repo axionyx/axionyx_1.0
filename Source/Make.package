@@ -1,6 +1,5 @@
 ifeq ($(USE_FDM), TRUE)
-CEXE_sources += advance_FDM.cpp
-CEXE_sources += Nyx_FDM.cpp
+CEXE_sources += advance_FDM_FD.cpp
 endif
 
 #ifneq ($(USE_HENSON), TRUE)
