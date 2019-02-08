@@ -32,7 +32,12 @@ Nyx::advance_particles_only (Real time,
 
     // A particle in cell (i) can affect cell values in (i-1) to (i+1)
     int stencil_deposition_width = 1;
- 
+
+#ifdef FDM_GB
+    // For FDM Gaussian kernels this is increased to                                                                                                                                                          
+    int stencil_deposition_width_fdm = ceil(sigma_ax*theta_ax)*pow(2,level-1);
+#endif 
+
     // A particle in cell (i) may need information from cell values in (i-1) to (i+1)
     //   to update its position (typically via interpolation of the acceleration from the grid)
     int stencil_interpolation_width = 1;
@@ -49,14 +54,38 @@ Nyx::advance_particles_only (Real time,
     //      we can't reduce this number as iteration increases.
  
     int ghost_width = ncycle + stencil_deposition_width;
- 
-    // *** grav_n_grow *** is used
-    //   *) to determine how many ghost cells we need to fill in the MultiFab from
-    //      which the particle interpolates its acceleration
-    //   *) to set how many cells the Where call in moveKickDrift tests = (grav.nGrow()-2).
- 
-    int grav_n_grow = ghost_width + (1-iteration) +
-                      stencil_interpolation_width ;
+
+#ifdef FDM_GB
+    // it is okay to use ghost_width in setup_ghost_particels since ghost_width_fdm for FDM                                                                                                                    
+    // Gaussian kernels is separately set in setup_ghost_particles                                                                                                                                          
+    int ghost_width_fdm = ncycle + stencil_deposition_width_fdm;
+#endif 
+
+    // *** where_width ***  is used                                                                                                                                                                            
+    //   *) to set how many cells the Where call in moveKickDrift tests =                                                                                                                                      
+    //      ghost_width + (1-iteration) - 1:                                                                                                                                                                   
+    //      the minus 1 arises because this occurs *after* the move                                                                                                                                            
+
+    int where_width =  ghost_width + (1-iteration)  - 1;
+
+#ifdef FDM_GB
+    int where_width_fdm =  ghost_width_fdm + (1-iteration)  - 1;
+#endif
+
+    // *** grav_n_grow *** is used                                                                                                                                                                               
+    //   *) to determine how many ghost cells we need to fill in the MultiFab from                                                                                                                              
+    //      which the particle interpolates its acceleration                                                                                                                                                    
+    //   *) to set how many cells the Where call in moveKickDrift tests = (grav.nGrow()-2).                                                                                                                     
+    //   *) the (1-iteration) arises because the ghost particles are created on the coarser                                                                                                                     
+    //      level which means in iteration 2 the ghost particles may have moved 1 additional cell along                                                                                                         
+
+    int grav_n_grow = ghost_width + (1-iteration) + (iteration-1) +
+      stencil_interpolation_width ;
+
+#ifdef FDM_GB
+    grav_n_grow = ghost_width_fdm + (1-iteration) + (iteration-1) +
+      stencil_interpolation_width ;
+#endif
 
     // Sanity checks
     if (do_hydro)
@@ -171,7 +200,9 @@ Nyx::advance_particles_only (Real time,
     //
     // Advance Particles
     //
+#ifndef FMD_GB
     if (Nyx::theActiveParticles().size() > 0)
+#endif
     {
         // Advance the particle velocities to the half-time and the positions to the new time
         // We use the cell-centered gravity to correctly interpolate onto particle locations
@@ -191,19 +222,39 @@ Nyx::advance_particles_only (Real time,
                 get_level(lev).gravity->get_old_grav_vector(lev, grav_vec_old, time);
                 
                 for (int i = 0; i < Nyx::theActiveParticles().size(); i++)
-                    Nyx::theActiveParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_old, a_half);
+		  Nyx::theActiveParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_old, a_half,where_width);
 
                 // Only need the coarsest virtual particles here.
                 if (lev == level && level < finest_level)
                     for (int i = 0; i < Nyx::theVirtualParticles().size(); i++)
-                        Nyx::theVirtualParticles()[i]->moveKickDrift(grav_vec_old, level, dt, a_old, a_half);
+                        Nyx::theVirtualParticles()[i]->moveKickDrift(grav_vec_old, level, dt, a_old, a_half,where_width);
 
                 // Miiiight need all Ghosts
                 for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
-                    Nyx::theGhostParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_new, a_half);
+                    Nyx::theGhostParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_new, a_half,where_width);
+
+#ifdef FDM_GB
+		MultiFab& Phi_old = get_level(lev).get_old_data(PhiGrav_Type);
+		if(Nyx::theFDMPC())
+		  Nyx::theFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm);
+		if(Nyx::theGhostFDMPC())
+		  Nyx::theGhostFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm);
+		if(Nyx::theVirtFDMPC())
+		  Nyx::theVirtFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm);
+#endif
             }
         }
     }
+
+#ifdef FDM_FD
+    //Advance Axions                                                                                                                                                                       
+    for (int lev = level; lev <= finest_level_to_advance; lev++)
+      get_level(lev).advance_FDM_FD(time, dt, a_old, a_new);
+
+    // Always average down from finer to coarser.                                                                                                                                                
+    for (int lev = finest_level_to_advance-1; lev >= level; lev--)
+      get_level(lev).average_down(Axion_Type);
+#endif
 
     //
     // Here we use the "old" phi from the current time step as a guess for this
@@ -231,7 +282,9 @@ Nyx::advance_particles_only (Real time,
                                fill_interior, grav_n_grow);
     }
 
+#ifndef FDM_GB
     if (Nyx::theActiveParticles().size() > 0)
+#endif
     {
         // Advance the particle velocities by dt/2 to the new time. We use the
         // cell-centered gravity to correctly interpolate onto particle
@@ -259,9 +312,64 @@ Nyx::advance_particles_only (Real time,
                 if (iteration != ncycle)
                     for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
                         Nyx::theGhostParticles()[i]->moveKick(grav_vec_new, lev, dt, a_new, a_half);
+
+#ifdef FDM_GB
+		MultiFab& Phi_new = get_level(lev).get_new_data(PhiGrav_Type);
+		if(Nyx::theFDMPC())
+		  Nyx::theFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half);
+		if(Nyx::theGhostFDMPC())
+		  Nyx::theGhostFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half);
+		if(Nyx::theVirtFDMPC())
+		  Nyx::theVirtFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half);
+#endif
+
             }
         }
     }
+
+#ifdef FDM_GB
+    for (int lev = level; lev <= finest_level_to_advance; lev++){
+      //Define neccessary number of ghost cells                                                                                                                                                                 
+      int ng = ceil(Nyx::sigma_ax*Nyx::theta_ax)*pow(2,lev);
+
+      //Initialize MultiFabs                                                                                                                                                                                    
+      MultiFab& Ax_new = get_level(lev).get_new_data(Axion_Type);
+      Ax_new.setVal(0.);
+      MultiFab fdmreal(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
+      fdmreal.setVal(0.);
+      MultiFab fdmimag(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
+      fdmimag.setVal(0.);
+
+      //Deposit Gaussian Beams                                                                                                                                                                                   
+      if(Nyx::theFDMPC())
+	Nyx::theFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev);
+      if(Nyx::theGhostFDMPC())
+	Nyx::theGhostFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev);
+      if(Nyx::theVirtFDMPC())
+	Nyx::theVirtFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev);
+
+      //Update real part in FDM state                                                                                                                                                                           
+      Ax_new.ParallelCopy(fdmreal, 0, Nyx::AxRe, 1, fdmreal.nGrow(),
+                          Ax_new.nGrow(), parent->Geom(lev).periodicity(),FabArrayBase::ADD);
+
+      //Update imaginary part in FDM state                                                                                                                                                                      
+      Ax_new.ParallelCopy(fdmimag, 0, Nyx::AxIm, 1, fdmimag.nGrow(),
+                          Ax_new.nGrow(), parent->Geom(lev).periodicity(),FabArrayBase::ADD);
+
+
+      //Update density in FDM state                                                                                                                                                                            
+      AmrLevel* amrlev = &parent->getLevel(lev);
+      for (amrex::FillPatchIterator fpi(*amrlev,  Ax_new); fpi.isValid(); ++fpi)
+        {
+          if (Ax_new[fpi].contains_nan())
+	    amrex::Abort("Nans in state just before FDM density update");
+          BL_FORT_PROC_CALL(FORT_FDM_FIELDS, fort_fdm_fields)
+            (BL_TO_FORTRAN(Ax_new[fpi]));
+          if (Ax_new[fpi].contains_nan())
+	    amrex::Abort("Nans in state just after FDM density update");
+        }
+    }
+#endif
 
     // Redistribution happens in post_timestep
     return dt;

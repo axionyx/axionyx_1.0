@@ -123,6 +123,11 @@ namespace
             delete VirtualParticles[i];
             VirtualParticles[i] = 0;
         }
+#ifdef FDM_GB
+	delete FDMPC;
+	delete GhostFDMPC;
+	delete VirtFDMPC;
+#endif
     }
 }
 
@@ -266,14 +271,9 @@ void
 Nyx::read_particle_params ()
 {
 
-  ///Check if this is really correct for AXIONS/////////
-
     ParmParse pp("nyx");
     pp.query("do_dm_particles", do_dm_particles);
-//#if defined(FDM) || defined(ONLYFDM)
-//        do_dm_particles = 0;
-//#endif
-#if defined(AGN) || defined(FDM)
+#if defined(AGN) || defined(FDM_GB)
     pp.get("particle_init_type", particle_init_type);
     pp.get("particle_move_type", particle_move_type);
 #else
@@ -284,8 +284,6 @@ Nyx::read_particle_params ()
         pp.query("init_with_sph_particles", init_with_sph_particles);
     }
 #endif
-    /////////////////////////////////////////////////////
-
 
 #ifdef GRAVITY
     if (!do_grav && particle_move_type == "Gravitational")
@@ -670,15 +668,11 @@ Nyx::init_particles ()
       BL_ASSERT (FDMPC == 0);
       FDMPC = new FDMParticleContainer(parent);
 
-      ActiveParticles.push_back(FDMPC);
-
       if (parent->subCycle())
         {
       	  VirtFDMPC = new FDMParticleContainer(parent);
-      	  VirtualParticles.push_back(VirtFDMPC);
 
       	  GhostFDMPC = new FDMParticleContainer(parent);
-      	  GhostParticles.push_back(GhostFDMPC);
         }
 
       //                                                                                                                                                                                                         
@@ -1098,15 +1092,15 @@ Nyx::particle_post_restart (const std::string& restart_file, bool is_checkpoint)
       BL_ASSERT (FDMPC == 0);
       FDMPC = new FDMParticleContainer(parent);
 
-      ActiveParticles.push_back(FDMPC);
+      // ActiveParticles.push_back(FDMPC);
 
       if (parent->subCycle())
         {
       	  VirtFDMPC = new FDMParticleContainer(parent);
-      	  VirtualParticles.push_back(VirtFDMPC);
+      	  // VirtualParticles.push_back(VirtFDMPC);
 
       	  GhostFDMPC = new FDMParticleContainer(parent);
-      	  GhostParticles.push_back(GhostFDMPC);
+      	  // GhostParticles.push_back(GhostFDMPC);
         }
 
       //                                                                                                                                                                                                         
@@ -1378,10 +1372,12 @@ Nyx::remove_virtual_particles()
             VirtualParticles[i]->RemoveParticlesAtLevel(level);
         virtual_particles_set = false;
     }
-// #ifdef FDM_GB
-//     if(theVirtFDMPC())
-//     theVirtFDMPC()->RemoveParticlesAtLevel(level);
-// #endif
+#ifdef FDM_GB
+    if(theVirtFDMPC()){
+      theVirtFDMPC()->RemoveParticlesAtLevel(level);
+      virtual_particles_set = false;
+    }
+#endif
 }
 
 void
@@ -1442,10 +1438,10 @@ Nyx::remove_ghost_particles()
         if (GhostParticles[i] != 0)
             GhostParticles[i]->RemoveParticlesAtLevel(level);
     }
-// #ifdef FDM_GB
-//     if(theGhostFDMPC())
-//       theGhostFDMPC()->RemoveParticlesAtLevel(level);
-// #endif
+#ifdef FDM_GB
+    if(theGhostFDMPC())
+      theGhostFDMPC()->RemoveParticlesAtLevel(level);
+#endif
 }
 
 //NyxParticleContainerBase::~NyxParticleContainerBase() {}

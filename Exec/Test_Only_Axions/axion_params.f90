@@ -4,7 +4,11 @@ module axion_params_module
   ! These are only used for the axion model.
   ! They have to be set/overwritten in Prob_3d.f90.
   
-  double precision, save :: m_tt = 2.5d0 !particle mass in units of 10^(-22) eV
+  double precision, save :: m_tt
+  double precision, save :: hbaroverm
+  double precision, save :: theta_ax
+  double precision, save :: sigma_ax
+  double precision, save :: gamma_ax
   double precision, save :: meandens !background axion density, set in ca_initdata
 
   double complex, parameter :: ii = (0., 1.)   

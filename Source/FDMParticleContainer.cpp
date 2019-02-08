@@ -222,7 +222,9 @@ FDMParticleContainer::moveKick (MultiFab&       acceleration,
 }
 
 void
-FDMParticleContainer::moveKickDriftFDM (amrex::MultiFab&       acceleration,
+FDMParticleContainer::moveKickDriftFDM (amrex::MultiFab&       phi,
+					int                    grav_n_grow,
+					amrex::MultiFab&       acceleration,
 					int                    lev,
 					amrex::Real            dt,
 					amrex::Real            a_old,
@@ -253,6 +255,15 @@ FDMParticleContainer::moveKickDriftFDM (amrex::MultiFab&       acceleration,
         ac_ptr->FillBoundary();
     }
 
+    amrex::MultiFab* phi_ptr;
+    phi_ptr = new amrex::MultiFab(this->m_gdb->ParticleBoxArray(lev),
+				  this->m_gdb->ParticleDistributionMap(lev),
+				  phi.nComp(),grav_n_grow);
+    for (amrex::MFIter mfi(*phi_ptr); mfi.isValid(); ++mfi)
+      phi_ptr->setVal(0.);
+    phi_ptr->copy(phi,0,0,phi.nComp());
+    phi_ptr->FillBoundary();
+
     const Real* plo = Geom(lev).ProbLo();
 
     int do_move = 1;
@@ -268,15 +279,19 @@ FDMParticleContainer::moveKickDriftFDM (amrex::MultiFab&       acceleration,
         if (Np > 0)
         {
            const Box& ac_box = (*ac_ptr)[pti].box();
+           const Box& phi_box = (*phi_ptr)[pti].box();
 
-           // update_fdm_particles(&Np, particles.data(),
-	   // 			(*ac_ptr)[pti].dataPtr(),
-	   // 			ac_box.loVect(), ac_box.hiVect(),
-	   // 			plo,dx,dt,a_old,a_half,&do_move);
+           update_gaussian_beams(&Np, particles.data(),
+				 (*ac_ptr)[pti].dataPtr(),
+				 ac_box.loVect(), ac_box.hiVect(),
+				 (*phi_ptr)[pti].dataPtr(),
+				 phi_box.loVect(), phi_box.hiVect(),
+				 plo,dx,dt,a_old,a_half,&do_move);
         }
     }
 
     if (ac_ptr != &acceleration) delete ac_ptr;
+    delete phi_ptr;
     
     ParticleLevel&    pmap          = this->GetParticles(lev);
     if (lev > 0 && sub_cycle)
@@ -317,11 +332,13 @@ FDMParticleContainer::moveKickDriftFDM (amrex::MultiFab&       acceleration,
 }
 
 void
-FDMParticleContainer::moveKickFDM (MultiFab&       acceleration,
-				   int             lev,
-				   Real            dt,
-				   Real            a_new,
-				   Real            a_half) 
+FDMParticleContainer::moveKickFDM (amrex::MultiFab& phi,
+				   int              grav_n_grow,
+				   amrex::MultiFab& acceleration,
+				   int              lev,
+				   Real             dt,
+				   Real             a_new,
+				   Real             a_half) 
 {
     BL_PROFILE("FDMParticleContainer::moveKick()");
 
@@ -343,6 +360,15 @@ FDMParticleContainer::moveKickFDM (MultiFab&       acceleration,
         ac_ptr->FillBoundary();
     }
 
+    amrex::MultiFab* phi_ptr;
+    phi_ptr = new amrex::MultiFab(this->m_gdb->ParticleBoxArray(lev),
+				  this->m_gdb->ParticleDistributionMap(lev),
+				  phi.nComp(),grav_n_grow);
+    for (amrex::MFIter mfi(*phi_ptr); mfi.isValid(); ++mfi)
+      phi_ptr->setVal(0.);
+    phi_ptr->copy(phi,0,0,phi.nComp());
+    phi_ptr->FillBoundary();
+
     const Real* plo = Geom(lev).ProbLo();
 
     int do_move = 0;
@@ -358,15 +384,19 @@ FDMParticleContainer::moveKickFDM (MultiFab&       acceleration,
         if (Np > 0)
         {
            const Box& ac_box = (*ac_ptr)[pti].box();
+           const Box& phi_box = (*phi_ptr)[pti].box();
 
-           // update_fdm_particles(&Np, particles.data(),
-	   // 			(*ac_ptr)[pti].dataPtr(),
-	   // 			ac_box.loVect(), ac_box.hiVect(),
-	   // 			plo,dx,dt,a_half,a_new,&do_move);
+           update_gaussian_beams(&Np, particles.data(),
+				 (*ac_ptr)[pti].dataPtr(),
+				 ac_box.loVect(), ac_box.hiVect(),
+				 (*phi_ptr)[pti].dataPtr(),
+				 phi_box.loVect(), phi_box.hiVect(),
+				 plo,dx,dt,a_half,a_new,&do_move);
         }
     }
     
     if (ac_ptr != &acceleration) delete ac_ptr;
+    delete phi_ptr;
 }
 
 void

@@ -76,6 +76,7 @@
       use axion_params_module
       use comoving_module, only : comoving_h, comoving_OmAx
       use interpolate_module
+      use amrex_parmparse_module
  
       implicit none
  
@@ -95,6 +96,16 @@
       double precision r,rc
       double precision d
       double precision, allocatable :: m(:), pos(:,:)
+
+      type(amrex_parmparse) :: pp
+
+      call amrex_parmparse_build(pp, "nyx")
+      call pp%query("m_tt", m_tt)
+      hbaroverm = 0.01917152d0 / m_tt
+      call pp%query("theta_ax", theta_ax)
+      call pp%query("sigma_ax", theta_ax)
+      call pp%query("gamma_ax", theta_ax)
+      call amrex_parmparse_destroy(pp)
       
       un = 20
       open(un,file='initial.txt',status="old",action="read")

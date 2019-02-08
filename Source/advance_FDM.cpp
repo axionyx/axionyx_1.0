@@ -218,19 +218,19 @@ Nyx::advance_FDM (Real time,
 
                for (int i = 0; i < Nyx::theActiveParticles().size(); i++)
                    Nyx::theActiveParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_old, a_half);
-	       Nyx::theFDMPC()->moveKickDriftFDM(phi, lev, dt, a_old, a_half);
+	       Nyx::theFDMPC()->moveKickDriftFDM(phi, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half);
 
                // // Only need the coarsest virtual particles here.
                // if (lev == level && level < finest_level){
                    for (int i = 0; i < Nyx::theVirtualParticles().size(); i++)
                        Nyx::theVirtualParticles()[i]->moveKickDrift(grav_vec_old, level, dt, a_old, a_half);
-		   Nyx::theGhostFDMPC()->moveKickDriftFDM(phi, lev, dt, a_old, a_half);
+		   Nyx::theGhostFDMPC()->moveKickDriftFDM(phi, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half);
 	       // }
 
                // Miiiight need all Ghosts
                for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
                    Nyx::theGhostParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_old, a_half);
-	       Nyx::theGhostFDMPC()->moveKickDriftFDM(phi, lev, dt, a_old, a_half);
+	       Nyx::theGhostFDMPC()->moveKickDriftFDM(phi, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half);
            }
        }
    }
@@ -416,19 +416,19 @@ Nyx::advance_FDM (Real time,
 		
 		for (int i = 0; i < Nyx::theActiveParticles().size(); i++)
 		  Nyx::theActiveParticles()[i]->moveKick(grav_vec_new, lev, dt, a_new, a_half);
-		Nyx::theFDMPC()->moveKickFDM(phi, lev, dt, a_new, a_half);
+		Nyx::theFDMPC()->moveKickFDM(phi, grav_n_grow, grav_vec_new, lev, dt, a_new, a_half);
 		
 		// // Only need the coarsest virtual particles here.
 		// if (lev == level && level < finest_level){
 		  for (int i = 0; i < Nyx::theVirtualParticles().size(); i++)
 		    Nyx::theVirtualParticles()[i]->moveKick(grav_vec_new, level, dt, a_new, a_half);
-		  Nyx::theGhostFDMPC()->moveKickFDM(phi, lev, dt, a_new, a_half);
+		  Nyx::theGhostFDMPC()->moveKickFDM(phi, grav_n_grow, grav_vec_new, lev, dt, a_new, a_half);
 		// }
 		
 		// Miiiight need all Ghosts
 		for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
 		  Nyx::theGhostParticles()[i]->moveKick(grav_vec_new, lev, dt, a_new, a_half);
-		Nyx::theGhostFDMPC()->moveKickFDM(phi, lev, dt, a_new, a_half);
+		Nyx::theGhostFDMPC()->moveKickFDM(phi, grav_n_grow, grav_vec_new, lev, dt, a_new, a_half);
 
 	      }
 	  }

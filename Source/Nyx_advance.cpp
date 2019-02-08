@@ -32,26 +32,13 @@ Nyx::advance (Real time,
   //    ncycle    : the number of subcycles at this level
 
 {
-#ifdef FDM
-    //TODO check if we need this
-    //grav_n_grow = ncycle + 2;
-    if (do_hydro)
-      {
-        return advance_hydro(time, dt, iteration, ncycle);
-      }
-    else
-      {
-        return advance_FDM(time, dt, iteration, ncycle);
-      }
-#else
-
 
 #ifndef NO_HYDRO
     if (do_hydro)
     {
         if (Nyx::theActiveParticles().size() > 0)
         {
-#ifndef AGN
+#if(!defined(AGN) && !defined(FDM_GB))
            if (do_dm_particles)
 #endif
            {
@@ -76,7 +63,6 @@ Nyx::advance (Real time,
         amrex::Abort("Nyx::advance -- do_hydro is false but no gravity -- dont know what to do");
     }
 #endif
-#endif //! FDM
     return 0;
 }
 
@@ -100,6 +86,11 @@ Nyx::advance_hydro_plus_particles (Real time,
 
     // A particle in cell (i) can affect cell values in (i-1) to (i+1)
     int stencil_deposition_width = 1;
+
+#ifdef FDM_GB
+    // For FDM Gaussian kernels this is increased to
+    int stencil_deposition_width_fdm = ceil(sigma_ax*theta_ax)*pow(2,level-1);
+#endif
  
     // A particle in cell (i) may need information from cell values in (i-1) to (i+1)
     //   to update its position (typically via interpolation of the acceleration from the grid)
@@ -115,8 +106,14 @@ Nyx::advance_hydro_plus_particles (Real time,
     //      that live on (level-1) can affect the grid over all of the ncycle steps.
     //      We define ghost cells at the coarser level to cover all iterations so
     //      we can't reduce this number as iteration increases.
- 
+
     int ghost_width = ncycle + stencil_deposition_width;
+
+#ifdef FDM_GB
+    // it is okay to use ghost_width in setup_ghost_particels since ghost_width_fdm for FDM 
+    // Gaussian kernels is separately set in setup_ghost_particles
+    int ghost_width_fdm = ncycle + stencil_deposition_width_fdm;
+#endif
 
     // *** where_width ***  is used
     //   *) to set how many cells the Where call in moveKickDrift tests =
@@ -124,6 +121,10 @@ Nyx::advance_hydro_plus_particles (Real time,
     //      the minus 1 arises because this occurs *after* the move
 
     int where_width =  ghost_width + (1-iteration)  - 1;
+
+#ifdef FDM_GB
+    int where_width_fdm =  ghost_width_fdm + (1-iteration)  - 1;
+#endif
  
     // *** grav_n_grow *** is used
     //   *) to determine how many ghost cells we need to fill in the MultiFab from
@@ -134,6 +135,11 @@ Nyx::advance_hydro_plus_particles (Real time,
  
     int grav_n_grow = ghost_width + (1-iteration) + (iteration-1) +
                       stencil_interpolation_width ;
+
+#ifdef FDM_GB
+    grav_n_grow = ghost_width_fdm + (1-iteration) + (iteration-1) +
+                  stencil_interpolation_width ;
+#endif
 
     BL_PROFILE_REGION_START("R::Nyx::advance_hydro_plus_particles");
     BL_PROFILE("Nyx::advance_hydro_plus_particles()");
@@ -258,7 +264,9 @@ Nyx::advance_hydro_plus_particles (Real time,
     //
     // Advance Particles
     //
+#ifndef FDM_GB
     if (Nyx::theActiveParticles().size() > 0)
+#endif
     {
         // Advance the particle velocities to the half-time and the positions to the new time
         // We use the cell-centered gravity to correctly interpolate onto particle locations
@@ -288,6 +296,15 @@ Nyx::advance_hydro_plus_particles (Real time,
                 // Miiiight need all Ghosts
                 for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
                    Nyx::theGhostParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_old, a_half, where_width);
+#ifdef FDM_GB
+		MultiFab& Phi_old = get_level(lev).get_old_data(PhiGrav_Type);
+		if(Nyx::theFDMPC())
+		  Nyx::theFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm);
+		if(Nyx::theGhostFDMPC())
+		  Nyx::theGhostFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm);
+		if(Nyx::theVirtFDMPC())
+		  Nyx::theVirtFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm);
+#endif
             }
         }
     }
@@ -330,6 +347,16 @@ Nyx::advance_hydro_plus_particles (Real time,
         get_level(lev).average_down(  State_Type);
         get_level(lev).average_down(DiagEOS_Type);
     }
+
+#ifdef FDM_FD
+    //Advance Axions                                                                                                                                                                                            
+    for (int lev = level; lev <= finest_level_to_advance; lev++)
+      get_level(lev).advance_FDM_FD(time, dt, a_old, a_new);
+
+    // Always average down from finer to coarser.                                                                                                                                                              
+    for (int lev = finest_level_to_advance-1; lev >= level; lev--)
+      get_level(lev).average_down(Axion_Type);
+#endif
 
 #ifdef GRAVITY
 
@@ -424,7 +451,9 @@ Nyx::advance_hydro_plus_particles (Real time,
     for (int lev = finest_level_to_advance-1; lev >= level; lev--)
         get_level(lev).average_down();
 
+#ifndef FDM_GB
     if (Nyx::theActiveParticles().size() > 0)
+#endif
     {
         // Advance the particle velocities by dt/2 to the new time. We use the
         // cell-centered gravity to correctly interpolate onto particle
@@ -452,8 +481,61 @@ Nyx::advance_hydro_plus_particles (Real time,
                 if (iteration != ncycle)
                     for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
                         Nyx::theGhostParticles()[i]->moveKick(grav_vec_new, lev, dt, a_new, a_half);
-            }
-        }
+#ifdef FDM_GB
+		MultiFab& Phi_new = get_level(lev).get_new_data(PhiGrav_Type);
+		if(Nyx::theFDMPC())
+		  Nyx::theFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half);
+		if(Nyx::theGhostFDMPC())
+		  Nyx::theGhostFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half);
+		if(Nyx::theVirtFDMPC())
+		  Nyx::theVirtFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half);
+#endif
+	    }
+	}
+    }
+#endif
+
+#ifdef FDM_GB
+    for (int lev = level; lev <= finest_level_to_advance; lev++){
+      //Define neccessary number of ghost cells                                                                                                                                           
+      int ng = ceil(Nyx::sigma_ax*Nyx::theta_ax)*pow(2,lev);
+      
+      //Initialize MultiFabs                                                                                                                                                             
+      MultiFab& Ax_new = get_level(lev).get_new_data(Axion_Type);
+      Ax_new.setVal(0.);
+      MultiFab fdmreal(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
+      fdmreal.setVal(0.);
+      MultiFab fdmimag(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
+      fdmimag.setVal(0.);
+      
+      //Deposit Gaussian Beams                                                                                                                                                             
+      if(Nyx::theFDMPC())
+	Nyx::theFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev);
+      if(Nyx::theGhostFDMPC())
+	Nyx::theGhostFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev);
+      if(Nyx::theVirtFDMPC())
+	Nyx::theVirtFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev);
+      
+      //Update real part in FDM state                                                                                                                                                       
+      Ax_new.ParallelCopy(fdmreal, 0, Nyx::AxRe, 1, fdmreal.nGrow(),
+			  Ax_new.nGrow(), parent->Geom(lev).periodicity(),FabArrayBase::ADD);
+      
+      //Update imaginary part in FDM state                                                                                                                                              
+      Ax_new.ParallelCopy(fdmimag, 0, Nyx::AxIm, 1, fdmimag.nGrow(),
+			  Ax_new.nGrow(), parent->Geom(lev).periodicity(),FabArrayBase::ADD);
+      
+      
+      //Update density in FDM state                                                                                                                                                        
+      AmrLevel* amrlev = &parent->getLevel(lev);
+      for (amrex::FillPatchIterator fpi(*amrlev,  Ax_new); fpi.isValid(); ++fpi)
+	{
+	  if (Ax_new[fpi].contains_nan())
+	    amrex::Abort("Nans in state just before FDM density update");
+	  BL_FORT_PROC_CALL(FORT_FDM_FIELDS, fort_fdm_fields)
+	    (BL_TO_FORTRAN(Ax_new[fpi]));
+	  if (Ax_new[fpi].contains_nan())
+	    amrex::Abort("Nans in state just after FDM density update");
+	}
     }
 #endif
 
@@ -525,6 +607,10 @@ Nyx::advance_hydro (Real time,
     {
         forcing->evolve(dt);
     }
+#endif
+
+#ifdef FDM_FD
+    advance_FDM_FD(time, dt, a_old, a_new);
 #endif
 
     // Call the hydro advance itself
