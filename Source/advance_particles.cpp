@@ -35,7 +35,7 @@ Nyx::advance_particles_only (Real time,
 
 #ifdef FDM_GB
     // For FDM Gaussian kernels this is increased to                                                                                                                                                          
-    int stencil_deposition_width_fdm = ceil(sigma_ax*theta_ax)*pow(2,level-1);
+    int stencil_deposition_width_fdm = ceil(sigma_ax*theta_ax/get_level(level).Geom().CellSize()[0]);
 #endif 
 
     // A particle in cell (i) may need information from cell values in (i-1) to (i+1)
@@ -83,8 +83,10 @@ Nyx::advance_particles_only (Real time,
       stencil_interpolation_width ;
 
 #ifdef FDM_GB
+    // Plus one since we need to take the derivative of grav_vector                                                                                                                                            
+    // in order to obtain hession of potential
     grav_n_grow = ghost_width_fdm + (1-iteration) + (iteration-1) +
-      stencil_interpolation_width ;
+      stencil_interpolation_width + 1;
 #endif
 
     // Sanity checks
@@ -236,11 +238,11 @@ Nyx::advance_particles_only (Real time,
 #ifdef FDM_GB
 		MultiFab& Phi_old = get_level(lev).get_old_data(PhiGrav_Type);
 		if(Nyx::theFDMPC())
-		  Nyx::theFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm);
+		  Nyx::theFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm,wkb_approx);
 		if(Nyx::theGhostFDMPC())
-		  Nyx::theGhostFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm);
+		  Nyx::theGhostFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm,wkb_approx);
 		if(Nyx::theVirtFDMPC())
-		  Nyx::theVirtFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm);
+		  Nyx::theVirtFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm,wkb_approx);
 #endif
             }
         }
@@ -316,11 +318,11 @@ Nyx::advance_particles_only (Real time,
 #ifdef FDM_GB
 		MultiFab& Phi_new = get_level(lev).get_new_data(PhiGrav_Type);
 		if(Nyx::theFDMPC())
-		  Nyx::theFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half);
+		  Nyx::theFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half,wkb_approx);
 		if(Nyx::theGhostFDMPC())
-		  Nyx::theGhostFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half);
+		  Nyx::theGhostFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half,wkb_approx);
 		if(Nyx::theVirtFDMPC())
-		  Nyx::theVirtFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half);
+		  Nyx::theVirtFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half,wkb_approx);
 #endif
 
             }
@@ -330,7 +332,7 @@ Nyx::advance_particles_only (Real time,
 #ifdef FDM_GB
     for (int lev = level; lev <= finest_level_to_advance; lev++){
       //Define neccessary number of ghost cells                                                                                                                                                                 
-      int ng = ceil(Nyx::sigma_ax*Nyx::theta_ax)*pow(2,lev);
+      int ng = ceil(Nyx::sigma_ax*Nyx::theta_ax/get_level(level).Geom().CellSize()[0]);
 
       //Initialize MultiFabs                                                                                                                                                                                    
       MultiFab& Ax_new = get_level(lev).get_new_data(Axion_Type);
@@ -342,11 +344,11 @@ Nyx::advance_particles_only (Real time,
 
       //Deposit Gaussian Beams                                                                                                                                                                                   
       if(Nyx::theFDMPC())
-	Nyx::theFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev);
+	Nyx::theFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new);
       if(Nyx::theGhostFDMPC())
-	Nyx::theGhostFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev);
+	Nyx::theGhostFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new);
       if(Nyx::theVirtFDMPC())
-	Nyx::theVirtFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev);
+	Nyx::theVirtFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new);
 
       //Update real part in FDM state                                                                                                                                                                           
       Ax_new.ParallelCopy(fdmreal, 0, Nyx::AxRe, 1, fdmreal.nGrow(),

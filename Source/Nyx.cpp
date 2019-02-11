@@ -111,6 +111,8 @@ Real Nyx::hbaroverm = 0.01917152 / m_tt;
 #ifdef FDM_GB
 Real Nyx::theta_ax = 1.0;
 Real Nyx::sigma_ax = 1.0;
+Real Nyx::gamma_ax = 1.0;
+int  Nyx::wkb_approx = 1;
 #endif
 int Nyx::Temp_comp = -1;
 int Nyx::  Ne_comp = -1;
@@ -280,6 +282,8 @@ Nyx::read_params ()
 #ifdef FDM_GB
     pp_nyx.query("theta_ax", theta_ax);
     pp_nyx.query("sigma_ax", sigma_ax);
+    gamma_ax = 0.5/sigma_ax/sigma_ax;
+    pp_nyx.query("wkb_approx", wkb_approx);
 #endif
     pp_nyx.query("dump_old", dump_old);
 

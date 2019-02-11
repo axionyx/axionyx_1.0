@@ -229,7 +229,8 @@ FDMParticleContainer::moveKickDriftFDM (amrex::MultiFab&       phi,
 					amrex::Real            dt,
 					amrex::Real            a_old,
 					amrex::Real            a_half,
-					int                    where_width)
+					int                    where_width,
+					int                    wkb_approx)
 {
     BL_PROFILE("FDMParticleContainer::moveKickDrift()");
 
@@ -286,7 +287,7 @@ FDMParticleContainer::moveKickDriftFDM (amrex::MultiFab&       phi,
 				 ac_box.loVect(), ac_box.hiVect(),
 				 (*phi_ptr)[pti].dataPtr(),
 				 phi_box.loVect(), phi_box.hiVect(),
-				 plo,dx,dt,a_old,a_half,&do_move);
+				 plo,dx,dt,a_old,a_half,&do_move,&wkb_approx);
         }
     }
 
@@ -338,7 +339,8 @@ FDMParticleContainer::moveKickFDM (amrex::MultiFab& phi,
 				   int              lev,
 				   Real             dt,
 				   Real             a_new,
-				   Real             a_half) 
+				   Real             a_half,
+				   int              wkb_approx) 
 {
     BL_PROFILE("FDMParticleContainer::moveKick()");
 
@@ -391,7 +393,7 @@ FDMParticleContainer::moveKickFDM (amrex::MultiFab& phi,
 				 ac_box.loVect(), ac_box.hiVect(),
 				 (*phi_ptr)[pti].dataPtr(),
 				 phi_box.loVect(), phi_box.hiVect(),
-				 plo,dx,dt,a_half,a_new,&do_move);
+				 plo,dx,dt,a_half,a_new,&do_move,&wkb_approx);
         }
     }
     
@@ -887,7 +889,7 @@ FDMParticleContainer::CreateGhostParticlesFDM (int level, int lev, int nGrow, Ao
 */
 
 void                                                                                                                                                                                                            
-FDMParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_imag, int lev) const
+FDMParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_imag, int lev, amrex::Real a) const
 {
   BL_PROFILE("FDMParticleContainer::DepositFDMParticles()");
 
@@ -996,7 +998,7 @@ FDMParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_imag, 
 
       deposit_fdm_particles(particles.data(), &np, data_ptr_real,
 			    lo_real, hi_real, data_ptr_imag, lo_imag, 
-			    hi_imag, plo, dx);
+			    hi_imag, plo, dx, a);
 
 #ifdef _OPENMP
     amrex::Print() << "amrex_atomic_accumulate_fab \n";
@@ -1274,7 +1276,7 @@ FDMParticleContainer::InitVarCount (MultiFab& mf, long num_particle_fdm, BoxArra
 }
 
 void
-FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nlevs, const Real hbaroverm, const Real sigma_ax)
+FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nlevs, const Real hbaroverm, const Real sigma_ax, const Real gamma_ax, const int wkb_approx)
 {
   const int       MyProc      = ParallelDescriptor::MyProc();
   const Geometry& geom        = m_gdb->Geom(lev);
@@ -1294,11 +1296,12 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
     {
       std::cout << "hbaroverm: "<< hbaroverm << '\n';
       std::cout << "sigma_ax : "<< sigma_ax << '\n';
+      std::cout << "gamma_ax : "<< gamma_ax << '\n';
     }
 
   int  npart = num_particle_fdm;
-  Real sigma_x = sigma_ax*dx[0];
-  Real gamma = 0.5/sigma_x/sigma_x;
+  // Real sigma_x = sigma_ax*dx[0];
+  // Real gamma = 0.5/sigma_x/sigma_x;
   Real alpha = 1600.0;
   Real q[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
   Real p[]  = {0.0,0.0,0.0};
@@ -1324,21 +1327,21 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
 	
     r = sqrt(-log(1-amrex::Random()));
     theta  = 2.0*M_PI*amrex::Random();
-    q[0] = r*cos(theta)*sqrt((alpha+gamma)/gamma/alpha) + q0[0];
-    p[0] = r*sin(theta)*2.0*sqrt(alpha+gamma)*hbaroverm + p0[0];
+    q[0] = r*cos(theta)*sqrt((alpha+gamma_ax)/gamma_ax/alpha) + q0[0];
+    p[0] = r*sin(theta)*2.0*sqrt(alpha+gamma_ax)*hbaroverm + p0[0];
 	
     r = sqrt(-log(1-amrex::Random()));
     theta  = 2.0*M_PI*amrex::Random();
-    q[1] = r*cos(theta)*sqrt((alpha+gamma)/gamma/alpha) + q0[1];
-    p[1] = r*sin(theta)*2.0*sqrt(alpha+gamma)*hbaroverm + p0[1];
+    q[1] = r*cos(theta)*sqrt((alpha+gamma_ax)/gamma_ax/alpha) + q0[1];
+    p[1] = r*sin(theta)*2.0*sqrt(alpha+gamma_ax)*hbaroverm + p0[1];
 	
     r = sqrt(-log(1-amrex::Random()));
     theta  = 2.0*M_PI*amrex::Random();
-    q[2] = r*cos(theta)*sqrt((alpha+gamma)/gamma/alpha) + q0[2];
-    p[2] = r*sin(theta)*2.0*sqrt(alpha+gamma)*hbaroverm + p0[2];
+    q[2] = r*cos(theta)*sqrt((alpha+gamma_ax)/gamma_ax/alpha) + q0[2];
+    p[2] = r*sin(theta)*2.0*sqrt(alpha+gamma_ax)*hbaroverm + p0[2];
 	
-    phi  = ( (p[0]*alpha+p0[0]*gamma)*(q[0]-q0[0]) + (p[1]*alpha+p0[1]*gamma)*(q[1]-q0[1]) + (p[2]*alpha+p0[2]*gamma)*(q[2]-q0[2]) )/(alpha+gamma);
-    Amp  = 2.0*(alpha+gamma)/sqrt(alpha*gamma)/M_PI/sqrt(2*gamma/M_PI)/pow(npart,2.0/3.0);
+    phi  = ( (p[0]*alpha+p0[0]*gamma_ax)*(q[0]-q0[0]) + (p[1]*alpha+p0[1]*gamma_ax)*(q[1]-q0[1]) + (p[2]*alpha+p0[2]*gamma_ax)*(q[2]-q0[2]) )/(alpha+gamma_ax);
+    Amp  = 2.0*(alpha+gamma_ax)/sqrt(alpha*gamma_ax)/M_PI/sqrt(2*gamma_ax/M_PI)/pow(npart,2.0/3.0);
     Amp /= sqrt(2.0*alpha/M_PI);
     Amp *= pow(fact,1.0/3.0);
 
@@ -1372,13 +1375,22 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
       //set phase
       part.rdata( 4) = phi;
       //set amplitude
-      if(index==0)
-      part.rdata( 5) = 0.0001*pow(2.0*gamma/M_PI,0.75);//pow(2.0*gamma*Amp,1.5);
+      // if(index==0)
+      // part.rdata( 5) = 0.0001*pow(2.0*gamma_ax/M_PI,0.75);//pow(2.0*gamma_ax*Amp,1.5);
+      // else
+      // part.rdata( 5) = pow(2.0*gamma_ax/M_PI,0.75);
+// #ifndef FDM_WKB
+//       part.rdata( 5) = pow(2.0*gamma_ax*Amp,1.5);
+// #else
+//       part.rdata( 5) = pow(gamma_ax*Amp,1.5);
+// #endif
+      if(wkb_approx)
+	part.rdata( 5) = pow(gamma_ax*Amp,1.5);
       else
-      part.rdata( 5) = pow(2.0*gamma/M_PI,0.75);//pow(2.0*gamma*Amp,1.5);
+	part.rdata( 5) = pow(2.0*gamma_ax*Amp,1.5);
       part.rdata( 6) = 0.0;
       //set width
-      part.rdata( 7) = gamma;
+      part.rdata( 7) = gamma_ax;
       //set Jacobian qq
       part.rdata( 8) = Amp;
       part.rdata( 9) = 0.0;
@@ -1389,16 +1401,6 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
       part.rdata(14) = 0.0;
       part.rdata(15) = 0.0;
       part.rdata(16) = Amp;
-      //set Jacobian qp
-      part.rdata(17) = 0.0;
-      part.rdata(18) = 0.0;
-      part.rdata(19) = 0.0;
-      part.rdata(20) = 0.0;
-      part.rdata(21) = 0.0;
-      part.rdata(22) = 0.0;
-      part.rdata(23) = 0.0;
-      part.rdata(24) = 0.0;
-      part.rdata(25) = 0.0;
       //set Jacobian pq
       part.rdata(26) = 0.0;
       part.rdata(27) = 0.0;
@@ -1409,6 +1411,16 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
       part.rdata(32) = 0.0;
       part.rdata(33) = 0.0;
       part.rdata(34) = 0.0;
+      //set Jacobian qp
+      part.rdata(17) = 0.0;
+      part.rdata(18) = 0.0;
+      part.rdata(19) = 0.0;
+      part.rdata(20) = 0.0;
+      part.rdata(21) = 0.0;
+      part.rdata(22) = 0.0;
+      part.rdata(23) = 0.0;
+      part.rdata(24) = 0.0;
+      part.rdata(25) = 0.0;
       //set Jacobian pp
       part.rdata(35) = Amp;
       part.rdata(36) = 0.0;
@@ -1419,7 +1431,6 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
       part.rdata(41) = 0.0;
       part.rdata(42) = 0.0;
       part.rdata(43) = Amp;
-
 
       if (!this->Where(part,pld))
 	amrex::Abort("ParticleContainer<N>::InitGaussianBeams(): invalid particle");

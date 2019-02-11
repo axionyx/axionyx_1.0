@@ -615,6 +615,7 @@ public:
     static amrex::Real theta_ax;
     static amrex::Real sigma_ax;
     static amrex::Real gamma_ax;
+    static int wkb_approx;
 #endif
 
     static int Temp_comp, Ne_comp, Zhi_comp;

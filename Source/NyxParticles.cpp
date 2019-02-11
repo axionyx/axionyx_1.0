@@ -789,7 +789,7 @@ Nyx::init_particles ()
       else if(particle_init_type == "GaussianBeams")
         {
 	  if(num_particle_fdm > 0)
-	    FDMPC->InitGaussianBeams(num_particle_fdm, level, parent->initialBaLevels()+1, hbaroverm, sigma_ax);
+	    FDMPC->InitGaussianBeams(num_particle_fdm, level, parent->initialBaLevels()+1, hbaroverm, sigma_ax, gamma_ax, wkb_approx);
 	  else
 	    amrex::Error("\nNeed num_particle_fdm > 0 for InitGaussianBeams!\n\n");
 
@@ -1418,7 +1418,7 @@ Nyx::setup_ghost_particles(int ngrow)
 
 	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
 	  // if(levelmethod[lev]==GaussBeam){
-	  ng = parent->nCycle(level)+ceil(sigma_ax*theta_ax)*pow(2,lev);
+	  ng = parent->nCycle(level)+ceil(sigma_ax*theta_ax/parent->Geom(lev).CellSize()[0]);
 	  // ng *=2;
 	  Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);
 	  Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ng);

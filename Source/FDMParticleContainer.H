@@ -73,7 +73,7 @@ public:
 
     void CreateGhostParticlesFDM (int level, int lev, int nGrow, AoS& ghosts) const;
 
-  void DepositFDMParticles (amrex::MultiFab& mf_real, amrex::MultiFab& mf_imag, int level) const;
+  void DepositFDMParticles (amrex::MultiFab& mf_real, amrex::MultiFab& mf_imag, int level, amrex::Real a) const;
 
     virtual void moveKickDrift (amrex::MultiFab& acceleration, int level, amrex::Real timestep,
                                 amrex::Real a_old = 1.0, amrex::Real a_half = 1.0, int where_width = 0);
@@ -81,15 +81,15 @@ public:
                                 amrex::Real a_new = 1.0, amrex::Real a_half = 1.0);
 
   void moveKickDriftFDM (amrex::MultiFab& phi, int grav_n_grow, amrex::MultiFab& acceleration, int level, amrex::Real timestep,
-			   amrex::Real a_old = 1.0, amrex::Real a_half = 1.0, int where_width = 0);
+			 amrex::Real a_old = 1.0, amrex::Real a_half = 1.0, int where_width = 0, int wkb_approx = 0);
   void moveKickFDM      (amrex::MultiFab& phi, int grav_n_grow, amrex::MultiFab& acceleration, int level, amrex::Real timestep,
-			   amrex::Real a_new = 1.0, amrex::Real a_half = 1.0);
+			 amrex::Real a_new = 1.0, amrex::Real a_half = 1.0, int wkb_approx = 0);
 
     void InitFromBinaryMortonFile(const std::string& particle_directory, int nextra, int skip_factor);
  
     void InitVarCount (amrex::MultiFab& mf, long n_axpart, amrex::BoxArray &baWhereNot, int lev, int nlevs);
 
-  void InitGaussianBeams (long n_axpart, int lev, int nlevs, const amrex::Real hbaroverm, const amrex::Real sigma_ax);
+  void InitGaussianBeams (long n_axpart, int lev, int nlevs, const amrex::Real hbaroverm, const amrex::Real sigma_ax, const amrex::Real gamma_ax, const int wkb_approx);
 };
 
 #endif /* _FDMParticleContainer_H_ */
