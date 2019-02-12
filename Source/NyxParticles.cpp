@@ -1136,29 +1136,18 @@ void
 Nyx::particle_est_time_step (Real& est_dt)
 {
     BL_PROFILE("Nyx::particle_est_time_step()");
+
+    const Real cur_time = state[PhiGrav_Type].curTime();
+    const Real a = get_comoving_a(cur_time);
+    MultiFab& grav = get_new_data(Gravity_Type);
+
     if (DMPC && particle_move_type == "Gravitational")
-    {
-        const Real cur_time = state[PhiGrav_Type].curTime();
-        const Real a = get_comoving_a(cur_time);
-        MultiFab& grav = get_new_data(Gravity_Type);
+      {
         const Real est_dt_particle = DMPC->estTimestep(grav, a, level, particle_cfl);
-
+	
         if (est_dt_particle > 0) {
-            est_dt = std::min(est_dt, est_dt_particle);
+	  est_dt = std::min(est_dt, est_dt_particle);
 	}
-
-#ifdef NEUTRINO_PARTICLES
-        const Real est_dt_neutrino = NPC->estTimestep(grav, a, level, neutrino_cfl);
-        if (est_dt_neutrino > 0) {
-            est_dt = std::min(est_dt, est_dt_neutrino);
-	}
-#endif
-
-// #ifdef FDM_GB
-//         const Real est_dt_axion = FDMPC->estTimestep(grav, a, level, particle_cfl);
-//         if (est_dt_axion > 0)
-// 	  est_dt = std::min(est_dt, est_dt_axion);
-// #endif
 
         if (verbose)
         {
@@ -1172,23 +1161,61 @@ Nyx::particle_est_time_step (Real& est_dt)
                 amrex::Print() << "...there are no particles at level "
                           << level << '\n';
             }
+	}
+      }
 #ifdef NEUTRINO_PARTICLES
+    if (NPC && particle_move_type == "Gravitational")
+      {
+        const Real est_dt_neutrino = NPC->estTimestep(grav, a, level, neutrino_cfl);
+
+        if (est_dt_neutrino > 0) {
+	  est_dt = std::min(est_dt, est_dt_neutrino);
+	}
+
+        if (verbose)
+        {
             if (est_dt_neutrino > 0)
             {
                 amrex::Print() << "...estdt from neutrinos at level "
                           << level << ": " << est_dt_neutrino << '\n';
             }
+            else
+            {
+                amrex::Print() << "...there are no neutrinos at level "
+                          << level << '\n';
+            }
+	}
+      }
 #endif
 
-// #ifdef FDM_GB
-//             if (est_dt_axion > 0)
-// 	      {
-// 		amrex::Print() << "...estdt from axions at level "
-// 			       << level << ": " << est_dt_axion << '\n';
-// 	      }
-// #endif
-        }
-    }
+#ifdef FDM_GB
+    if (FDMPC && particle_move_type == "Gravitational")
+      {
+        const Real est_dt_fdm1 = FDMPC->estTimestep(grav, a, level, particle_cfl);
+	MultiFab& phi = get_new_data(PhiGrav_Type);
+	Real beam_cfl_reduced = beam_cfl*2.0*M_PI*hbaroverm;
+	amrex::Print() << "FDM:: beam_cfl " << beam_cfl << " \n";
+        const Real est_dt_fdm2 = FDMPC->estTimestepFDM(phi, level, beam_cfl_reduced);
+	const Real est_dt_fdm = std::min(est_dt_fdm1 ,est_dt_fdm2);
+
+        if (est_dt_fdm > 0)
+	  est_dt = std::min(est_dt, est_dt_fdm);
+
+        if (verbose)
+        {
+            if (est_dt_fdm > 0)
+            {
+                amrex::Print() << "...estdt from FDM at level "
+                          << level << ": " << est_dt_fdm << '\n';
+            }
+            else
+            {
+                amrex::Print() << "...there are no FDM beams at level "
+                          << level << '\n';
+            }
+	}
+      }
+#endif
 }
 #endif
 

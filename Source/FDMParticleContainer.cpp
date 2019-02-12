@@ -402,6 +402,290 @@ FDMParticleContainer::moveKickFDM (amrex::MultiFab& phi,
 }
 
 void
+FDMParticleContainer::CreateGhostParticlesFDM (int level, int lev, int nGrow, AoS& ghosts) const
+{
+  BL_PROFILE("FDMParticleContainer::CreateGhostParticlesFDM()");
+  BL_ASSERT(ghosts.empty());
+  BL_ASSERT(level < finestLevel());
+
+  if (level >= static_cast<int>(GetParticles().size()))
+    return;
+
+  const BoxArray& fine = ParticleBoxArray(lev);
+
+  std::vector< std::pair<int,Box> > isects;
+
+  const auto& pmap = GetParticles(level);
+  for (const auto& kv : pmap)
+    {
+      const auto& pbox = kv.second.GetArrayOfStructs();
+      for (auto it = pbox.cbegin(); it != pbox.cend(); ++it)
+        {
+	  const IntVect& iv = Index(*it, lev);
+	  fine.intersections(Box(iv,iv),isects,false,nGrow);
+	  for (const auto& isec : isects)
+            {
+	      amrex::ignore_unused(isec);
+	      ParticleType p = *it;  // yes, make a copy                                                                                                                                                         
+	      p.m_idata.id = GhostParticleID;
+	      ghosts().push_back(p);
+            }
+        }
+    }
+}
+
+/*
+  Particle deposition
+*/
+
+void                                                                                                                                                                                                            
+FDMParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_imag, int lev, amrex::Real a) const
+{
+  BL_PROFILE("FDMParticleContainer::DepositFDMParticles()");
+
+  MultiFab* mf_pointer_real;
+
+  if (OnSameGrids(lev, mf_real)) {
+    // If we are already working with the internal mf defined on the                                                                                                                                             
+    // particle_box_array, then we just work with this.                                                                                                                                                          
+    mf_pointer_real = &mf_real;
+  }
+  else {
+
+      amrex::Print() <<"FDM:: mf_real different!!\n";
+
+    // If mf_real is not defined on the particle_box_array, then we need                                                                                                                                 
+    // to make a temporary here and copy into mf_real at the end.                                                                                                                                        
+    mf_pointer_real = new MultiFab(ParticleBoxArray(lev),
+				   ParticleDistributionMap(lev),
+				   1, mf_real.nGrow());
+
+    for (MFIter mfi(*mf_pointer_real); mfi.isValid(); ++mfi) {
+      (*mf_pointer_real)[mfi].setVal(0);
+    }
+  }
+
+  MultiFab* mf_pointer_imag;
+
+  if (OnSameGrids(lev, mf_imag)) {
+    // If we are already working with the internal mf defined on the                                                                                                                                             
+    // particle_box_array, then we just work with this.                                                                                                                                                          
+    mf_pointer_imag = &mf_imag;
+  }
+  else {
+
+      amrex::Print() <<"FDM:: mf_imag different!!\n";
+
+    // If mf_imag is not defined on the particle_box_array, then we need                                                                                                                                 
+    // to make a temporary here and copy into mf_imag at the end.                                                                                                                                        
+      mf_pointer_imag = new MultiFab(ParticleBoxArray(lev),
+				     ParticleDistributionMap(lev),
+				     1, mf_imag.nGrow());
+
+    for (MFIter mfi(*mf_pointer_imag); mfi.isValid(); ++mfi) {
+      (*mf_pointer_imag)[mfi].setVal(0);
+    }
+  }
+
+#ifdef _OPENMP
+  const int       ng_real     = mf_pointer_real->nGrow();
+  const int       ng_imag     = mf_pointer_imag->nGrow();
+#endif
+  const Real      strttime    = amrex::second();
+  const Geometry& gm          = Geom(lev);
+  const Real*     plo         = gm.ProbLo();
+  const Real*     dx          = gm.CellSize();
+   
+#ifdef _OPENMP
+#pragma omp parallel
+#endif
+  {
+    FArrayBox local_real, local_imag;
+    for (MyConstParIter pti(*this, lev); pti.isValid(); ++pti) {
+      const auto& particles = pti.GetArrayOfStructs();
+      const long np = pti.numParticles();
+      FArrayBox& fab_real = (*mf_pointer_real)[pti];
+      FArrayBox& fab_imag = (*mf_pointer_imag)[pti];
+      Real *data_ptr_real, *data_ptr_imag;
+      const int *lo_real, *hi_real, *lo_imag, *hi_imag;
+
+#ifdef _OPENMP
+      Box tile_box_real = pti.tilebox();
+      tile_box_real.grow(ng_real);
+      local_real.resize(tile_box,1);
+      local_real = 0.0;
+      data_ptr_real = local_real.dataPtr();
+      lo_real = tile_box_real.loVect();
+      hi_real = tile_box_real.hiVect();
+
+      Box tile_box_imag = pti.tilebox();
+      tile_box_imag.grow(ng_imag);
+      local_imag.resize(tile_box,1);
+      local_imag = 0.0;
+      data_ptr_imag = local_imag.dataPtr();
+      lo_imag = tile_box_imag.loVect();
+      hi_imag = tile_box_imag.hiVect();
+#else
+      const Box& box_real = fab_real.box();
+      data_ptr_real = fab_real.dataPtr();
+      lo_real = box_real.loVect();
+      hi_real = box_real.hiVect();
+
+      const Box& box_imag = fab_imag.box();
+      data_ptr_imag = fab_imag.dataPtr();
+      lo_imag = box_imag.loVect();
+      hi_imag = box_imag.hiVect();
+
+#endif
+
+      //Boundaries could be easily generalized but don't need to
+      BL_ASSERT(lo_real[0]==lo_imag[0]);
+      BL_ASSERT(lo_real[1]==lo_imag[1]);
+      BL_ASSERT(lo_real[2]==lo_imag[2]);
+      BL_ASSERT(hi_real[0]==hi_imag[0]);
+      BL_ASSERT(hi_real[1]==hi_imag[1]);
+      BL_ASSERT(hi_real[2]==hi_imag[2]);
+
+      deposit_fdm_particles(particles.data(), &np, data_ptr_real,
+			    lo_real, hi_real, data_ptr_imag, lo_imag, 
+			    hi_imag, plo, dx, a);
+
+#ifdef _OPENMP
+    amrex::Print() << "amrex_atomic_accumulate_fab \n";
+      amrex_atomic_accumulate_fab(BL_TO_FORTRAN_3D(local_real),
+				  BL_TO_FORTRAN_3D(fab_real), 1);
+      amrex_atomic_accumulate_fab(BL_TO_FORTRAN_3D(local_imag),
+				  BL_TO_FORTRAN_3D(fab_imag), 1);
+#endif
+    }
+  }
+
+  // If mf_real is not defined on the particle_box_array, then we need                                                                                                                                   
+  // to copy here from mf_pointer_real into mf_real. I believe that we don't                                                                                                                                  
+  // need any information in ghost cells so we don't copy those.                                                                                                                                                 
+  if (mf_pointer_real != &mf_real) {
+    mf_real.copy(*mf_pointer_real,0,0,1);
+    delete mf_pointer_real;
+  }
+
+  // If mf_imag is not defined on the particle_box_array, then we need                                                                                                                                   
+  // to copy here from mf_pointer_imag into mf_imag. I believe that we don't                                                                                                                                  
+  // need any information in ghost cells so we don't copy those.                                                                                                                                                 
+  if (mf_pointer_imag != &mf_imag) {
+    mf_imag.copy(*mf_pointer_imag,0,0,1);
+    delete mf_pointer_imag;
+  }
+
+  if (m_verbose > 1) {
+    Real stoptime = amrex::second() - strttime;
+
+    ParallelDescriptor::ReduceRealMax(stoptime,ParallelDescriptor::IOProcessorNumber());
+
+    amrex::Print() << "FDMParticleContainer::DepositFDMParticles time: " << stoptime << '\n';
+  }
+}
+
+amrex::Real
+FDMParticleContainer::estTimestepFDM(amrex::MultiFab&       phi,
+				     int                    lev,
+				     amrex::Real            cfl) const
+{
+  BL_PROFILE("FDMParticleContainer::estTimestep()");
+  amrex::Real            dt               = 1e50;
+  BL_ASSERT(lev >= 0);
+
+  if (this->GetParticles().size() == 0)
+    return dt;
+
+  const amrex::Real      strttime         = amrex::ParallelDescriptor::second();
+  const amrex::Geometry& geom             = this->m_gdb->Geom(lev);
+  const ParticleLevel&   pmap             = this->GetParticles(lev);
+  int                    tnum             = 1;
+
+  amrex::Print() << "FDM:: beam_cfl_reduced " << cfl << " \n";
+
+#ifdef _OPENMP
+  tnum = omp_get_max_threads();
+#endif
+
+  amrex::Vector<amrex::Real> ldt(tnum,1e50);
+
+  long num_particles_at_level = 0;
+  amrex::MultiFab* phi_pointer;
+  if (this->OnSameGrids(lev, phi))
+    {
+      phi_pointer = 0;
+    }
+  else
+    {
+      phi_pointer = new amrex::MultiFab(this->m_gdb->ParticleBoxArray(lev),
+				       this->m_gdb->ParticleDistributionMap(lev),
+				       phi.nComp(), phi.nGrow());
+
+      phi_pointer->copy(phi,0,0,1);
+      phi_pointer->FillBoundary(geom.periodicity()); // DO WE NEED GHOST CELLS FILLED ???                                                                                                                         
+    }
+
+#ifdef _OPENMP
+#pragma omp parallel
+#endif
+  for (MyConstParIter pti(*this, lev); pti.isValid(); ++pti) {
+    const int grid = pti.index();
+    const AoS&       pbox = pti.GetArrayOfStructs();
+    const int        n    = pbox.size();
+    const amrex::FArrayBox& phifab = (phi_pointer) ? (*phi_pointer)[grid] : phi[grid];
+
+    num_particles_at_level += n;
+    for (int i = 0; i < n; i++) {
+      const ParticleType& p = pbox[i];
+
+      if (p.id() <= 0) continue;
+
+      amrex::Real vel_square = (p.rdata(1)*p.rdata(1)+p.rdata(2)*p.rdata(2)+p.rdata(3)*p.rdata(3));
+      amrex::Real dt_part = (vel_square > 0) ? (cfl * 2.0 / vel_square) : 1e50;
+      amrex::IntVect cell = this->Index(p, lev);
+      const amrex::Real pot = phifab(cell,0);
+      if (pot > 0)
+	dt_part = std::min( dt_part, cfl / pot );
+
+      int tid = 0;
+
+#ifdef _OPENMP
+      tid = omp_get_thread_num();
+#endif
+      ldt[tid] = std::min(dt_part, ldt[tid]);
+    }
+  }
+
+  if (phi_pointer) delete phi_pointer;
+
+  for (int i = 0; i < ldt.size(); i++)
+    dt = std::min(dt, ldt[i]);
+
+  amrex::ParallelDescriptor::ReduceRealMin(dt);
+  //                                                                                                                                                                                                             
+  // Set dt negative if there are no particles at this level.                                                                                                                                                    
+  //                                                                                                                                                                                                             
+  amrex::ParallelDescriptor::ReduceLongSum(num_particles_at_level);
+
+  if (num_particles_at_level == 0) dt = -1.e50;
+  if (this->m_verbose > 1)
+    {
+      amrex::Real stoptime = amrex::ParallelDescriptor::second() - strttime;
+
+      amrex::ParallelDescriptor::ReduceRealMax(stoptime,amrex::ParallelDescriptor::IOProcessorNumber());
+
+      if (amrex::ParallelDescriptor::IOProcessor())
+        {
+	  std::cout << "FDMParticleContainer::estTimestep() time: " << stoptime << '\n';
+        }
+    }
+
+  return dt;
+}
+
+
+void
 FDMParticleContainer::InitCosmo1ppcMultiLevel(
                         MultiFab& mf, const Real disp_fac[], const Real vel_fac[], 
                         const Real particleMass, int disp_idx, int vel_idx, 
@@ -849,190 +1133,6 @@ FDMParticleContainer::InitCosmo(
             std::cout << "InitCosmo() done time: " << runtime << '\n';
         }
     }
-}
-
-void
-FDMParticleContainer::CreateGhostParticlesFDM (int level, int lev, int nGrow, AoS& ghosts) const
-{
-  BL_PROFILE("FDMParticleContainer::CreateGhostParticlesFDM()");
-  BL_ASSERT(ghosts.empty());
-  BL_ASSERT(level < finestLevel());
-
-  if (level >= static_cast<int>(GetParticles().size()))
-    return;
-
-  const BoxArray& fine = ParticleBoxArray(lev);
-
-  std::vector< std::pair<int,Box> > isects;
-
-  const auto& pmap = GetParticles(level);
-  for (const auto& kv : pmap)
-    {
-      const auto& pbox = kv.second.GetArrayOfStructs();
-      for (auto it = pbox.cbegin(); it != pbox.cend(); ++it)
-        {
-	  const IntVect& iv = Index(*it, lev);
-	  fine.intersections(Box(iv,iv),isects,false,nGrow);
-	  for (const auto& isec : isects)
-            {
-	      amrex::ignore_unused(isec);
-	      ParticleType p = *it;  // yes, make a copy                                                                                                                                                         
-	      p.m_idata.id = GhostParticleID;
-	      ghosts().push_back(p);
-            }
-        }
-    }
-}
-
-/*
-  Particle deposition
-*/
-
-void                                                                                                                                                                                                            
-FDMParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_imag, int lev, amrex::Real a) const
-{
-  BL_PROFILE("FDMParticleContainer::DepositFDMParticles()");
-
-  MultiFab* mf_pointer_real;
-
-  if (OnSameGrids(lev, mf_real)) {
-    // If we are already working with the internal mf defined on the                                                                                                                                             
-    // particle_box_array, then we just work with this.                                                                                                                                                          
-    mf_pointer_real = &mf_real;
-  }
-  else {
-
-      amrex::Print() <<"FDM:: mf_real different!!\n";
-
-    // If mf_real is not defined on the particle_box_array, then we need                                                                                                                                 
-    // to make a temporary here and copy into mf_real at the end.                                                                                                                                        
-    mf_pointer_real = new MultiFab(ParticleBoxArray(lev),
-				   ParticleDistributionMap(lev),
-				   1, mf_real.nGrow());
-
-    for (MFIter mfi(*mf_pointer_real); mfi.isValid(); ++mfi) {
-      (*mf_pointer_real)[mfi].setVal(0);
-    }
-  }
-
-  MultiFab* mf_pointer_imag;
-
-  if (OnSameGrids(lev, mf_imag)) {
-    // If we are already working with the internal mf defined on the                                                                                                                                             
-    // particle_box_array, then we just work with this.                                                                                                                                                          
-    mf_pointer_imag = &mf_imag;
-  }
-  else {
-
-      amrex::Print() <<"FDM:: mf_imag different!!\n";
-
-    // If mf_imag is not defined on the particle_box_array, then we need                                                                                                                                 
-    // to make a temporary here and copy into mf_imag at the end.                                                                                                                                        
-      mf_pointer_imag = new MultiFab(ParticleBoxArray(lev),
-				     ParticleDistributionMap(lev),
-				     1, mf_imag.nGrow());
-
-    for (MFIter mfi(*mf_pointer_imag); mfi.isValid(); ++mfi) {
-      (*mf_pointer_imag)[mfi].setVal(0);
-    }
-  }
-
-#ifdef _OPENMP
-  const int       ng_real     = mf_pointer_real->nGrow();
-  const int       ng_imag     = mf_pointer_imag->nGrow();
-#endif
-  const Real      strttime    = amrex::second();
-  const Geometry& gm          = Geom(lev);
-  const Real*     plo         = gm.ProbLo();
-  const Real*     dx          = gm.CellSize();
-   
-#ifdef _OPENMP
-#pragma omp parallel
-#endif
-  {
-    FArrayBox local_real, local_imag;
-    for (MyConstParIter pti(*this, lev); pti.isValid(); ++pti) {
-      const auto& particles = pti.GetArrayOfStructs();
-      const long np = pti.numParticles();
-      FArrayBox& fab_real = (*mf_pointer_real)[pti];
-      FArrayBox& fab_imag = (*mf_pointer_imag)[pti];
-      Real *data_ptr_real, *data_ptr_imag;
-      const int *lo_real, *hi_real, *lo_imag, *hi_imag;
-
-#ifdef _OPENMP
-      Box tile_box_real = pti.tilebox();
-      tile_box_real.grow(ng_real);
-      local_real.resize(tile_box,1);
-      local_real = 0.0;
-      data_ptr_real = local_real.dataPtr();
-      lo_real = tile_box_real.loVect();
-      hi_real = tile_box_real.hiVect();
-
-      Box tile_box_imag = pti.tilebox();
-      tile_box_imag.grow(ng_imag);
-      local_imag.resize(tile_box,1);
-      local_imag = 0.0;
-      data_ptr_imag = local_imag.dataPtr();
-      lo_imag = tile_box_imag.loVect();
-      hi_imag = tile_box_imag.hiVect();
-#else
-      const Box& box_real = fab_real.box();
-      data_ptr_real = fab_real.dataPtr();
-      lo_real = box_real.loVect();
-      hi_real = box_real.hiVect();
-
-      const Box& box_imag = fab_imag.box();
-      data_ptr_imag = fab_imag.dataPtr();
-      lo_imag = box_imag.loVect();
-      hi_imag = box_imag.hiVect();
-
-#endif
-
-      //Boundaries could be easily generalized but don't need to
-      BL_ASSERT(lo_real[0]==lo_imag[0]);
-      BL_ASSERT(lo_real[1]==lo_imag[1]);
-      BL_ASSERT(lo_real[2]==lo_imag[2]);
-      BL_ASSERT(hi_real[0]==hi_imag[0]);
-      BL_ASSERT(hi_real[1]==hi_imag[1]);
-      BL_ASSERT(hi_real[2]==hi_imag[2]);
-
-      deposit_fdm_particles(particles.data(), &np, data_ptr_real,
-			    lo_real, hi_real, data_ptr_imag, lo_imag, 
-			    hi_imag, plo, dx, a);
-
-#ifdef _OPENMP
-    amrex::Print() << "amrex_atomic_accumulate_fab \n";
-      amrex_atomic_accumulate_fab(BL_TO_FORTRAN_3D(local_real),
-				  BL_TO_FORTRAN_3D(fab_real), 1);
-      amrex_atomic_accumulate_fab(BL_TO_FORTRAN_3D(local_imag),
-				  BL_TO_FORTRAN_3D(fab_imag), 1);
-#endif
-    }
-  }
-
-  // If mf_real is not defined on the particle_box_array, then we need                                                                                                                                   
-  // to copy here from mf_pointer_real into mf_real. I believe that we don't                                                                                                                                  
-  // need any information in ghost cells so we don't copy those.                                                                                                                                                 
-  if (mf_pointer_real != &mf_real) {
-    mf_real.copy(*mf_pointer_real,0,0,1);
-    delete mf_pointer_real;
-  }
-
-  // If mf_imag is not defined on the particle_box_array, then we need                                                                                                                                   
-  // to copy here from mf_pointer_imag into mf_imag. I believe that we don't                                                                                                                                  
-  // need any information in ghost cells so we don't copy those.                                                                                                                                                 
-  if (mf_pointer_imag != &mf_imag) {
-    mf_imag.copy(*mf_pointer_imag,0,0,1);
-    delete mf_pointer_imag;
-  }
-
-  if (m_verbose > 1) {
-    Real stoptime = amrex::second() - strttime;
-
-    ParallelDescriptor::ReduceRealMax(stoptime,ParallelDescriptor::IOProcessorNumber());
-
-    amrex::Print() << "FDMParticleContainer::DepositFDMParticles time: " << stoptime << '\n';
-  }
 }
 
 void 

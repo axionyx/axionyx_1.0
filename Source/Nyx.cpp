@@ -113,6 +113,7 @@ Real Nyx::theta_ax = 1.0;
 Real Nyx::sigma_ax = 1.0;
 Real Nyx::gamma_ax = 1.0;
 int  Nyx::wkb_approx = 1;
+Real Nyx::beam_cfl = 0.2;
 #endif
 int Nyx::Temp_comp = -1;
 int Nyx::  Ne_comp = -1;
@@ -284,6 +285,7 @@ Nyx::read_params ()
     pp_nyx.query("sigma_ax", sigma_ax);
     gamma_ax = 0.5/sigma_ax/sigma_ax;
     pp_nyx.query("wkb_approx", wkb_approx);
+    pp_nyx.query("beam_cfl", beam_cfl);
 #endif
     pp_nyx.query("dump_old", dump_old);
 
