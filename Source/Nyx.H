@@ -17,6 +17,7 @@
 #endif
 #ifdef FDM_GB
 #include "FDMParticleContainer.H"
+#include "FDMwkbParticleContainer.H"
 #endif
 
 #include <iostream>
@@ -410,8 +411,8 @@ public:
     amrex::Real advance_hydro_plus_particles(amrex::Real time, amrex::Real dt, int iteration,
                                       int ncycle);
 #ifdef FDM
-    amrex::Real advance_FDM(amrex::Real time, amrex::Real dt, int iteration, int ncycle);
-           void advance_FDM_FD(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
+    // amrex::Real advance_FDM(amrex::Real time, amrex::Real dt, int iteration, int ncycle);
+    void advance_FDM_FD(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
 #endif
 
 #ifdef FDM
@@ -596,6 +597,9 @@ public:
     static FDMParticleContainer* theFDMPC();
     static FDMParticleContainer* theVirtFDMPC();
     static FDMParticleContainer* theGhostFDMPC();
+    static FDMwkbParticleContainer* theFDMwkbPC();
+    static FDMwkbParticleContainer* theVirtFDMwkbPC();
+    static FDMwkbParticleContainer* theGhostFDMwkbPC();
 #endif
 
     static int NUM_STATE;

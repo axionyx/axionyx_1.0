@@ -229,8 +229,7 @@ FDMParticleContainer::moveKickDriftFDM (amrex::MultiFab&       phi,
 					amrex::Real            dt,
 					amrex::Real            a_old,
 					amrex::Real            a_half,
-					int                    where_width,
-					int                    wkb_approx)
+					int                    where_width)
 {
     BL_PROFILE("FDMParticleContainer::moveKickDrift()");
 
@@ -287,7 +286,7 @@ FDMParticleContainer::moveKickDriftFDM (amrex::MultiFab&       phi,
 				 ac_box.loVect(), ac_box.hiVect(),
 				 (*phi_ptr)[pti].dataPtr(),
 				 phi_box.loVect(), phi_box.hiVect(),
-				 plo,dx,dt,a_old,a_half,&do_move,&wkb_approx);
+				 plo,dx,dt,a_old,a_half,&do_move);
         }
     }
 
@@ -339,8 +338,7 @@ FDMParticleContainer::moveKickFDM (amrex::MultiFab& phi,
 				   int              lev,
 				   Real             dt,
 				   Real             a_new,
-				   Real             a_half,
-				   int              wkb_approx) 
+				   Real             a_half) 
 {
     BL_PROFILE("FDMParticleContainer::moveKick()");
 
@@ -393,7 +391,7 @@ FDMParticleContainer::moveKickFDM (amrex::MultiFab& phi,
 				 ac_box.loVect(), ac_box.hiVect(),
 				 (*phi_ptr)[pti].dataPtr(),
 				 phi_box.loVect(), phi_box.hiVect(),
-				 plo,dx,dt,a_half,a_new,&do_move,&wkb_approx);
+				 plo,dx,dt,a_half,a_new,&do_move);
         }
     }
     
@@ -1374,7 +1372,7 @@ FDMParticleContainer::InitVarCount (MultiFab& mf, long num_particle_fdm, BoxArra
 }
 
 void
-FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nlevs, const Real hbaroverm, const Real sigma_ax, const Real gamma_ax, const int wkb_approx)
+FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nlevs, const Real hbaroverm, const Real sigma_ax, const Real gamma_ax)
 {
   const int       MyProc      = ParallelDescriptor::MyProc();
   const Geometry& geom        = m_gdb->Geom(lev);
@@ -1431,17 +1429,6 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
     Amp /= sqrt(2.0*alpha/M_PI);
     Amp *= pow(fact,1.0/3.0);
 
-    if(wkb_approx){
-      q[0] = generateGaussianNoise(q0[0],sigma*sqrt(2.0));
-      q[1] = generateGaussianNoise(q0[1],sigma*sqrt(2.0));
-      q[2] = generateGaussianNoise(q0[2],sigma*sqrt(2.0));
-      phi  = 0.0;
-      p[0] = p0[0];
-      p[1] = p0[1];
-      p[2] = p0[2];
-      Amp  = pow(fact/npart/npart,1.0/3.0)/M_PI/(alpha/M_PI);
-    }
-
     if(q[0]>geom.ProbLo(0) && q[0]<geom.ProbHi(0) && q[1]>geom.ProbLo(1) && q[1]<geom.ProbHi(1) && q[2]>geom.ProbLo(2) && q[2]<geom.ProbHi(2)){
 
       part.id()      = ParticleType::NextID();
@@ -1469,10 +1456,7 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
       // part.rdata( 5) = 0.0001*pow(2.0*gamma_ax/M_PI,0.75);//pow(2.0*gamma_ax*Amp,1.5);
       // else
       // part.rdata( 5) = pow(2.0*gamma_ax/M_PI,0.75);
-      if(wkb_approx)
-	part.rdata( 5) = pow(gamma_ax*Amp,1.5);
-      else
-	part.rdata( 5) = pow(2.0*gamma_ax*Amp,1.5);
+      part.rdata( 5) = pow(2.0*gamma_ax*Amp,1.5);
       part.rdata( 6) = 0.0;
       //set width
       part.rdata( 7) = gamma_ax;
@@ -1487,16 +1471,6 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
       part.rdata(15) = 0.0;
       part.rdata(16) = Amp;
       //set Jacobian pq
-      part.rdata(26) = 0.0;
-      part.rdata(27) = 0.0;
-      part.rdata(28) = 0.0;
-      part.rdata(29) = 0.0;
-      part.rdata(30) = 0.0;
-      part.rdata(31) = 0.0;
-      part.rdata(32) = 0.0;
-      part.rdata(33) = 0.0;
-      part.rdata(34) = 0.0;
-      //set Jacobian qp
       part.rdata(17) = 0.0;
       part.rdata(18) = 0.0;
       part.rdata(19) = 0.0;
@@ -1506,6 +1480,16 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
       part.rdata(23) = 0.0;
       part.rdata(24) = 0.0;
       part.rdata(25) = 0.0;
+      //set Jacobian qp
+      part.rdata(26) = 0.0;
+      part.rdata(27) = 0.0;
+      part.rdata(28) = 0.0;
+      part.rdata(29) = 0.0;
+      part.rdata(30) = 0.0;
+      part.rdata(31) = 0.0;
+      part.rdata(32) = 0.0;
+      part.rdata(33) = 0.0;
+      part.rdata(34) = 0.0;
       //set Jacobian pp
       part.rdata(35) = Amp;
       part.rdata(36) = 0.0;

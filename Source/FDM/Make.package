@@ -1,7 +1,8 @@
 ifeq ($(USE_FDM), TRUE)
 CEXE_headers   += FDMParticleContainer.H
 CEXE_sources   += FDMParticleContainer.cpp
+CEXE_headers   += FDMwkbParticleContainer.H
+CEXE_sources   += FDMwkbParticleContainer.cpp
 FEXE_headers   += fdm_F.H
 f90EXE_sources += fdm_3d.f90
-##CEXE_sources   += FDM_assignfields.cpp
 endif

@@ -29,15 +29,6 @@ public:
       real_comp_names.push_back("qq7");
       real_comp_names.push_back("qq8");
       real_comp_names.push_back("qq9");
-      real_comp_names.push_back("qp1");
-      real_comp_names.push_back("qp2");
-      real_comp_names.push_back("qp3");
-      real_comp_names.push_back("qp4");
-      real_comp_names.push_back("qp5");
-      real_comp_names.push_back("qp6");
-      real_comp_names.push_back("qp7");
-      real_comp_names.push_back("qp8");
-      real_comp_names.push_back("qp9");
       real_comp_names.push_back("pq1");
       real_comp_names.push_back("pq2");
       real_comp_names.push_back("pq3");
@@ -47,6 +38,15 @@ public:
       real_comp_names.push_back("pq7");
       real_comp_names.push_back("pq8");
       real_comp_names.push_back("pq9");
+      real_comp_names.push_back("qp1");
+      real_comp_names.push_back("qp2");
+      real_comp_names.push_back("qp3");
+      real_comp_names.push_back("qp4");
+      real_comp_names.push_back("qp5");
+      real_comp_names.push_back("qp6");
+      real_comp_names.push_back("qp7");
+      real_comp_names.push_back("qp8");
+      real_comp_names.push_back("qp9");
       real_comp_names.push_back("pp1");
       real_comp_names.push_back("pp2");
       real_comp_names.push_back("pp3");
@@ -83,15 +83,15 @@ public:
                                 amrex::Real a_new = 1.0, amrex::Real a_half = 1.0);
 
     void moveKickDriftFDM (amrex::MultiFab& phi, int grav_n_grow, amrex::MultiFab& acceleration, int level, amrex::Real timestep,
-			   amrex::Real a_old = 1.0, amrex::Real a_half = 1.0, int where_width = 0, int wkb_approx = 0);
+			   amrex::Real a_old = 1.0, amrex::Real a_half = 1.0, int where_width = 0);
     void moveKickFDM      (amrex::MultiFab& phi, int grav_n_grow, amrex::MultiFab& acceleration, int level, amrex::Real timestep,
-			   amrex::Real a_new = 1.0, amrex::Real a_half = 1.0, int wkb_approx = 0);
+			   amrex::Real a_new = 1.0, amrex::Real a_half = 1.0);
 
     void InitFromBinaryMortonFile(const std::string& particle_directory, int nextra, int skip_factor);
  
     void InitVarCount (amrex::MultiFab& mf, long n_axpart, amrex::BoxArray &baWhereNot, int lev, int nlevs);
 
-    void InitGaussianBeams (long n_axpart, int lev, int nlevs, const amrex::Real hbaroverm, const amrex::Real sigma_ax, const amrex::Real gamma_ax, const int wkb_approx);
+    void InitGaussianBeams (long n_axpart, int lev, int nlevs, const amrex::Real hbaroverm, const amrex::Real sigma_ax, const amrex::Real gamma_ax);
 
     amrex::Real generateGaussianNoise(const amrex::Real &mean, const amrex::Real &stdDev);
 };

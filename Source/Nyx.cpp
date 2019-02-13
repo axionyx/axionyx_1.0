@@ -1371,9 +1371,14 @@ Nyx::post_timestep (int iteration)
                                                   theActiveParticles()[i]->finestLevel(),
                                                   iteration);
 #ifdef FDM_GB
-	theFDMPC()->Redistribute(level,
-				 theFDMPC()->finestLevel(),
-				 iteration);
+	if(theFDMPC())
+	  theFDMPC()->Redistribute(level,
+				   theFDMPC()->finestLevel(),
+				   iteration);
+	if(theFDMwkbPC())
+	  theFDMwkbPC()->Redistribute(level,
+				   theFDMwkbPC()->finestLevel(),
+				   iteration);
 #endif
     }
 

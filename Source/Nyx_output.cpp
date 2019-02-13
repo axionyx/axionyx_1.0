@@ -180,6 +180,11 @@ Nyx::writePlotFile (const std::string& dir,
                     derive_names.push_back(it->name());
                     num_derive++;
 		  }
+                if (Nyx::theFDMwkbPC())
+		  {
+                    derive_names.push_back(it->name());
+                    num_derive++;
+		  }
 #endif
             } else if (it->name() == "Rank") {
                 derive_names.push_back(it->name());
@@ -536,6 +541,9 @@ Nyx::writePlotFile (const std::string& dir,
     if(Nyx::theFDMPC()) {
       Nyx::theFDMPC()->SetLevelDirectoriesCreated(false);
     }
+    if(Nyx::theFDMwkbPC()) {
+      Nyx::theFDMwkbPC()->SetLevelDirectoriesCreated(false);
+    }
 #endif
 
 }
@@ -554,6 +562,9 @@ Nyx::writePlotFilePre (const std::string& dir, ostream& os)
 #ifdef FDM_GB
   if(Nyx::theFDMPC()) {
     Nyx::theFDMPC()->WritePlotFilePre();
+  }
+  if(Nyx::theFDMwkbPC()) {
+    Nyx::theFDMwkbPC()->WritePlotFilePre();
   }
 #endif
 
@@ -574,6 +585,9 @@ Nyx::writePlotFilePost (const std::string& dir, ostream& os)
 #ifdef FDM_GB
   if(Nyx::theFDMPC()) {
     Nyx::theFDMPC()->WritePlotFilePost();
+  }
+  if(Nyx::theFDMwkbPC()) {
+    Nyx::theFDMwkbPC()->WritePlotFilePost();
   }
 #endif
 }
@@ -599,6 +613,11 @@ Nyx::particle_plot_file (const std::string& dir)
         if (Nyx::theFDMPC())
           {
             Nyx::theFDMPC()->WriteNyxPlotFile(dir, fdm_plt_particle_file);
+          }
+
+        if (Nyx::theFDMwkbPC())
+          {
+            Nyx::theFDMwkbPC()->WriteNyxPlotFile(dir, fdm_plt_particle_file);
           }
 #endif
 
@@ -670,6 +689,19 @@ Nyx::particle_plot_file (const std::string& dir)
             File << particle_plotfile_format << '\n';
             File.close();
         }
+
+        if (Nyx::theFDMwkbPC() && ParallelDescriptor::IOProcessor())
+        {
+            std::string FileName = dir + "/" + fdm_plt_particle_file + "/precision";
+            std::ofstream File;
+            File.open(FileName.c_str(), std::ios::out|std::ios::trunc);
+            if ( ! File.good()) {
+                amrex::FileOpenFailed(FileName);
+	    }
+            File.precision(15);
+            File << particle_plotfile_format << '\n';
+            File.close();
+        }
 #endif
     }
 }
@@ -694,6 +726,11 @@ Nyx::particle_check_point (const std::string& dir)
       if (Nyx::theFDMPC())
         {
           Nyx::theFDMPC()->NyxCheckpoint(dir, fdm_chk_particle_file);
+        }
+
+      if (Nyx::theFDMwkbPC())
+        {
+          Nyx::theFDMwkbPC()->NyxCheckpoint(dir, fdm_chk_particle_file);
         }
 #endif
 
@@ -885,6 +922,9 @@ Nyx::checkPoint (const std::string& dir,
     if(Nyx::theFDMPC()) {
       Nyx::theFDMPC()->SetLevelDirectoriesCreated(false);
     }
+    if(Nyx::theFDMwkbPC()) {
+      Nyx::theFDMwkbPC()->SetLevelDirectoriesCreated(false);
+    }
 #endif
 
 }
@@ -904,6 +944,9 @@ Nyx::checkPointPre (const std::string& dir,
 #ifdef FDM_GB
   if(Nyx::theFDMPC()) {
     Nyx::theFDMPC()->CheckpointPre();
+  }
+  if(Nyx::theFDMwkbPC()) {
+    Nyx::theFDMwkbPC()->CheckpointPre();
   }
 #endif
 
@@ -925,6 +968,9 @@ Nyx::checkPointPost (const std::string& dir,
 #ifdef FDM_GB
   if(Nyx::theFDMPC()) {
     Nyx::theFDMPC()->CheckpointPost();
+  }
+  if(Nyx::theFDMwkbPC()) {
+    Nyx::theFDMwkbPC()->CheckpointPost();
   }
 #endif
 }

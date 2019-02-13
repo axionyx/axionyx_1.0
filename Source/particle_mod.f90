@@ -45,4 +45,19 @@ module particle_mod
      integer(c_int)  :: cpu
   end type fdm_particle_t
 
+  public  fdm_particle_wkb_t
+  
+  type, bind(C)  :: fdm_particle_wkb_t
+     real(c_real)    :: pos(3)     !< Position
+     real(c_real)    :: mass       !< Particle mass
+     real(c_real)    :: vel(3)     !< Particle velocity
+     real(c_real)    :: phase      !< Particle phase 
+     real(c_real)    :: amp(2)     !< Particle amplitude
+     real(c_real)    :: width      !< Particle width
+     real(c_real)    :: qq(9)      !< Particle Jacobian qq
+     real(c_real)    :: pq(9)      !< Particle Jacobian pq
+     integer(c_int)  :: id
+     integer(c_int)  :: cpu
+  end type fdm_particle_wkb_t
+
 end module
