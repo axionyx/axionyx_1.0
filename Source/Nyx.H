@@ -762,7 +762,8 @@ protected:
     static int particle_skip_factor;
 
 #ifdef FDM_GB
-  static long num_particle_fdm;                                                                                                                                                                                     
+    static long num_particle_fdm;                                                                                                                                                                      
+    static long num_particle_dm;                                                                                                                                                                    
 #endif
 
     static amrex::IntVect Nrep;  // how many times the initial conditions are replicated in each direction

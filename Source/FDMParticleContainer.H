@@ -91,7 +91,9 @@ public:
  
     void InitVarCount (amrex::MultiFab& mf, long n_axpart, amrex::BoxArray &baWhereNot, int lev, int nlevs);
 
-  void InitGaussianBeams (long n_axpart, int lev, int nlevs, const amrex::Real hbaroverm, const amrex::Real sigma_ax, const amrex::Real gamma_ax, const int wkb_approx);
+    void InitGaussianBeams (long n_axpart, int lev, int nlevs, const amrex::Real hbaroverm, const amrex::Real sigma_ax, const amrex::Real gamma_ax, const int wkb_approx);
+
+    amrex::Real generateGaussianNoise(const amrex::Real &mean, const amrex::Real &stdDev);
 };
 
 #endif /* _FDMParticleContainer_H_ */

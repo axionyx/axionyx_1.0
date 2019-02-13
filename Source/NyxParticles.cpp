@@ -158,6 +158,7 @@ Real Nyx::neutrino_cfl = 0.5;
 #endif
 #ifdef FDM_GB
 long Nyx::num_particle_fdm;
+long Nyx::num_particle_dm;
 #endif
 
 IntVect Nyx::Nrep;
@@ -362,6 +363,7 @@ Nyx::read_particle_params ()
 
 #ifdef FDM_GB
     pp.query("num_particle_fdm", num_particle_fdm);
+    pp.query("num_particle_dm", num_particle_dm);
 #endif
 
     pp.query("write_particle_density_at_init", write_particle_density_at_init);
@@ -549,6 +551,21 @@ Nyx::init_particles ()
 					 BL_SPACEDIM + 1,
 					 particle_skip_factor);
         }
+#ifdef FDM_GB
+	else if (particle_init_type == "GaussianBeams")
+	  {
+	    if (verbose)
+	      {
+		amrex::Print() << "\nInitializing DM particles for FDM gravitational potential...\n\n";
+		if (init_with_sph_particles == 1)
+		  amrex::Error("FDM computations are not supported for sph particles.");
+	      }
+	    if(num_particle_dm > 0)
+	      DMPC->InitGaussianBeams(num_particle_dm, level, parent->initialBaLevels()+1);
+	    else
+	      amrex::Error("\nNeed num_particle_dm > 0 for DM InitGaussianBeams!\n\n");
+	  }
+#endif
         else
         {
             amrex::Error("not a valid input for nyx.particle_init_type");
@@ -788,6 +805,8 @@ Nyx::init_particles ()
         }
       else if(particle_init_type == "GaussianBeams")
         {
+	  if (!do_dm_particles)
+	    amrex::Print() << "\n DM particles are needed for the construction of the gravitational potential!!\n\n";
 	  if(num_particle_fdm > 0)
 	    FDMPC->InitGaussianBeams(num_particle_fdm, level, parent->initialBaLevels()+1, hbaroverm, sigma_ax, gamma_ax, wkb_approx);
 	  else
@@ -1194,7 +1213,6 @@ Nyx::particle_est_time_step (Real& est_dt)
         const Real est_dt_fdm1 = FDMPC->estTimestep(grav, a, level, particle_cfl);
 	MultiFab& phi = get_new_data(PhiGrav_Type);
 	Real beam_cfl_reduced = beam_cfl*2.0*M_PI*hbaroverm;
-	amrex::Print() << "FDM:: beam_cfl " << beam_cfl << " \n";
         const Real est_dt_fdm2 = FDMPC->estTimestepFDM(phi, level, beam_cfl_reduced);
 	const Real est_dt_fdm = std::min(est_dt_fdm1 ,est_dt_fdm2);
 

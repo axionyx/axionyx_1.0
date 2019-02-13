@@ -39,7 +39,12 @@ public:
                                 amrex::Real a_new = 1.0, amrex::Real a_half = 1.0);
 
     void InitFromBinaryMortonFile(const std::string& particle_directory, int nextra, int skip_factor);
+    
+#ifdef FDM_GB
+    void InitGaussianBeams (long num_particle_dm, int lev, int nlevs);
 
+    amrex::Real generateGaussianNoise(const amrex::Real &mean, const amrex::Real &stdDev);
+#endif
 };
 
 #endif /* _DarkMatterParticleContainer_H_ */

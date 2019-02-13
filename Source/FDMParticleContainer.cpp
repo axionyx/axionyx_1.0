@@ -602,8 +602,6 @@ FDMParticleContainer::estTimestepFDM(amrex::MultiFab&       phi,
   const ParticleLevel&   pmap             = this->GetParticles(lev);
   int                    tnum             = 1;
 
-  amrex::Print() << "FDM:: beam_cfl_reduced " << cfl << " \n";
-
 #ifdef _OPENMP
   tnum = omp_get_max_threads();
 #endif
@@ -1388,26 +1386,14 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
   if (calls[lev] > 1) return;
   Vector<ParticleLevel>& particles = this->GetParticles();
 
-  // Real m_tt = 2.5;                                                                                                                                                                                             
-  // Real hbaroverm = 0.01917152 / m_tt;
-  // Real sigma = 1.1;
-
-  if (ParallelDescriptor::IOProcessor())
-    {
-      std::cout << "hbaroverm: "<< hbaroverm << '\n';
-      std::cout << "sigma_ax : "<< sigma_ax << '\n';
-      std::cout << "gamma_ax : "<< gamma_ax << '\n';
-    }
-
   int  npart = num_particle_fdm;
-  // Real sigma_x = sigma_ax*dx[0];
-  // Real gamma = 0.5/sigma_x/sigma_x;
-  Real alpha = 1600.0;
+  Real alpha = 100.0;
   Real q[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
   Real p[]  = {0.0,0.0,0.0};
   Real q0[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
   Real p0[] = {0.0,0.0,0.0};
   Real r, theta, phi, Amp;
+  Real sigma = 0.5/sqrt(alpha);
   Real fact = 1.0;
 
   particles.reserve(15);  // So we don't ever have to do any copying on a resize.
@@ -1445,16 +1431,16 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
     Amp /= sqrt(2.0*alpha/M_PI);
     Amp *= pow(fact,1.0/3.0);
 
-    // if(true){
-    //   q[0] = generateGaussianNoise(q0[0],sigma*sqrt(2.0));
-    //   q[1] = generateGaussianNoise(q0[1],sigma*sqrt(2.0));
-    //   q[2] = generateGaussianNoise(q0[2],sigma*sqrt(2.0));
-    //   phi  = 0.0;
-    //   p[0] = p0[0];
-    //   p[1] = p0[1];
-    //   p[2] = p0[2];
-    //   Amp  = pow(fact/npart/npart,1.0/3.0)/pi/(alpha/pi);
-    // }
+    if(wkb_approx){
+      q[0] = generateGaussianNoise(q0[0],sigma*sqrt(2.0));
+      q[1] = generateGaussianNoise(q0[1],sigma*sqrt(2.0));
+      q[2] = generateGaussianNoise(q0[2],sigma*sqrt(2.0));
+      phi  = 0.0;
+      p[0] = p0[0];
+      p[1] = p0[1];
+      p[2] = p0[2];
+      Amp  = pow(fact/npart/npart,1.0/3.0)/M_PI/(alpha/M_PI);
+    }
 
     if(q[0]>geom.ProbLo(0) && q[0]<geom.ProbHi(0) && q[1]>geom.ProbLo(1) && q[1]<geom.ProbHi(1) && q[2]>geom.ProbLo(2) && q[2]<geom.ProbHi(2)){
 
@@ -1463,15 +1449,19 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
 
       // set position
       for (int n = 0; n < BL_SPACEDIM; n++)
-	part.pos( n) = 0.5;//q[n];
-      if(index==0)
-	part.pos( 0) = 0.32;
+	part.pos( n) = q[n];
+      // 	part.pos( n) = 0.5;
+      // if(index==0)
+      // 	part.pos( 0) = 0.32;
       // set mass                                                                                                                                                                
-      part.rdata( 0) =  1.0/npart; //dx[0] * dx[1] * dx[2];
+      part.rdata( 0) =  1.0/(npart * dx[0] * dx[1] * dx[2]);
       // set velocity
-      part.rdata( 1) = 0.0;//p[0];
-      part.rdata( 2) = 0.0;//p[1];
-      part.rdata( 3) = 0.0;//p[2];
+      // part.rdata( 1) = 0.0;
+      // part.rdata( 2) = 0.0;
+      // part.rdata( 3) = 0.0;
+      part.rdata( 1) = p[0];
+      part.rdata( 2) = p[1];
+      part.rdata( 3) = p[2];
       //set phase
       part.rdata( 4) = phi;
       //set amplitude
@@ -1479,11 +1469,6 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
       // part.rdata( 5) = 0.0001*pow(2.0*gamma_ax/M_PI,0.75);//pow(2.0*gamma_ax*Amp,1.5);
       // else
       // part.rdata( 5) = pow(2.0*gamma_ax/M_PI,0.75);
-// #ifndef FDM_WKB
-//       part.rdata( 5) = pow(2.0*gamma_ax*Amp,1.5);
-// #else
-//       part.rdata( 5) = pow(gamma_ax*Amp,1.5);
-// #endif
       if(wkb_approx)
 	part.rdata( 5) = pow(gamma_ax*Amp,1.5);
       else
@@ -1556,4 +1541,29 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
       std::cout << "Redistribute done" << '\n';
     }
   
+}
+
+amrex::Real
+FDMParticleContainer::generateGaussianNoise(const amrex::Real &mean, const amrex::Real &stdDev) {
+
+  static bool hasSpare = false;
+  static amrex::Real spare;
+
+  if(hasSpare) {
+    hasSpare = false;
+    return mean + stdDev * spare;
+  }
+
+  hasSpare = true;
+  static amrex::Real u, v, s;
+  do {
+    u = (rand() / ((amrex::Real) RAND_MAX)) * 2.0 - 1.0;
+    v = (rand() / ((amrex::Real) RAND_MAX)) * 2.0 - 1.0;
+    s = u * u + v * v;
+  }
+  while( (s >= 1.0) || (s == 0.0) );
+
+  s = sqrt(-2.0 * log(s) / s);
+  spare = v * s;
+  return mean + stdDev * u * s;
 }
