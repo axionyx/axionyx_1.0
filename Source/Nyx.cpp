@@ -107,14 +107,18 @@ int Nyx::NUM_AX = -1;
 int Nyx::vonNeumann_dt = 0;
 Real Nyx::m_tt = 2.5;
 Real Nyx::hbaroverm = 0.01917152 / m_tt;
-#endif
-#ifdef FDM_GB
+int Nyx::FDlevel = 0;
+int Nyx::GBlevel = 1;
+int Nyx::NBlevel = 2;
+bool Nyx::partlevel = false;
+Vector<int> Nyx::levelmethod;
 Real Nyx::theta_ax = 1.0;
 Real Nyx::sigma_ax = 1.0;
 Real Nyx::gamma_ax = 1.0;
 int  Nyx::wkb_approx = 1;
 Real Nyx::beam_cfl = 0.2;
 #endif
+
 int Nyx::Temp_comp = -1;
 int Nyx::  Ne_comp = -1;
 int Nyx:: Zhi_comp = -1;
@@ -279,13 +283,22 @@ Nyx::read_params ()
     pp_nyx.query("vonNeumann_dt", vonNeumann_dt);
     pp_nyx.query("m_tt", m_tt);
     hbaroverm = 0.01917152 / m_tt;
-#endif
-#ifdef FDM_GB
     pp_nyx.query("theta_ax", theta_ax);
     pp_nyx.query("sigma_ax", sigma_ax);
     gamma_ax = 0.5/sigma_ax/sigma_ax;
     pp_nyx.query("wkb_approx", wkb_approx);
     pp_nyx.query("beam_cfl", beam_cfl);
+    if (pp_nyx.contains("levelmethod"))
+      {
+	int nlevs = pp_nyx.countval("levelmethod");
+	levelmethod.resize(nlevs);
+	pp_nyx.queryarr("levelmethod",levelmethod,0,nlevs);
+	for(int lev = 0; lev<levelmethod.size(); lev++)
+	  if(levelmethod[lev]!=FDlevel)
+	    partlevel = true;
+      }
+    else
+      amrex::Abort("Need to specify levelmethod for FDM routines");
 #endif
     pp_nyx.query("dump_old", dump_old);
 
@@ -1370,7 +1383,7 @@ Nyx::post_timestep (int iteration)
             theActiveParticles()[i]->Redistribute(level,
                                                   theActiveParticles()[i]->finestLevel(),
                                                   iteration);
-#ifdef FDM_GB
+#ifdef FDM
 	if(theFDMPC())
 	  theFDMPC()->Redistribute(level,
 				   theFDMPC()->finestLevel(),

@@ -198,14 +198,12 @@ Nyx::hydro_setup()
     int use_axions = 0;
 
 #ifdef FDM
-        use_axions = 1;
-            AxDens = 0;
-            AxRe   = 1;
-            AxIm   = 2;
-            NUM_AX = 3;
+    use_axions = 1;
+    AxDens     = 0;
+    AxRe       = 1;
+    AxIm       = 2;
+    NUM_AX     = 3;
 #endif
-
-
 
     // Define NUM_GROW from the f90 module.
     fort_get_method_params(&NUM_GROW);
@@ -801,10 +799,10 @@ Nyx::no_hydro_setup()
     int use_axions = 0;
 #ifdef FDM
     use_axions = 1;
-    AxDens = 0;
-    AxRe   = 1;
-    AxIm   = 2;
-    NUM_AX = 3;
+    AxDens     = 0;
+    AxRe       = 1;
+    AxIm       = 2;
+    NUM_AX     = 3;
 #endif
     int NDIAG_C = -1;
 

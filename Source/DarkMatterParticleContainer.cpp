@@ -784,7 +784,7 @@ DarkMatterParticleContainer::InitFromBinaryMortonFile(const std::string& particl
   
   Redistribute();
 }
-#ifdef FDM_GB
+#ifdef FDM
 void
 DarkMatterParticleContainer::InitGaussianBeams (long num_particle_dm, int lev, int nlevs)
 {

@@ -2,6 +2,7 @@
 #ifndef _Nyx_H_
 #define _Nyx_H_
 
+#include <AMReX_Vector.H>
 #include <AMReX_BC_TYPES.H>
 #include <AMReX_AmrLevel.H>
 #include <AMReX_ErrorList.H>
@@ -15,7 +16,7 @@
 #ifdef NEUTRINO_PARTICLES
 #include "NeutrinoParticleContainer.H"
 #endif
-#ifdef FDM_GB
+#ifdef FDM
 #include "FDMParticleContainer.H"
 #include "FDMwkbParticleContainer.H"
 #endif
@@ -593,7 +594,7 @@ public:
     static NeutrinoParticleContainer* theGhostNPC();
 #endif
 
-#ifdef FDM_GB
+#ifdef FDM
     static FDMParticleContainer* theFDMPC();
     static FDMParticleContainer* theVirtFDMPC();
     static FDMParticleContainer* theGhostFDMPC();
@@ -612,10 +613,12 @@ public:
     static int NUM_AX;
     static int vonNeumann_dt;
     static amrex::Real m_tt;
-    static amrex::Real hbaroverm; 
-#endif
-
-#ifdef FDM_GB
+    static amrex::Real hbaroverm;
+    static int FDlevel;
+    static int GBlevel;
+    static int NBlevel;
+    static bool partlevel;
+    static amrex::Vector<int> levelmethod;
     static amrex::Real theta_ax;
     static amrex::Real sigma_ax;
     static amrex::Real gamma_ax;
@@ -674,7 +677,7 @@ protected:
 #ifdef AGN
     std::string retrieveAGN();
 #endif
-#ifdef FDM_GB
+#ifdef FDM
   std::string retrieveFDM();
 #endif
 
@@ -765,7 +768,7 @@ protected:
     static int particle_initrandom_iseed;
     static int particle_skip_factor;
 
-#ifdef FDM_GB
+#ifdef FDM
     static long num_particle_fdm;                                                                                                                                                                      
     static long num_particle_dm;                                                                                                                                                                    
 #endif

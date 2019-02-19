@@ -1,3 +1,4 @@
+#ifdef FDM
 #include <stdint.h>
 
 #include "FDMParticleContainer.H"
@@ -1551,3 +1552,5 @@ FDMParticleContainer::generateGaussianNoise(const amrex::Real &mean, const amrex
   spare = v * s;
   return mean + stdDev * u * s;
 }
+
+#endif /*FDM*/

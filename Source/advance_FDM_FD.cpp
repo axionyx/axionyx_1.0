@@ -134,10 +134,6 @@ Nyx::advance_FDM_FD (amrex::Real time,
     }
     int ang = Ax_new.nGrow();
 
-    if ( amrex::ParallelDescriptor::IOProcessor() ){
-	std::cout << "Ax_New.nGrow(): " << ang << "\n";
-    }
-
     for (int i = 0; i < Ax_new.nComp(); i++)
     {
         if (Ax_new.contains_nan(i, 1, ang))

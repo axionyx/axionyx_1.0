@@ -39,7 +39,7 @@ Nyx::particle_derive (const std::string& name, Real time, int ngrow)
         return derive_dat;
     }
 #endif
-#ifdef FDM_GB
+#ifdef FDM
     else if (Nyx::theFDMPC() && name == "fdm_particle_count")                                                                                                                                                
       {                                                                                                                                                                                                          
 	std::unique_ptr<MultiFab> derive_dat(new MultiFab(grids, dmap, 1, 0));                                                                                                          

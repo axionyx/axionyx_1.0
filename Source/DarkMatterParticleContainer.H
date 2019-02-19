@@ -40,7 +40,7 @@ public:
 
     void InitFromBinaryMortonFile(const std::string& particle_directory, int nextra, int skip_factor);
     
-#ifdef FDM_GB
+#ifdef FDM
     void InitGaussianBeams (long num_particle_dm, int lev, int nlevs);
 
     amrex::Real generateGaussianNoise(const amrex::Real &mean, const amrex::Real &stdDev);

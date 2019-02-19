@@ -33,7 +33,7 @@ Nyx::advance_particles_only (Real time,
     // A particle in cell (i) can affect cell values in (i-1) to (i+1)
     int stencil_deposition_width = 1;
 
-#ifdef FDM_GB
+#ifdef FDM
     // For FDM Gaussian kernels this is increased to                                                                                                                                                          
     int stencil_deposition_width_fdm = ceil(sigma_ax*theta_ax/get_level(level).Geom().CellSize()[0]);
 #endif 
@@ -55,7 +55,7 @@ Nyx::advance_particles_only (Real time,
  
     int ghost_width = ncycle + stencil_deposition_width;
 
-#ifdef FDM_GB
+#ifdef FDM
     // it is okay to use ghost_width in setup_ghost_particels since ghost_width_fdm for FDM                                                                                                                    
     // Gaussian kernels is separately set in setup_ghost_particles                                                                                                                                          
     int ghost_width_fdm = ncycle + stencil_deposition_width_fdm;
@@ -68,7 +68,7 @@ Nyx::advance_particles_only (Real time,
 
     int where_width =  ghost_width + (1-iteration)  - 1;
 
-#ifdef FDM_GB
+#ifdef FDM
     int where_width_fdm =  ghost_width_fdm + (1-iteration)  - 1;
 #endif
 
@@ -82,11 +82,12 @@ Nyx::advance_particles_only (Real time,
     int grav_n_grow = ghost_width + (1-iteration) + (iteration-1) +
       stencil_interpolation_width ;
 
-#ifdef FDM_GB
+#ifdef FDM
     // Plus one since we need to take the derivative of grav_vector                                                                                                                                            
     // in order to obtain hession of potential
-    grav_n_grow = ghost_width_fdm + (1-iteration) + (iteration-1) +
-      stencil_interpolation_width + 1;
+    if(partlevel)
+      grav_n_grow = ghost_width_fdm + (1-iteration) + (iteration-1) +
+	stencil_interpolation_width + 1;
 #endif
 
     // Sanity checks
@@ -202,9 +203,7 @@ Nyx::advance_particles_only (Real time,
     //
     // Advance Particles
     //
-#ifndef FMD_GB
     if (Nyx::theActiveParticles().size() > 0)
-#endif
     {
         // Advance the particle velocities to the half-time and the positions to the new time
         // We use the cell-centered gravity to correctly interpolate onto particle locations
@@ -235,7 +234,7 @@ Nyx::advance_particles_only (Real time,
                 for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
                     Nyx::theGhostParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_new, a_half,where_width);
 
-#ifdef FDM_GB
+#ifdef FDM
 		MultiFab& Phi_old = get_level(lev).get_old_data(PhiGrav_Type);
 		if(Nyx::theFDMPC())
 		  Nyx::theFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm);
@@ -254,10 +253,11 @@ Nyx::advance_particles_only (Real time,
         }
     }
 
-#ifdef FDM_FD
-    //Advance Axions                                                                                                                                                                       
+#ifdef FDM
+    //Advance FDM wavefunction with finite difference method on FDlevels                                                                                                        
     for (int lev = level; lev <= finest_level_to_advance; lev++)
-      get_level(lev).advance_FDM_FD(time, dt, a_old, a_new);
+      if(levelmethod[lev]==FDlevel)
+	get_level(lev).advance_FDM_FD(time, dt, a_old, a_new);
 
     // Always average down from finer to coarser.                                                                                                                                                
     for (int lev = finest_level_to_advance-1; lev >= level; lev--)
@@ -290,9 +290,7 @@ Nyx::advance_particles_only (Real time,
                                fill_interior, grav_n_grow);
     }
 
-#ifndef FDM_GB
     if (Nyx::theActiveParticles().size() > 0)
-#endif
     {
         // Advance the particle velocities by dt/2 to the new time. We use the
         // cell-centered gravity to correctly interpolate onto particle
@@ -321,7 +319,7 @@ Nyx::advance_particles_only (Real time,
                     for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
                         Nyx::theGhostParticles()[i]->moveKick(grav_vec_new, lev, dt, a_new, a_half);
 
-#ifdef FDM_GB
+#ifdef FDM
 		MultiFab& Phi_new = get_level(lev).get_new_data(PhiGrav_Type);
 		if(Nyx::theFDMPC())
 		  Nyx::theFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half);
@@ -341,8 +339,13 @@ Nyx::advance_particles_only (Real time,
         }
     }
 
-#ifdef FDM_GB
+#ifdef FDM
     for (int lev = level; lev <= finest_level_to_advance; lev++){
+
+      //Only construct wavefunction from Gaussian beams on GBlevels
+      if(levelmethod[lev]!=GBlevel)
+	continue;
+
       //Define neccessary number of ghost cells                                                                                                                                                                 
       int ng = ceil(Nyx::sigma_ax*Nyx::theta_ax/get_level(level).Geom().CellSize()[0]);
 

@@ -29,14 +29,14 @@ namespace
     std::string neutrino_particle_file;
 #endif
 
-#ifdef FDM_GB
+#ifdef FDM
     std::string fdm_particle_file;
 #endif
 
   // const std::string chk_particle_file("DM");
     const std::string dm_chk_particle_file("DM");
     const std::string agn_chk_particle_file("AGN");
-#ifdef FDM_GB
+#ifdef FDM
     const std::string fdm_chk_particle_file("FDM");
 #endif
     //
@@ -67,7 +67,7 @@ namespace
 #ifdef NEUTRINO_PARTICLES
     NeutrinoParticleContainer*    NPC = 0;
 #endif
-#ifdef FDM_GB
+#ifdef FDM
     FDMwkbParticleContainer* FDMwkbPC = 0;
     FDMParticleContainer*       FDMPC = 0;
 #endif
@@ -89,7 +89,7 @@ namespace
 #ifdef NEUTRINO_PARTICLES
     NeutrinoParticleContainer*   VirtNPC = 0;
 #endif
-#ifdef FDM_GB
+#ifdef FDM
     FDMwkbParticleContainer* VirtFDMwkbPC = 0;
     FDMParticleContainer*       VirtFDMPC = 0;
 #endif
@@ -104,7 +104,7 @@ namespace
 #ifdef NEUTRINO_PARTICLES
     NeutrinoParticleContainer*   GhostNPC = 0;
 #endif
-#ifdef FDM_GB
+#ifdef FDM
     FDMwkbParticleContainer* GhostFDMwkbPC = 0;
     FDMParticleContainer*       GhostFDMPC = 0;
 #endif
@@ -126,7 +126,7 @@ namespace
             delete VirtualParticles[i];
             VirtualParticles[i] = 0;
         }
-#ifdef FDM_GB
+#ifdef FDM
 	if(FDMwkbPC)
 	  delete FDMwkbPC;
 	if(GhostFDMwkbPC)
@@ -168,7 +168,7 @@ Real Nyx::particle_cfl = 0.5;
 #ifdef NEUTRINO_PARTICLES
 Real Nyx::neutrino_cfl = 0.5;
 #endif
-#ifdef FDM_GB
+#ifdef FDM
 long Nyx::num_particle_fdm;
 long Nyx::num_particle_dm;
 #endif
@@ -262,7 +262,7 @@ Nyx::theGhostNPC ()
 }
 #endif
 
-#ifdef FDM_GB
+#ifdef FDM
 FDMParticleContainer*
 Nyx::theFDMPC ()
 {
@@ -301,7 +301,12 @@ Nyx::read_particle_params ()
 
     ParmParse pp("nyx");
     pp.query("do_dm_particles", do_dm_particles);
-#if defined(AGN) || defined(FDM_GB)
+#ifdef FDM
+    if(partlevel)
+      //If Gaussian Beam Method is chosen for FDM evolution, we need dm_particles for the construction of the gravitational potential.
+      do_dm_particles = 1;
+#endif
+#ifdef AGN
     pp.get("particle_init_type", particle_init_type);
     pp.get("particle_move_type", particle_move_type);
 #else
@@ -388,9 +393,11 @@ Nyx::read_particle_params ()
     }
 #endif
 
-#ifdef FDM_GB
-    pp.query("num_particle_fdm", num_particle_fdm);
-    pp.query("num_particle_dm", num_particle_dm);
+#ifdef FDM
+    if(partlevel){
+      pp.get("num_particle_fdm", num_particle_fdm);
+      pp.get("num_particle_dm", num_particle_dm);
+    }
 #endif
 
     pp.query("write_particle_density_at_init", write_particle_density_at_init);
@@ -578,8 +585,8 @@ Nyx::init_particles ()
 					 BL_SPACEDIM + 1,
 					 particle_skip_factor);
         }
-#ifdef FDM_GB
-	else if (particle_init_type == "GaussianBeams")
+#ifdef FDM
+	else if (particle_init_type == "GaussianBeams" && partlevel)
 	  {
 	    if (verbose)
 	      {
@@ -707,7 +714,8 @@ Nyx::init_particles ()
         }
     }
 #endif
-#ifdef FDM_GB
+#ifdef FDM
+    if(partlevel){
     if(wkb_approx)
     {
       BL_ASSERT (FDMwkbPC == 0);
@@ -840,24 +848,36 @@ Nyx::init_particles ()
 	  else
 	    amrex::Error("\nNeed num_particle_fdm > 0 for InitGaussianBeams!\n\n");
 
-	  // //Define neccessary number of ghost cells                                                                                                                                              
-	  // int ng = ceiling(sigma_ax*theta_ax)*pow(2,level);
-
-	  //Initialize MultiFabs                                                                                                                                                                      
-	  MultiFab& Ax_new = get_new_data(Axion_Type);
+	  MultiFab& Ax_new = get_level(level).get_new_data(Axion_Type);
 	  Ax_new.setVal(0.);
+
+	  // if(levelmethod[level]==GBlevel){
+
+	  // //Define neccessary number of ghost cells                                                                                                                                              
+	  // int ng = ceil(Nyx::sigma_ax*Nyx::theta_ax/get_level(level).Geom().CellSize()[0]);
+
+	  // //Initialize MultiFabs                                                                                                                                                                      
 	  // MultiFab fdmreal(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
 	  // fdmreal.setVal(0.);
 	  // MultiFab fdmimag(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
 	  // fdmimag.setVal(0.);
 
+	  // const Real cur_time  = state[State_Type].curTime();
+	  // const Real a_new = get_comoving_a(cur_time);
+
 	  // //Deposit Gaussian Beams                                                                                                                                                         
+	  // if(Nyx::theFDMPC())
+	  //   Nyx::theFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+	  // if(Nyx::theGhostFDMPC())
+	  //   Nyx::theGhostFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+	  // if(Nyx::theVirtFDMPC())
+	  //   Nyx::theVirtFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
 	  // if(Nyx::theFDMwkbPC())
-	  //   Nyx::theFDMwkbPC()->DepositFDMwkbParticles(fdmreal,fdmimag,level);
+	  //   Nyx::theFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
 	  // if(Nyx::theGhostFDMwkbPC())
-	  //   Nyx::theGhostFDMwkbPC()->DepositFDMwkbParticles(fdmreal,fdmimag,level);
+	  //   Nyx::theGhostFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
 	  // if(Nyx::theVirtFDMwkbPC())
-	  //   Nyx::theVirtFDMwkbPC()->DepositFDMwkbParticles(fdmreal,fdmimag,level);
+	  //   Nyx::theVirtFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
 
 	  // //Update real part in FDM state                                                                                                                                                            
 	  // Ax_new.ParallelCopy(fdmreal, 0, Nyx::AxRe, 1, fdmreal.nGrow(),
@@ -878,6 +898,7 @@ Nyx::init_particles ()
 	  //     if (Ax_new[fpi].contains_nan())
 	  // 	amrex::Abort("Nans in state just after FDM density update");
 	  //   }
+	  // }
 
         } else {
 	//FIXME                                                                                                                                                                                                            
@@ -1015,24 +1036,36 @@ Nyx::init_particles ()
 	  else
 	    amrex::Error("\nNeed num_particle_fdm > 0 for InitGaussianBeams!\n\n");
 
-	  // //Define neccessary number of ghost cells                                                                                                                                              
-	  // int ng = ceiling(sigma_ax*theta_ax)*pow(2,level);
-
-	  //Initialize MultiFabs                                                                                                                                                                      
-	  MultiFab& Ax_new = get_new_data(Axion_Type);
+	  MultiFab& Ax_new = get_level(level).get_new_data(Axion_Type);
 	  Ax_new.setVal(0.);
+	  
+	  // if(levelmethod[level]==GBlevel){
+	  
+	  // //Define neccessary number of ghost cells                                                                                                                                              
+	  // int ng = ceil(Nyx::sigma_ax*Nyx::theta_ax/get_level(level).Geom().CellSize()[0]);
+
+	  // //Initialize MultiFabs                                                                                                                                                                      
 	  // MultiFab fdmreal(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
 	  // fdmreal.setVal(0.);
 	  // MultiFab fdmimag(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
 	  // fdmimag.setVal(0.);
 
+          // const Real cur_time  = state[State_Type].curTime();
+	  // const Real a_new = get_comoving_a(cur_time);
+
 	  // //Deposit Gaussian Beams                                                                                                                                                         
 	  // if(Nyx::theFDMPC())
-	  //   Nyx::theFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level);
+	  //   Nyx::theFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
 	  // if(Nyx::theGhostFDMPC())
-	  //   Nyx::theGhostFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level);
+	  //   Nyx::theGhostFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
 	  // if(Nyx::theVirtFDMPC())
-	  //   Nyx::theVirtFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level);
+	  //   Nyx::theVirtFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+	  // if(Nyx::theFDMwkbPC())
+	  //   Nyx::theFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+	  // if(Nyx::theGhostFDMwkbPC())
+	  //   Nyx::theGhostFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+	  // if(Nyx::theVirtFDMwkbPC())
+	  //   Nyx::theVirtFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
 
 	  // //Update real part in FDM state                                                                                                                                                            
 	  // Ax_new.ParallelCopy(fdmreal, 0, Nyx::AxRe, 1, fdmreal.nGrow(),
@@ -1053,12 +1086,14 @@ Nyx::init_particles ()
 	  //     if (Ax_new[fpi].contains_nan())
 	  // 	amrex::Abort("Nans in state just after FDM density update");
 	  //   }
-
+	  // }
+	  
         } else {
 	//FIXME                                                                                                                                                                                                            
 	std::cout << "multilevel init not implemented, yet!" << std::endl;
       }
 
+    }
     }
 #endif
 }
@@ -1309,8 +1344,9 @@ Nyx::particle_post_restart (const std::string& restart_file, bool is_checkpoint)
         }
     }
 #endif
-#ifdef FDM_GB
+#ifdef FDM
     {
+      if(partlevel){
       if(wkb_approx){
 	BL_ASSERT (FDMwkbPC == 0);
 	FDMwkbPC = new FDMwkbParticleContainer(parent);
@@ -1389,6 +1425,7 @@ Nyx::particle_post_restart (const std::string& restart_file, bool is_checkpoint)
 	  }
       }
     }
+    }
 #endif
 }
 
@@ -1449,7 +1486,7 @@ Nyx::particle_est_time_step (Real& est_dt)
       }
 #endif
 
-#ifdef FDM_GB
+#ifdef FDM
     if (FDMwkbPC && particle_move_type == "Gravitational")
       {
 	const Real est_dt_fdm1 = FDMwkbPC->estTimestep(grav, a, level, particle_cfl);
@@ -1508,7 +1545,7 @@ void
 Nyx::particle_redistribute (int lbase, bool my_init)
 {
     BL_PROFILE("Nyx::particle_redistribute()");
-#ifdef FDM_GB
+#ifdef FDM
     if (DMPC || FDMPC || FDMwkbPC)
 #else
     if (DMPC)
@@ -1520,7 +1557,7 @@ Nyx::particle_redistribute (int lbase, bool my_init)
         //  
         if (my_init)
         {
-#ifdef FDM_GB
+#ifdef FDM
 	    if(DMPC)
 	      DMPC->Redistribute(lbase);
 	    if(FDMPC)
@@ -1604,7 +1641,7 @@ Nyx::particle_redistribute (int lbase, bool my_init)
                    amrex::Print() << "Calling redistribute because DistMap changed " << '\n';
             }
 
-#ifdef FDM_GB
+#ifdef FDM
 	    if(DMPC)
 	      DMPC->Redistribute(lbase);
 	    if(FDMPC)
@@ -1660,7 +1697,7 @@ Nyx::setup_virtual_particles()
 	    Nyx::theVirtPC()->AddParticlesAtLevel(virts, level);
 	  }
       }
-#ifdef FDM_GB
+#ifdef FDM
       if(Nyx::theFDMPC() != 0){
         FDMParticleContainer::AoS virts;
         if (level < parent->finestLevel())
@@ -1700,7 +1737,7 @@ Nyx::remove_virtual_particles()
             VirtualParticles[i]->RemoveParticlesAtLevel(level);
         virtual_particles_set = false;
     }
-#ifdef FDM_GB
+#ifdef FDM
     if(theVirtFDMPC()){
       theVirtFDMPC()->RemoveParticlesAtLevel(level);
       virtual_particles_set = false;
@@ -1739,27 +1776,27 @@ Nyx::setup_ghost_particles(int ngrow)
         Nyx::theGhostNPC()->AddParticlesAtLevel(ghosts, level+1, ngrow);
     }
 #endif
-#ifdef FDM_GB
+#ifdef FDM
     if(Nyx::theFDMPC() != 0)
       {
 	FDMParticleContainer::AoS ghosts;
 	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
-	  // if(levelmethod[lev]==GBlevel){
+	  if(levelmethod[lev]==GBlevel){
 	    int ng = parent->nCycle(level)+ceil(sigma_ax*theta_ax/parent->Geom(lev).CellSize()[0]);
 	    Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);
 	    Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ng);
-	  // }
+	  }
 	}
       }
     if(Nyx::theFDMwkbPC() != 0)
       {
 	FDMwkbParticleContainer::AoS ghosts;
 	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
-	  // if(levelmethod[lev]==GBlevel){
+	  if(levelmethod[lev]==GBlevel){
 	    int ng = parent->nCycle(level)+ceil(sigma_ax*theta_ax/parent->Geom(lev).CellSize()[0]);
 	    Nyx::theFDMwkbPC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);
 	    Nyx::theGhostFDMwkbPC()->AddParticlesAtLevel(ghosts, lev, ng);
-	  // }
+	  }
 	}
       }
 #endif
@@ -1775,7 +1812,7 @@ Nyx::remove_ghost_particles()
         if (GhostParticles[i] != 0)
             GhostParticles[i]->RemoveParticlesAtLevel(level);
     }
-#ifdef FDM_GB
+#ifdef FDM
     if(theGhostFDMPC())
       theGhostFDMPC()->RemoveParticlesAtLevel(level);
     if(theGhostFDMwkbPC())
