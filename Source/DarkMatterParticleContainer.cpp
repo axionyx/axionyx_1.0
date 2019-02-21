@@ -786,7 +786,7 @@ DarkMatterParticleContainer::InitFromBinaryMortonFile(const std::string& particl
 }
 #ifdef FDM
 void
-DarkMatterParticleContainer::InitGaussianBeams (long num_particle_dm, int lev, int nlevs)
+DarkMatterParticleContainer::InitGaussianBeams (long num_particle_dm, int lev, int nlevs, const Real fact)
 {
 
   const int       MyProc      = ParallelDescriptor::MyProc();
@@ -799,12 +799,14 @@ DarkMatterParticleContainer::InitGaussianBeams (long num_particle_dm, int lev, i
   Vector<ParticleLevel>& particles = this->GetParticles();
 
   int  npart = num_particle_dm;
-  Real alpha = 100.0;
+  Real alpha = 1.8;//100.0;
   Real q0[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
   Real q[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
   Real p0[] = {0.0,0.0,0.0};
   Real sigma = 0.5/sqrt(alpha);/*remember that we square amplitude alpha->2*alpha*/
-  Real fact = 1.0;
+  // Real comoving_OmM = 0.3;
+  // Real comoving_h = 0.7;
+  // Real fact = 2.775e+11*comoving_h*comoving_h*comoving_OmM;//  1.0;
 
   //calculate dm particle mass
   Real mass = 1.0/npart;

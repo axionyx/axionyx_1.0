@@ -46,7 +46,7 @@
 
       use meth_params_module, only : UAXRE, UAXIM
       use fundamental_constants_module
-      !use axion_params_module, only: ax_maxchange,ax_x,ax_y,ax_z
+      !use fdm_params_module, only: ax_maxchange,ax_x,ax_y,ax_z
 
       implicit none
 
@@ -114,7 +114,7 @@
                              vdx, nvar, delta, ProbLo,ProbHi &
                              )
 
-      use axion_params_module, only : hbaroverm
+      use fdm_params_module, only : hbaroverm
 
       implicit none
 
@@ -186,7 +186,7 @@
       use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM
       use comoving_module
       use fundamental_constants_module
-      use axion_params_module
+      use fdm_params_module
 
       implicit none
 
@@ -310,7 +310,7 @@
            courno,a_old,a_new,verbose)
 
       use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM
-      use axion_params_module, only : hbaroverm, ii
+      use fdm_params_module, only : hbaroverm, ii
       use fundamental_constants_module
       use probdata_module
 
@@ -334,7 +334,7 @@
       double precision invdeltasq(3)
       double precision xn,xp,xc,del,Vo,r
 
-      !(complex) axion field
+      !(complex) fdm field
       double complex, allocatable :: psi(:,:,:),k1(:,:,:),k2(:,:,:),k3(:,:,:),k4(:,:,:),V(:,:,:)
 
       allocate( psi(uin_l1:uin_h1,uin_l2:uin_h2,uin_l3:uin_h3) )

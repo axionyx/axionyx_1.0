@@ -746,7 +746,7 @@
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      ! use axion_params_module, only : mindens, meandens
+      ! use fdm_params_module, only : mindens, meandens
 
       implicit none
 
@@ -831,7 +831,7 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use axion_params_module, only : m_tt,meandens,hbaroverm
+      use fdm_params_module, only : m_tt,meandens,hbaroverm
 
       implicit none
 
@@ -887,7 +887,7 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use axion_params_module, only : m_tt,hbaroverm
+      use fdm_params_module, only : m_tt,hbaroverm
 
       implicit none
 
@@ -939,7 +939,7 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use axion_params_module, only : m_tt, hbaroverm!, mindens
+      use fdm_params_module, only : m_tt, hbaroverm!, mindens
       use fundamental_constants_module
 
       implicit none
@@ -1031,7 +1031,7 @@ end subroutine ca_axphase
                           dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                           lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use axion_params_module, only : m_tt, hbaroverm!, mindens
+      use fdm_params_module, only : m_tt, hbaroverm!, mindens
       use fundamental_constants_module
 
       implicit none
@@ -1092,7 +1092,7 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use axion_params_module, only : m_tt,meandens,hbaroverm
+      use fdm_params_module, only : m_tt,meandens,hbaroverm
       use fundamental_constants_module
 
       implicit none
@@ -1133,7 +1133,7 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use axion_params_module, only : m_tt,meandens,hbaroverm
+      use fdm_params_module, only : m_tt,meandens,hbaroverm
       use fundamental_constants_module
 
       implicit none
@@ -1174,7 +1174,7 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use axion_params_module, only : m_tt,meandens,hbaroverm
+      use fdm_params_module, only : m_tt,meandens,hbaroverm
       use fundamental_constants_module
 
       implicit none
@@ -1216,11 +1216,11 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
       !
-      ! This routine calculates the error estimator for the axion velocity (AxRe,AxIm) 
+      ! This routine calculates the error estimator for the fdm velocity (AxRe,AxIm) 
       ! according to R. Loehner (1987) eq.4
       !
 
-      use axion_params_module, only : epsilon_L, mindens
+      use fdm_params_module, only : epsilon_L, mindens
 
       implicit none
 
@@ -1264,11 +1264,11 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
       !
-      ! This routine calculates the error estimator for the axion velocity (AxRe,AxIm) 
+      ! This routine calculates the error estimator for the fdm velocity (AxRe,AxIm) 
       ! according to R. Loehner (1987) eq.4
       !
 
-      use axion_params_module, only : epsilon_L, mindens
+      use fdm_params_module, only : epsilon_L, mindens
 
       implicit none
 
@@ -1312,11 +1312,11 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
       !
-      ! This routine calculates the error estimator for the axion velocity (AxRe,AxIm) 
+      ! This routine calculates the error estimator for the fdm velocity (AxRe,AxIm) 
       ! according to R. Loehner (1987) eq.4
       !
 
-      use axion_params_module, only : epsilon_L, mindens
+      use fdm_params_module, only : epsilon_L, mindens
 
       implicit none
 

@@ -275,7 +275,7 @@
     use amrex_error_module
     use amrex_fort_module, only : amrex_real
     use particle_mod      , only: fdm_particle_t
-    use axion_params_module, only : hbaroverm, ii, sigma_ax, gamma_ax
+    use fdm_params_module, only : hbaroverm, ii, gamma_fdm!, sigma_fdm
 
     integer,              intent(in   )        :: np
     type(fdm_particle_t), intent(inout)        :: particles(np)
@@ -485,7 +485,7 @@
 !         Update complex beam amplitude Cpq
 !          
           ZZ = particles(n)%width*qq-pq/(2.0*ii*hbaroverm) &
-               + (pp-2.0*ii*hbaroverm*particles(n)%width*qp)*gamma_ax
+               + (pp-2.0*ii*hbaroverm*particles(n)%width*qp)*gamma_fdm
 
           det = (ZZ(1,1)*ZZ(2,2)*ZZ(3,3) - ZZ(1,1)*ZZ(2,3)*ZZ(3,2) &
                - ZZ(1,2)*ZZ(2,1)*ZZ(3,3) + ZZ(1,2)*ZZ(2,3)*ZZ(3,1) &
@@ -512,7 +512,7 @@
            do nn=1, nn_hi
 !                                                                                                                                                                                                                  
               ZZ = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm) &
-                   + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_ax                    
+                   + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_fdm                    
 !                                                                                                                                                                                                      
               det = (ZZ(1,1)*ZZ(2,2)*ZZ(3,3) - ZZ(1,1)*ZZ(2,3)*ZZ(3,2) &
                    - ZZ(1,2)*ZZ(2,1)*ZZ(3,3) + ZZ(1,2)*ZZ(2,3)*ZZ(3,1) &
@@ -541,7 +541,7 @@
            do nn=1, nn_hi
 !                                                                                                                                                                                                                
               ZZ = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm) &
-                   + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_ax                    
+                   + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_fdm                    
 !                                                                                                                                                                                                                
               det = (ZZ(1,1)*ZZ(2,2)*ZZ(3,3) - ZZ(1,1)*ZZ(2,3)*ZZ(3,2) &
                    - ZZ(1,2)*ZZ(2,1)*ZZ(3,3) + ZZ(1,2)*ZZ(2,3)*ZZ(3,1) &
@@ -570,7 +570,7 @@
            do nn=1, nn_hi
 !                                                                                                                                                                                                                
               ZZ = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm) &
-                   + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_ax                    
+                   + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_fdm                    
 !                                                                                                                                                                                                              
               det = (ZZ(1,1)*ZZ(2,2)*ZZ(3,3) - ZZ(1,1)*ZZ(2,3)*ZZ(3,2) &
                    - ZZ(1,2)*ZZ(2,1)*ZZ(3,3) + ZZ(1,2)*ZZ(2,3)*ZZ(3,1) &
@@ -599,7 +599,7 @@
            do nn=1, nn_hi
 !                                                                                                                                                                                                                
               ZZ = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm) &
-                   + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_ax
+                   + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_fdm
 !                                                                                                                                                                                                              
               det = (ZZ(1,1)*ZZ(2,2)*ZZ(3,3) - ZZ(1,1)*ZZ(2,3)*ZZ(3,2) &
                    - ZZ(1,2)*ZZ(2,1)*ZZ(3,3) + ZZ(1,2)*ZZ(2,3)*ZZ(3,1) &
@@ -628,7 +628,7 @@
            do nn=1, nn_hi
 !                                                                                                                                                                                                                
               ZZ = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm) &
-                   + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_ax
+                   + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_fdm
 !                                                                                                                                                                                                                
               det = (ZZ(1,1)*ZZ(2,2)*ZZ(3,3) - ZZ(1,1)*ZZ(2,3)*ZZ(3,2) &
                    - ZZ(1,2)*ZZ(2,1)*ZZ(3,3) + ZZ(1,2)*ZZ(2,3)*ZZ(3,1) &
@@ -652,6 +652,8 @@
 
         particles(n)%amp(1) = real(real(Cpq))
         particles(n)%amp(2) = real(aimag(Cpq))
+
+        print *, hbaroverm, ii, gamma_fdm, particles(n)%amp(1), particles(n)%amp(2)
 
        end if
 
@@ -797,7 +799,7 @@
     use amrex_error_module
     use amrex_fort_module, only : amrex_real
     use particle_mod      , only: fdm_particle_wkb_t
-    use axion_params_module, only : hbaroverm, ii, sigma_ax, gamma_ax
+    use fdm_params_module, only : hbaroverm, ii!, sigma_fdm, gamma_fdm
 
     integer,              intent(in   )        :: np
     type(fdm_particle_wkb_t), intent(inout)    :: particles(np)

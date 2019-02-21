@@ -5,4 +5,5 @@ CEXE_headers   += FDMwkbParticleContainer.H
 CEXE_sources   += FDMwkbParticleContainer.cpp
 FEXE_headers   += fdm_F.H
 f90EXE_sources += fdm_3d.f90
+f90EXE_sources += fdm_params.f90
 endif

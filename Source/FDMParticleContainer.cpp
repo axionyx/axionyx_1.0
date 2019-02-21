@@ -1373,7 +1373,7 @@ FDMParticleContainer::InitVarCount (MultiFab& mf, long num_particle_fdm, BoxArra
 }
 
 void
-FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nlevs, const Real hbaroverm, const Real sigma_ax, const Real gamma_ax)
+FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nlevs, const Real hbaroverm, const Real sigma_ax, const Real gamma_ax, const Real fact)
 {
   const int       MyProc      = ParallelDescriptor::MyProc();
   const Geometry& geom        = m_gdb->Geom(lev);
@@ -1386,14 +1386,16 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
   Vector<ParticleLevel>& particles = this->GetParticles();
 
   int  npart = num_particle_fdm;
-  Real alpha = 100.0;
+  Real alpha = 1.8;//100.0;
   Real q[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
   Real p[]  = {0.0,0.0,0.0};
   Real q0[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
   Real p0[] = {0.0,0.0,0.0};
   Real r, theta, phi, Amp;
   Real sigma = 0.5/sqrt(alpha);
-  Real fact = 1.0;
+  // Real comoving_OmM = 0.3;
+  // Real comoving_h = 0.7;
+  // Real fact = 2.775e+11*comoving_h*comoving_h*comoving_OmM;//  1.0;
 
   particles.reserve(15);  // So we don't ever have to do any copying on a resize.
   particles.resize(nlevs);

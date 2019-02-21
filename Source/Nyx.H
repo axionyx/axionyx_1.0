@@ -614,14 +614,15 @@ public:
     static int vonNeumann_dt;
     static amrex::Real m_tt;
     static amrex::Real hbaroverm;
+    static amrex::Real meandens;
     static int FDlevel;
     static int GBlevel;
     static int NBlevel;
     static bool partlevel;
     static amrex::Vector<int> levelmethod;
-    static amrex::Real theta_ax;
-    static amrex::Real sigma_ax;
-    static amrex::Real gamma_ax;
+    static amrex::Real theta_fdm;
+    static amrex::Real sigma_fdm;
+    static amrex::Real gamma_fdm;
     static int wkb_approx;
     static amrex::Real beam_cfl;
 #endif

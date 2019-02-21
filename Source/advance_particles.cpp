@@ -35,7 +35,7 @@ Nyx::advance_particles_only (Real time,
 
 #ifdef FDM
     // For FDM Gaussian kernels this is increased to                                                                                                                                                          
-    int stencil_deposition_width_fdm = ceil(sigma_ax*theta_ax/get_level(level).Geom().CellSize()[0]);
+    int stencil_deposition_width_fdm = ceil(sigma_fdm*theta_fdm/get_level(level).Geom().CellSize()[0]);
 #endif 
 
     // A particle in cell (i) may need information from cell values in (i-1) to (i+1)
@@ -347,7 +347,7 @@ Nyx::advance_particles_only (Real time,
 	continue;
 
       //Define neccessary number of ghost cells                                                                                                                                                                 
-      int ng = ceil(Nyx::sigma_ax*Nyx::theta_ax/get_level(level).Geom().CellSize()[0]);
+      int ng = ceil(Nyx::sigma_fdm*Nyx::theta_fdm/get_level(level).Geom().CellSize()[0]);
 
       //Initialize MultiFabs                                                                                                                                                                                    
       MultiFab& Ax_new = get_level(lev).get_new_data(Axion_Type);

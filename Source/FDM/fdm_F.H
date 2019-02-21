@@ -45,6 +45,14 @@ extern "C"
 				 const int* lo_real, const int* hi_real, const amrex::Real* state_imag,
 				 const int* lo_imag, const int* hi_imag, const amrex::Real* prob_lo,
 				 const amrex::Real* dx, const amrex::Real& a);
+
+  void fort_set_mtt(const amrex::Real& m_tt);
+  void fort_set_hbaroverm(const amrex::Real& hbaroverm);
+  void fort_set_theta(const amrex::Real& theta_fdm);
+  void fort_set_sigma(const amrex::Real& sigma_fdm);
+  void fort_set_gamma(const amrex::Real& gamma_fdm);
+  void fort_set_meandens(const amrex::Real& meandens);
+
 #ifdef __cplusplus
 }
 #endif

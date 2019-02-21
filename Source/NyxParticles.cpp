@@ -595,7 +595,7 @@ Nyx::init_particles ()
 		  amrex::Error("FDM computations are not supported for sph particles.");
 	      }
 	    if(num_particle_dm > 0)
-	      DMPC->InitGaussianBeams(num_particle_dm, level, parent->initialBaLevels()+1);
+	      DMPC->InitGaussianBeams(num_particle_dm, level, parent->initialBaLevels()+1, meandens);
 	    else
 	      amrex::Error("\nNeed num_particle_dm > 0 for DM InitGaussianBeams!\n\n");
 	  }
@@ -844,7 +844,7 @@ Nyx::init_particles ()
 	  if (!do_dm_particles)
 	    amrex::Print() << "\n DM particles are needed for the construction of the gravitational potential!!\n\n";
 	  if(num_particle_fdm > 0)
-	    FDMwkbPC->InitGaussianBeams(num_particle_fdm, level, parent->initialBaLevels()+1, hbaroverm, sigma_ax, gamma_ax);
+	    FDMwkbPC->InitGaussianBeams(num_particle_fdm, level, parent->initialBaLevels()+1, hbaroverm, sigma_fdm, gamma_fdm, meandens);
 	  else
 	    amrex::Error("\nNeed num_particle_fdm > 0 for InitGaussianBeams!\n\n");
 
@@ -854,7 +854,7 @@ Nyx::init_particles ()
 	  // if(levelmethod[level]==GBlevel){
 
 	  // //Define neccessary number of ghost cells                                                                                                                                              
-	  // int ng = ceil(Nyx::sigma_ax*Nyx::theta_ax/get_level(level).Geom().CellSize()[0]);
+	  // int ng = ceil(Nyx::sigma_fdm*Nyx::theta_fdm/get_level(level).Geom().CellSize()[0]);
 
 	  // //Initialize MultiFabs                                                                                                                                                                      
 	  // MultiFab fdmreal(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
@@ -1032,7 +1032,7 @@ Nyx::init_particles ()
 	  if (!do_dm_particles)
 	    amrex::Print() << "\n DM particles are needed for the construction of the gravitational potential!!\n\n";
 	  if(num_particle_fdm > 0)
-	    FDMPC->InitGaussianBeams(num_particle_fdm, level, parent->initialBaLevels()+1, hbaroverm, sigma_ax, gamma_ax);
+	    FDMPC->InitGaussianBeams(num_particle_fdm, level, parent->initialBaLevels()+1, hbaroverm, sigma_fdm, gamma_fdm, meandens);
 	  else
 	    amrex::Error("\nNeed num_particle_fdm > 0 for InitGaussianBeams!\n\n");
 
@@ -1042,7 +1042,7 @@ Nyx::init_particles ()
 	  // if(levelmethod[level]==GBlevel){
 	  
 	  // //Define neccessary number of ghost cells                                                                                                                                              
-	  // int ng = ceil(Nyx::sigma_ax*Nyx::theta_ax/get_level(level).Geom().CellSize()[0]);
+	  // int ng = ceil(Nyx::sigma_fdm*Nyx::theta_fdm/get_level(level).Geom().CellSize()[0]);
 
 	  // //Initialize MultiFabs                                                                                                                                                                      
 	  // MultiFab fdmreal(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
@@ -1781,22 +1781,22 @@ Nyx::setup_ghost_particles(int ngrow)
       {
 	FDMParticleContainer::AoS ghosts;
 	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
-	  if(levelmethod[lev]==GBlevel){
-	    int ng = parent->nCycle(level)+ceil(sigma_ax*theta_ax/parent->Geom(lev).CellSize()[0]);
+	  // if(levelmethod[lev]==GBlevel){
+	    int ng = parent->nCycle(level)+ceil(sigma_fdm*theta_fdm/parent->Geom(lev).CellSize()[0]);
 	    Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);
 	    Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ng);
-	  }
+	  // }
 	}
       }
     if(Nyx::theFDMwkbPC() != 0)
       {
 	FDMwkbParticleContainer::AoS ghosts;
 	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
-	  if(levelmethod[lev]==GBlevel){
-	    int ng = parent->nCycle(level)+ceil(sigma_ax*theta_ax/parent->Geom(lev).CellSize()[0]);
+	  // if(levelmethod[lev]==GBlevel){
+	    int ng = parent->nCycle(level)+ceil(sigma_fdm*theta_fdm/parent->Geom(lev).CellSize()[0]);
 	    Nyx::theFDMwkbPC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);
 	    Nyx::theGhostFDMwkbPC()->AddParticlesAtLevel(ghosts, lev, ng);
-	  }
+	  // }
 	}
       }
 #endif

@@ -306,6 +306,7 @@ Gravity::solve_for_old_phi (int               level,
         MultiFab& Ax_old = LevelData[level]->get_old_data(Axion_Type);
         MultiFab::Add(Rhs, Ax_old, Nyx::AxDens, 0, 1, 0);
     }
+    else
 #endif
 
     // We shouldn't need to use virtual or ghost particles for old phi solves.
@@ -335,36 +336,42 @@ Gravity::solve_for_new_phi (int               level,
     MultiFab Rhs(grids[level], dmap[level], 1, 0);
     Rhs.setVal(0.0);
 
-#ifndef NO_HYDRO
-    if (Nyx::Do_Hydro() == 1)
-    {
-       MultiFab& S_new = LevelData[level]->get_new_data(State_Type);
-       MultiFab::Copy(Rhs, S_new, density, 0, 1, 0);
-    }
+#ifdef FDM
+    if(Nyx::levelmethod[level]==Nyx::FDlevel)
+      {
+	MultiFab& Ax_new = LevelData[level]->get_new_data(Axion_Type);
+	MultiFab::Add(Rhs, Ax_new, Nyx::AxDens, 0, 1, 0);
+      }
+    else
 #endif
-
-    AddParticlesToRhs(level,Rhs,ngrow_for_solve);
-    AddVirtualParticlesToRhs(level,Rhs,ngrow_for_solve);
-    AddGhostParticlesToRhs(level,Rhs);
+      {
+        AddParticlesToRhs(level,Rhs,ngrow_for_solve);
+        AddVirtualParticlesToRhs(level,Rhs,ngrow_for_solve);
+	AddGhostParticlesToRhs(level,Rhs);
+      }
 
 #ifdef FDM
-    if(Nyx::levelmethod[level]==Nyx::FDlevel){
-      MultiFab& Ax_new = LevelData[level]->get_new_data(Axion_Type);
-      MultiFab::Add(Rhs, Ax_new, Nyx::AxDens, 0, 1, 0);
-    }
-    else if(Nyx::levelmethod[level]==Nyx::NBlevel){
+    if(Nyx::levelmethod[level]==Nyx::NBlevel){
       // Construct FDM density from n-body density
       MultiFab& Ax_new = LevelData[level]->get_new_data(Axion_Type);
       Ax_new.setVal(0.0);
       MultiFab::Copy(Ax_new, Rhs, 0, Nyx::AxDens, 1, 0);
-#ifndef NO_HYDRO
-      if (Nyx::Do_Hydro() == 1)
-	{
-	  MultiFab& S_new = LevelData[level]->get_new_data(State_Type);
-	  MultiFab::Subtract(Ax_new, S_new, density, Nyx::AxDens, 1, 0);
-	}
-#endif
+// #ifndef NO_HYDRO
+//       if (Nyx::Do_Hydro() == 1)
+// 	{
+// 	  MultiFab& S_new = LevelData[level]->get_new_data(State_Type);
+// 	  MultiFab::Subtract(Ax_new, S_new, density, Nyx::AxDens, 1, 0);
+// 	}
+// #endif
       Ax_new.FillBoundary(Nyx::AxDens,1,parent->Geom(level).periodicity());
+    }
+#endif
+
+#ifndef NO_HYDRO
+    if (Nyx::Do_Hydro() == 1)
+    {
+       MultiFab& S_new = LevelData[level]->get_new_data(State_Type);
+       MultiFab::Add(Rhs, S_new, density, 0, 1, 0);
     }
 #endif
 
@@ -891,9 +898,17 @@ Gravity::actual_multilevel_solve (int                       level,
             }
         }
 #endif
-        MultiFab::Add(*Rhs_p[lev], *Rhs_particles[lev], 0, 0, 1, 0);
 
 #ifdef FDM
+	if(Nyx::levelmethod[level+lev]==Nyx::NBlevel)
+	  if(is_new==1)
+	    {
+	      //Construct FDM density from n-body density
+	      MultiFab& Ax_new = LevelData[level+lev]->get_new_data(Axion_Type);
+	      Ax_new.setVal(0.0);
+	      Ax_new.ParallelCopy(*Rhs_particles[lev], 0, Nyx::AxDens, 1, 0, Ax_new.nGrow(), parent->Geom(level+lev).periodicity(),FabArrayBase::COPY);
+	    }
+
 	if(Nyx::levelmethod[level+lev]==Nyx::FDlevel)
 	{
 	  if (is_new == 1)
@@ -905,15 +920,10 @@ Gravity::actual_multilevel_solve (int                       level,
 	      MultiFab::Add(*(Rhs_p[lev]), LevelData[level+lev]->get_old_data(Axion_Type), Nyx::AxDens, 0, 1, 0);
 	    }
 	}
-	else if(Nyx::levelmethod[level+lev]==Nyx::NBlevel)
-	  if(is_new==1)
-	    {
-	      //Construct FDM density from n-body density
-	      MultiFab& Ax_new = LevelData[level+lev]->get_new_data(Axion_Type);
-	      Ax_new.setVal(0.0);
-	      Ax_new.ParallelCopy(*Rhs_particles[lev], 0, Nyx::AxDens, 1, 0, Ax_new.nGrow(), parent->Geom(level+lev).periodicity(),FabArrayBase::COPY);
-	    }
+	else
 #endif
+
+        MultiFab::Add(*Rhs_p[lev], *Rhs_particles[lev], 0, 0, 1, 0);
 
     }
 

@@ -5,7 +5,7 @@ subroutine deposit_fdm_particles(particles, np, state_real, &
   use iso_c_binding
   use amrex_fort_module, only : amrex_real
   use particle_mod      , only: fdm_particle_t
-  use axion_params_module, only : hbaroverm, theta_ax, ii
+  use fdm_params_module, only : hbaroverm, theta_fdm, ii
 
   integer,              intent(in ) :: np, lo_real(3), hi_real(3), lo_imag(3), hi_imag(3)
   type(fdm_particle_t), intent(in ) :: particles(np)
@@ -20,7 +20,7 @@ subroutine deposit_fdm_particles(particles, np, state_real, &
   do n = 1, np
 
      amp = cmplx(particles(n)%amp(1),particles(n)%amp(2))
-     rad = ceiling(theta_ax/sqrt(2.0*particles(n)%width)/dx(1))
+     rad = ceiling(theta_fdm/sqrt(2.0*particles(n)%width)/dx(1))
      pos = (particles(n)%pos - plo)/dx + 0.5d0
 
      i1  = floor(pos(1))
@@ -39,7 +39,7 @@ subroutine deposit_fdm_particles(particles, np, state_real, &
                             (real(k1+k)+1.0-pos(3))*dx(3)*(real(k1+k)+1.0-pos(3))*dx(3))* &
                             particles(n)%width
                        
-                       if (kernelsize .le. (theta_ax*theta_ax/2.0)) then
+                       if (kernelsize .le. (theta_fdm*theta_fdm/2.0)) then
                           
                           phi = amp*exp(-kernelsize)*exp(ii*(particles(n)%phase+ &
                                particles(n)%vel(1)*a*(real(i1+i)-1.0-pos(1))*dx(1)+ &
@@ -69,7 +69,7 @@ subroutine deposit_fdm_particles_wkb(particles, np, state_real, &
   use iso_c_binding
   use amrex_fort_module, only : amrex_real
   use particle_mod      , only: fdm_particle_wkb_t
-  use axion_params_module, only : hbaroverm, theta_ax, ii
+  use fdm_params_module, only : hbaroverm, theta_fdm, ii
 
   integer,              intent(in ) :: np, lo_real(3), hi_real(3), lo_imag(3), hi_imag(3)
   type(fdm_particle_wkb_t), intent(in ) :: particles(np)
@@ -84,7 +84,7 @@ subroutine deposit_fdm_particles_wkb(particles, np, state_real, &
   do n = 1, np
 
      amp = cmplx(particles(n)%amp(1),particles(n)%amp(2))
-     rad = ceiling(theta_ax/sqrt(2.0*particles(n)%width)/dx(1))
+     rad = ceiling(theta_fdm/sqrt(2.0*particles(n)%width)/dx(1))
      pos = (particles(n)%pos - plo)/dx + 0.5d0
 
      i1  = floor(pos(1))
@@ -103,7 +103,7 @@ subroutine deposit_fdm_particles_wkb(particles, np, state_real, &
                             (real(k1+k)+1.0-pos(3))*dx(3)*(real(k1+k)+1.0-pos(3))*dx(3))* &
                             particles(n)%width
                        
-                       if (kernelsize .le. (theta_ax*theta_ax/2.0)) then
+                       if (kernelsize .le. (theta_fdm*theta_fdm/2.0)) then
                           
                           phi = amp*exp(-kernelsize)*exp(ii*(particles(n)%phase+ &
                                particles(n)%vel(1)*a*(real(i1+i)-1.0-pos(1))*dx(1)+ &
@@ -138,3 +138,75 @@ subroutine fort_fdm_fields(state, state_l1,state_l2,state_l3,state_h1,state_h2,s
   state(:,:,:,UAXDENS) = state(:,:,:,UAXRE)**2+state(:,:,:,UAXIM)**2
 
 end subroutine fort_fdm_fields
+
+subroutine fort_set_mtt(mtt) &
+     bind(C, name="fort_set_mtt")
+
+  use amrex_fort_module, only : rt => amrex_real  
+  use fdm_params_module, only: m_tt
+  
+  real(rt), intent(in) :: mtt
+  
+  m_tt = mtt
+  
+end subroutine fort_set_mtt
+
+subroutine fort_set_hbaroverm(hbm) &
+     bind(C, name="fort_set_hbaroverm")
+  
+  use amrex_fort_module, only : rt => amrex_real
+  use fdm_params_module, only: hbaroverm
+  
+  real(rt), intent(in) :: hbm
+  
+  hbaroverm = hbm
+  
+end subroutine fort_set_hbaroverm
+
+subroutine fort_set_theta(theta) &
+     bind(C, name="fort_set_theta")
+  
+  use amrex_fort_module, only : rt => amrex_real
+  use fdm_params_module, only: theta_fdm
+  
+  real(rt), intent(in) :: theta
+  
+  theta_fdm = theta
+  
+end subroutine fort_set_theta
+
+subroutine fort_set_sigma(sigma) &
+     bind(C, name="fort_set_sigma")
+  
+  use amrex_fort_module, only : rt => amrex_real
+  use fdm_params_module, only: sigma_fdm
+  
+  real(rt), intent(in) :: sigma
+  
+  sigma_fdm = sigma
+  
+end subroutine fort_set_sigma
+
+subroutine fort_set_gamma(gamma) &
+     bind(C, name="fort_set_gamma")
+  
+  use amrex_fort_module, only : rt => amrex_real
+  use fdm_params_module, only: gamma_fdm
+  
+  real(rt), intent(in) :: gamma
+  
+  gamma_fdm = gamma
+  
+end subroutine fort_set_gamma
+
+subroutine fort_set_meandens(dens) &
+     bind(C, name="fort_set_meandens")
+  
+  use amrex_fort_module, only : rt => amrex_real
+  use fdm_params_module, only: meandens
+  
+  real(rt), intent(in) :: dens
+  
+  meandens = dens
+  
+end subroutine fort_set_meandens

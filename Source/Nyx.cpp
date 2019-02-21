@@ -48,6 +48,10 @@ using std::string;
 #include "agn_F.H"
 #endif
 
+#ifdef FDM
+#include "fdm_F.H"
+#endif
+
 using namespace amrex;
 
 extern "C" {
@@ -107,14 +111,15 @@ int Nyx::NUM_AX = -1;
 int Nyx::vonNeumann_dt = 0;
 Real Nyx::m_tt = 2.5;
 Real Nyx::hbaroverm = 0.01917152 / m_tt;
+Real Nyx::meandens = 1.0;
 int Nyx::FDlevel = 0;
 int Nyx::GBlevel = 1;
 int Nyx::NBlevel = 2;
 bool Nyx::partlevel = false;
 Vector<int> Nyx::levelmethod;
-Real Nyx::theta_ax = 1.0;
-Real Nyx::sigma_ax = 1.0;
-Real Nyx::gamma_ax = 1.0;
+Real Nyx::theta_fdm = 1.0;
+Real Nyx::sigma_fdm = 1.0;
+Real Nyx::gamma_fdm = 1.0;
 int  Nyx::wkb_approx = 1;
 Real Nyx::beam_cfl = 0.2;
 #endif
@@ -282,10 +287,15 @@ Nyx::read_params ()
 #ifdef FDM
     pp_nyx.query("vonNeumann_dt", vonNeumann_dt);
     pp_nyx.query("m_tt", m_tt);
+    fort_set_mtt(m_tt);
     hbaroverm = 0.01917152 / m_tt;
-    pp_nyx.query("theta_ax", theta_ax);
-    pp_nyx.query("sigma_ax", sigma_ax);
-    gamma_ax = 0.5/sigma_ax/sigma_ax;
+    fort_set_hbaroverm(hbaroverm);
+    pp_nyx.query("theta_fdm", theta_fdm);
+    fort_set_theta(theta_fdm);
+    pp_nyx.query("sigma_fdm", sigma_fdm);
+    fort_set_sigma(sigma_fdm);
+    gamma_fdm = 0.5/sigma_fdm/sigma_fdm;
+    fort_set_gamma(gamma_fdm);
     pp_nyx.query("wkb_approx", wkb_approx);
     pp_nyx.query("beam_cfl", beam_cfl);
     if (pp_nyx.contains("levelmethod"))
@@ -389,6 +399,11 @@ Nyx::read_params ()
     fort_set_omb(comoving_OmB);
     fort_set_omm(comoving_OmM);
     fort_set_hubble(comoving_h);
+
+#ifdef FDM
+    meandens = 2.775e+11*comoving_h*comoving_h*comoving_OmM;
+    fort_set_meandens(meandens);
+#endif
 
     pp_nyx.get("do_hydro", do_hydro);
 #ifdef NO_HYDRO
