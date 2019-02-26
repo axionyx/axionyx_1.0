@@ -623,6 +623,7 @@ public:
     static amrex::Real theta_fdm;
     static amrex::Real sigma_fdm;
     static amrex::Real gamma_fdm;
+    static amrex::Real alpha_fdm;
     static int wkb_approx;
     static amrex::Real beam_cfl;
 #endif

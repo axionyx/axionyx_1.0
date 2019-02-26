@@ -653,7 +653,7 @@
         particles(n)%amp(1) = real(real(Cpq))
         particles(n)%amp(2) = real(aimag(Cpq))
 
-        print *, hbaroverm, ii, gamma_fdm, particles(n)%amp(1), particles(n)%amp(2)
+        ! print *, hbaroverm, ii, gamma_fdm, particles(n)%amp(1), particles(n)%amp(2)
 
        end if
 

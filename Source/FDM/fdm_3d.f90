@@ -42,9 +42,9 @@ subroutine deposit_fdm_particles(particles, np, state_real, &
                        if (kernelsize .le. (theta_fdm*theta_fdm/2.0)) then
                           
                           phi = amp*exp(-kernelsize)*exp(ii*(particles(n)%phase+ &
-                               particles(n)%vel(1)*a*(real(i1+i)-1.0-pos(1))*dx(1)+ &
-                               particles(n)%vel(2)*a*(real(j1+j)-1.0-pos(2))*dx(2)+ &
-                               particles(n)%vel(3)*a*(real(k1+k)-1.0-pos(3))*dx(3) )/hbaroverm)
+                               particles(n)%vel(1)*a*(real(i1+i)+1.0-pos(1))*dx(1)+ &
+                               particles(n)%vel(2)*a*(real(j1+j)+1.0-pos(2))*dx(2)+ &
+                               particles(n)%vel(3)*a*(real(k1+k)+1.0-pos(3))*dx(3) )/hbaroverm)
                           
                           state_real(i1+i,j1+j,k1+k,1) = state_real(i1+i,j1+j,k1+k,1) + real(real(phi))
                           state_imag(i1+i,j1+j,k1+k,1) = state_imag(i1+i,j1+j,k1+k,1) + real(aimag(phi))
@@ -106,9 +106,9 @@ subroutine deposit_fdm_particles_wkb(particles, np, state_real, &
                        if (kernelsize .le. (theta_fdm*theta_fdm/2.0)) then
                           
                           phi = amp*exp(-kernelsize)*exp(ii*(particles(n)%phase+ &
-                               particles(n)%vel(1)*a*(real(i1+i)-1.0-pos(1))*dx(1)+ &
-                               particles(n)%vel(2)*a*(real(j1+j)-1.0-pos(2))*dx(2)+ &
-                               particles(n)%vel(3)*a*(real(k1+k)-1.0-pos(3))*dx(3) )/hbaroverm)
+                               particles(n)%vel(1)*a*(real(i1+i)+1.0-pos(1))*dx(1)+ &
+                               particles(n)%vel(2)*a*(real(j1+j)+1.0-pos(2))*dx(2)+ &
+                               particles(n)%vel(3)*a*(real(k1+k)+1.0-pos(3))*dx(3) )/hbaroverm)
                           
                           state_real(i1+i,j1+j,k1+k,1) = state_real(i1+i,j1+j,k1+k,1) + real(real(phi))
                           state_imag(i1+i,j1+j,k1+k,1) = state_imag(i1+i,j1+j,k1+k,1) + real(aimag(phi))

@@ -120,6 +120,7 @@ Vector<int> Nyx::levelmethod;
 Real Nyx::theta_fdm = 1.0;
 Real Nyx::sigma_fdm = 1.0;
 Real Nyx::gamma_fdm = 1.0;
+Real Nyx::alpha_fdm = 1.0;
 int  Nyx::wkb_approx = 1;
 Real Nyx::beam_cfl = 0.2;
 #endif
@@ -296,6 +297,7 @@ Nyx::read_params ()
     fort_set_sigma(sigma_fdm);
     gamma_fdm = 0.5/sigma_fdm/sigma_fdm;
     fort_set_gamma(gamma_fdm);
+    pp_nyx.query("alpha_fdm", alpha_fdm);
     pp_nyx.query("wkb_approx", wkb_approx);
     pp_nyx.query("beam_cfl", beam_cfl);
     if (pp_nyx.contains("levelmethod"))

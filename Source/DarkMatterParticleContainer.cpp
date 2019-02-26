@@ -786,10 +786,11 @@ DarkMatterParticleContainer::InitFromBinaryMortonFile(const std::string& particl
 }
 #ifdef FDM
 void
-DarkMatterParticleContainer::InitGaussianBeams (long num_particle_dm, int lev, int nlevs, const Real fact)
+DarkMatterParticleContainer::InitGaussianBeams (long num_particle_dm, int lev, int nlevs, const Real fact, const Real alpha, const Real a)
 {
 
   const int       MyProc      = ParallelDescriptor::MyProc();
+  const int       nprocs      = ParallelDescriptor::NProcs();
   const Geometry& geom        = m_gdb->Geom(lev);
 
   static Vector<int> calls;
@@ -799,17 +800,14 @@ DarkMatterParticleContainer::InitGaussianBeams (long num_particle_dm, int lev, i
   Vector<ParticleLevel>& particles = this->GetParticles();
 
   int  npart = num_particle_dm;
-  Real alpha = 1.8;//100.0;
+  int  npart_tot = nprocs*npart; //Each processor initializes num_particle_fdm beams
   Real q0[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
   Real q[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
   Real p0[] = {0.0,0.0,0.0};
   Real sigma = 0.5/sqrt(alpha);/*remember that we square amplitude alpha->2*alpha*/
-  // Real comoving_OmM = 0.3;
-  // Real comoving_h = 0.7;
-  // Real fact = 2.775e+11*comoving_h*comoving_h*comoving_OmM;//  1.0;
 
   //calculate dm particle mass
-  Real mass = 1.0/npart;
+  Real mass = 1.0/npart_tot;
   mass *= pow(2.0*alpha/M_PI,-1.5);
   mass *= fact;
 
@@ -843,9 +841,9 @@ DarkMatterParticleContainer::InitGaussianBeams (long num_particle_dm, int lev, i
       //set mass
       part.rdata( 0) =  mass;
       //set velocity
-      part.rdata( 1) = p0[0];
-      part.rdata( 2) = p0[1];
-      part.rdata( 3) = p0[2];
+      part.rdata( 1) = p0[0]/a;
+      part.rdata( 2) = p0[1]/a;
+      part.rdata( 3) = p0[2]/a;
       
       if (!this->Where(part,pld))
 	amrex::Abort("ParticleContainer<N>::InitGaussianBeams(): invalid particle");

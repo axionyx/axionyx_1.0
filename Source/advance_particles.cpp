@@ -196,7 +196,8 @@ Nyx::advance_particles_only (Real time,
         // Solve for phi
         // If a single-level calculation we can still use the previous phi as a guess.
         // TODO: Check this.
-        int use_previous_phi_as_guess = 1;
+        // int use_previous_phi_as_guess = 1;
+        int use_previous_phi_as_guess = 0;
         gravity->multilevel_solve_for_old_phi(level, finest_level,
                                               use_previous_phi_as_guess);
     }

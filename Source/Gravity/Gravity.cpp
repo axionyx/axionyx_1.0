@@ -1018,7 +1018,7 @@ Gravity::actual_multilevel_solve (int                       level,
         const Real  dvol = grids[0].d_numPts() * dx[0] * dx[1] * dx[2];
 
         sum /= dvol;
-        std::cout << "subtracing " << sum << std::endl;
+	amrex::Print() << "subtracing " << sum << std::endl;
         for (int lev = 0; lev < num_levels; lev++)
         {
           (*phi_p[lev]).plus(-sum, 0, 1, 0);
@@ -1027,7 +1027,7 @@ Gravity::actual_multilevel_solve (int                       level,
         sum = 0.0;
         for (int lev = 0; lev < num_levels; lev++)
                        sum += compute_multilevel_average(level+lev, phi_p[lev], finest_level);
-        std::cout << "average is " << sum/dvol << " after subtraction." << std::endl;
+	amrex::Print() << "average is " << sum/dvol << " after subtraction." << std::endl;
 
       }
 }

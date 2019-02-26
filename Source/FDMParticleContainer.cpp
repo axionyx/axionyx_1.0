@@ -283,11 +283,11 @@ FDMParticleContainer::moveKickDriftFDM (amrex::MultiFab&       phi,
            const Box& phi_box = (*phi_ptr)[pti].box();
 
            update_gaussian_beams(&Np, particles.data(),
-				 (*ac_ptr)[pti].dataPtr(),
-				 ac_box.loVect(), ac_box.hiVect(),
-				 (*phi_ptr)[pti].dataPtr(),
-				 phi_box.loVect(), phi_box.hiVect(),
-				 plo,dx,dt,a_old,a_half,&do_move);
+	   			 (*ac_ptr)[pti].dataPtr(),
+	   			 ac_box.loVect(), ac_box.hiVect(),
+	   			 (*phi_ptr)[pti].dataPtr(),
+	   			 phi_box.loVect(), phi_box.hiVect(),
+	   			 plo,dx,dt,a_old,a_half,&do_move);
         }
     }
 
@@ -361,11 +361,11 @@ FDMParticleContainer::moveKickFDM (amrex::MultiFab& phi,
         ac_ptr->FillBoundary();
     }
 
-    amrex::MultiFab* phi_ptr;
-    phi_ptr = new amrex::MultiFab(this->m_gdb->ParticleBoxArray(lev),
-				  this->m_gdb->ParticleDistributionMap(lev),
-				  phi.nComp(),grav_n_grow);
-    for (amrex::MFIter mfi(*phi_ptr); mfi.isValid(); ++mfi)
+    MultiFab* phi_ptr;
+    phi_ptr = new MultiFab(ParticleBoxArray(lev),
+			   ParticleDistributionMap(lev),
+			   phi.nComp(),grav_n_grow);
+    for (MFIter mfi(*phi_ptr); mfi.isValid(); ++mfi)
       phi_ptr->setVal(0.);
     phi_ptr->copy(phi,0,0,phi.nComp());
     phi_ptr->FillBoundary();
@@ -388,11 +388,11 @@ FDMParticleContainer::moveKickFDM (amrex::MultiFab& phi,
            const Box& phi_box = (*phi_ptr)[pti].box();
 
            update_gaussian_beams(&Np, particles.data(),
-				 (*ac_ptr)[pti].dataPtr(),
-				 ac_box.loVect(), ac_box.hiVect(),
-				 (*phi_ptr)[pti].dataPtr(),
-				 phi_box.loVect(), phi_box.hiVect(),
-				 plo,dx,dt,a_half,a_new,&do_move);
+	   			 (*ac_ptr)[pti].dataPtr(),
+	   			 ac_box.loVect(), ac_box.hiVect(),
+	   			 (*phi_ptr)[pti].dataPtr(),
+	   			 phi_box.loVect(), phi_box.hiVect(),
+	   			 plo,dx,dt,a_half,a_new,&do_move);
         }
     }
     
@@ -407,7 +407,7 @@ FDMParticleContainer::CreateGhostParticlesFDM (int level, int lev, int nGrow, Ao
   BL_ASSERT(ghosts.empty());
   BL_ASSERT(level < finestLevel());
 
-  if (level >= static_cast<int>(GetParticles().size()))
+  if (lev > static_cast<int>(GetParticles().size()))
     return;
 
   const BoxArray& fine = ParticleBoxArray(lev);
@@ -511,7 +511,7 @@ FDMParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_imag, 
 #ifdef _OPENMP
       Box tile_box_real = pti.tilebox();
       tile_box_real.grow(ng_real);
-      local_real.resize(tile_box,1);
+      local_real.resize(tile_box_real,1);
       local_real = 0.0;
       data_ptr_real = local_real.dataPtr();
       lo_real = tile_box_real.loVect();
@@ -519,7 +519,7 @@ FDMParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_imag, 
 
       Box tile_box_imag = pti.tilebox();
       tile_box_imag.grow(ng_imag);
-      local_imag.resize(tile_box,1);
+      local_imag.resize(tile_box_imag,1);
       local_imag = 0.0;
       data_ptr_imag = local_imag.dataPtr();
       lo_imag = tile_box_imag.loVect();
@@ -1373,9 +1373,10 @@ FDMParticleContainer::InitVarCount (MultiFab& mf, long num_particle_fdm, BoxArra
 }
 
 void
-FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nlevs, const Real hbaroverm, const Real sigma_ax, const Real gamma_ax, const Real fact)
+FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nlevs, const Real hbaroverm, const Real sigma_ax, const Real gamma_ax, const Real fact, const Real alpha, const Real a)
 {
   const int       MyProc      = ParallelDescriptor::MyProc();
+  const int       nprocs      = ParallelDescriptor::NProcs();
   const Geometry& geom        = m_gdb->Geom(lev);
   const Real*     dx          = geom.CellSize();
 
@@ -1385,17 +1386,13 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
   if (calls[lev] > 1) return;
   Vector<ParticleLevel>& particles = this->GetParticles();
 
-  int  npart = num_particle_fdm;
-  Real alpha = 1.8;//100.0;
+  int  npart     = num_particle_fdm;
+  int  npart_tot = nprocs*npart; //Each processor initializes num_particle_fdm beams
   Real q[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
   Real p[]  = {0.0,0.0,0.0};
   Real q0[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
   Real p0[] = {0.0,0.0,0.0};
   Real r, theta, phi, Amp;
-  Real sigma = 0.5/sqrt(alpha);
-  // Real comoving_OmM = 0.3;
-  // Real comoving_h = 0.7;
-  // Real fact = 2.775e+11*comoving_h*comoving_h*comoving_OmM;//  1.0;
 
   particles.reserve(15);  // So we don't ever have to do any copying on a resize.
   particles.resize(nlevs);
@@ -1428,7 +1425,7 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
     p[2] = r*sin(theta)*2.0*sqrt(alpha+gamma_ax)*hbaroverm + p0[2];
 	
     phi  = ( (p[0]*alpha+p0[0]*gamma_ax)*(q[0]-q0[0]) + (p[1]*alpha+p0[1]*gamma_ax)*(q[1]-q0[1]) + (p[2]*alpha+p0[2]*gamma_ax)*(q[2]-q0[2]) )/(alpha+gamma_ax);
-    Amp  = 2.0*(alpha+gamma_ax)/sqrt(alpha*gamma_ax)/M_PI/sqrt(2*gamma_ax/M_PI)/pow(npart,2.0/3.0);
+    Amp  = 2.0*(alpha+gamma_ax)/sqrt(alpha*gamma_ax)/M_PI/sqrt(2*gamma_ax/M_PI)/pow(npart_tot,2.0/3.0);
     Amp /= sqrt(2.0*alpha/M_PI);
     Amp *= pow(fact,1.0/3.0);
 
@@ -1437,28 +1434,18 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
       part.id()      = ParticleType::NextID();
       part.cpu()     = MyProc;
 
-      // set position
+      //set position
       for (int n = 0; n < BL_SPACEDIM; n++)
 	part.pos( n) = q[n];
-      // 	part.pos( n) = 0.5;
-      // if(index==0)
-      // 	part.pos( 0) = 0.32;
-      // set mass                                                                                                                                                                
-      part.rdata( 0) =  1.0/(npart * dx[0] * dx[1] * dx[2]);
-      // set velocity
-      // part.rdata( 1) = 0.0;
-      // part.rdata( 2) = 0.0;
-      // part.rdata( 3) = 0.0;
-      part.rdata( 1) = p[0];
-      part.rdata( 2) = p[1];
-      part.rdata( 3) = p[2];
+      //set mass                                                                                                                                                                
+      part.rdata( 0) =  1.0/(npart_tot * dx[0] * dx[1] * dx[2]);
+      //set velocity
+      part.rdata( 1) = p[0]/a;
+      part.rdata( 2) = p[1]/a;
+      part.rdata( 3) = p[2]/a;
       //set phase
       part.rdata( 4) = phi;
       //set amplitude
-      // if(index==0)
-      // part.rdata( 5) = 0.0001*pow(2.0*gamma_ax/M_PI,0.75);//pow(2.0*gamma_ax*Amp,1.5);
-      // else
-      // part.rdata( 5) = pow(2.0*gamma_ax/M_PI,0.75);
       part.rdata( 5) = pow(2.0*gamma_ax*Amp,1.5);
       part.rdata( 6) = 0.0;
       //set width
