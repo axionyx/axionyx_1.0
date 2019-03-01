@@ -490,17 +490,17 @@ Nyx::advance_hydro_plus_particles (Real time,
 #ifdef FDM
 		MultiFab& Phi_new = get_level(lev).get_new_data(PhiGrav_Type);
 		if(Nyx::theFDMPC())
-		  Nyx::theFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half);
+		  Nyx::theFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_new, a_half);
 		if(Nyx::theGhostFDMPC())
-		  Nyx::theGhostFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half);
+		  Nyx::theGhostFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_new, a_half);
 		if(Nyx::theVirtFDMPC())
-		  Nyx::theVirtFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half);
+		  Nyx::theVirtFDMPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_new, a_half);
 		if(Nyx::theFDMwkbPC())
-		  Nyx::theFDMwkbPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half);
+		  Nyx::theFDMwkbPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_new, a_half);
 		if(Nyx::theGhostFDMwkbPC())
-		  Nyx::theGhostFDMwkbPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half);
+		  Nyx::theGhostFDMwkbPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_new, a_half);
 		if(Nyx::theVirtFDMwkbPC())
-		  Nyx::theVirtFDMwkbPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_old, a_half);
+		  Nyx::theVirtFDMwkbPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_new, a_half);
 #endif
 	    }
 	}

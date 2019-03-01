@@ -1493,11 +1493,12 @@ Nyx::particle_est_time_step (Real& est_dt)
 #ifdef FDM
     if (FDMwkbPC && particle_move_type == "Gravitational")
       {
-	const Real est_dt_fdm1 = FDMwkbPC->estTimestep(grav, a, level, particle_cfl);
-	MultiFab& phi = get_new_data(PhiGrav_Type);
-	Real beam_cfl_reduced = beam_cfl*2.0*M_PI*hbaroverm;
-	const Real est_dt_fdm2 = FDMwkbPC->estTimestepFDM(phi, level, beam_cfl_reduced);
-	const Real est_dt_fdm = std::min(est_dt_fdm1 ,est_dt_fdm2);
+	// const Real est_dt_fdm1 = FDMwkbPC->estTimestep(grav, a, level, particle_cfl);
+	// MultiFab& phi = get_new_data(PhiGrav_Type);
+	// Real beam_cfl_reduced = beam_cfl*2.0*M_PI*hbaroverm;
+	// const Real est_dt_fdm2 = FDMwkbPC->estTimestepFDM(phi, level, beam_cfl_reduced);
+	// const Real est_dt_fdm = std::min(est_dt_fdm1 ,est_dt_fdm2);
+	const Real est_dt_fdm = FDMwkbPC->estTimestep(grav, a, level, particle_cfl);
 	
 	if (est_dt_fdm > 0)
 	  est_dt = std::min(est_dt, est_dt_fdm);
@@ -1518,11 +1519,12 @@ Nyx::particle_est_time_step (Real& est_dt)
       }
     if (FDMPC && particle_move_type == "Gravitational")
       {
-	const Real est_dt_fdm1 = FDMPC->estTimestep(grav, a, level, particle_cfl);
-	MultiFab& phi = get_new_data(PhiGrav_Type);
-	Real beam_cfl_reduced = beam_cfl*2.0*M_PI*hbaroverm;
-	const Real est_dt_fdm2 = FDMPC->estTimestepFDM(phi, level, beam_cfl_reduced);
-	const Real est_dt_fdm = std::min(est_dt_fdm1 ,est_dt_fdm2);
+	// const Real est_dt_fdm1 = FDMPC->estTimestep(grav, a, level, particle_cfl);
+	// MultiFab& phi = get_new_data(PhiGrav_Type);
+	// Real beam_cfl_reduced = beam_cfl*2.0*M_PI*hbaroverm;
+	// const Real est_dt_fdm2 = FDMPC->estTimestepFDM(phi, level, beam_cfl_reduced);
+	// const Real est_dt_fdm = std::min(est_dt_fdm1 ,est_dt_fdm2);
+	const Real est_dt_fdm = FDMPC->estTimestep(grav, a, level, particle_cfl);
 	
 	if (est_dt_fdm > 0)
 	  est_dt = std::min(est_dt, est_dt_fdm);

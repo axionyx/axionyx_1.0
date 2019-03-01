@@ -403,7 +403,12 @@ Nyx::read_params ()
     fort_set_hubble(comoving_h);
 
 #ifdef FDM
-    meandens = 2.775e+11*comoving_h*comoving_h*comoving_OmM;
+    if(comoving_h && comoving_OmM)
+      meandens = 2.775e+11*comoving_h*comoving_h*comoving_OmM;
+    else{
+      meandens = 2.775e+11*0.7*0.7*0.3;
+      amrex::Print()<<"WARNING: Automatically set meandens to "<<meandens<<" in Nyx.cpp."<<std::endl;
+    }
     fort_set_meandens(meandens);
 #endif
 
@@ -985,7 +990,7 @@ Nyx::est_time_step (Real dt_old)
 
 //add time step requirements here.
 #ifdef FDM
-    if (vonNeumann_dt >0){
+    if (vonNeumann_dt >0 && levelmethod[level]==FDlevel){
       Real a = get_comoving_a(cur_time);
       const MultiFab& phi = get_new_data(PhiGrav_Type);
       Real phi_max = phi.max(0);

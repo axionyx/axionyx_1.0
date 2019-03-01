@@ -392,7 +392,8 @@
                 wx_hi*wy_hi*wz_lo*phi(i,   j,   k-1, 1) + &
                 wx_hi*wy_hi*wz_hi*phi(i,   j,   k  , 1)
 
-       particles(n)%phase = particles(n)%phase - half_dt * part_phi
+       !Remember different sign convention for phi
+       particles(n)%phase = particles(n)%phase + half_dt * part_phi
 
        hessian(1,1) = &
                (wy_hi*wz_hi*accel(i,   j,   k  , 1) + &
@@ -461,8 +462,9 @@
                 wx_lo*wy_lo*accel(i-1, j-1, k-1, 3)) * inv_dx(3)
 
        
-       pq = pq - half_dt * matmul(hessian,qq)
-       pp = pp - half_dt * matmul(hessian,qp)
+       !Remember different sign convention for phi
+       pq = pq + half_dt * matmul(hessian,qq)
+       pp = pp + half_dt * matmul(hessian,qp)
 
        if (do_move .eq. 1) then
 
@@ -909,7 +911,8 @@
                 wx_hi*wy_hi*wz_lo*phi(i,   j,   k-1, 1) + &
                 wx_hi*wy_hi*wz_hi*phi(i,   j,   k  , 1)
 
-       particles(n)%phase = particles(n)%phase - half_dt * part_phi
+       !Remember different sign convention for phi
+       particles(n)%phase = particles(n)%phase + half_dt * part_phi
 
        hessian(1,1) = &
                (wy_hi*wz_hi*accel(i,   j,   k  , 1) + &
@@ -977,7 +980,8 @@
                 wx_lo*wy_hi*accel(i-1, j  , k-1, 3) - &
                 wx_lo*wy_lo*accel(i-1, j-1, k-1, 3)) * inv_dx(3)
 
-       pq = pq - half_dt * matmul(hessian,qq)
+       !Remember different sign convention for phi
+       pq = pq + half_dt * matmul(hessian,qq)
 
        ! moveKickDrift: Update position by full dt: x^new = x^old + dt u^half / a^half
        if (do_move .eq. 1) then
