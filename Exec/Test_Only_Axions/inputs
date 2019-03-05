@@ -1,5 +1,5 @@
 # ------------------  INPUTS TO MAIN PROGRAM  -------------------
-max_step = 30000
+max_step = 1
 
 nyx.comoving_OmB = 0.0
 nyx.comoving_OmM = 0.3
@@ -22,7 +22,6 @@ amr.data_log = runlog
 #Leave this commented out in cvs version
 #amr.restart = chk30000
 nyx.dump_old = 1
-max_step = 100000
 #particles.particle_output_file = particle_output
 particles.write_in_plotfile = 0
 
@@ -41,7 +40,7 @@ mg.bottom_solver = 1
 geometry.is_periodic =  1 1 1
 geometry.coord_sys   =  0
 
-geometry.prob_lo     =  -0.256 -0.256 -0.256 
+geometry.prob_lo     =  -0.256 -0.256 -0.256
 geometry.prob_hi     =   0.256 0.256 0.256
 #geometry.prob_lo     =  -0.512 -0.512 -0.512
 geometry.prob_lo     =  -0 -0 -0
@@ -50,11 +49,11 @@ geometry.prob_hi     =   0.512 0.512 0.512
 #geometry.prob_hi     =   0.128 0.128 0.128
 
 #amr.n_cell           =  256 256 256
-amr.n_cell           =  512 512 512
+#amr.n_cell           =  512 512 512
 #amr.n_cell           =  128 128 128
-#amr.n_cell           =  4 4 4
-nyx.n_particles      =  1  1  1 
-amr.max_grid_size    =  256
+amr.n_cell           = 32 32 32
+nyx.n_particles      = 1  1  1
+amr.max_grid_size    = 32
 
 # >>>>>>>>>>>>>  BC FLAGS <<<<<<<<<<<<<<<<
 # 0 = Interior           3 = Symmetry
@@ -111,7 +110,7 @@ amr.regrid_int         = 400000
 #amr.n_error_buf        = 0 2
 #amr.refine_grid_layout = 1
 amr.regrid_on_restart  = 0
-amr.blocking_factor    = 32
+amr.blocking_factor    = 16
 amr.subcycling_mode    = Manual
 amr.subcycling_iterations = 4
 amr.grid_eff           = 0.7
@@ -122,7 +121,7 @@ amr.check_int       = 5000
 #amr.check_per	    = 1.e-6
 
 # PLOTFILES
-amr.plot_file       = plot
+amr.plot_file       = plt
 #amr.plot_per       = 1.e-6
 amr.plot_int	    = 100
 
@@ -131,4 +130,3 @@ amr.plot_vars = AxDens AxRe AxIm phi_grav #AxDens AxMomX AxMomY AxMomZ phi_grav 
 
 #PROBIN FILENAME
 amr.probin_file = probin
-
