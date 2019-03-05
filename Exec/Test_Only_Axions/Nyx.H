@@ -18,13 +18,17 @@
 
 #include <iostream>
 
+
 #ifdef BL_HDF5
 #include <hdf5.h>
 #endif
 
-
 using std::istream;
 using std::ostream;
+
+//testing swfft
+using namespace amrex;
+
 
 typedef NyxParticleContainer<1+BL_SPACEDIM+3> StellarParticleContainer;
 
@@ -270,7 +274,7 @@ public:
     // Restore spectrum at restart
     //
     void forcing_post_restart(const std::string& restart_file);
-#endif 
+#endif
 
     //
     // Read particle-related inputs
@@ -411,6 +415,12 @@ public:
            void advance_FDM_FD(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
            //TODO_JENS: the stub I added
            void advance_FDM_FFT(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
+           void init_rhs(amrex::MultiFab& Mrhs, amrex::Geometry& geom);
+           void swfft_test(amrex::MultiFab& rhs, amrex::MultiFab& soln, amrex::Geometry& geom, int verbose);
+           // void drift(const int *self, const int *local_ng, const int *global_ng, size_t local_indx, double hbar, double k0, double m, double dt, std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> > * fpsi);
+           // void kick(int SIZE, const int *self, const int *local_ng, const int *global_ng, size_t local_indx, double hbar, double dt, amrex::MultiFab& psi, amrex::MultiFab& pot);
+
+
 #endif
 
 #ifdef FDM
@@ -423,12 +433,12 @@ public:
 #endif
 
     void compute_hydro_sources(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new,
-                               amrex::MultiFab& S_border, amrex::MultiFab& D_border, 
-                               amrex::MultiFab& ext_src_old, amrex::MultiFab& hydro_src, 
+                               amrex::MultiFab& S_border, amrex::MultiFab& D_border,
+                               amrex::MultiFab& ext_src_old, amrex::MultiFab& hydro_src,
                                amrex::MultiFab& grav, amrex::MultiFab& divu_cc,
                                bool init_flux_register, bool add_to_flux_register);
 
-    void update_state_with_sources( amrex::MultiFab& S_old      , amrex::MultiFab& S_new, 
+    void update_state_with_sources( amrex::MultiFab& S_old      , amrex::MultiFab& S_new,
                                     amrex::MultiFab& ext_src_old, amrex::MultiFab& hydro_src,
                                     amrex::MultiFab& grav       , amrex::MultiFab& divu_cc,
                                     amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
@@ -438,8 +448,8 @@ public:
 
 #ifdef SDC
     void sdc_reactions ( amrex::MultiFab& state_old, amrex::MultiFab& state_new, amrex::MultiFab&  dstate,
-                         amrex::MultiFab& hydro_src, amrex::MultiFab& IR, 
-                         amrex::Real dt, amrex::Real a_old, amrex::Real a_new, 
+                         amrex::MultiFab& hydro_src, amrex::MultiFab& IR,
+                         amrex::Real dt, amrex::Real a_old, amrex::Real a_new,
                          int sdc_iter);
 #endif
 

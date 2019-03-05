@@ -1,5 +1,5 @@
 #ifdef FDM
- 
+
 #include "Nyx.H"
 #include "Nyx_F.H"
 #include <AMReX_Particles_F.H>
@@ -11,7 +11,7 @@ using namespace amrex;
 #	include "Gravity.H"
 #	include <Gravity_F.H>
 #endif
- 
+
 using std::string;
 
 amrex::Real
@@ -37,7 +37,7 @@ Nyx::advance_FDM (amrex::Real time,
     {
         if (level > 0)
             return dt;
-            
+
         finest_level_to_advance = finest_level;
     }
     else
@@ -51,7 +51,7 @@ Nyx::advance_FDM (amrex::Real time,
             // This level was advanced by a previous multilevel advance.
             if (level > 0 && ncycle == 1)
                 return dt;
-            
+
             // Find the finest level to advance
             int lev = level;
             while(lev < finest_level && parent->nCycle(lev+1) == 1)
@@ -62,7 +62,7 @@ Nyx::advance_FDM (amrex::Real time,
         // We must setup virtual and Ghost Particles
         //
         // Setup the virtual particles that represent finer level particles
-        // 
+        //
         //setup_virtual_particles();
         //
         // Setup ghost particles for use in finer levels. Note that Ghost particles
@@ -111,7 +111,7 @@ Nyx::advance_FDM (amrex::Real time,
 //TODO: once again, this part only concerns particles.
 #ifdef GRAVITY
     //
-    // We now do a multilevel solve for old Gravity. This goes to the 
+    // We now do a multilevel solve for old Gravity. This goes to the
     // finest level regardless of subcycling behavior. Consequentially,
     // If we are subcycling we skip this step on the first iteration of
     // finer levels.
@@ -125,7 +125,7 @@ Nyx::advance_FDM (amrex::Real time,
                 gravity->zero_phi_flux_reg(lev + 1);
             }
         }
-        
+
         // swap grav data
         for (int lev = level; lev <= finest_level; lev++)
             get_level(lev).gravity->swap_time_levels(lev);
@@ -141,7 +141,7 @@ Nyx::advance_FDM (amrex::Real time,
 
         if (verbose && ParallelDescriptor::IOProcessor())
             std::cout << "\n... old-time level solve at level " << level << '\n';
-            
+
         //
         // Solve for phi
         // If a single-level calculation we can still use the previous phi as a guess.
@@ -170,7 +170,7 @@ Nyx::advance_FDM (amrex::Real time,
 //                const BoxArray& ba = get_level(lev).get_new_data(State_Type).boxArray();
 //                MultiFab grav_vec_old(ba, BL_SPACEDIM, grav_n_grow);
 //                get_level(lev).gravity->get_old_grav_vector(lev, grav_vec_old, time);
-//                
+//
 //                for (int i = 0; i < Nyx::theActiveParticles().size(); i++)
 //                    Nyx::theActiveParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_old, a_half);
 //
@@ -189,7 +189,7 @@ Nyx::advance_FDM (amrex::Real time,
 #endif
 //TODO_JENS: here is the spot to put the hooks for calling the FFT solver.
     //Advance Axions
-    
+
     for (int lev = level; lev <= finest_level_to_advance; lev++)
         if(lev==0)
             //here is the hook:
@@ -261,7 +261,7 @@ Nyx::advance_FDM (amrex::Real time,
 //    }
 
     //we need to get new grids, since it implicitely fills the new part of the
-    //Gravity_Type, which we need for the interpolated values of G at higher 
+    //Gravity_Type, which we need for the interpolated values of G at higher
     //levels when filling ghosts from lower levels.
     const auto& dm = get_level(level).get_new_data(State_Type).DistributionMap();
     MultiFab grav_vec_new(grids, dm, BL_SPACEDIM, grav_n_grow);
