@@ -57,9 +57,9 @@ nyx_main (int argc, char* argv[])
 
     // save the inputs file name for later
     if (argc > 1) {
-      if (!strchr(argv[1], '=')) {
-        inputs_name = argv[1];
-      }
+        if (!strchr(argv[1], '=')) {
+            inputs_name = argv[1];
+        }
     }
     BL_PROFILE_REGION_START("main()");
     BL_PROFILE_VAR("main()", pmain);
@@ -123,35 +123,32 @@ nyx_main (int argc, char* argv[])
 
     bool finished(false);
 
-    while ( ! finished) 
+    while ( ! finished)
     {
-     // If we set the regrid_on_restart flag and if we are *not* going to take
-     // a time step then we want to go ahead and regrid here.
-     //
-     if (amrptr->RegridOnRestart()) {
-       if (    (amrptr->levelSteps(0) >= max_step ) ||
-               ( (stop_time >= 0.0) &&
-                 (amrptr->cumTime() >= stop_time)  )    )
-       {
-           // Regrid only!
-           amrptr->RegridOnly(amrptr->cumTime());
-       }
-     }
+        // If we set the regrid_on_restart flag and if we are *not* going to take
+        // a time step then we want to go ahead and regrid here.
+        //
+        if (amrptr->RegridOnRestart()) {
+            if ( (amrptr->levelSteps(0) >= max_step ) ||
+                   ( (stop_time >= 0.0) &&
+                     (amrptr->cumTime() >= stop_time) ) ){
+               // Regrid only!
+               amrptr->RegridOnly(amrptr->cumTime());
+            }
+        }
 
-     if (amrptr->okToContinue()
-          && (amrptr->levelSteps(0) < max_step || max_step < 0)
-          && (amrptr->cumTime() < stop_time || stop_time < 0.0))
-
-     {
-       amrptr->coarseTimeStep(stop_time);          // ---- Do a timestep.
+        if (amrptr->okToContinue()
+                && (amrptr->levelSteps(0) < max_step || max_step < 0)
+                    && (amrptr->cumTime() < stop_time || stop_time < 0.0)){
+            amrptr->coarseTimeStep(stop_time);          // ---- Do a timestep.
 #ifdef HENSON
-       henson_save_pointer("amr",  amrptr);        // redundant to do every timesetp, but negligible overhead
-       henson_save_pointer("dmpc", Nyx::theDMPC());
-       henson_yield();
+            henson_save_pointer("amr",  amrptr);        // redundant to do every timesetp, but negligible overhead
+            henson_save_pointer("dmpc", Nyx::theDMPC());
+            henson_yield();
 #endif
-     } else {
-       finished = true;
-     }
+        } else {
+            finished = true;
+        }
 
     }  // ---- end while( ! finished)
 

@@ -137,8 +137,9 @@ void Nyx::swfft_test(MultiFab& rhs, MultiFab& soln, Geometry& geom, int verbose)
         const int *global_ng = dfft.global_ng();
 
         const std::complex<double> imagi(0.0,1.0);
-        local_indx = 0;
 
+        // DRIFT - full time step
+        local_indx = 0;
         for(size_t k=0; k<(size_t)local_ng[0]; k++) {
             size_t global_k = local_ng[2]*self[0] + k; //maybe need another condition for if (k < local_ng[2]/2)?
 
@@ -157,15 +158,17 @@ void Nyx::swfft_test(MultiFab& rhs, MultiFab& soln, Geometry& geom, int verbose)
                                  + double(global_k) * double(global_k) );
 
                         std::complex<double> cpsi(std::real(a[local_indx]),std::imag(a[local_indx]));
-                        cpsi *= std::exp( -imagi / hbar * k2/2.0/m  * dt );
+                        cpsi *= std::exp( -imagi * hbar * k2/2.0/m  * dt );
 
                         a[local_indx]= {cpsi.real() /local_ng[0]/local_ng[1]/local_ng[2], cpsi.imag() /local_ng[0]/local_ng[1]/local_ng[2]};
-                        
+
                     }
                     local_indx++;
                 }
             }
         }
+
+
 
         // *******************************************
         // Compute the backward transformdfft.global_size
