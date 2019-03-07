@@ -160,11 +160,11 @@
                   r = dsqrt((xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1) - pos(h,1))**2 + &
                             (xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2) - pos(h,2))**2 + &
                             (xlo(3)+(k-lo(3))*delta(3) + 0.5d0*delta(3) - pos(h,3))**2)
-                  ! axion(i,j,k,UAXDENS) =  meandens/((1.d0+9.1d-2*(r/rc)**2.d0)**8.0d0)
-                  ! axion(i,j,k,UAXRE)   =  dsqrt(axion(i,j,k,UAXDENS))
-                  ! axion(i,j,k,UAXIM)   = 0.0d0
-                  axion(i,j,k,UAXRE)   =  sin(tpi*x/xhi(1))
-                  axion(i,j,k,UAXIM)   =  cos(tpi*x/xhi(1))
+                  axion(i,j,k,UAXDENS) =  meandens/((1.d0+9.1d-2*(r/rc)**2.d0)**8.0d0)
+                  axion(i,j,k,UAXRE)   =  dsqrt(axion(i,j,k,UAXDENS))
+                  axion(i,j,k,UAXIM)   = 0.0d0
+                  ! axion(i,j,k,UAXRE)   =  sin(tpi*x/xhi(1))
+                  ! axion(i,j,k,UAXIM)   =  cos(tpi*x/xhi(1))
                 enddo
             enddo
          enddo

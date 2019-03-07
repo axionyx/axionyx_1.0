@@ -175,99 +175,292 @@ void Nyx::advance_FDM_FFT (amrex::Real time,
     // *****************************************
     // Defining through Axion_Type
     // *****************************************
-    int lev = 0;
-    MultiFab& Ax_old = get_level(lev).get_old_data(Axion_Type);
-    MultiFab real_old(Ax_old.boxArray(), Ax_old.DistributionMap(), 1, 0);
-    MultiFab imag_old(Ax_old.boxArray(), Ax_old.DistributionMap(), 1, 0);
-    MultiFab::Copy(real_old, Ax_old, Nyx::AxRe, 0, 1, 0);
-    MultiFab::Copy(imag_old, Ax_old, Nyx::AxIm, 0, 1, 0);
+    MultiFab& Ax_old = get_old_data(Axion_Type);
+    MultiFab& Ax_new = get_new_data(Axion_Type);
 
-    MultiFab& Ax_new = get_level(lev).get_new_data(Axion_Type);
-    MultiFab real_new(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, 0);
-    MultiFab imag_new(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, 0);
-    MultiFab::Copy(real_new, Ax_new, Nyx::AxRe, 0, 1, 0);
-    MultiFab::Copy(imag_new, Ax_new, Nyx::AxIm, 0, 1, 0);
-
-    // std::cout << "***********************" << std::endl;
-    // std::cout << "nGrow: " << Ax_new.nGrow()  << std::endl;
-    // std::cout << "nGrow: " << real_new.nGrow()  << std::endl;
-
-
-    // // // *****************************************
-    // // // Defining tnaively
-    // // // *****************************************
-    // amrex::IntVect n_cell;
-    // amrex::IntVect max_grid_size;
-    // amrex::MultiFab rhs;
-    // amrex::MultiFab lhs;
-    // amrex::Geometry geom;
-    // int verbose_sw=2;
-    //
-    // {
-    //     ParmParse pp;
-    //     // Read in n_cell.  Use defaults if not explicitly defined.
-    //     int cnt = pp.countval("amr.n_cell");
-    //
-    //     if (cnt > 1) {
-    //         Vector<int> ncs;
-    //         pp.getarr("amr.n_cell",ncs);
-    //         n_cell = IntVect{ncs[0],ncs[1],ncs[2]};
-    //     } else if (cnt > 0) {
-    //         int ncs;
-    //         pp.get("amr.n_cell",ncs);
-    //         n_cell = IntVect{ncs,ncs,ncs};
-    //     } else {
-    //         std::cout << "WARNING: amr.n_cell not found in inputs, setting n_cell to 32^3! " << std::endl;
-    //         n_cell = IntVect{32,32,32};
-    //     }
-    //     // Read in max_grid_size.  Use defaults if not explicitly defined.
-    //     cnt = pp.countval("amr.max_grid_size");
-    //     if (cnt > 1) {
-    //         Vector<int> mgs;
-    //         pp.getarr("amr.max_grid_size",mgs);
-    //         max_grid_size = IntVect{mgs[0],mgs[1],mgs[2]};
-    //     } else if (cnt > 0) {
-    //         int mgs;
-    //         pp.get("amr.max_grid_size",mgs);
-    //         max_grid_size = IntVect{mgs,mgs,mgs};
-    //     } else {
-    //         std::cout << "WARNING: amr.max_grid_size not found in inputs, setting max_grid_size to 32^3! " << std::endl;
-    //         max_grid_size = IntVect{32,32,32};
-    //     }
-    //     pp.query("verbose", verbose);
-    // }
-    //
-    // BoxArray ba;
-    // Real dx = 1./double(n_cell[0]);
-    // IntVect dom_lo(0,0,0);
-    // IntVect dom_hi(n_cell[0]-1,n_cell[1]-1,n_cell[2]-1);
-    // Box domain(dom_lo,dom_hi);
-    // ba.define(domain);
-    // ba.maxSize(max_grid_size);
-    // Real x_hi = n_cell[0]*dx;
-    // Real y_hi = n_cell[1]*dx;
-    // Real z_hi = n_cell[2]*dx;
-    // RealBox real_box({0.0,0.0,0.0}, {x_hi,y_hi,z_hi});
-    // // The FFT assumes fully periodic boundaries
-    // std::array<int,3> is_periodic {1,1,1};
-    // geom.define(domain, &real_box, CoordSys::cartesian, is_periodic.data());
-    // // Make sure we define both the soln and the rhs with the same DistributionMapping
-    // DistributionMapping dmap{ba};
-    // rhs.define(ba, dmap, 1, 0);
-    // lhs.define(ba, dmap, 1, 0);
-    // init_rhs(rhs, geom);
-
+#ifndef NDEBUG
+    if (Ax_old.contains_nan(0, Ax_old.nComp(), 0))
+    {
+        for (int i = 0; i < Ax_old.nComp(); i++)
+        {
+            if (Ax_old.contains_nan(i,1,0))
+            {
+                std::cout << "Testing component i for NaNs: " << i << std::endl;
+                amrex::Abort("Ax_old has NaNs in this component::advance_FDM_FFT()");
+            }
+        }
+    }
+#endif
+    
+    const BoxArray& ba = Ax_old.boxArray();
+    const DistributionMapping& dm = Ax_old.DistributionMap();
+    MultiFab real(ba, dm, 1, 0);
+    MultiFab imag(ba, dm, 1, 0);
+    MultiFab::Copy(real, Ax_old, Nyx::AxRe, 0, 1, 0);
+    MultiFab::Copy(imag, Ax_old, Nyx::AxIm, 0, 1, 0);
 
     //Uncomment if you want to plot rhs before swfft
-    writeMultiFabAsPlotFile("MFAB_plot000", real_old, "rhs");
+    // writeMultiFabAsPlotFile("MFAB_plot000", real, "rhs");
 
-    swfft_test(real_old, real_new, geom, verbose);
+    // Define pi and (two pi) here                                                                                                                                                                             
+    Real  pi = 4 * std::atan(1.0);
+    Real tpi = 2 * pi;
+
+    // We assume that all grids have the same size hence                                                                                                                                                        
+    // we have the same nx,ny,nz on all ranks                                                                                                                                                                  
+    int nx = ba[0].size()[0];
+    int ny = ba[0].size()[1];
+    int nz = ba[0].size()[2];
+
+    Box domain(geom.Domain());
+
+    int nbx = domain.length(0) / nx;
+    int nby = domain.length(1) / ny;
+    int nbz = domain.length(2) / nz;
+    int nboxes = nbx * nby * nbz;
+    if (nboxes != ba.size())
+      amrex::Error("NBOXES NOT COMPUTED CORRECTLY");
+    amrex::Print() << "Number of boxes:\t" << nboxes << std::endl;
+
+    Vector<int> rank_mapping;
+    rank_mapping.resize(nboxes);
+
+    for (int ib = 0; ib < nboxes; ++ib)
+      {
+        int i = ba[ib].smallEnd(0) / nx;
+        int j = ba[ib].smallEnd(1) / ny;
+        int k = ba[ib].smallEnd(2) / nz;
+
+        // This would be the "correct" local index if the data wasn't being transformed                                                                                                                         
+        // int local_index = k*nbx*nby + j*nbx + i;                                                                                                                                                             
+
+        // This is what we pass to dfft to compensate for the Fortran ordering                                                                                                                                
+        //      of amrex data in MultiFabs.                                                                                                                                                                    
+        int local_index = i*nby*nbz + j*nbz + k;
+
+        rank_mapping[local_index] = dm[ib];
+        if (verbose)
+	  amrex::Print() << "LOADING RANK NUMBER " << dm[ib] << " FOR GRID NUMBER " << ib
+                         << " WHICH IS LOCAL NUMBER " << local_index << std::endl;
+      }
+
+    Real h = geom.CellSize(0);
+    Real hsq = h*h;
+
+    Real start_time = amrex::second();
+
+    // Assume for now that nx = ny = nz                                                                                                                                                                       
+    int Ndims[3] = { nbz, nby, nbx };
+    int     n[3] = {domain.length(2), domain.length(1), domain.length(0)};
+    hacc::Distribution d(MPI_COMM_WORLD,n,Ndims,&rank_mapping[0]);
+    hacc::Dfft dfft(d);
+
+    //some constants which need to be passed from the init file                                                                                                                                              
+    double hbar = 1.;
+    double k0 = 1.;
+    double m = 1.;
+    double hbaroverm = hbar/m;
+
+    //get the potential                                                                                                                                                                                    
+    MultiFab& grav_phi = get_old_data(PhiGrav_Type);
+    MultiFab phi(grav_phi.boxArray(), grav_phi.DistributionMap(), 1, 0);
+    MultiFab::Copy(phi, grav_phi, 0, 0, 1, 0);
+
+#ifndef NDEBUG
+    if (phi.contains_nan(0, phi.nComp(), 0))
+    {
+        for (int i = 0; i < phi.nComp(); i++)
+        {
+            if (phi.contains_nan(i,1,0))
+            {
+                std::cout << "Testing component phi for NaNs: " << i << std::endl;
+                amrex::Abort("phi has NaNs in this component::advance_FDM_FFT()");
+            }
+        }
+    }
+#endif
+
+    //loop for the drift                                                                                                                                                                                           
+    for (MFIter mfi(real,false); mfi.isValid(); ++mfi)
+      {
+	int gid = mfi.index();
+        size_t local_size  = dfft.local_size();
+
+	std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> > a;
+	std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> > b;
+
+        a.resize(nx*ny*nz);
+        b.resize(nx*ny*nz);
+
+        dfft.makePlans(&a[0],&b[0],&a[0],&b[0]);
+
+        // *******************************************                                                                                                                                                          
+        // Copy real data from Rhs into real part of a -- no ghost cells and                                                                                                                                    
+        // put into C++ ordering (not Fortran)                                                                                                                                                                  
+        // *******************************************
+        complex_t zero(0.0, 0.0);
+        size_t local_indx = 0;
+        for(size_t k=0; k<(size_t)nz; k++) {
+	  for(size_t j=0; j<(size_t)ny; j++) {
+	    for(size_t i=0; i<(size_t)nx; i++) {
+
+	      complex_t temp(real[mfi].dataPtr()[local_indx],imag[mfi].dataPtr()[local_indx]);
+	      a[local_indx] = temp;
+	      local_indx++;
+
+	    }
+	  }
+        }
+        // *******************************************                                                                                                                                                        
+        // Same thing as above, for the potentail -only need the real part                                                                                                                                     
+        // put into C++ ordering (not Fortran)                                                                                                                                                                 
+        // *******************************************                                                                                                                                                        
+        local_indx = 0;
+        for(size_t k=0; k<(size_t)nz; k++) {
+	  for(size_t j=0; j<(size_t)ny; j++) {
+	    for(size_t i=0; i<(size_t)nx; i++) {
+
+	      complex_t temp(phi[mfi].dataPtr()[local_indx],0.);
+	      b[local_indx] = temp;
+	      local_indx++;
+
+	    }
+	  }
+        }
+
+
+
+        //  *******************************************                                                                                                                                                       
+        //  Compute the forward transform                                                                                                                                                                     
+        //  *******************************************
+        dfft.forward(&a[0]);
+
+        //  *******************************************                                                                                                                                                       
+        //  drift - one full time step                                                                                                                                                                         
+        //  *******************************************                                                                                                                                                          
+        const int *self = dfft.self_kspace();
+        const int *local_ng = dfft.local_ng_kspace();
+        const int *global_ng = dfft.global_ng();
+        const std::complex<double> imagi(0.0,1.0);
+        local_indx = 0;
+        for(size_t k=0; k<(size_t)local_ng[0]; k++) {
+	  size_t global_k = local_ng[2]*self[0] + k; //maybe need another condition for if (k < local_ng[2]/2)?                                                                                                  
+
+	  for(size_t j=0; j<(size_t)local_ng[1]; j++) {
+	    size_t global_j = local_ng[1]*self[1] + j;
+
+	    for(size_t i=0; i<(size_t)local_ng[2]; i++) {
+	      size_t global_i = local_ng[0]*self[2] + i;
+
+	      if (global_i == 0 && global_j == 0 && global_k == 0) {
+		a[local_indx] = 0;
+	      }
+	      else {
+		double k2 = k0 * k0 * ( double(global_i) * double(global_i)
+					+ double(global_j) * double(global_j)
+					+ double(global_k) * double(global_k) );
+
+		a[local_indx] *= std::exp( -imagi * hbar * k2/2.0/m  * dt );
+
+	      }
+	      local_indx++;
+	    }
+	  }
+        }
+
+        // *******************************************                                                                                                                                                           
+        // Compute the backward transformdfft.global_size                                                                                                                                                        
+        // *******************************************                                                                                                                                                           
+        dfft.backward(&a[0]);
+ 
+        size_t global_size  = dfft.global_size();
+	std::cout << "GOBAL SIZE " << global_size << std::endl;
+        double fac = hsq / global_size;
+        local_indx = 0;
+        for(size_t k=0; k<(size_t)nz; k++) {
+	  for(size_t j=0; j<(size_t)ny; j++) {
+	    for(size_t i=0; i<(size_t)nx; i++) {
+
+	      real[mfi].dataPtr()[local_indx] = std::real(a[local_indx])/global_size;
+	      imag[mfi].dataPtr()[local_indx] = std::imag(a[local_indx])/global_size;
+	      local_indx++;
+
+	    }
+	  }
+        }
+
+      }//MFIter loop
+
+
+    //  *******************************************                                                                                                                                            
+    //  kick - one full time step                                                                                                                                                                 
+    //  *******************************************                                                                                            
+     for (MFIter mfi(real); mfi.isValid(); ++mfi)
+      {
+	const Box& box = mfi.validbox();
+
+	Real* real_p = real[mfi].dataPtr();
+	Real* imag_p = imag[mfi].dataPtr();
+	Real* phi_p  = phi[mfi].dataPtr();
+
+	fort_kick(box.loVect(), box.hiVect(), real_p, imag_p, phi_p, &hbaroverm, &dt);
+      }
+
+#ifndef NDEBUG
+    if (real.contains_nan(0, real.nComp(), 0))
+    {
+        for (int i = 0; i < real.nComp(); i++)
+        {
+            if (real.contains_nan(i,1,0))
+            {
+                std::cout << "Testing component real for NaNs: " << i << std::endl;
+                amrex::Abort("real has NaNs in this component::advance_FDM_FFT()");
+            }
+        }
+    }
+#endif
+#ifndef NDEBUG
+    if (imag.contains_nan(0, imag.nComp(), 0))
+    {
+        for (int i = 0; i < imag.nComp(); i++)
+        {
+            if (imag.contains_nan(i,1,0))
+            {
+                std::cout << "Testing component imag for NaNs: " << i << std::endl;
+                amrex::Abort("imag has NaNs in this component::advance_FDM_FFT()");
+            }
+        }
+    }
+#endif
 
     //Uncomment if you want to plot lhs after swfft
-    writeMultiFabAsPlotFile("MFAB_plot111", real_new, "rhs");
+    // writeMultiFabAsPlotFile("MFAB_plot111", real, "rhs");
 
-    Ax_new.ParallelCopy(real_new, 0, Nyx::AxRe, 1, real_new.nGrow(), Ax_new.nGrow(), parent->Geom(lev).periodicity(),FabArrayBase::COPY);
-    Ax_new.ParallelCopy(imag_new, 0, Nyx::AxIm, 1, imag_new.nGrow(), Ax_new.nGrow(), parent->Geom(lev).periodicity(),FabArrayBase::COPY);
+    Ax_new.ParallelCopy(real, 0, Nyx::AxRe, 1, real.nGrow(), Ax_new.nGrow(), geom.periodicity(),FabArrayBase::COPY);
+    Ax_new.ParallelCopy(imag, 0, Nyx::AxIm, 1, imag.nGrow(), Ax_new.nGrow(), geom.periodicity(),FabArrayBase::COPY);
+
+    for (MFIter mfi(Ax_new); mfi.isValid(); ++mfi)
+      {
+	FArrayBox& fab = Ax_new[mfi];
+	Real* ax = fab.dataPtr();
+	const Box& axbox = fab.box();
+	fort_ax_fields(ax, axbox.loVect(), axbox.hiVect());
+      }
+
+#ifndef NDEBUG
+    if (Ax_new.contains_nan(0, Ax_new.nComp(), 0))
+    {
+        for (int i = 0; i < Ax_new.nComp(); i++)
+        {
+            if (Ax_new.contains_nan(i,1,0))
+            {
+                std::cout << "Testing component i for NaNs: " << i << std::endl;
+                amrex::Abort("Ax_new has NaNs in this component::advance_FDM_FFT()");
+            }
+        }
+    }
+#endif
+
 }
 
 void Nyx::init_rhs(MultiFab& rhs, Geometry& geom)
