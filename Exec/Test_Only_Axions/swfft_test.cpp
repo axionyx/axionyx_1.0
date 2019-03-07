@@ -86,7 +86,10 @@ void Nyx::swfft_test(MultiFab& rhs, MultiFab& soln, Geometry& geom, int verbose)
     double hbar = 1.;
     double k0 = 1.;
     double m = 1.;
-    double dt = 1.;
+    double dt = 0.1;
+
+    //get the potential
+    MultiFab& phi = get_new_data(PhiGrav_Type);
 
     //loop for the drift
     for (MFIter mfi(rhs,false); mfi.isValid(); ++mfi)
@@ -120,6 +123,22 @@ void Nyx::swfft_test(MultiFab& rhs, MultiFab& soln, Geometry& geom, int verbose)
                 }
             }
         }
+        // *******************************************
+        // Same thing as above, for the potentail -only need the real part
+        // put into C++ ordering (not Fortran)
+        // *******************************************
+        local_indx = 0;
+        for(size_t k=0; k<(size_t)nz; k++) {
+            for(size_t j=0; j<(size_t)ny; j++) {
+                for(size_t i=0; i<(size_t)nx; i++) {
+
+                    complex_t temp(phi[mfi].dataPtr()[local_indx],0.);
+                    b[local_indx] = temp;
+                    local_indx++;
+
+                }
+            }
+        }
 
 
 
@@ -129,16 +148,13 @@ void Nyx::swfft_test(MultiFab& rhs, MultiFab& soln, Geometry& geom, int verbose)
         dfft.forward(&a[0]);
 
         //  *******************************************
-        //  Now divide the coefficients of the transform: drift
+        //  drift - one full time step
         //  *******************************************
-        local_indx = 0;
         const int *self = dfft.self_kspace();
         const int *local_ng = dfft.local_ng_kspace();
         const int *global_ng = dfft.global_ng();
-
         const std::complex<double> imagi(0.0,1.0);
 
-        // DRIFT - full time step
         local_indx = 0;
         for(size_t k=0; k<(size_t)local_ng[0]; k++) {
             size_t global_k = local_ng[2]*self[0] + k; //maybe need another condition for if (k < local_ng[2]/2)?
@@ -160,7 +176,7 @@ void Nyx::swfft_test(MultiFab& rhs, MultiFab& soln, Geometry& geom, int verbose)
                         std::complex<double> cpsi(std::real(a[local_indx]),std::imag(a[local_indx]));
                         cpsi *= std::exp( -imagi * hbar * k2/2.0/m  * dt );
 
-                        a[local_indx]= {cpsi.real() /local_ng[0]/local_ng[1]/local_ng[2], cpsi.imag() /local_ng[0]/local_ng[1]/local_ng[2]};
+                        a[local_indx]= { cpsi.real() /local_ng[0]/local_ng[1]/local_ng[2], cpsi.imag() /local_ng[0]/local_ng[1]/local_ng[2] };
 
                     }
                     local_indx++;
@@ -168,13 +184,30 @@ void Nyx::swfft_test(MultiFab& rhs, MultiFab& soln, Geometry& geom, int verbose)
             }
         }
 
-
-
         // *******************************************
         // Compute the backward transformdfft.global_size
         // *******************************************
         dfft.backward(&a[0]);
-        //
+
+
+        //  *******************************************
+        //  kick - one full time step
+        //  *******************************************
+        local_indx = 0;
+    	for(size_t k=0; k<(size_t)local_ng[2]; k++) {
+    		for(size_t j=0; j<(size_t)local_ng[1]; j++) {
+    			for(size_t i=0; i<(size_t)local_ng[0]; i++) {
+
+                    std::complex<double> cpsi(std::real(a[local_indx]),std::imag(a[local_indx]));
+
+    				cpsi *= std::exp( -imagi * b[local_indx] / hbar  * dt );
+
+                    a[local_indx] = { cpsi.real(), cpsi.imag() };
+                    local_indx++;
+    			}
+    		}
+    	}
+
 
         size_t global_size  = dfft.global_size();
         std::cout << "GOBAL SIZE " << global_size << std::endl;
@@ -186,7 +219,7 @@ void Nyx::swfft_test(MultiFab& rhs, MultiFab& soln, Geometry& geom, int verbose)
                for(size_t i=0; i<(size_t)nx; i++) {
 
                    // here, we need to keep the imag part of a as well
-                   soln[mfi].dataPtr()[local_indx] = std::real(a[local_indx]);
+                   soln[mfi].dataPtr()[local_indx] = std::real(a[local_indx])/global_size;
                    local_indx++;
 
                 }
@@ -195,60 +228,3 @@ void Nyx::swfft_test(MultiFab& rhs, MultiFab& soln, Geometry& geom, int verbose)
 
     }//MFIter loop
 }//swfft_test function
-
-
-// void Nyx::drift(const int *self, const int *local_ng, const int *global_ng, size_t local_indx, double hbar, double k0, double m, double dt, std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> > * fpsi){
-// 	const std::complex<double> imagi(0.0,1.0);
-// 	double kzz, kyy, kxx;
-//
-//     local_indx = 0;
-//
-//     for(size_t k=0; k<(size_t)local_ng[0]; k++) {
-//         size_t global_k = local_ng[2]*self[0] + k; //maybe we need another condition for if (k < local_ng[2]/2)?
-//
-//         for(size_t j=0; j<(size_t)local_ng[1]; j++) {
-//             size_t global_j = local_ng[1]*self[1] + j;
-//
-//             for(size_t i=0; i<(size_t)local_ng[2]; i++) {
-//                 size_t global_i = local_ng[0]*self[2] + i;
-//
-//                 if (global_i == 0 && global_j == 0 && global_k == 0) {
-//                     // fpsi[local_indx] = 0;
-//                     std::cout << " " <<std::endl;
-//                 }
-//                 else {
-//                     double k2 = k0 * k0 * ( double(global_i) * double(global_i)
-//                              + double(global_j) * double(global_j)
-//                              + double(global_k) * double(global_k) );
-//
-//                     // fpsi[local_indx] = fpsi[local_indx] * std::exp( -imagi / hbar * k2/2.0/m  * dt );
-//                     // fpsi[local_indx] = fpsi[local_indx]/local_ng[0]/local_ng[1]/local_ng[2];
-//
-//                     // std::cout << "my fpsi: " << fpsi[local_indx] << std::endl;
-//                     std::cout << "a: " << fpsi[local_indx] << " local indx: " << local_indx << std::endl;
-//                 }
-//                 local_indx++;
-//             }
-//         }
-//     }
-// }//end Nyx::drift
-
-// void Nyx::kick(int SIZE, const int *self, const int *local_ng, const int *global_ng, size_t local_indx, double hbar, double dt, amrex::MultiFab& psi, amrex::MultiFab& pot){
-// 	// const std::complex<double> I(0.0,1.0);
-//     //
-//     // local_indx = 0;
-//     //
-//     // size_t SIZE = global_ng[0]; //assuming we have a cube
-//     //
-// 	// for(size_t k=0; k<SIZE; k++) {
-// 	// 	for(size_t j=0; j<SIZE; j++) {
-// 	// 		for(size_t i=0; i<SIZE; i++) {
-// 	// 			std::complex<double> cpsi(psi[k+SIZE*(j+SIZE*i)][0],psi[k+SIZE*(j+SIZE*i)][1]);
-// 	// 			//if (l%blah==0) cout <<"V: " << pot[i][0] << '\t' << pot[i][1] << endl;
-// 	// 			cpsi *= std::exp( -I * pot[k+SIZE*(j+SIZE*i)][0] / hbar  * dt/2.0 );
-// 	// 			psi[k+SIZE*(j+SIZE*i)][0] = cpsi.real();
-// 	// 			psi[k+SIZE*(j+SIZE*i)][1] = cpsi.imag();
-// 	// 		}
-// 	// 	}
-// 	// }
-// }//end Nyx::kick

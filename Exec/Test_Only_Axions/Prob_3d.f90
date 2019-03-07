@@ -15,7 +15,7 @@
 
 !
 !     Build "probin" filename -- the name of file containing fortin namelist.
-!     
+!
       integer maxlen
       parameter (maxlen=256)
       character probin*(maxlen)
@@ -43,16 +43,16 @@
 
 ! ::: -----------------------------------------------------------
 ! ::: This routine is called at problem setup time and is used
-! ::: to initialize data on each grid.  
-! ::: 
+! ::: to initialize data on each grid.
+! :::
 ! ::: NOTE:  all arrays have one cell of ghost zones surrounding
 ! :::        the grid interior.  Values in these cells need not
 ! :::        be set here.
-! ::: 
+! :::
 ! ::: INPUTS/OUTPUTS:
-! ::: 
+! :::
 ! ::: level     => amr level of grid
-! ::: time      => time at which to init data             
+! ::: time      => time at which to init data
 ! ::: lo,hi     => index limits of grid interior (cell centered)
 ! ::: nstate    => number of state components.  You should know
 ! :::		   this already!
@@ -79,9 +79,9 @@
       use axion_params_module
       use comoving_module, only : comoving_h, comoving_OmAx
       use interpolate_module
- 
+
       implicit none
- 
+
       integer level, ns, nd, na
       integer lo(3), hi(3)
       integer s_l1,s_l2,s_l3,s_h1,s_h2,s_h3
@@ -95,10 +95,15 @@
       integer i,j,k,h
       integer un,length
       double precision hubl
-      double precision r,rc
+      double precision r,rc,x,y,z
       double precision d
+      double precision pi, tpi
       double precision, allocatable :: m(:), pos(:,:)
-      
+
+
+
+
+
       un = 20
       open(un,file='initial.txt',status="old",action="read")
       read(un,*) length
@@ -113,31 +118,33 @@
       end do
       close(un)
       !print *,"star is at ", pos
-        
+
+      pi = 4.d0 * atan(1.d0)
+      tpi = 2.0d0 * pi
 
       hubl = 0.7d0
-      meandens = 2.775d11 * hubl**2* comoving_OmAx !background density 
-      
+      meandens = 2.775d11 * hubl**2* comoving_OmAx !background density
+
       rc = 1.3d0 * 0.012513007848917703d0 / (dsqrt(m_tt * hubl) * comoving_OmAx**(0.25d0))
 
       !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)
          do j = lo(2), hi(2)
             do i = lo(1), hi(1)
-               
+
                state(i,j,k,URHO)    = 1.5d0 * small_dens
                state(i,j,k,URHO)    = 0.0d0
-               
+
                if (UMX .gt. -1) then
                   state(i,j,k,UMX:UMZ) = 0.0d0
-                  
+
                   ! These will both be set later in the call to init_e.
                   state(i,j,k,UEINT) = 0.d0
                   state(i,j,k,UEDEN) = 0.d0
                   diag_eos(i,j,k,TEMP_COMP) = 1000.d0
                   diag_eos(i,j,k,  NE_COMP) =    0.d0
                end if
-               
+
                if (UFS .gt. -1) then
                   state(i,j,k,UFS  ) = XHYDROGEN
                   state(i,j,k,UFS+1) = (1.d0 - XHYDROGEN)
@@ -147,15 +154,18 @@
                axion(i,j,k,UAXIM) = 0.0d0
 
                do h = 1,length
-               
+
+                  x = xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1)
 
                   r = dsqrt((xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1) - pos(h,1))**2 + &
                             (xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2) - pos(h,2))**2 + &
                             (xlo(3)+(k-lo(3))*delta(3) + 0.5d0*delta(3) - pos(h,3))**2)
-                  axion(i,j,k,UAXDENS) =  meandens/((1.d0+9.1d-2*(r/rc)**2.d0)**8.0d0)
-                  axion(i,j,k,UAXRE)   =  dsqrt(axion(i,j,k,UAXDENS))
-                  axion(i,j,k,UAXIM)   = 0.0d0
-               enddo
+                  ! axion(i,j,k,UAXDENS) =  meandens/((1.d0+9.1d-2*(r/rc)**2.d0)**8.0d0)
+                  ! axion(i,j,k,UAXRE)   =  dsqrt(axion(i,j,k,UAXDENS))
+                  ! axion(i,j,k,UAXIM)   = 0.0d0
+                  axion(i,j,k,UAXRE)   =  sin(tpi*x/xhi(1))
+                  axion(i,j,k,UAXIM)   =  cos(tpi*x/xhi(1))
+                enddo
             enddo
          enddo
       enddo

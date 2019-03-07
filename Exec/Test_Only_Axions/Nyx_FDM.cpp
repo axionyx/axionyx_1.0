@@ -171,86 +171,103 @@ void Nyx::advance_FDM_FFT (amrex::Real time,
                       amrex::Real a_old,
                       amrex::Real a_new)
 {
-    //testing swfft
-    amrex::IntVect n_cell;
-    amrex::IntVect max_grid_size;
-    amrex::MultiFab rhs;
-    amrex::MultiFab lhs;
-    amrex::Geometry geom;
-    int verbose_sw=2;
+
+    // *****************************************
+    // Defining through Axion_Type
+    // *****************************************
+    int lev = 0;
+    MultiFab& Ax_old = get_level(lev).get_old_data(Axion_Type);
+    MultiFab real_old(Ax_old.boxArray(), Ax_old.DistributionMap(), 1, 0);
+    MultiFab imag_old(Ax_old.boxArray(), Ax_old.DistributionMap(), 1, 0);
+    MultiFab::Copy(real_old, Ax_old, Nyx::AxRe, 0, 1, 0);
+    MultiFab::Copy(imag_old, Ax_old, Nyx::AxIm, 0, 1, 0);
+
+    MultiFab& Ax_new = get_level(lev).get_new_data(Axion_Type);
+    MultiFab real_new(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, 0);
+    MultiFab imag_new(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, 0);
+    MultiFab::Copy(real_new, Ax_new, Nyx::AxRe, 0, 1, 0);
+    MultiFab::Copy(imag_new, Ax_new, Nyx::AxIm, 0, 1, 0);
+
+    // std::cout << "***********************" << std::endl;
+    // std::cout << "nGrow: " << Ax_new.nGrow()  << std::endl;
+    // std::cout << "nGrow: " << real_new.nGrow()  << std::endl;
 
 
-    {
-        ParmParse pp;
+    // // // *****************************************
+    // // // Defining tnaively
+    // // // *****************************************
+    // amrex::IntVect n_cell;
+    // amrex::IntVect max_grid_size;
+    // amrex::MultiFab rhs;
+    // amrex::MultiFab lhs;
+    // amrex::Geometry geom;
+    // int verbose_sw=2;
+    //
+    // {
+    //     ParmParse pp;
+    //     // Read in n_cell.  Use defaults if not explicitly defined.
+    //     int cnt = pp.countval("amr.n_cell");
+    //
+    //     if (cnt > 1) {
+    //         Vector<int> ncs;
+    //         pp.getarr("amr.n_cell",ncs);
+    //         n_cell = IntVect{ncs[0],ncs[1],ncs[2]};
+    //     } else if (cnt > 0) {
+    //         int ncs;
+    //         pp.get("amr.n_cell",ncs);
+    //         n_cell = IntVect{ncs,ncs,ncs};
+    //     } else {
+    //         std::cout << "WARNING: amr.n_cell not found in inputs, setting n_cell to 32^3! " << std::endl;
+    //         n_cell = IntVect{32,32,32};
+    //     }
+    //     // Read in max_grid_size.  Use defaults if not explicitly defined.
+    //     cnt = pp.countval("amr.max_grid_size");
+    //     if (cnt > 1) {
+    //         Vector<int> mgs;
+    //         pp.getarr("amr.max_grid_size",mgs);
+    //         max_grid_size = IntVect{mgs[0],mgs[1],mgs[2]};
+    //     } else if (cnt > 0) {
+    //         int mgs;
+    //         pp.get("amr.max_grid_size",mgs);
+    //         max_grid_size = IntVect{mgs,mgs,mgs};
+    //     } else {
+    //         std::cout << "WARNING: amr.max_grid_size not found in inputs, setting max_grid_size to 32^3! " << std::endl;
+    //         max_grid_size = IntVect{32,32,32};
+    //     }
+    //     pp.query("verbose", verbose);
+    // }
+    //
+    // BoxArray ba;
+    // Real dx = 1./double(n_cell[0]);
+    // IntVect dom_lo(0,0,0);
+    // IntVect dom_hi(n_cell[0]-1,n_cell[1]-1,n_cell[2]-1);
+    // Box domain(dom_lo,dom_hi);
+    // ba.define(domain);
+    // ba.maxSize(max_grid_size);
+    // Real x_hi = n_cell[0]*dx;
+    // Real y_hi = n_cell[1]*dx;
+    // Real z_hi = n_cell[2]*dx;
+    // RealBox real_box({0.0,0.0,0.0}, {x_hi,y_hi,z_hi});
+    // // The FFT assumes fully periodic boundaries
+    // std::array<int,3> is_periodic {1,1,1};
+    // geom.define(domain, &real_box, CoordSys::cartesian, is_periodic.data());
+    // // Make sure we define both the soln and the rhs with the same DistributionMapping
+    // DistributionMapping dmap{ba};
+    // rhs.define(ba, dmap, 1, 0);
+    // lhs.define(ba, dmap, 1, 0);
+    // init_rhs(rhs, geom);
 
-        // Read in n_cell.  Use defaults if not explicitly defined.
-        int cnt = pp.countval("amr.n_cell");
 
-        if (cnt > 1) {
-            Vector<int> ncs;
-            pp.getarr("amr.n_cell",ncs);
-            n_cell = IntVect{ncs[0],ncs[1],ncs[2]};
-        } else if (cnt > 0) {
-            int ncs;
-            pp.get("amr.n_cell",ncs);
-            n_cell = IntVect{ncs,ncs,ncs};
-        } else {
-            std::cout << "WARNING: amr.n_cell not found in inputs, setting n_cell to 32^3! " << std::endl;
-            n_cell = IntVect{32,32,32};
-        }
+    //Uncomment if you want to plot rhs before swfft
+    writeMultiFabAsPlotFile("MFAB_plot000", real_old, "rhs");
 
-        // Read in max_grid_size.  Use defaults if not explicitly defined.
-        cnt = pp.countval("amr.max_grid_size");
-        if (cnt > 1) {
-            Vector<int> mgs;
-            pp.getarr("amr.max_grid_size",mgs);
-            max_grid_size = IntVect{mgs[0],mgs[1],mgs[2]};
-        } else if (cnt > 0) {
-            int mgs;
-            pp.get("amr.max_grid_size",mgs);
-            max_grid_size = IntVect{mgs,mgs,mgs};
-        } else {
-            std::cout << "WARNING: amr.max_grid_size not found in inputs, setting max_grid_size to 32^3! " << std::endl;
-            max_grid_size = IntVect{32,32,32};
-        }
+    swfft_test(real_old, real_new, geom, verbose);
 
-        pp.query("verbose", verbose);
-    }
+    //Uncomment if you want to plot lhs after swfft
+    writeMultiFabAsPlotFile("MFAB_plot111", real_new, "rhs");
 
-    BoxArray ba;
-
-    Real dx = 1./double(n_cell[0]);
-    IntVect dom_lo(0,0,0);
-    IntVect dom_hi(n_cell[0]-1,n_cell[1]-1,n_cell[2]-1);
-    Box domain(dom_lo,dom_hi);
-    ba.define(domain);
-    ba.maxSize(max_grid_size);
-    Real x_hi = n_cell[0]*dx;
-    Real y_hi = n_cell[1]*dx;
-    Real z_hi = n_cell[2]*dx;
-    RealBox real_box({0.0,0.0,0.0}, {x_hi,y_hi,z_hi});
-    // The FFT assumes fully periodic boundaries
-    std::array<int,3> is_periodic {1,1,1};
-    geom.define(domain, &real_box, CoordSys::cartesian, is_periodic.data());
-
-    // Make sure we define both the soln and the rhs with the same DistributionMapping
-    DistributionMapping dmap{ba};
-
-    rhs.define(ba, dmap, 1, 0);
-    lhs.define(ba, dmap, 1, 0);
-    init_rhs(rhs, geom);
-
-    // //Uncomment if you want to plot rhs before swfft
-    // const std::string pltfile0 = "MFAB_plot000";
-    // std::string componentName = "rhs";
-    // writeMultiFabAsPlotFile(pltfile0, rhs, componentName);
-
-    swfft_test(rhs, lhs, geom, verbose_sw);
-
-    // //Uncomment if you want to plot lhs after swfft
-    // const std::string pltfile1 = "MFAB_plot002";
-    // std::string componentName1 = "rhs";
-    // writeMultiFabAsPlotFile(pltfile1, lhs, componentName1);
+    Ax_new.ParallelCopy(real_new, 0, Nyx::AxRe, 1, real_new.nGrow(), Ax_new.nGrow(), parent->Geom(lev).periodicity(),FabArrayBase::COPY);
+    Ax_new.ParallelCopy(imag_new, 0, Nyx::AxIm, 1, imag_new.nGrow(), Ax_new.nGrow(), parent->Geom(lev).periodicity(),FabArrayBase::COPY);
 }
 
 void Nyx::init_rhs(MultiFab& rhs, Geometry& geom)

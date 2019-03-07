@@ -417,9 +417,6 @@ public:
            void advance_FDM_FFT(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
            void init_rhs(amrex::MultiFab& Mrhs, amrex::Geometry& geom);
            void swfft_test(amrex::MultiFab& rhs, amrex::MultiFab& soln, amrex::Geometry& geom, int verbose);
-           // void drift(const int *self, const int *local_ng, const int *global_ng, size_t local_indx, double hbar, double k0, double m, double dt, std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> > * fpsi);
-           // void kick(int SIZE, const int *self, const int *local_ng, const int *global_ng, size_t local_indx, double hbar, double dt, amrex::MultiFab& psi, amrex::MultiFab& pot);
-
 
 #endif
 
