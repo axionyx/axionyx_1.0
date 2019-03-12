@@ -413,10 +413,7 @@ public:
 #ifdef FDM
     amrex::Real advance_FDM(amrex::Real time, amrex::Real dt, int iteration, int ncycle);
            void advance_FDM_FD(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
-           //TODO_JENS: the stub I added
            void advance_FDM_FFT(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
-           void init_rhs(amrex::MultiFab& Mrhs, amrex::Geometry& geom);
-           void swfft_test(amrex::MultiFab& rhs, amrex::MultiFab& soln, amrex::Geometry& geom, int verbose);
 
 #endif
 

@@ -119,6 +119,10 @@
       close(un)
       !print *,"star is at ", pos
 
+      do i=1,3
+         pos(1,i)=center(i)
+      enddo
+
       pi = 4.d0 * atan(1.d0)
       tpi = 2.0d0 * pi
 
