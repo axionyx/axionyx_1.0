@@ -231,6 +231,14 @@ void Nyx::advance_FDM_FFT (amrex::Real time,
         }
     }
 #endif
+
+  //  *******************************************                                                                                                                                            
+  //  kick - one full time step                                                                                                                                                                 
+  //  *******************************************                                                                                            
+  for (MFIter mfi(real_old); mfi.isValid(); ++mfi){
+    const Box& box = mfi.validbox();
+    fort_kick(box.loVect(), box.hiVect(), real_old[mfi].dataPtr(), imag_old[mfi].dataPtr(), phi[mfi].dataPtr(), &hbaroverm, &dt);
+  }
     
   // *****************************************
   // We assume that all grids have the same size hence                                                                                                                                                        
@@ -266,14 +274,14 @@ void Nyx::advance_FDM_FFT (amrex::Real time,
       int j = ba[ib].smallEnd(1) / ny;
       int k = ba[ib].smallEnd(2) / nz;
       int local_index = k*nbx*nby + j*nbx + i;                                                                                                                                                             
-      
+
       rank_mapping[local_index] = dm[ib];
       
       if (verbose)
 	amrex::Print() << "LOADING RANK NUMBER " << dm[ib] << " FOR GRID NUMBER " << ib
 		       << " WHICH IS LOCAL NUMBER " << local_index << std::endl;
     }
-  
+    
   // *****************************************
   // Assume for now that nx = ny = nz                                                                                                                                                                       
   // *****************************************
@@ -282,6 +290,9 @@ void Nyx::advance_FDM_FFT (amrex::Real time,
   hacc::Distribution d(MPI_COMM_WORLD,n,Ndims,&rank_mapping[0]);
   hacc::Dfft dfft(d);
   
+  //  *******************************************                                                                                                                                                       
+  //  drift - one full time step                                                                                                                                                                         
+  //  *******************************************                                                                                                                                                          
   for (MFIter mfi(real_old,false); mfi.isValid(); ++mfi)
     {
       
@@ -301,19 +312,18 @@ void Nyx::advance_FDM_FFT (amrex::Real time,
       //  *******************************************
       dfft.forward(&a[0]);
       
-      //  *******************************************                                                                                                                                                       
-      //  drift - one full time step                                                                                                                                                                         
-      //  *******************************************                                                                                                                                                          
       const int *self = dfft.self_kspace();
       const int *local_ng = dfft.local_ng_kspace();
       const int *global_ng = dfft.global_ng();
       const std::complex<double> imagi(0.0,1.0);
       size_t local_indx = 0;
-      
+
       for(size_t i=0; i<(size_t)local_ng[0]; i++) {
 	size_t global_i = local_ng[0]*self[0] + i;
+
 	for(size_t j=0; j<(size_t)local_ng[1]; j++) {
 	  size_t global_j = local_ng[1]*self[1] + j;
+
 	  for(size_t k=0; k<(size_t)local_ng[2]; k++) {
 	    size_t global_k = local_ng[2]*self[2] + k;
 	    
@@ -323,8 +333,8 @@ void Nyx::advance_FDM_FFT (amrex::Real time,
 	    else {
 	      
 	      double laplace_k = 2./hsq * ( (cos(tpi*double(global_i)/double(global_ng[0])) - 1.) +
-					    (cos(tpi*double(global_j)/double(global_ng[1])) - 1.) +
-					    (cos(tpi*double(global_k)/double(global_ng[2])) - 1.) );
+	      				    (cos(tpi*double(global_j)/double(global_ng[1])) - 1.) +
+	      				    (cos(tpi*double(global_k)/double(global_ng[2])) - 1.) );
 	      
 	      a[local_indx] *= std::exp( imagi * hbaroverm * laplace_k / a_half / a_half / 2.0  * dt );
 	      
@@ -346,14 +356,6 @@ void Nyx::advance_FDM_FFT (amrex::Real time,
       }
       
     }//MFIter loop
-  
-  //  *******************************************                                                                                                                                            
-  //  kick - one full time step                                                                                                                                                                 
-  //  *******************************************                                                                                            
-  for (MFIter mfi(real_new); mfi.isValid(); ++mfi){
-    const Box& box = mfi.validbox();
-    fort_kick(box.loVect(), box.hiVect(), real_new[mfi].dataPtr(), imag_new[mfi].dataPtr(), phi[mfi].dataPtr(), &hbaroverm, &dt);
-  }
   
   //  *******************************************                                                                                                                                            
   //  Update axion state                                                                                                                                                                 
