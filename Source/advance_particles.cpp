@@ -348,7 +348,7 @@ Nyx::advance_particles_only (Real time,
 	continue;
 
       //Define neccessary number of ghost cells                                                                                                                                                                 
-      int ng = ceil(Nyx::sigma_fdm*Nyx::theta_fdm/get_level(level).Geom().CellSize()[0]);
+      int ng = ceil(Nyx::sigma_fdm*Nyx::theta_fdm/get_level(lev).Geom().CellSize()[0]);
 
       //Initialize MultiFabs                                                                                                                                                                                    
       MultiFab& Ax_new = get_level(lev).get_new_data(Axion_Type);

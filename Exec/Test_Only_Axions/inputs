@@ -1,134 +1,119 @@
 # ------------------  INPUTS TO MAIN PROGRAM  -------------------
-max_step = 30000
+max_step = 2
+#stop_time = 1.262326e17
 
 nyx.comoving_OmB = 0.0
 nyx.comoving_OmM = 0.3
-nyx.comoving_h = 0.7
+nyx.comoving_h = 0.0
 
-nyx.inhomo_reion     = 0
-
-
-nyx.small_dens = 1e-4
 nyx.initial_z = 0.0
-#nyx.final_a = 1.0
 nyx.initial_dt = 1.e-6
-#nyx.max_timestep = 2.e-6
-nyx.vonNeumann_dt = 1
+#nyx.fixed_dt = 1.e-5
+
+nyx.ppm_type = 2
+nyx.add_ext_src = 0
+
+nyx.show_timings = 1
+gravity.show_timings = 1
+
+nyx.small_dens = 1.0e-32
+nyx.small_temp = 1.0
+nyx.small_pres = 1.0e-20
 
 #File written during the run: nstep | time | dt | redshift | a
-amr.data_log = runlog
+amr.data_log = runlog #stats_full stats_delta stats_l0 stats_l1 stats_l2 stats_l3
+amr.grid_log = grdlog
 
 #This is how we restart from a checkpoint and write an ascii particle file
 #Leave this commented out in cvs version
-#amr.restart = chk30000
-nyx.dump_old = 1
-max_step = 100000
-#particles.particle_output_file = particle_output
-particles.write_in_plotfile = 0
-
-gravity.gravity_type = PoissonGrav
-gravity.no_sync      = 1
-gravity.no_composite = 1
-
-gravity.ml_tol    = 1.e-10
-gravity.sl_tol    = 1.e-10
-gravity.delta_tol = 1.e-10
-gravity.use_previous_phi_as_guess = 0
-
-mg.bottom_solver = 1
+#amr.restart = chk00250
 
 # PROBLEM SIZE & GEOMETRY
-geometry.is_periodic =  1 1 1
 geometry.coord_sys   =  0
+#geometry.is_periodic = 0 0 0 
+geometry.is_periodic = 1 1 1 
+geometry.prob_lo     =  0     0     0
+geometry.prob_hi     = 1.0 1.0 1.0
+#amr.n_cell           = 256 256 256
+amr.n_cell           = 16 16 16 
+#amr.n_cell           = 256 256 256
+#amr.max_grid_size    = 128 # 64 #32
 
-geometry.prob_lo     =  -0.256 -0.256 -0.256 
-geometry.prob_hi     =   0.256 0.256 0.256
-#geometry.prob_lo     =  -0.512 -0.512 -0.512
-geometry.prob_lo     =  -0 -0 -0
-geometry.prob_hi     =   0.512 0.512 0.512
-#geometry.prob_lo     =  -0.128 -0.128 -0.128
-#geometry.prob_hi     =   0.128 0.128 0.128
+# >>>>>>>>> FDM PHYSICS <<<<<<<<<<<
 
-#amr.n_cell           =  256 256 256
-#amr.n_cell           =  512 512 512
-amr.n_cell           =  128 128 128
-#amr.n_cell           =  4 4 4
-nyx.n_particles      =  1  1  1 
-amr.max_grid_size    =  256
+nyx.num_particle_fdm = 1
+nyx.num_particle_dm  = 1
+nyx.levelmethod = 1 1 1 1 1 1
+nyx.particle_init_type = GaussianBeams
+nyx.sigma_fdm = 0.1
+nyx.theta_fdm = 4.0
+nyx.alpha_fdm = 1600.0; #1.8 # 0.4 #10000.0
+nyx.wkb_approx = 0
+nyx.beam_cfl = 0.1
+nyx.m_tt = 2.5
+#nyx.do_dm_particles = 1
 
 # >>>>>>>>>>>>>  BC FLAGS <<<<<<<<<<<<<<<<
 # 0 = Interior           3 = Symmetry
 # 1 = Inflow             4 = SlipWall
 # 2 = Outflow
+
 # >>>>>>>>>>>>>  BC FLAGS <<<<<<<<<<<<<<<<
-nyx.lo_bc       =  0	  0	0
-nyx.hi_bc       =  0	  0	0
+#nyx.lo_bc       =  1 1 1
+#nyx.hi_bc       =  1 1 1
+nyx.lo_bc       =  0 0 0 
+nyx.hi_bc       =  0 0 0
 
 # WHICH PHYSICS
 nyx.do_hydro = 0
-#nyx.gamma = 1.666
-#nyx.print_fortran_warnings = 0
-#nyx.do_hydro = 0
 nyx.do_grav  = 1
-
-# PARTICLES
-nyx.do_dm_particles = 0
-nyx.show_timings =1
-mg.show_timings = 1
-
-# >>>>>>>>>>>>>  PARTICLE INIT OPTIONS <<<<<<<<<<<<<<<<
-#  "AsciiFile"        "Random"	    "Cosmological"
-# >>>>>>>>>>>>>  PARTICLE INIT OPTIONS <<<<<<<<<<<<<<<<
-#nyx.particle_init_type = Cosmological
-#cosmo.initDirName  = init
-
-# >>>>>>>>>>>>>  PARTICLE MOVE OPTIONS <<<<<<<<<<<<<<<<
-#  "Gravitational"    "Random"
-# >>>>>>>>>>>>>  PARTICLE MOVE OPTIONS <<<<<<<<<<<<<<<<
 nyx.particle_move_type = Gravitational
 
+gravity.gravity_type = PoissonGrav
+
+nyx.use_const_species = 0
+nyx.h_species = 1.0
+nyx.he_species = 0.0
 
 # TIME STEP CONTROL
-nyx.cfl            = 0.5     # cfl number for hyperbolic system
-nyx.nu_cfl         = 0.9     # cfl number for hyperbolic system
+nyx.cfl            = 0.9     # cfl number for hyperbolic system
 nyx.init_shrink    = 1.0     # scale back initial timestep
-nyx.change_max     = 1.05    # scale back initial timestep
+nyx.change_max     = 1.1     # factor by which timestep can change
 nyx.dt_cutoff      = 5.e-20  # level 0 timestep below which we halt
 
 # DIAGNOSTICS & VERBOSITY
-nyx.sum_interval   = 2      # timesteps between computing mass
-nyx.v              = 1       # verbosity in Castro.cpp
-gravity.v             = 1       # verbosity in Gravity.cpp
-amr.v                 = 1       # verbosity in Amr.cpp
-mg.v                  = 1       # verbosity in Amr.cpp
-#particles.v           = 1       # verbosity in Particle class
-amr.grid_log         = grdlog  # name of grid logging file
+nyx.sum_interval      = 2       # timesteps between computing mass
+nyx.v                 = 2       # verbosity in Castro.cpp
+gravity.v             = 2       # verbosity in Gravity.cpp
+amr.v                 = 2       # verbosity in Amr.cpp
+mg.v                  = 2       # verbosity in Amr.cpp
+nyx.print_fortran_warnings = 0
 
 # REFINEMENT / REGRIDDING
-amr.max_level       = 0       # maximum level number allowed
-amr.ref_ratio          = 2 2 2 2 2
-amr.regrid_int         = 400000
-#amr.n_error_buf        = 0 2
+amr.max_level          = 0        # maximum level number allowed
+#amr.ref_ratio          = 2 2 2 2
+#amr.regrid_int         = 4 4 4 4
+#amr.n_error_buf        = 2 2 2 2
 #amr.refine_grid_layout = 1
-amr.regrid_on_restart  = 0
-amr.blocking_factor    = 32
-amr.subcycling_mode    = Manual
-amr.subcycling_iterations = 4
-amr.grid_eff           = 0.7
+#amr.regrid_on_restart  = 1
+amr.blocking_factor    = 16
+#amr.subcycling_mode    = Auto
+#amr.grid_eff           = 0.8 0.8 0.8 0.8
 
 # CHECKPOINT FILES
 amr.check_file      = chk
-amr.check_int       = 5000
-#amr.check_per	    = 1.e-6
+amr.check_int       = 2500000
 
 # PLOTFILES
-amr.plot_file       = plot
-#amr.plot_per       = 1.e-6
-amr.plot_int	    = 100
+amr.plot_file       = plt
+amr.plot_int        = 100
+#amr.plot_per        = 3.155815e15
+#nyx.plot_z_values   = 99.5 60.0 40.0 20.0 10.0 8.0 7.0 6.0 5.0 4.0 3.0 2.5 2.0 1.5 1.0 0.5 0.1
 
-amr.derive_plot_vars = AxPhase # these variables appear in the plotfile
-amr.plot_vars = AxDens AxRe AxIm phi_grav #AxDens AxMomX AxMomY AxMomZ phi_grav #ALL #density xmom ymom zmom phi_grav #
+amr.plot_vars        = ALL
+amr.derive_plot_vars = fdm_mass_density fdm_particle_count particle_mass_density particle_count AxPhase
 
 #PROBIN FILENAME
 amr.probin_file = probin
 
+particles.write_in_plotfile = 1

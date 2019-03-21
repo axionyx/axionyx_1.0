@@ -806,43 +806,43 @@ Nyx::init_particles ()
 	  // moved to Nyx_initcosmo.cpp                                                                                                                                                                      
         }
       //do init                                                                                                                                                                                                  
-      else if(particle_init_type == "Bosonstar")
-        {
-	  const int initDataDim = 4; //FIXME: depends on setup... I guess                                                                                                                                        
-	  const Real * dx = geom.CellSize();
-	  const Real cur_time = state[State_Type].curTime();
-	  MultiFab InitData(grids,dmap,initDataDim,0);
+      // else if(particle_init_type == "Bosonstar")
+      //   {
+      // 	  const int initDataDim = 4; //FIXME: depends on setup... I guess                                                                                                                                        
+      // 	  const Real * dx = geom.CellSize();
+      // 	  const Real cur_time = state[State_Type].curTime();
+      // 	  MultiFab InitData(grids,dmap,initDataDim,0);
 
-	  for (MFIter mfi(InitData); mfi.isValid(); ++mfi)
-            {
-	      RealBox gridloc = RealBox(grids[mfi.index()], geom.CellSize(), geom.ProbLo());
-	      const Box& box = mfi.validbox();
-	      const int* lo = box.loVect();
-	      const int* hi = box.hiVect();
+      // 	  for (MFIter mfi(InitData); mfi.isValid(); ++mfi)
+      //       {
+      // 	      RealBox gridloc = RealBox(grids[mfi.index()], geom.CellSize(), geom.ProbLo());
+      // 	      const Box& box = mfi.validbox();
+      // 	      const int* lo = box.loVect();
+      // 	      const int* hi = box.hiVect();
 
-	      // BL_FORT_PROC_CALL(INITPART, initpart)
-	      initpart(&level, &cur_time,
-		 lo, hi,
-		 &initDataDim, BL_TO_FORTRAN(InitData[mfi]),
-		 dx, gridloc.lo(), gridloc.hi());
-            }
+      // 	      // BL_FORT_PROC_CALL(INITPART, initpart)
+      // 	      initpart(&level, &cur_time,
+      // 		 lo, hi,
+      // 		 &initDataDim, BL_TO_FORTRAN(InitData[mfi]),
+      // 		 dx, gridloc.lo(), gridloc.hi());
+      //       }
 
  
-	  BoxArray baWhereNot;
-	  if (level < parent->initialBaLevels())
-	    baWhereNot = parent->initialBa(level+1);
-	  BoxArray myBaWhereNot(baWhereNot.size());
-	  for (int i=0; i < baWhereNot.size(); i++)
-	    myBaWhereNot.set(i, baWhereNot[i]);
-	  if (level < parent->initialBaLevels())
-	    myBaWhereNot.coarsen(parent->refRatio(level));
+      // 	  BoxArray baWhereNot;
+      // 	  if (level < parent->initialBaLevels())
+      // 	    baWhereNot = parent->initialBa(level+1);
+      // 	  BoxArray myBaWhereNot(baWhereNot.size());
+      // 	  for (int i=0; i < baWhereNot.size(); i++)
+      // 	    myBaWhereNot.set(i, baWhereNot[i]);
+      // 	  if (level < parent->initialBaLevels())
+      // 	    myBaWhereNot.coarsen(parent->refRatio(level));
 
-	  if(num_particle_fdm > 0)
-	    FDMwkbPC->InitVarCount(InitData, num_particle_fdm, myBaWhereNot, level, parent->initialBaLevels()+1);
-	  else
-	    amrex::Error("\nNeed num_particle_fdm > 0 for InitVarCount!\n\n");
+      // 	  if(num_particle_fdm > 0)
+      // 	    FDMwkbPC->InitVarCount(InitData, num_particle_fdm, myBaWhereNot, level, parent->initialBaLevels()+1);
+      // 	  else
+      // 	    amrex::Error("\nNeed num_particle_fdm > 0 for InitVarCount!\n\n");
 
-        }
+      //   }
       else if(particle_init_type == "GaussianBeams")
         {
 	  if (!do_dm_particles)
@@ -994,43 +994,43 @@ Nyx::init_particles ()
 	  // moved to Nyx_initcosmo.cpp                                                                                                                                                                      
         }
       //do init                                                                                                                                                                                                  
-      else if(particle_init_type == "Bosonstar")
-        {
-	  const int initDataDim = 4; //FIXME: depends on setup... I guess                                                                                                                                        
-	  const Real * dx = geom.CellSize();
-	  const Real cur_time = state[State_Type].curTime();
-	  MultiFab InitData(grids,dmap,initDataDim,0);
+      // else if(particle_init_type == "Bosonstar")
+      //   {
+      // 	  const int initDataDim = 4; //FIXME: depends on setup... I guess                                                                                                                                        
+      // 	  const Real * dx = geom.CellSize();
+      // 	  const Real cur_time = state[State_Type].curTime();
+      // 	  MultiFab InitData(grids,dmap,initDataDim,0);
 
-	  for (MFIter mfi(InitData); mfi.isValid(); ++mfi)
-            {
-	      RealBox gridloc = RealBox(grids[mfi.index()], geom.CellSize(), geom.ProbLo());
-	      const Box& box = mfi.validbox();
-	      const int* lo = box.loVect();
-	      const int* hi = box.hiVect();
+      // 	  for (MFIter mfi(InitData); mfi.isValid(); ++mfi)
+      //       {
+      // 	      RealBox gridloc = RealBox(grids[mfi.index()], geom.CellSize(), geom.ProbLo());
+      // 	      const Box& box = mfi.validbox();
+      // 	      const int* lo = box.loVect();
+      // 	      const int* hi = box.hiVect();
 
-	      // BL_FORT_PROC_CALL(INITPART, initpart)
-	      initpart(&level, &cur_time,
-		 lo, hi,
-		 &initDataDim, BL_TO_FORTRAN(InitData[mfi]),
-		 dx, gridloc.lo(), gridloc.hi());
-            }
+      // 	      // BL_FORT_PROC_CALL(INITPART, initpart)
+      // 	      initpart(&level, &cur_time,
+      // 		 lo, hi,
+      // 		 &initDataDim, BL_TO_FORTRAN(InitData[mfi]),
+      // 		 dx, gridloc.lo(), gridloc.hi());
+      //       }
 
  
-	  BoxArray baWhereNot;
-	  if (level < parent->initialBaLevels())
-	    baWhereNot = parent->initialBa(level+1);
-	  BoxArray myBaWhereNot(baWhereNot.size());
-	  for (int i=0; i < baWhereNot.size(); i++)
-	    myBaWhereNot.set(i, baWhereNot[i]);
-	  if (level < parent->initialBaLevels())
-	    myBaWhereNot.coarsen(parent->refRatio(level));
+      // 	  BoxArray baWhereNot;
+      // 	  if (level < parent->initialBaLevels())
+      // 	    baWhereNot = parent->initialBa(level+1);
+      // 	  BoxArray myBaWhereNot(baWhereNot.size());
+      // 	  for (int i=0; i < baWhereNot.size(); i++)
+      // 	    myBaWhereNot.set(i, baWhereNot[i]);
+      // 	  if (level < parent->initialBaLevels())
+      // 	    myBaWhereNot.coarsen(parent->refRatio(level));
 
-	  if(num_particle_fdm > 0)
-	    FDMPC->InitVarCount(InitData, num_particle_fdm, myBaWhereNot, level, parent->initialBaLevels()+1);
-	  else
-	    amrex::Error("\nNeed num_particle_fdm > 0 for InitVarCount!\n\n");
+      // 	  if(num_particle_fdm > 0)
+      // 	    FDMPC->InitVarCount(InitData, num_particle_fdm, myBaWhereNot, level, parent->initialBaLevels()+1);
+      // 	  else
+      // 	    amrex::Error("\nNeed num_particle_fdm > 0 for InitVarCount!\n\n");
 
-        }
+      //   }
       else if(particle_init_type == "GaussianBeams")
         {
 	  if (!do_dm_particles)
@@ -1519,12 +1519,12 @@ Nyx::particle_est_time_step (Real& est_dt)
       }
     if (FDMPC && particle_move_type == "Gravitational")
       {
-	// const Real est_dt_fdm1 = FDMPC->estTimestep(grav, a, level, particle_cfl);
-	// MultiFab& phi = get_new_data(PhiGrav_Type);
-	// Real beam_cfl_reduced = beam_cfl*2.0*M_PI*hbaroverm;
-	// const Real est_dt_fdm2 = FDMPC->estTimestepFDM(phi, level, beam_cfl_reduced);
-	// const Real est_dt_fdm = std::min(est_dt_fdm1 ,est_dt_fdm2);
-	const Real est_dt_fdm = FDMPC->estTimestep(grav, a, level, particle_cfl);
+	const Real est_dt_fdm1 = FDMPC->estTimestep(grav, a, level, particle_cfl);
+	MultiFab& phi = get_new_data(PhiGrav_Type);
+	Real beam_cfl_reduced = beam_cfl*2.0*M_PI*hbaroverm;
+	const Real est_dt_fdm2 = FDMPC->estTimestepFDM(phi, level, beam_cfl_reduced);
+	const Real est_dt_fdm = std::min(est_dt_fdm1 ,est_dt_fdm2);
+	// const Real est_dt_fdm = FDMPC->estTimestep(grav, a, level, particle_cfl);
 	
 	if (est_dt_fdm > 0)
 	  est_dt = std::min(est_dt, est_dt_fdm);
@@ -1786,8 +1786,9 @@ Nyx::setup_ghost_particles(int ngrow)
     // if(Nyx::theFDMPC() != 0)
     // {
     //     FDMParticleContainer::AoS ghosts;
-    //     Nyx::theFDMPC()->CreateGhostParticles(level, ngrow, ghosts);
-    //     Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, level+1, ngrow);
+    // 	int ng = ceil(sigma_fdm*theta_fdm/parent->Geom(level+1).CellSize()[0]);
+    //     Nyx::theFDMPC()->CreateGhostParticles(level, ng, ghosts);
+    //     Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, level+1, ng);
     // }
     // if(Nyx::theFDMwkbPC() != 0)
     // {

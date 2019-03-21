@@ -421,10 +421,9 @@ FDMParticleContainer::CreateGhostParticlesFDM (int level, int lev, int nGrow, Ao
       for (auto it = pbox.cbegin(); it != pbox.cend(); ++it)
         {
 	  const IntVect& iv = Index(*it, lev);
-	  fine.intersections(Box(iv,iv),isects,false,nGrow);
-	  for (const auto& isec : isects)
+	  fine.intersections(Box(iv,iv),isects,true,nGrow);
+	  if(!isects.empty())
             {
-	      amrex::ignore_unused(isec);
 	      ParticleType p = *it;  // yes, make a copy                                                                                                                                                         
 	      p.m_idata.id = GhostParticleID;
 	      ghosts().push_back(p);
