@@ -280,9 +280,11 @@
     integer,              intent(in   )        :: np
     type(fdm_particle_t), intent(inout)        :: particles(np)
     integer,              intent(in   )        :: accel_lo(3), accel_hi(3)
+    ! real(amrex_real),     intent(inout)        :: accel &
     real(amrex_real),     intent(in   )        :: accel &
          (accel_lo(1):accel_hi(1),accel_lo(2):accel_hi(2),accel_lo(3):accel_hi(3),3)
     integer,              intent(in   )        :: phi_lo(3), phi_hi(3)
+    ! real(amrex_real),     intent(inout)        :: phi &
     real(amrex_real),     intent(in   )        :: phi &
          (phi_lo(1):phi_hi(1),phi_lo(2):phi_hi(2),phi_lo(3):phi_hi(3),1)
     real(amrex_real),     intent(in   )        :: plo(3),dx(3),dt,a_prev,a_cur
@@ -304,6 +306,30 @@
     half_dt       = 0.5d0 * dt
     a_cur_inv    = 1.d0 / a_cur
     dt_a_cur_inv = dt * a_cur_inv
+
+    ! phi = 0.d0
+    ! accel = 0.d0
+    
+    ! do k = phi_lo(3), phi_hi(3)
+    !    do j = phi_lo(2), phi_hi(2)
+    !       do i = phi_lo(1), phi_hi(1)
+    !          phi(i,j,k,1) = -( ((i+0.5d0)*dx(1)+plo(1))*((i+0.5d0)*dx(1)+plo(1))+ &
+    !                          ((j+0.5d0)*dx(2)+plo(2))*((j+0.5d0)*dx(2)+plo(2))+ &
+    !                          ((k+0.5d0)*dx(3)+plo(3))*((k+0.5d0)*dx(3)+plo(3)) ) * &
+    !                        2.0*hbaroverm*hbaroverm*1600.0*1600.0
+    !       enddo
+    !    enddo
+    ! enddo
+
+    ! do k = accel_lo(3), accel_hi(3)
+    !    do j = accel_lo(2), accel_hi(2)
+    !       do i = accel_lo(1), accel_hi(1)
+    !          accel(i,j,k,1) = -((i+0.5d0)*dx(1)+plo(1)) * 4.0*hbaroverm*hbaroverm*1600.0*1600.0
+    !          accel(i,j,k,2) = -((j+0.5d0)*dx(2)+plo(2)) * 4.0*hbaroverm*hbaroverm*1600.0*1600.0
+    !          accel(i,j,k,3) = -((k+0.5d0)*dx(3)+plo(3)) * 4.0*hbaroverm*hbaroverm*1600.0*1600.0
+    !       enddo
+    !    enddo
+    ! enddo
 
     do n = 1, np
 
