@@ -337,39 +337,39 @@ void Nyx::advance_FDM_FFT (amrex::Real time,
       //         }
       //     }
       // }
-      
-      ///// k^2 drift loop
-      // for(size_t i=0; i<(size_t)local_ng[0]; i++) {
-      //     int global_i = local_ng[0]*self[0] + i;
-      //     if (global_i >= global_ng[0]/2){
-      //         global_i = global_i - global_ng[0];
-      //     }
-      //
-      //
-      //     for(size_t j=0; j<(size_t)local_ng[1]; j++) {
-      //         int global_j = local_ng[1]*self[1] + j;
-      //         if (global_j >= global_ng[1]/2){
-      //             global_j = global_j - global_ng[1];
-      //         }
-      //
-      //
-      //         for(size_t k=0; k<(size_t)local_ng[2]; k++) {
-      //             int global_k = local_ng[2]*self[2] + k;
-      //             if (global_k >= global_ng[2]/2){
-      //                 global_k = global_k - global_ng[2];
-      //             }
-      //
-      //             double kx = tpi * double(global_i)/double(global_ng[0]);
-      //             double ky = tpi * double(global_j)/double(global_ng[1]);
-      //             double kz = tpi * double(global_k)/double(global_ng[2]);
-      //             double k2 = (kx*kx + ky*ky + kz*kz)/h/h;
-      //
-      //             a[local_indx] *= std::exp(- imagi * hbaroverm * k2 / a_half / a_half / 2.0  * dt );
-      //
-      //             local_indx++;
-      //         }
-      //     }
-      // }
+
+      /// k^2 drift loop
+      for(size_t i=0; i<(size_t)local_ng[0]; i++) {
+          int global_i = local_ng[0]*self[0] + i;
+          if (global_i >= global_ng[0]/2){
+              global_i = global_i - global_ng[0];
+          }
+
+
+          for(size_t j=0; j<(size_t)local_ng[1]; j++) {
+              int global_j = local_ng[1]*self[1] + j;
+              if (global_j >= global_ng[1]/2){
+                  global_j = global_j - global_ng[1];
+              }
+
+
+              for(size_t k=0; k<(size_t)local_ng[2]; k++) {
+                  int global_k = local_ng[2]*self[2] + k;
+                  if (global_k >= global_ng[2]/2){
+                      global_k = global_k - global_ng[2];
+                  }
+
+                  double kx = tpi * double(global_i)/double(global_ng[0]);
+                  double ky = tpi * double(global_j)/double(global_ng[1]);
+                  double kz = tpi * double(global_k)/double(global_ng[2]);
+                  double k2 = (kx*kx + ky*ky + kz*kz)/h/h;
+
+                  a[local_indx] *= std::exp(- imagi * hbaroverm * k2 / a_half / a_half / 2.0  * dt );
+
+                  local_indx++;
+              }
+          }
+      }
 
       // *******************************************
       // Compute the backward transformdfft.global_size
