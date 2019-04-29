@@ -235,10 +235,49 @@ void Nyx::advance_FDM_FFT (amrex::Real time,
   // //  *******************************************
   // //  kick - one full time step
   // //  *******************************************
+  // //  OLD KICK 
   // for (MFIter mfi(real_old); mfi.isValid(); ++mfi){
   //   const Box& box = mfi.validbox();
   //   fort_kick(box.loVect(), box.hiVect(), real_old[mfi].dataPtr(), imag_old[mfi].dataPtr(), phi[mfi].dataPtr(), &hbaroverm, &dt);
   // }
+
+
+  //NEW KICK
+    for (MFIter mfi(real_old); mfi.isValid(); ++mfi){
+      const Box& box = mfi.validbox();
+
+      std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> > psi;
+      std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> > cphi;
+      psi.resize(gridsize);
+      cphi.resize(gridsize);
+
+      for(size_t i=0; i<(size_t)gridsize; i++){
+         psi[i] = complex_t(real_old[mfi].dataPtr()[i],imag_old[mfi].dataPtr()[i]);
+         cphi[i] = complex_t(phi[mfi].dataPtr()[i],0.0);
+      }
+
+      const std::complex<double> imagi(0.0,1.0);
+      size_t local_indx = 0;
+
+      for(size_t i=box.loVect()[0]; i<box.hiVect()[0]; i++) {
+        for(size_t j=box.loVect()[0]; j<box.hiVect()[0]; j++) {
+          for(size_t k=box.loVect()[0]; k<box.hiVect()[0]; k++) {
+            psi[local_indx] = std::exp(- imagi * cphi[local_indx] / hbaroverm  * dt ) * psi[local_indx];
+            local_indx++;
+          }
+        }
+      }
+
+      for(size_t i=0; i<(size_t)gridsize; i++) {
+          real_new[mfi].dataPtr()[i] = std::real(psi[i]);
+          imag_new[mfi].dataPtr()[i] = std::imag(psi[i]);
+      }
+
+    }
+
+    //Uncomment if you want to plot a MULTIFAB into a file
+    // writeMultiFabAsPlotFile("MFAB_plot000", real_old, "psi_re");
+
 
   // *****************************************
   // We assume that all grids have the same size hence
@@ -378,8 +417,8 @@ void Nyx::advance_FDM_FFT (amrex::Real time,
 
       size_t global_size  = dfft.global_size();
       for(size_t i=0; i<(size_t)gridsize; i++) {
-	real_new[mfi].dataPtr()[i] = std::real(a[i])/global_size;
-	imag_new[mfi].dataPtr()[i] = std::imag(a[i])/global_size;
+          real_new[mfi].dataPtr()[i] = std::real(a[i])/global_size;
+          imag_new[mfi].dataPtr()[i] = std::imag(a[i])/global_size;
       }
 
     }//MFIter loop
