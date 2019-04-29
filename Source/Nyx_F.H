@@ -29,10 +29,10 @@ BL_FORT_PROC_DECL(FORT_ADVANCE_FDM_FD, fort_advance_fdm_fd)
   void fort_integrate_comoving_a
     (amrex::Real* old_a, amrex::Real* new_a, amrex::Real* dt);
 
-  void fort_integrate_comoving_a_to_z 
+  void fort_integrate_comoving_a_to_z
     (amrex::Real* old_a, amrex::Real* z_value, amrex::Real* dt);
 
-  void fort_integrate_comoving_a_to_a 
+  void fort_integrate_comoving_a_to_a
     (amrex::Real* old_a, amrex::Real* a_value, amrex::Real* dt);
 
   void set_simd(const int *simd_width);
@@ -106,10 +106,10 @@ BL_FORT_PROC_DECL(FORT_ADVANCE_FDM_FD, fort_advance_fdm_fd)
     const int& num_ax, BL_FORT_FAB_ARG(axions),
 #endif
      const int& num_diag,  BL_FORT_FAB_ARG(diag_eos), const amrex::Real dx[],
-     const amrex::Real xlo[], const amrex::Real xhi[]);
+     const amrex::Real xlo[], const amrex::Real xhi[], const amrex::Real boxsize[]);
 
   void fort_init_zhi
-    (const int* lo, const int* hi, 
+    (const int* lo, const int* hi,
      const int& num_diag, BL_FORT_FAB_ARG(diag_eos),
      const int& ratio, BL_FORT_FAB_ARG(zhi));
 

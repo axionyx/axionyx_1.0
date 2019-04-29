@@ -69,7 +69,7 @@
                              ns, state   ,s_l1,s_l2,s_l3,s_h1,s_h2,s_h3, &
                              na, axion,   a_l1,a_l2,a_l3,a_h1,a_h2,a_h3, &
                              nd, diag_eos,d_l1,d_l2,d_l3,d_h1,d_h2,d_h3, &
-                             delta,xlo,xhi) bind(C)
+                             delta,xlo,xhi,boxsize) bind(C)
       use probdata_module
       use atomic_rates_module, only : XHYDROGEN
       use meth_params_module, only : URHO, UMX, UMY, UMZ, UEDEN, UEINT,&
@@ -87,7 +87,7 @@
       integer s_l1,s_l2,s_l3,s_h1,s_h2,s_h3
       integer d_l1,d_l2,d_l3,d_h1,d_h2,d_h3
       integer a_l1,a_l2,a_l3,a_h1,a_h2,a_h3
-      double precision xlo(3), xhi(3), time, delta(3)
+      double precision xlo(3), xhi(3), time, delta(3), boxsize(3)
       double precision    state(s_l1:s_h1,s_l2:s_h2,s_l3:s_h3,ns)
       double precision diag_eos(d_l1:d_h1,d_l2:d_h2,d_l3:d_h3,nd)
       double precision    axion(a_l1:a_h1,a_l2:a_h2,a_l3:a_h3,na)
@@ -95,13 +95,13 @@
       integer i,j,k,h
       integer un,length
       double precision hubl
-      double precision r,rc,x,y,z
+      double precision r,rc
+      double precision rx,ry,rz
       double precision d
       double precision pi, tpi
       double precision, allocatable :: m(:), pos(:,:)
-
-
-
+      double precision velFac, sigmaR
+      double precision hbaroverm
 
 
       un = 20
@@ -131,6 +131,10 @@
 
       rc = 1.3d0 * 0.012513007848917703d0 / (dsqrt(m_tt * hubl) * comoving_OmAx**(0.25d0))
 
+      ! hbaroverm = 0.01917152d0 / m_tt
+      velFac = 1.0d0
+      sigmaR = 10.0d0
+
       !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)
          do j = lo(2), hi(2)
@@ -159,16 +163,48 @@
 
                do h = 1,length
 
-                  x = xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1)
+                   ! !!!! Previous soliton ICs
+                    ! r = dsqrt((xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1) - pos(h,1))**2 + &
+                    !           (xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2) - pos(h,2))**2 + &
+                    !           (xlo(3)+(k-lo(3))*delta(3) + 0.5d0*delta(3) - pos(h,3))**2)
+                    ! axion(i,j,k,UAXDENS) = axion(i,j,k,UAXDENS) + meandens/((1.d0+9.1d-2*(r/rc)**2.d0)**8.0d0)/length
+                    ! axion(i,j,k,UAXRE)   = dsqrt(axion(i,j,k,UAXDENS))
+                    ! axion(i,j,k,UAXIM)   = 0.0d0
+                    !
 
-                  r = dsqrt((xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1) - pos(h,1))**2 + &
-                            (xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2) - pos(h,2))**2 + &
-                            (xlo(3)+(k-lo(3))*delta(3) + 0.5d0*delta(3) - pos(h,3))**2)
-                  axion(i,j,k,UAXDENS) =  meandens/((1.d0+9.1d-2*(r/rc)**2.d0)**8.0d0)
-                  axion(i,j,k,UAXRE)   =  dsqrt(axion(i,j,k,UAXDENS))
-                  axion(i,j,k,UAXIM)   = 0.0d0
-                  ! axion(i,j,k,UAXRE)   =  sin(tpi*x/xhi(1))
-                  ! axion(i,j,k,UAXIM)   =  cos(tpi*x/xhi(1))
+                    rx = xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1) - pos(h,1)
+                    ry = xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2) - pos(h,2)
+                    rz = xlo(3)+(k-lo(3))*delta(3) + 0.5d0*delta(3) - pos(h,3)
+                    ! rx = xlo(1)+(i-lo(1))*delta(1) - pos(h,1)
+                    ! ry = xlo(2)+(j-lo(2))*delta(2) - pos(h,2)
+                    ! rz = xlo(3)+(k-lo(3))*delta(3) - pos(h,3)
+                    ! print *, xlo(2), lo(2), pos(h,2), xhi(2), hi(2)
+                    if (abs(rx) .gt. (boxsize(1)/2.0d0)) then
+                       rx = boxsize(1)-abs(rx)
+                    end if
+                    if (abs(ry) .gt. (boxsize(2)/2.0d0)) then
+                       ry = boxsize(2)-abs(ry)
+                    end if
+                    if (abs(rz) .gt. (boxsize(3)/2.0d0)) then
+                       rz = boxsize(3)-abs(rz)
+                    end if
+
+                    r = dsqrt(rx**2 + ry**2 + rz**2)
+
+                    !!!! GASSIAN DENSITY PROFILE
+                    axion(i,j,k,UAXDENS) = meandens*exp(-0.5d0*r**2/sigmaR/sigmaR)/sigmaR/length
+
+                    !!! SOME SOLITON-FITTING PROFILE
+                    ! axion(i,j,k,UAXDENS) = axion(i,j,k,UAXDENS) + meandens/((1.d0+9.1d-2*(r/rc)**2.d0)**8.0d0)/length
+
+                    !! CONSTANT VELOCITY KICK IN A DIAGONAL DIRECTION
+                    ! axion(i,j,k,UAXRE)   = dsqrt(axion(i,j,k,UAXDENS)) * cos(velFac*(xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1) - pos(h,1)+xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2) - pos(h,2)))
+                    ! axion(i,j,k,UAXIM)   = dsqrt(axion(i,j,k,UAXDENS)) * sin(velFac*(xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1) - pos(h,1)+xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2) - pos(h,2)))
+
+                    !!! NO INITIAL VELOCITY
+                    axion(i,j,k,UAXRE)   = dsqrt(axion(i,j,k,UAXDENS))
+                    axion(i,j,k,UAXIM)   = 0.0d0
+
                 enddo
             enddo
          enddo

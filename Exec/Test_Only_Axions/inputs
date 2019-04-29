@@ -1,5 +1,5 @@
 # ------------------  INPUTS TO MAIN PROGRAM  -------------------
-max_step = 50
+max_step = 500
 
 nyx.comoving_OmB = 0.0
 nyx.comoving_OmM = 0.3
@@ -40,20 +40,15 @@ mg.bottom_solver = 1
 geometry.is_periodic =  1 1 1
 geometry.coord_sys   =  0
 
-geometry.prob_lo     =  -0.256 -0.256 -0.256
-geometry.prob_hi     =   0.256 0.256 0.256
-#geometry.prob_lo     =  -0.512 -0.512 -0.512
+
 geometry.prob_lo     =  -0 -0 -0
 geometry.prob_hi     =   0.512 0.512 0.512
-#geometry.prob_lo     =  -0.128 -0.128 -0.128
-#geometry.prob_hi     =   0.128 0.128 0.128
 
-#amr.n_cell           =  256 256 256
-#amr.n_cell           =  512 512 512
-#amr.n_cell           =  128 128 128
 amr.n_cell           = 32 32 32
-nyx.n_particles      = 1  1  1
 amr.max_grid_size    = 32
+amr.blocking_factor  = 16
+nyx.n_particles      = 1  1  1
+
 
 # >>>>>>>>>>>>>  BC FLAGS <<<<<<<<<<<<<<<<
 # 0 = Interior           3 = Symmetry
@@ -110,7 +105,6 @@ amr.regrid_int         = 400000
 #amr.n_error_buf        = 0 2
 #amr.refine_grid_layout = 1
 amr.regrid_on_restart  = 0
-amr.blocking_factor    = 16
 amr.subcycling_mode    = Manual
 amr.subcycling_iterations = 4
 amr.grid_eff           = 0.7
@@ -123,7 +117,7 @@ amr.check_int       = 5000
 # PLOTFILES
 amr.plot_file       = plt
 #amr.plot_per       = 1.e-6
-amr.plot_int	    = 100
+amr.plot_int	    = 10
 
 amr.derive_plot_vars = AxPhase # these variables appear in the plotfile
 amr.plot_vars = AxDens AxRe AxIm phi_grav #AxDens AxMomX AxMomY AxMomZ phi_grav #ALL #density xmom ymom zmom phi_grav #

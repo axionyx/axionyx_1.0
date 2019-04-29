@@ -83,7 +83,7 @@ Nyx::read_init_params ()
 
     // Input error check
     if (!binary_particle_file.empty() && (particle_init_type != "BinaryFile" &&
-                                          particle_init_type != "BinaryMetaFile" && 
+                                          particle_init_type != "BinaryMetaFile" &&
 					  particle_init_type != "BinaryMortonFile"))
     {
         if (ParallelDescriptor::IOProcessor())
@@ -210,7 +210,7 @@ Nyx::initData ()
         MultiFab&   Ax_new   = get_new_data(Axion_Type);
         int         na       = Ax_new.nComp();
 #endif
-        if (do_hydro == 1) 
+        if (do_hydro == 1)
         {
             MultiFab&   D_new    = get_new_data(DiagEOS_Type);
             int         nd       = D_new.nComp();
@@ -224,13 +224,13 @@ Nyx::initData ()
                 RealBox gridloc = RealBox(bx, geom.CellSize(), geom.ProbLo());
 
                 fort_initdata
-                    (level, cur_time, bx.loVect(), bx.hiVect(), 
-                     ns, BL_TO_FORTRAN(S_new[mfi]), 
-                     nd, BL_TO_FORTRAN(D_new[mfi]), 
+                    (level, cur_time, bx.loVect(), bx.hiVect(),
+                     ns, BL_TO_FORTRAN(S_new[mfi]),
+                     nd, BL_TO_FORTRAN(D_new[mfi]),
 #ifdef FDM
                      na, BL_TO_FORTRAN(Ax_new[mfi]),
 #endif
-                     dx, gridloc.lo(), gridloc.hi());
+                     dx, gridloc.lo(), gridloc.hi(), geom.ProbHi());
             }
 
             if (inhomo_reion) init_zhi();
@@ -249,15 +249,15 @@ Nyx::initData ()
             {
                 const Box& bx = mfi.tilebox();
                 RealBox gridloc = RealBox(bx, geom.CellSize(), geom.ProbLo());
-   //TODO check why ns/S_new is written twice below in the original code. 
+   //TODO check why ns/S_new is written twice below in the original code.
                 fort_initdata
-                    (level, cur_time, bx.loVect(), bx.hiVect(), 
-                     ns, BL_TO_FORTRAN(S_new[mfi]), 
+                    (level, cur_time, bx.loVect(), bx.hiVect(),
+                     ns, BL_TO_FORTRAN(S_new[mfi]),
 #ifdef FDM
                      na, BL_TO_FORTRAN(Ax_new[mfi]),
 #endif
-                     ns, BL_TO_FORTRAN(S_new[mfi]), 
-                     dx, gridloc.lo(), gridloc.hi());
+                     ns, BL_TO_FORTRAN(S_new[mfi]),
+                     dx, gridloc.lo(), gridloc.hi(), geom.ProbHi());
             }
         }
     }
@@ -274,7 +274,7 @@ Nyx::initData ()
         MultiFab& G_new = get_new_data(Gravity_Type);
         G_new.setVal(0);
     }
-    else 
+    else
     {
         //
         // Initialize this to zero before first solve.
@@ -309,11 +309,11 @@ Nyx::initData ()
 	VisMF::Read(mf, mfDirName.c_str());
 
         MultiFab& S_new_crse = get_level(0).get_new_data(State_Type);
-	
+
 	S_new_crse.copy(mf, 0, 0, 6);
 	S_new_crse.copy(mf, 0, FirstSpec, 1);
 
-        if (do_hydro == 1) 
+        if (do_hydro == 1)
         {
             MultiFab&  D_new = get_new_data(DiagEOS_Type);
             D_new.setVal(0.);
@@ -365,7 +365,7 @@ Nyx::initData ()
     //
     // Need to compute this in case we want to use overdensity for regridding.
     //
-    if (level == 0) 
+    if (level == 0)
         compute_average_density();
 #endif
 
@@ -379,14 +379,14 @@ Nyx::init_from_plotfile ()
     BL_PROFILE("Nyx::init_from_plotfile()");
     if (verbose && ParallelDescriptor::IOProcessor())
     {
-        std::cout << " " << std::endl; 
+        std::cout << " " << std::endl;
         std::cout << "Initializing the data from " << parent->theRestartPlotFile() << std::endl;
     }
 
     if (parent->maxLevel() > 0)
         amrex::Abort("We can only restart from single-level plotfiles");
 
-    // Make sure to read in "a" before we call ReadPlotFile since we will use a 
+    // Make sure to read in "a" before we call ReadPlotFile since we will use a
     //      when we construct e from T.
 
     bool is_checkpoint = false;
@@ -428,7 +428,7 @@ Nyx::init_from_plotfile ()
                 fort_init_e_from_rhoe
                     (BL_TO_FORTRAN(S_new[mfi]), &ns, bx.loVect(), bx.hiVect(), &old_a);
             }
-            else 
+            else
             {
                 fort_init_e_from_t
                     (BL_TO_FORTRAN(S_new[mfi]), &ns,
@@ -450,7 +450,7 @@ Nyx::init_from_plotfile ()
     if (verbose && ParallelDescriptor::IOProcessor())
     {
         std::cout << "Done initializing the particles from the plotfile " << std::endl;
-        std::cout << " " << std::endl; 
+        std::cout << " " << std::endl;
     }
 
 }
