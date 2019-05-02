@@ -993,15 +993,16 @@ Nyx::est_time_step (Real dt_old)
     if (vonNeumann_dt >0 && levelmethod[level]==FDlevel){
       Real a = get_comoving_a(cur_time);
       const MultiFab& phi = get_new_data(PhiGrav_Type);
-      Real phi_max = phi.max(0);
+      Real phi_max = std::abs(phi.max(0)-phi.min(0));
       const Real* dx = geom.CellSize();
+      Real cfl_vN = 0.5;
       //from BODO
       // Real m_tt = 2.5;
       // Real hbaroverm = 0.01917152 / m_tt;
-      Real time_step = std::min(dx[0]*dx[0]*a*a/6/hbaroverm,hbaroverm/phi_max); 
+      Real time_step = cfl_vN*std::min(dx[0]*dx[0]*a*a/6/hbaroverm,hbaroverm/phi_max); 
       //Real time_step = std::min(10.0*dx[0]*dx[0]*a*a,0.002/phi_max);
       if (verbose && ParallelDescriptor::IOProcessor())
-        std::cout << "...estdt from von Neumann stability :  "<< time_step << '\n';
+        std::cout << "...estdt from von Neumann stability :  "<< time_step << " " <<phi_max<<'\n';
       return time_step;
     }
 #endif
@@ -1845,6 +1846,7 @@ Nyx::postCoarseTimeStep (Real cumtime)
 
 void
 Nyx::post_regrid (int lbase,
+		  int iteration,
                   int new_finest)
 {
     BL_PROFILE("Nyx::post_regrid()");
@@ -1855,7 +1857,7 @@ Nyx::post_regrid (int lbase,
 #endif
 
     if (level == lbase) {
-        particle_redistribute(lbase, false);
+      particle_redistribute(lbase, iteration, false);
     }
 
 #ifdef GRAVITY

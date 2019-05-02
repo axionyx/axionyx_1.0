@@ -809,7 +809,7 @@ DarkMatterParticleContainer::InitGaussianBeams (long num_particle_dm, int lev, i
   //calculate dm particle mass
   Real mass = 1.0/npart_tot;
   mass *= pow(2.0*alpha/M_PI,-1.5);
-  mass *= fact;
+  mass *= 100.0*fact;
 
   particles.reserve(15);  // So we don't ever have to do any copying on a resize.                                                                                                                                  
   particles.resize(nlevs);

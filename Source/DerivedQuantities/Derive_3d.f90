@@ -851,7 +851,7 @@ end subroutine ca_axphase
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
-               ekin(i,j,k,1)= hbaroverm**2 / 2 * meandens * &
+               ekin(i,j,k,1)= hbaroverm**2 / 2 * &
                               (((-dat(i+2,j,k,2)+8.0d0*dat(i+1,j,k,2)-8.0d0*dat(i-1,j,k,2)+dat(i-2,j,k,2))/(12.0d0*delta(1)))**2 &
                               +((-dat(i+2,j,k,3)+8.0d0*dat(i+1,j,k,3)-8.0d0*dat(i-1,j,k,3)+dat(i-2,j,k,3))/(12.0d0*delta(1)))**2 &
                               +((-dat(i,j+2,k,2)+8.0d0*dat(i,j+1,k,2)-8.0d0*dat(i,j-1,k,2)+dat(i,j-2,k,2))/(12.0d0*delta(2)))**2 &
@@ -887,7 +887,7 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use fdm_params_module, only : m_tt,hbaroverm
+      use fdm_params_module, only : m_tt,hbaroverm,a
 
       implicit none
 
@@ -923,9 +923,9 @@ end subroutine ca_axphase
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
                ekinrho(i,j,k,1)= hbaroverm**2 / 2 * &
-                                 (( (-dsqrt(dat(i+2,j,k,1))+8.0d0*dsqrt(dat(i+1,j,k,1))-8.0d0*dsqrt(dat(i-1,j,k,1))+dsqrt(dat(i-2,j,k,1))) / (12.0d0*delta(1)) )**2 &
-                                 +( (-dsqrt(dat(i,j+2,k,1))+8.0d0*dsqrt(dat(i,j+1,k,1))-8.0d0*dsqrt(dat(i,j-1,k,1))+dsqrt(dat(i,j-2,k,1))) / (12.0d0*delta(2)) )**2 &
-                                 +( (-dsqrt(dat(i,j,k+2,1))+8.0d0*dsqrt(dat(i,j,k+1,1))-8.0d0*dsqrt(dat(i,j,k-1,1))+dsqrt(dat(i,j,k-2,1))) / (12.0d0*delta(3)) )**2 )
+                                 (( (-dsqrt(dat(i+2,j,k,1))+8.0d0*dsqrt(dat(i+1,j,k,1))-8.0d0*dsqrt(dat(i-1,j,k,1))+dsqrt(dat(i-2,j,k,1))) / (12.0d0*delta(1)*a) )**2 &
+                                 +( (-dsqrt(dat(i,j+2,k,1))+8.0d0*dsqrt(dat(i,j+1,k,1))-8.0d0*dsqrt(dat(i,j-1,k,1))+dsqrt(dat(i,j-2,k,1))) / (12.0d0*delta(2)*a) )**2 &
+                                 +( (-dsqrt(dat(i,j,k+2,1))+8.0d0*dsqrt(dat(i,j,k+1,1))-8.0d0*dsqrt(dat(i,j,k-1,1))+dsqrt(dat(i,j,k-2,1))) / (12.0d0*delta(3)*a) )**2 )
             enddo
          enddo
       enddo
@@ -939,7 +939,7 @@ end subroutine ca_axphase
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
 
-      use fdm_params_module, only : m_tt, hbaroverm!, mindens
+      use fdm_params_module, only : m_tt, hbaroverm,a!, mindens
       use fundamental_constants_module
 
       implicit none
@@ -984,9 +984,9 @@ end subroutine ca_axphase
                diff(3) = min( dabs(phase(i,j,k+1)-phase(i,j,k-1)) , dabs(phase(i,j,k+1)-phase(i,j,k-1)-2.0*PI) , dabs(phase(i,j,k+1)-phase(i,j,k-1)+2.0*PI) ) 
 
                ekinv(i,j,k,1)= hbaroverm**2 / 2 * dat(i,j,k,1) * &
-                               (( diff(1) / (2*delta(1)) )**2 &
-                               +( diff(2) / (2*delta(2)) )**2 &
-                               +( diff(3) / (2*delta(3)) )**2)
+                               (( diff(1) / (2*delta(1)*a) )**2 &
+                               +( diff(2) / (2*delta(2)*a) )**2 &
+                               +( diff(3) / (2*delta(3)*a) )**2)
 
                ! !Have to consider the cases where the phase jumps from close to -pi to pi and vice versa
                ! diff(1) = min( dabs(phase(i+1,j,k)-phase(i,j,k)) , dabs(phase(i+1,j,k)-phase(i,j,k)-2.0*PI) , dabs(phase(i+1,j,k)-phase(i,j,k)+2.0*PI) ) 

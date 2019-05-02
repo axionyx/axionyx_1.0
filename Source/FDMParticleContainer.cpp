@@ -1426,7 +1426,7 @@ FDMParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nle
     phi  = ( (p[0]*alpha+p0[0]*gamma_ax)*(q[0]-q0[0]) + (p[1]*alpha+p0[1]*gamma_ax)*(q[1]-q0[1]) + (p[2]*alpha+p0[2]*gamma_ax)*(q[2]-q0[2]) )/(alpha+gamma_ax);
     Amp  = 2.0*(alpha+gamma_ax)/sqrt(alpha*gamma_ax)/M_PI/sqrt(2*gamma_ax/M_PI)/pow(npart_tot,2.0/3.0);
     Amp /= sqrt(2.0*alpha/M_PI);
-    Amp *= pow(fact,1.0/3.0);
+    Amp *= pow(100.0*fact,1.0/3.0);
 
     if(q[0]>geom.ProbLo(0) && q[0]<geom.ProbHi(0) && q[1]>geom.ProbLo(1) && q[1]<geom.ProbHi(1) && q[2]>geom.ProbLo(2) && q[2]<geom.ProbHi(2)){
 

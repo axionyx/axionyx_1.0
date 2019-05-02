@@ -305,7 +305,7 @@ public:
     //
     // Redistribute
     //
-    void particle_redistribute(int lbase = 0, bool init = false);
+    void particle_redistribute(int lbase = 0, int iteration = 0, bool init = false);
 
     //
     // Move randomly
@@ -505,7 +505,7 @@ public:
     //
     // Do work after `regrid()`.
     //
-    virtual void post_regrid(int lbase, int new_finest);
+    virtual void post_regrid(int lbase, int iteration, int new_finest);
 
     //
     // Do work after a `restart()`.

@@ -516,7 +516,8 @@ Gravity::solve_for_phi (int               level,
     std::cout << "We should never end up here" << std::endl;
     //Since the gravitational potential is only defined up to a constant,
     //we set the average gravitational potential to zero
-    if ( grids[level].contains(parent->Geom(level).Domain()) )
+    if ( parent->Geom(level).Domain().numPts() == grids[level].numPts() )
+    // if ( grids[level].contains(parent->Geom(level).Domain()) )
       {
         Real sum        = compute_level_average(level, &phi);
         const Real* dx  = parent->Geom(0).CellSize();
@@ -1008,28 +1009,29 @@ Gravity::actual_multilevel_solve (int                       level,
     for (int lev = finest_level; lev > level; lev--)
         average_fine_ec_onto_crse_ec(lev-1,is_new);
     //Set the average gravitational potential to zero
-    if ( grids[level].contains(parent->Geom(level).Domain()) )
-      {
-        Real sum = 0;
-        for (int lev = 0; lev < num_levels; lev++)
-          sum += compute_multilevel_average(level+lev, phi_p[lev], finest_level);
+    // if ( parent->Geom(level).Domain().numPts() == grids[level].numPts() )
+    // // if ( grids[level].contains(parent->Geom(level).Domain()) )
+    //   {
+    //     Real sum = 0;
+    //     for (int lev = 0; lev < num_levels; lev++)
+    //       sum += compute_multilevel_average(level+lev, phi_p[lev], finest_level);
 
-        const Real* dx   = parent->Geom(0).CellSize();
-        const Real  dvol = grids[0].d_numPts() * dx[0] * dx[1] * dx[2];
+    //     const Real* dx   = parent->Geom(0).CellSize();
+    //     const Real  dvol = grids[0].d_numPts() * dx[0] * dx[1] * dx[2];
 
-        sum /= dvol;
-	amrex::Print() << "subtracing " << sum << std::endl;
-        for (int lev = 0; lev < num_levels; lev++)
-        {
-          (*phi_p[lev]).plus(-sum, 0, 1, 0);
-        }
-        //check the mean
-        sum = 0.0;
-        for (int lev = 0; lev < num_levels; lev++)
-                       sum += compute_multilevel_average(level+lev, phi_p[lev], finest_level);
-	amrex::Print() << "average is " << sum/dvol << " after subtraction." << std::endl;
+    //     sum /= dvol;
+    // 	amrex::Print() << "subtracing " << sum << std::endl;
+    //     for (int lev = 0; lev < num_levels; lev++)
+    //     {
+    //       (*phi_p[lev]).plus(-sum, 0, 1, 0);
+    //     }
+    //     //check the mean
+    //     sum = 0.0;
+    //     for (int lev = 0; lev < num_levels; lev++)
+    //                    sum += compute_multilevel_average(level+lev, phi_p[lev], finest_level);
+    // 	amrex::Print() << "average is " << sum/dvol << " after subtraction." << std::endl;
 
-      }
+    //   }
 }
 
 void
@@ -1488,7 +1490,8 @@ Gravity::set_mass_offset (Real time)
                 mass_offset += Nyx::theActiveParticles()[i]->sumParticleMass(lev);
 #ifdef FDM
             //TODO check if the third argument needs to be true!
-            mass_offset += cs->vol_weight_sum("AxDens", time, true);
+	    if(Nyx::levelmethod[lev]==Nyx::FDlevel)
+	      mass_offset += cs->vol_weight_sum("AxDens", time, true);
 #endif
         }
 

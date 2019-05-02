@@ -307,7 +307,7 @@
            grav, g_l1,g_l2,g_l3,g_h1,g_h2,g_h3, &
            phi,  p_l1,p_l2,p_l3,p_h1,p_h2,p_h3, &
            delta,prob_lo,prob_hi,dt, &
-           courno,a_old,a_new,verbose)
+           courno,a_old,a_half,a_new,verbose)
 
       use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM
       use fdm_params_module, only : hbaroverm, ii
@@ -327,11 +327,11 @@
       double precision grav(   g_l1:g_h1,     g_l2:g_h2,     g_l3:g_h3,   3)
       double precision  phi(   p_l1:p_h1,     p_l2:p_h2,     p_l3:p_h3)
       double precision delta(3),prob_lo(3),prob_hi(3),dt,time,courno
-      double precision a_old, a_new
+      double precision a_old, a_half, a_new
 
       !additional variables
       integer          i,j,k
-      double precision invdeltasq(3)
+      double precision invdeltasq_old(3), invdeltasq_half(3), invdeltasq_new(3)
       double precision xn,xp,xc,del,Vo,r
 
       !(complex) fdm field
@@ -351,31 +351,31 @@
       k4  = 0.d0
       V   = 0.d0
 
-      xn  = prob_hi(1)            ! Need that the center of the physical problem is at (0,0,0)!!
-      xp  = 7.d0/8.d0*prob_hi(1)  ! Inside this radius the 'sponge' is zero.
-      !TODO this effectively disables the sponge
-      xp  = 1.0d10*prob_hi(1)  ! Inside this radius the 'sponge' is zero.
-      !TODO 
-      xc  = (xn+xp)/2.d0
-      del = xn-xp
-      !Vo  = 0.657d0              ! Corresponding to Vo=1 in arXiv:gr-qc/0404014v2 eq.29 when scaled to halo with rho_max=rho_cr
-      Vo  = 0.d0
+      ! xn  = prob_hi(1)            ! Need that the center of the physical problem is at (0,0,0)!!
+      ! xp  = 7.d0/8.d0*prob_hi(1)  ! Inside this radius the 'sponge' is zero.
+      ! !TODO this effectively disables the sponge
+      ! xp  = 1.0d10*prob_hi(1)  ! Inside this radius the 'sponge' is zero.
+      ! !TODO 
+      ! xc  = (xn+xp)/2.d0
+      ! del = xn-xp
+      ! !Vo  = 0.657d0              ! Corresponding to Vo=1 in arXiv:gr-qc/0404014v2 eq.29 when scaled to halo with rho_max=rho_cr
+      ! Vo  = 0.d0
 
-      do k = p_l3, p_h3
-         do j = p_l2, p_h2
-            do i = p_l1, p_h1
-               r = dsqrt((i*delta(1)+prob_lo(1))**2.d0 + (j*delta(2)+prob_lo(2))**2.d0 + (k*delta(3)+prob_lo(3))**2.d0) !Distance from the physical problem center
-               if (r .lt. xp) then
-                  V(i,j,k) = 0.d0
-               else if ((r .ge. xp) .and. (r .lt. xc)) then
-!                  V(i,j,k) = ii*Vo/2.d0 * (2.d0 + dtanh((r-xc)/del) - dtanh(xc/del)) ! Cf. arXiv:gr-qc/0404014v2 eq.29 : we changed the sign so it matches the sign of phi.
-                  V(i,j,k) = ii*Vo/2.d0 * (     ((r-xp)/del)**2.d0*2.d0)
-               else
-                  V(i,j,k) = ii*Vo/2.d0 * (1.d0-((r-xn)/del)**2.d0*2.d0)
-               endif
-            enddo
-         enddo
-      enddo
+!       do k = p_l3, p_h3
+!          do j = p_l2, p_h2
+!             do i = p_l1, p_h1
+!                r = dsqrt((i*delta(1)+prob_lo(1))**2.d0 + (j*delta(2)+prob_lo(2))**2.d0 + (k*delta(3)+prob_lo(3))**2.d0) !Distance from the physical problem center
+!                if (r .lt. xp) then
+!                   V(i,j,k) = 0.d0
+!                else if ((r .ge. xp) .and. (r .lt. xc)) then
+! !                  V(i,j,k) = ii*Vo/2.d0 * (2.d0 + dtanh((r-xc)/del) - dtanh(xc/del)) ! Cf. arXiv:gr-qc/0404014v2 eq.29 : we changed the sign so it matches the sign of phi.
+!                   V(i,j,k) = ii*Vo/2.d0 * (     ((r-xp)/del)**2.d0*2.d0)
+!                else
+!                   V(i,j,k) = ii*Vo/2.d0 * (1.d0-((r-xn)/del)**2.d0*2.d0)
+!                endif
+!             enddo
+!          enddo
+!       enddo
 
       !We need this, since single scalars are not saved in checkpoint files and therefore meandens=0 after restart! 
       !if (meandens .eq. 0) then
@@ -386,7 +386,9 @@
       !hbaroverm = 0.01917152d0 / m_tt
 
       do i = 1, 3
-       invdeltasq(i) = 1.d0 / ( a_new * delta(i) )**2 ! differentiate w.r.t. proper distance
+       invdeltasq_old(i)  = 1.d0 / ( a_old  * delta(i) )**2 ! differentiate w.r.t. proper distance
+       invdeltasq_half(i) = 1.d0 / ( a_half * delta(i) )**2 ! differentiate w.r.t. proper distance
+       invdeltasq_new(i)  = 1.d0 / ( a_new  * delta(i) )**2 ! differentiate w.r.t. proper distance
       enddo
 
       !$OMP PARALLEL DO PRIVATE(i,j,k)
@@ -421,7 +423,7 @@
                                         +2.d0*psi(i-1,j-1,k+1)&
                                         +2.d0*psi(i-1,j-1,k-1)&
                                         -88.d0*(psi(i,j,k)))&
-                   *invdeltasq(1)/52.d0 + ii*(phi(i,j,k)+V(i,j,k))/hbaroverm*(psi(i,j,k))
+                   *invdeltasq_old(1)/52.d0 + ii*(phi(i,j,k)+V(i,j,k))/hbaroverm*(psi(i,j,k))
 
             enddo
          enddo
@@ -460,7 +462,7 @@
                                         +2.d0*(psi(i-1,j-1,k+1)+k1(i-1,j-1,k+1)*dt/2.d0)&
                                         +2.d0*(psi(i-1,j-1,k-1)+k1(i-1,j-1,k-1)*dt/2.d0)&
                                         -88.d0*(psi(i,j,k)+k1(i,j,k)*dt/2.d0))&
-                   *invdeltasq(1)/52.d0 + ii*(phi(i,j,k)+V(i,j,k))/hbaroverm*(psi(i,j,k)+k1(i,j,k)*dt/2.d0)
+                   *invdeltasq_half(1)/52.d0 + ii*(phi(i,j,k)+V(i,j,k))/hbaroverm*(psi(i,j,k)+k1(i,j,k)*dt/2.d0)
                
             enddo
          enddo
@@ -499,7 +501,7 @@
                                         +2.d0*(psi(i-1,j-1,k+1)+k2(i-1,j-1,k+1)*dt/2.d0)&
                                         +2.d0*(psi(i-1,j-1,k-1)+k2(i-1,j-1,k-1)*dt/2.d0)&
                                         -88.d0*(psi(i,j,k)+k2(i,j,k)*dt/2.d0))&
-                   *invdeltasq(1)/52.d0 + ii*(phi(i,j,k)+V(i,j,k))/hbaroverm*(psi(i,j,k)+k2(i,j,k)*dt/2.d0)
+                   *invdeltasq_half(1)/52.d0 + ii*(phi(i,j,k)+V(i,j,k))/hbaroverm*(psi(i,j,k)+k2(i,j,k)*dt/2.d0)
                
             enddo
          enddo
@@ -538,7 +540,7 @@
                                         +2.d0*(psi(i-1,j-1,k+1)+k3(i-1,j-1,k+1)*dt)&
                                         +2.d0*(psi(i-1,j-1,k-1)+k3(i-1,j-1,k-1)*dt)&
                                         -88.d0*(psi(i,j,k)+k3(i,j,k)*dt))&
-                   *invdeltasq(1)/52.d0 + ii*(phi(i,j,k)+V(i,j,k))/hbaroverm*(psi(i,j,k)+k3(i,j,k)*dt)
+                   *invdeltasq_new(1)/52.d0 + ii*(phi(i,j,k)+V(i,j,k))/hbaroverm*(psi(i,j,k)+k3(i,j,k)*dt)
                    
             enddo
          enddo

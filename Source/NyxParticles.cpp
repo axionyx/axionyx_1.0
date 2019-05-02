@@ -442,8 +442,9 @@ Nyx::init_particles ()
 
         if (init_with_sph_particles == 1)
            SPHPC = new DarkMatterParticleContainer(parent);
-
+#ifndef FDM
 	if (parent->subCycle())
+#endif
 	{
 	    VirtPC = new DarkMatterParticleContainer(parent);
             VirtualParticles.push_back(VirtPC); 
@@ -725,7 +726,7 @@ Nyx::init_particles ()
       BL_ASSERT (FDMwkbPC == 0);
       FDMwkbPC = new FDMwkbParticleContainer(parent);
 
-      if (parent->subCycle())
+      // if (parent->subCycle())
         {
       	  VirtFDMwkbPC = new FDMwkbParticleContainer(parent);
 
@@ -913,7 +914,7 @@ Nyx::init_particles ()
       BL_ASSERT (FDMPC == 0);
       FDMPC = new FDMParticleContainer(parent);
 
-      if (parent->subCycle())
+      // if (parent->subCycle())
         {
       	  VirtFDMPC = new FDMParticleContainer(parent);
 
@@ -1279,7 +1280,7 @@ Nyx::particle_post_restart (const std::string& restart_file, bool is_checkpoint)
         DMPC = new DarkMatterParticleContainer(parent);
         ActiveParticles.push_back(DMPC);
  
-        if (parent->subCycle())
+        // if (parent->subCycle())
         {
             VirtPC = new DarkMatterParticleContainer(parent);
             VirtualParticles.push_back(VirtPC);
@@ -1357,7 +1358,7 @@ Nyx::particle_post_restart (const std::string& restart_file, bool is_checkpoint)
 	
 	// ActiveParticles.push_back(FDMwkbPC);
 	
-	if (parent->subCycle())
+	// if (parent->subCycle())
 	  {
 	    VirtFDMwkbPC = new FDMwkbParticleContainer(parent);
 	    // VirtualParticles.push_back(VirtFDMwkbPC);
@@ -1395,7 +1396,7 @@ Nyx::particle_post_restart (const std::string& restart_file, bool is_checkpoint)
 	
 	// ActiveParticles.push_back(FDMPC);
 	
-	if (parent->subCycle())
+	// if (parent->subCycle())
 	  {
 	    VirtFDMPC = new FDMParticleContainer(parent);
 	    // VirtualParticles.push_back(VirtFDMPC);
@@ -1493,12 +1494,12 @@ Nyx::particle_est_time_step (Real& est_dt)
 #ifdef FDM
     if (FDMwkbPC && particle_move_type == "Gravitational")
       {
-	// const Real est_dt_fdm1 = FDMwkbPC->estTimestep(grav, a, level, particle_cfl);
-	// MultiFab& phi = get_new_data(PhiGrav_Type);
-	// Real beam_cfl_reduced = beam_cfl*2.0*M_PI*hbaroverm;
-	// const Real est_dt_fdm2 = FDMwkbPC->estTimestepFDM(phi, level, beam_cfl_reduced);
-	// const Real est_dt_fdm = std::min(est_dt_fdm1 ,est_dt_fdm2);
-	const Real est_dt_fdm = FDMwkbPC->estTimestep(grav, a, level, particle_cfl);
+	const Real est_dt_fdm1 = FDMwkbPC->estTimestep(grav, a, level, particle_cfl);
+	MultiFab& phi = get_new_data(PhiGrav_Type);
+	Real beam_cfl_reduced = beam_cfl*2.0*M_PI*hbaroverm;
+	const Real est_dt_fdm2 = FDMwkbPC->estTimestepFDM(phi, level, beam_cfl_reduced);
+	const Real est_dt_fdm = std::min(est_dt_fdm1 ,est_dt_fdm2);
+	// const Real est_dt_fdm = FDMwkbPC->estTimestep(grav, a, level, particle_cfl);
 	
 	if (est_dt_fdm > 0)
 	  est_dt = std::min(est_dt, est_dt_fdm);
@@ -1548,7 +1549,7 @@ Nyx::particle_est_time_step (Real& est_dt)
 #endif
 
 void
-Nyx::particle_redistribute (int lbase, bool my_init)
+Nyx::particle_redistribute (int lbase, int iteration, bool my_init)
 {
     BL_PROFILE("Nyx::particle_redistribute()");
 #ifdef FDM
@@ -1565,13 +1566,13 @@ Nyx::particle_redistribute (int lbase, bool my_init)
         {
 #ifdef FDM
 	    if(DMPC)
-	      DMPC->Redistribute(lbase);
+	      DMPC->Redistribute(lbase, DMPC->finestLevel(), iteration);
 	    if(FDMPC)
-	      FDMPC->Redistribute(lbase);
+	      FDMPC->Redistribute(lbase, FDMPC->finestLevel(), iteration);
 	    if(FDMwkbPC)
-	      FDMwkbPC->Redistribute(lbase);
+	      FDMwkbPC->Redistribute(lbase, FDMwkbPC->finestLevel(), iteration);
 #else
-            DMPC->Redistribute(lbase);
+            DMPC->Redistribute(lbase, DMPC->finestLevel(),iteration);
 #endif
             return;
         }
@@ -1649,13 +1650,13 @@ Nyx::particle_redistribute (int lbase, bool my_init)
 
 #ifdef FDM
 	    if(DMPC)
-	      DMPC->Redistribute(lbase);
+	      DMPC->Redistribute(lbase, DMPC->finestLevel(), iteration);
 	    if(FDMPC)
-	      FDMPC->Redistribute(lbase);
+	      FDMPC->Redistribute(lbase, FDMPC->finestLevel(), iteration);
 	    if(FDMwkbPC)
-	      FDMwkbPC->Redistribute(lbase);
+	      FDMwkbPC->Redistribute(lbase, FDMwkbPC->finestLevel(), iteration);
 #else
-            DMPC->Redistribute(lbase);
+            DMPC->Redistribute(lbase, DMPC->finestLevel(), iteration);
 #endif
             //
             // Use the new BoxArray and DistMap to define ba and dm for next time.
@@ -1783,41 +1784,42 @@ Nyx::setup_ghost_particles(int ngrow)
     }
 #endif
 #ifdef FDM
+    if(Nyx::theFDMPC() != 0 && levelmethod[level+1]==GBlevel)
+    {
+        FDMParticleContainer::AoS ghosts;
+    	int ng = parent->nCycle(level+1)+ceil(sigma_fdm*theta_fdm/parent->Geom(level+1).CellSize()[0]);
+        Nyx::theFDMPC()->CreateGhostParticles(level, ng, ghosts);
+        Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, level+1, ng);
+    }
+    if(Nyx::theFDMwkbPC() != 0 && levelmethod[level+1]==GBlevel)
+    {
+        FDMwkbParticleContainer::AoS ghosts;
+    	int ng = parent->nCycle(level+1)+ceil(sigma_fdm*theta_fdm/parent->Geom(level+1).CellSize()[0]);
+        Nyx::theFDMwkbPC()->CreateGhostParticles(level, ng, ghosts);
+        Nyx::theGhostFDMwkbPC()->AddParticlesAtLevel(ghosts, level+1, ng);
+    }
     // if(Nyx::theFDMPC() != 0)
-    // {
-    //     FDMParticleContainer::AoS ghosts;
-    // 	int ng = ceil(sigma_fdm*theta_fdm/parent->Geom(level+1).CellSize()[0]);
-    //     Nyx::theFDMPC()->CreateGhostParticles(level, ng, ghosts);
-    //     Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, level+1, ng);
-    // }
+    //   {
+    // 	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
+    // 	  if(levelmethod[lev]==GBlevel){
+    // 	    FDMParticleContainer::AoS ghosts;
+    // 	    int ng = parent->nCycle(lev)+ceil(sigma_fdm*theta_fdm/parent->Geom(lev).CellSize()[0]);
+    // 	    Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);
+    // 	    Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ng);
+    // 	  }
+    // 	}
+    //   }
     // if(Nyx::theFDMwkbPC() != 0)
-    // {
-    //     FDMwkbParticleContainer::AoS ghosts;
-    //     Nyx::theFDMwkbPC()->CreateGhostParticles(level, ngrow, ghosts);
-    //     Nyx::theGhostFDMwkbPC()->AddParticlesAtLevel(ghosts, level+1, ngrow);
-    // }
-    if(Nyx::theFDMPC() != 0)
-      {
-    	FDMParticleContainer::AoS ghosts;
-    	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
-    	  if(levelmethod[lev]==GBlevel){
-    	    int ng = parent->nCycle(level)+ceil(sigma_fdm*theta_fdm/parent->Geom(lev).CellSize()[0]);
-    	    Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);
-    	    Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ng);
-    	  }
-    	}
-      }
-    if(Nyx::theFDMwkbPC() != 0)
-      {
-    	FDMwkbParticleContainer::AoS ghosts;
-    	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
-    	  if(levelmethod[lev]==GBlevel){
-    	    int ng = parent->nCycle(level)+ceil(sigma_fdm*theta_fdm/parent->Geom(lev).CellSize()[0]);
-    	    Nyx::theFDMwkbPC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);
-    	    Nyx::theGhostFDMwkbPC()->AddParticlesAtLevel(ghosts, lev, ng);
-    	  }
-    	}
-      }
+    //   {
+    // 	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
+    // 	  if(levelmethod[lev]==GBlevel){
+    // 	    FDMwkbParticleContainer::AoS ghosts;
+    // 	    int ng = parent->nCycle(lev)+ceil(sigma_fdm*theta_fdm/parent->Geom(lev).CellSize()[0]);
+    // 	    Nyx::theFDMwkbPC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);
+    // 	    Nyx::theGhostFDMwkbPC()->AddParticlesAtLevel(ghosts, lev, ng);
+    // 	  }
+    // 	}
+    //   }
 #endif
 
 }

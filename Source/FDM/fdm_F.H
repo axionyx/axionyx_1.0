@@ -52,6 +52,7 @@ extern "C"
   void fort_set_sigma(const amrex::Real& sigma_fdm);
   void fort_set_gamma(const amrex::Real& gamma_fdm);
   void fort_set_meandens(const amrex::Real& meandens);
+  void fort_set_a(const amrex::Real& a);
 
 #ifdef __cplusplus
 }

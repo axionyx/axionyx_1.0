@@ -8,6 +8,7 @@ module fdm_params_module
   real(rt), save :: sigma_fdm
   real(rt), save :: gamma_fdm
   real(rt), save :: meandens !background fdm density, set in ca_initdata
+  real(rt), save :: a
   ! integer, save :: wkb_approx 
 
   double complex, parameter :: ii = (0., 1.)   

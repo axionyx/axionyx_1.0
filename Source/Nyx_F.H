@@ -20,7 +20,7 @@ BL_FORT_PROC_DECL(FORT_ADVANCE_FDM_FD, fort_advance_fdm_fd)
      const amrex::Real dx[],const amrex::Real prob_lo[],
      const amrex::Real prob_hi[], const amrex::Real* dt,
      const amrex::Real* cflLoc,
-     const amrex::Real* a_old, const amrex::Real* a_new,
+     const amrex::Real* a_old, const amrex::Real* a_half, const amrex::Real* a_new,
      const int& verbose);
 
   BL_FORT_PROC_DECL(FORT_FDM_FIELDS, fort_fdm_fields)

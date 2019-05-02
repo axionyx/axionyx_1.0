@@ -1417,7 +1417,7 @@ FDMwkbParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int 
     p[0] = p0[0];
     p[1] = p0[1];
     p[2] = p0[2];
-    Amp  = pow(fact/npart_tot/npart_tot,1.0/3.0)/M_PI/(alpha/M_PI);
+    Amp  = pow(100.0*fact/npart_tot/npart_tot,1.0/3.0)/M_PI/(alpha/M_PI);
     
     if(q[0]>geom.ProbLo(0) && q[0]<geom.ProbHi(0) && q[1]>geom.ProbLo(1) && q[1]<geom.ProbHi(1) && q[2]>geom.ProbLo(2) && q[2]<geom.ProbHi(2)){
 

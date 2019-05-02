@@ -12,6 +12,10 @@
 #include "Forcing.H"
 #endif
 
+#ifdef FDM
+#include "fdm_F.H"
+#endif
+
 
 using namespace amrex;
 
@@ -396,6 +400,8 @@ Nyx::compute_axion_quantities (Real& mass, Real& epot, Real& ekinrho, Real& ekin
     int             finest_level = parent->finestLevel();
     Real            time         = state[Axion_Type].curTime();
     const Geometry& geom         = parent->Geom(0);
+    const Real a                 = get_comoving_a(time);
+    fort_set_a(a);
     
     for (int lev = 0; lev <= finest_level; lev++)
     {

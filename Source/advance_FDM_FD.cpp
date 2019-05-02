@@ -20,7 +20,7 @@ Nyx::advance_FDM_FD (amrex::Real time,
     // const amrex::Real cur_time     = state[State_Type].curTime();
     // const int  finest_level = parent->finestLevel();
 
-    // const amrex::Real a_half = 0.5 * (a_old + a_new);
+    const amrex::Real a_half = 0.5 * (a_old + a_new);
 
     amrex::MultiFab&  Ax_old = get_old_data(Axion_Type);
     amrex::MultiFab&  Ax_new = get_new_data(Axion_Type);
@@ -104,7 +104,7 @@ Nyx::advance_FDM_FD (amrex::Real time,
              BL_TO_FORTRAN(grav_vector[fpi]),
              BL_TO_FORTRAN(phiold),
              dx, prob_lo, prob_hi, &dt,
-             &cflLoc, &a_old, &a_new, verbose);
+             &cflLoc, &a_old, &a_half, &a_new, verbose);
         courno = std::max(courno, cflLoc);
        }
     }

@@ -210,3 +210,15 @@ subroutine fort_set_meandens(dens) &
   meandens = dens
   
 end subroutine fort_set_meandens
+
+subroutine fort_set_a(scalefactor) &
+     bind(C, name="fort_set_a")
+  
+  use amrex_fort_module, only : rt => amrex_real
+  use fdm_params_module, only: a
+  
+  real(rt), intent(in) :: scalefactor
+  
+  a = scalefactor
+  
+end subroutine fort_set_a
