@@ -42,7 +42,7 @@
       ! over_den = 2.0d0**(3*(level+1)) * avg_den
       critdens = 2.775d11 * 0.7d0**2 * 0.3d0! * comoving_OmAx !3 * (100)**2 *0.7d0**2 *  comoving_OmAx / ( 8 * PI * Gconst)                                                                                       
       
-      over_den = critdens * 1.0d-1
+      over_den = 8.0d0**(level+1) * critdens! * 1.0d-2
       ! print *, " "
       ! print *, over_den
       ! print *, " "

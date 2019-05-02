@@ -74,7 +74,7 @@
                                      NE_COMP, UAXDENS, UAXRE, UAXIM
       use bl_constants_module, only : M_PI
       use axion_params_module
-      use comoving_module, only : comoving_h, comoving_OmAx
+      use comoving_module, only : comoving_h, comoving_OmAx, comoving_OmM
       use interpolate_module
       use amrex_parmparse_module
  
@@ -93,7 +93,7 @@
       integer i,j,k,h
       integer un,length
       double precision hubl
-      double precision r,rc
+      double precision r,rc,alpha
       double precision d
       double precision, allocatable :: m(:), pos(:,:)
 
@@ -102,9 +102,7 @@
       call amrex_parmparse_build(pp, "nyx")
       call pp%query("m_tt", m_tt)
       hbaroverm = 0.01917152d0 / m_tt
-      call pp%query("theta_ax", theta_ax)
-      call pp%query("sigma_ax", theta_ax)
-      call pp%query("gamma_ax", theta_ax)
+      call pp%query("alpha_fdm", alpha)
       call amrex_parmparse_destroy(pp)
       
       un = 20
@@ -124,9 +122,10 @@
         
 
       hubl = 0.7d0
-      meandens = 2.775d11 * hubl**2* comoving_OmAx !background density 
-      
-      rc = 1.3d0 * 0.012513007848917703d0 / (dsqrt(m_tt * hubl) * comoving_OmAx**(0.25d0))
+      meandens = 2.775d11 * hubl**2* comoving_OmM !background density 
+      meandens = 100.0d0*meandens
+
+      rc = 1.3d0 * 0.012513007848917703d0 / (dsqrt(m_tt * hubl) * comoving_OmM**(0.25d0))
 
       !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)
@@ -157,10 +156,14 @@
                do h = 1,length
                
 
-                  r = dsqrt((xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1) - pos(h,1))**2 + &
-                            (xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2) - pos(h,2))**2 + &
-                            (xlo(3)+(k-lo(3))*delta(3) + 0.5d0*delta(3) - pos(h,3))**2)
-                  axion(i,j,k,UAXDENS) =  meandens/((1.d0+9.1d-2*(r/rc)**2.d0)**8.0d0)
+                  ! r = dsqrt((xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1) - pos(h,1))**2 + &
+                  !           (xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2) - pos(h,2))**2 + &
+                  !           (xlo(3)+(k-lo(3))*delta(3) + 0.5d0*delta(3) - pos(h,3))**2)
+                  ! axion(i,j,k,UAXDENS) =  meandens/((1.d0+9.1d-2*(r/rc)**2.d0)**8.0d0)
+                  r = dsqrt((xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1)-center(1))**2 + &
+                            (xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2)-center(2))**2 + &
+                            (xlo(3)+(k-lo(3))*delta(3) + 0.5d0*delta(3)-center(3))**2)
+                  axion(i,j,k,UAXDENS) =  meandens*exp(-2.0d0*alpha*r*r)
                   axion(i,j,k,UAXRE)   =  dsqrt(axion(i,j,k,UAXDENS))
                   axion(i,j,k,UAXIM)   = 0.0d0
                enddo
