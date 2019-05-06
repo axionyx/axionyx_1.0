@@ -1,6 +1,13 @@
-This page briefly explains how to download and run Nyx.
+# Contents
+[Installation](#installation)
 
-## Installation
+[File structure](#file-structure-of-nyx)
+
+[More file structure](#more-file-structure)
+
+[Output](#output)
+
+# Installation
 
 This installs Nyx with the Intel compilers.
 
@@ -35,7 +42,7 @@ this case.
 Nyx expects amrex to exist in <nyx repo>/..; if it is somewhere else,
 you need to set the AMREX\_HOME variable accordingly. on startup.
 
-## File structure of Nyx
+# File structure of Nyx
 
   - Source/ contains the baseline source files
   - the actually compileable problems (executables) live in sub
@@ -58,7 +65,7 @@ you need to set the AMREX\_HOME variable accordingly. on startup.
         need to add it to the list in Make.package; for example, to add
         y.f90 to the list, you would add a line
 
-`f90EXE_sources += y.f90`
+        `f90EXE_sources += y.f90`
 
   -   - a *Prob\_3d.f90* file; it contains the code to initialize the
         problem that you want to solve, e.g. sets up the density field
@@ -68,17 +75,9 @@ you need to set the AMREX\_HOME variable accordingly. on startup.
         refining cells, the latter adds these criteria to the existing
         list of such criteria.
 
-## Running Jobs
+# More file structure
 
-### enable script
-
-It is recommended to create a script that sets up the environment for
-later compilation/running of the code. The file could like this:
-
-`#load intel compiler and MPI`  
-`module load intel/compiler/6`
-
-## Output
+# Output
 
 Nyx outputs certain global diagnostics at each timestep and plot files at regular
 intervals, or at user-specified redshifts. Visualization packages
@@ -94,11 +93,7 @@ related to the Lyman-alpha forest science. These suites are fully MPI-parallel a
 be run either "in situ" or "in-transit", or with a combination of both.
 
 
-## License
+# License
 Nyx is released under the LBL's modified BSD license, see the [license.txt](license.txt) file for details.
 
 
-## Contact
-
-For questions, comments, suggestions, contact Ann Almgren at ASAlmgren@lbl.gov
-or Zarija Lukic at zarija@lbl.gov .
