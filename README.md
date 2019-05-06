@@ -77,6 +77,8 @@ you need to set the AMREX\_HOME variable accordingly. on startup.
 
 # More file structure
 
+TBD
+
 # Output
 
 Nyx outputs certain global diagnostics at each timestep and plot files at regular
