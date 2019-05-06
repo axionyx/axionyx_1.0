@@ -1,78 +1,82 @@
-# Nyx
+This page briefly explains how to download and run Nyx.
 
-*an adaptive mesh, massively-parallel, cosmological simulation code*
+## Installation
 
-******
+This installs Nyx with the Intel compilers.
 
-## About
+`mkdir nyx`  
+`cd nyx`  
+`#clone amrex`  
+`git clone `<https://github.com/AMReX-Codes/amrex.git>  
+`#clone Nyx`  
+`git clone `<https://github.com/AMReX-Astro/Nyx.git>  
+`#load intel compiler and MPI`  
+`module load intel/compiler/64/2017/17.0.2`  
+`module load intel/mpi/64/current/2.174`  
+`#necessary to force the intel compilers to be used `  
+`export I_MPI_CXX=icpc`  
+`export I_MPI_CC=icc`  
+`export I_MPI_F90=ifort`  
+  
+`#build amrex`  
+`cd amrex`  
+`./configure --comp intel --with-omp yes`  
+`#note; I think it is technically not necessary to build amrex. Whatever needs to be built will be built when we compile Nyx. `  
+`#However, it is not a bad practice to build amrex first, because it makes it easier to  isolate problems with the environment.`  
+`make -j12`  
+`#build a random problem in Nyx - note that not all predefined problems with actually compile!`  
+`cd ../Nyx/Exec/AMR-density`  
+`make -j12 `
 
-Nyx code solves equations of compressible hydrodynamics on an adaptive grid
-hierarchy coupled with an N-body treatment of dark matter. The gasdynamics in
-Nyx uses a finite volume methodology on an adaptive set of 3-D Eulerian grids;
-dark matter is represented as discrete particles moving under the influence of
-gravity. Particles are evolved via a particle-mesh method, using Cloud-in-Cell
-deposition/interpolation scheme. Both baryonic and dark matter contribute to
-the gravitational field. In addition, Nyx currently includes physics needed to
-accurately model the intergalactic medium: in optically thin limit and assuming
-ionization equilibrium, the code calculates heating and cooling processes of the
-primordial-composition gas in an ionizing ultraviolet background radiation field.
-Additional physics capabilities are under development.
+A typical problem that one encounters is that the compiler is set to gcc
+for a given problem. You need to adapt the corresponding GNUMakefile in
+this case.
 
-Nyx is parallelized with MPI + OpenMP, and has been run at parallel concurrency
-of up to 2,097,152 (on NERSC's Cori).
+Nyx expects amrex to exist in <nyx repo>/..; if it is somewhere else,
+you need to set the AMREX\_HOME variable accordingly. on startup.
 
-More information on Nyx can be found here:
-http://amrex-astro.github.io/Nyx/
+## File structure of Nyx
 
-If you prefer to run depreciated BoxLib-based version of the code, then 
-you can use the `boxlib` branch (which will no longer be updated).
+  - Source/ contains the baseline source files
+  - the actually compileable problems (executables) live in sub
+    directories of Exec/
+  - each sub dir in Exec/ usually has
+      - some default *inputs* file, defining the input parameters for a
+        simulation run
+      - some default *probin* file, defining the input parameters
+        exclusively used in Fortran code (when for some reason the
+        inputs file's content can be passed down)
+      - a *GNUMakefile*, defining how this problem is to be compiled;
+        most importantly, in this file you can switch on/off OpenMP
+        support, the debug mode, and change the compiler used (with the
+        COMP parameter) to gnu/intel/..
+      - a *Make.package* file, defining which files need to be compiled.
+        You need to add here files only if you are not overriding the
+        ones in Source, e.g. if there is x.cpp in Source/ that you
+        rewrote and put in the problem folder, it will automatically
+        replace the one in Source. However, if you add a 'new' file, you
+        need to add it to the list in Make.package; for example, to add
+        y.f90 to the list, you would add a line
 
+`f90EXE_sources += y.f90`
 
-## Getting Started
+  -   - a *Prob\_3d.f90* file; it contains the code to initialize the
+        problem that you want to solve, e.g. sets up the density field
+        etc. The important routine here is called fort\_initdata.
+      - many problems also have a *Tagging\_3d.f90* and a
+        *Nyx\_error.cpp* file; the first defines the criteria for
+        refining cells, the latter adds these criteria to the existing
+        list of such criteria.
 
-To compile the code, we require Fortran 2003 and C++11 compliant compilers that
-support (if parallelism is sought) OpenMP 4.5 or better, and/or MPI-2 or higher
-implementation.
+## Running Jobs
 
-To use Nyx, you also need AMReX:
-https://github.com/AMReX-codes/amrex
+### enable script
 
-There is a User's Guide in `Nyx/UsersGuide/` (type `make` to build
-from LaTeX source) that will guide you through running your first
-problem.
+It is recommended to create a script that sets up the environment for
+later compilation/running of the code. The file could like this:
 
-
-## Development Model
-
-New features are committed to the `development` branch.  We use nightly
-regression testing to ensure that no answers change (or if they do, that
-the changes were expected).  No changes should be pushed directly into
-`master`. Approximately once a month, we perform a merge of `development`
-into `master`.
-
-Contributions are welcomed and should be done via pull requests.
-A pull request should be generated from your fork of Nyx and should target
-the `development` branch.
-
-
-## Physics
-
-For the description of the N-body and adiabatic hydro algorithms in Nyx, see
-Almgren, Bell, Lijewski, Lukic & Van Andel (2013), ApJ, 765, 39:
-http://adsabs.harvard.edu/abs/2013ApJ...765...39A
-
-For the reaction and thermal rates of the primordial chemical composition gas 
-(and convergence tests in the context of the Lyman-alpha forest), see
-Lukic, Stark, Nugent, White, Meiksin & Almgren (2015), MNRAS, 446, 3697:
-http://adsabs.harvard.edu/abs/2015MNRAS.446.3697L
-
-For considerations regarding the spatially uniform synthesis model of the UV background, 
-which provides the photo-ionization and photo-heating rates, see Onorbe,
-Hennawi & Lukic (2017), ApJ, 837, 106:
-http://adsabs.harvard.edu/abs/2017ApJ...837..106O
-
-We have also implemented non-radiative transfer methods to model inhomogeneous reionization,
-the paper is in preparation.
+`#load intel compiler and MPI`  
+`module load intel/compiler/6`
 
 ## Output
 
