@@ -1,11 +1,8 @@
 # Contents
-[Installation](#installation)
-
-[File structure](#file-structure-of-nyx)
-
-[More file structure](#more-file-structure)
-
-[Output](#output)
+[Installation](#installation)  
+[File structure](#file-structure-of-nyx)  
+[More file structure](#more-file-structure)  
+[Output](#output)  
 
 # Installation
 
