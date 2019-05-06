@@ -74,7 +74,7 @@ you need to set the AMREX\_HOME variable accordingly. on startup.
 
 # More file structure
 
-TBD
+The AMReX that operates in the background of Nyx is at the very heart of everything that happens in Nyx. Each level (in our case, we have only one) is represented by a [Nyx](https://github.com/cbehren/axionyx/blob/master/Source/Nyx.H) object that is derived from the base class [AmrLevel](https://github.com/AMReX-Codes/amrex/blob/master/Src/Amr/AMReX_AmrLevel.H). All levels are held together by an [Amr](https://github.com/AMReX-Codes/amrex/blob/master/Src/Amr/AMReX_Amr.H) object. The role of the Nyx class is to implement the specific routines needed to solve the problem we want to solve, e.g. the [advance](https://github.com/cbehren/axionyx/blob/master/Source/Nyx_advance.cpp) routine declared, but not defined in the base class, see [here](https://github.com/AMReX-Codes/amrex/blob/9e3aaa7053499b9f7f0c786a92ef860c6322f10d/Src/Amr/AMReX_AmrLevel.H#L160). What this structure means is that you might have functions that apparently are never called in Nyx. They are, however, called in the AMReX base classes. advance is one of those routines. It is called by the Amr class, looping over all levels (if there is more than one) if necessary in [timeStep](https://github.com/AMReX-Codes/amrex/blob/9e3aaa7053499b9f7f0c786a92ef860c6322f10d/Src/Amr/AMReX_Amr.cpp#L1950). 
 
 # Output
 
