@@ -41,7 +41,7 @@ geometry.coord_sys   =  0
 geometry.prob_lo     =  0.0 0.0 0.0
 geometry.prob_hi     =   0.512 0.512 0.512
 
-amr.n_cell           = 32 32 32
+amr.n_cell           = 64 64 64
 amr.max_grid_size    = 32
 amr.blocking_factor  = 32
 nyx.n_particles      = 1  1  1

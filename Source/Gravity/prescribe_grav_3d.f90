@@ -10,14 +10,12 @@ module ps_grav
   contains
 
       subroutine ps_grav_init()
-        use fundamental_constants_module, only : Gconst,L_unit,M_unit
-        ! use probdata_module, only : dcenx,dceny,dcenz,dmconc,dmmass,dmscale
+        use fundamental_constants_module, only : Gconst,Mpc,M_s
+        use probdata_module, only : dcenx,dceny,dcenz,dmconc,dmmass,dmscale
         implicit none
         if(isnt_init) then
-          ! dm_const = -(dmmass/M_unit)*Gconst / (log(1.0d0+dmconc) - dmconc/(1.0d0+dmconc))
-          ! dm_const2 = dmconc/(dmscale/L_unit)
-          dm_const = 1.0d0
-          dm_const2 = 1.0d0
+          dm_const = -(dmmass/M_s)*Gconst / (log(1.0d0+dmconc) - dmconc/(1.0d0+dmconc))
+          dm_const2 = dmconc/(dmscale/Mpc)
           isnt_init = .false.
         else
           write(*,*)'ps_grav is already initialized, why are we here?'
@@ -31,9 +29,8 @@ module ps_grav
         real(rt), intent(in) :: r!,smbh_const
         real(rt)             :: g
 !         ! put function for g(r) in here
-        ! g = dm_const*(dlog(1.0d0+dm_const2*r)/(r*r)-dm_const2 &
-               ! /(r*(1.0d0+r*dm_const2)))
-        g = 1.0d0
+        g = dm_const*(dlog(1.0d0+dm_const2*r)/(r*r)-dm_const2 &
+               /(r*(1.0d0+r*dm_const2)))
       end function ps_grav_accel
 
       pure function ps_grav_phi(r) result(g)
@@ -41,19 +38,16 @@ module ps_grav
         real(rt), intent(in) :: r
         real(rt)             :: g
 !         ! put function for g(r) in here
-        ! g = -dm_const*dlog(1.0d0+r*dm_const2)/r
-        g = 1.0d0
+        g = -dm_const*dlog(1.0d0+r*dm_const2)/r
       end function ps_grav_phi
 end module ps_grav
-
+ 
 subroutine fort_prescribe_grav (lo,hi,dx, &
      grav,g_l1,g_l2,g_l3,g_h1,g_h2,g_h3,&
      problo,add)
 
-  !has to be defined here as well otherwise there are errors:
-  use amrex_fort_module, only : rt => amrex_real
-  ! use probdata_module, only : dcenx,dceny,dcenz
-  use bl_constants_module, only : HALF
+  use probdata_module, only : dcenx,dceny,dcenz
+  use amrex_constants_module, only : HALF
   use ps_grav, only : ps_grav_accel
   implicit none
   integer          :: g_l1,g_l2,g_l3,g_h1,g_h2,g_h3,add
@@ -62,68 +56,58 @@ subroutine fort_prescribe_grav (lo,hi,dx, &
   real(rt) :: dx(3)
   real(rt) :: problo(3)
 
-
-
   integer          :: i,j,k
-  real :: fort_prescribe_grav_gravityprofile
-  real :: x,y,z,y2,z2
-  real :: r,maggrav
-  real :: dxm,r1
+  real(rt) :: fort_prescribe_grav_gravityprofile
+  real(rt) :: x,y,z,y2,z2
+  real(rt) :: r,maggrav
+  real(rt) :: dxm,r1
   dxm = min(dx(1),dx(2),dx(3))
 !
 ! This is an example of how to use the radial profile above.
 !
-  ! if (add.eq.0) then
-  !    do k = lo(3), hi(3)
-  !       z = problo(3) + (dble(k)+HALF) * dx(3) - dcenz
-  !       z2 = z*z
-  !       do j = lo(2), hi(2)
-  !          y = problo(2) + (dble(j)+HALF) * dx(2) - dceny
-  !          y2 = y*y
-  !          do i = lo(1), hi(1)
-  !             x = problo(1) + (dble(i)+HALF) * dx(1) - dcenx
-  !             r1 = dsqrt(x*x+y2+z2)
-  !             r = max(dxm,r1)
-  !
-  !             maggrav = ps_grav_accel(r)
-  !
-  !             !              Put in angular dependence
-  !             grav(i,j,k,1) = maggrav*x/r
-  !             grav(i,j,k,2) = maggrav*y/r
-  !             grav(i,j,k,3) = maggrav*z/r
-  !          enddo
-  !       enddo
-  !    enddo
-  ! else
-  !    do k = lo(3), hi(3)
-  !       z = problo(3) + (dble(k)+HALF) * dx(3) - dcenz
-  !       z2 = z*z
-  !       do j = lo(2), hi(2)
-  !          y = problo(2) + (dble(j)+HALF) * dx(2) - dceny
-  !          y2 = y*y
-  !          do i = lo(1), hi(1)
-  !             x = problo(1) + (dble(i)+HALF) * dx(1) - dcenx
-  !             r1 = dsqrt(x*x+y2+z2)
-  !             r = max(dxm,r1)
-  !
-  !             maggrav = ps_grav_accel(r)
-  !
-  !             !              Put in angular dependence
-  !             grav(i,j,k,1) = grav(i,j,k,1) + maggrav*x/r
-  !             grav(i,j,k,2) = grav(i,j,k,2) + maggrav*y/r
-  !             grav(i,j,k,3) = grav(i,j,k,3) + maggrav*z/r
-  !          enddo
-  !       enddo
-  !    enddo
-  ! endif
-  do k = lo(3), hi(3)
+  if (add.eq.0) then
+     do k = lo(3), hi(3)
+        z = problo(3) + (dble(k)+HALF) * dx(3) - dcenz
+        z2 = z*z
         do j = lo(2), hi(2)
+           y = problo(2) + (dble(j)+HALF) * dx(2) - dceny
+           y2 = y*y
            do i = lo(1), hi(1)
-              grav(i,j,k,1) = 0.0d0
-              grav(i,j,k,2) = 0.0d0
-              grav(i,j,k,3) = 0.0d0
+              x = problo(1) + (dble(i)+HALF) * dx(1) - dcenx
+              r1 = dsqrt(x*x+y2+z2)
+              r = max(dxm,r1)
+
+              maggrav = ps_grav_accel(r)
+
+              !              Put in angular dependence
+              grav(i,j,k,1) = maggrav*x/r
+              grav(i,j,k,2) = maggrav*y/r
+              grav(i,j,k,3) = maggrav*z/r
            enddo
         enddo
      enddo
+  else
+     do k = lo(3), hi(3)
+        z = problo(3) + (dble(k)+HALF) * dx(3) - dcenz
+        z2 = z*z
+        do j = lo(2), hi(2)
+           y = problo(2) + (dble(j)+HALF) * dx(2) - dceny
+           y2 = y*y
+           do i = lo(1), hi(1)
+              x = problo(1) + (dble(i)+HALF) * dx(1) - dcenx
+              r1 = dsqrt(x*x+y2+z2)
+              r = max(dxm,r1)
+
+              maggrav = ps_grav_accel(r)
+
+              !              Put in angular dependence
+              grav(i,j,k,1) = grav(i,j,k,1) + maggrav*x/r
+              grav(i,j,k,2) = grav(i,j,k,2) + maggrav*y/r
+              grav(i,j,k,3) = grav(i,j,k,3) + maggrav*z/r
+           enddo
+        enddo
+     enddo
+  endif
 
 end subroutine fort_prescribe_grav
+

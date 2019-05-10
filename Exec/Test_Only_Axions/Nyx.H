@@ -18,21 +18,17 @@
 
 #include <iostream>
 
-
 #ifdef BL_HDF5
 #include <hdf5.h>
 #endif
 
+
 using std::istream;
 using std::ostream;
 
-//testing swfft
-using namespace amrex;
-
-
 typedef NyxParticleContainer<1+BL_SPACEDIM+3> StellarParticleContainer;
 #ifdef CGRAV
-void prescribe_grav_potential(MultiFab& phi, Geometry& geom, int level, int finest_level);
+void prescribe_grav_potential(amrex::MultiFab& phi, const amrex::Geometry& geom, int level, int finest_level);
 #endif
 #ifdef NO_HYDRO
 enum StateType {
@@ -120,6 +116,8 @@ public:
     virtual void writePlotFilePre(const std::string& dir, ostream& os);
     virtual void writePlotFilePost(const std::string& dir, ostream& os);
 
+    void writeJobInfo (const std::string& dir);
+
     //
     //Write amrex::MultiFab as plot file
     //
@@ -172,9 +170,19 @@ public:
     static void read_comoving_params();
 
     //
-    // Initial redshift (default = 0)
+    // Initial redshift
     //
     static amrex::Real initial_z;
+
+    //
+    // Initial time in code units
+    //
+    static amrex::Real initial_time;
+
+    //
+    // End time in code units
+    //
+    static amrex::Real final_time;
 
     //
     // Final a -- used as stopping criterion if positive
@@ -276,7 +284,7 @@ public:
     // Restore spectrum at restart
     //
     void forcing_post_restart(const std::string& restart_file);
-#endif
+#endif 
 
     //
     // Read particle-related inputs
@@ -416,7 +424,6 @@ public:
     amrex::Real advance_FDM(amrex::Real time, amrex::Real dt, int iteration, int ncycle);
            void advance_FDM_FD(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
            void advance_FDM_FFT(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
-
 #endif
 
 #ifdef FDM
@@ -429,12 +436,12 @@ public:
 #endif
 
     void compute_hydro_sources(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new,
-                               amrex::MultiFab& S_border, amrex::MultiFab& D_border,
-                               amrex::MultiFab& ext_src_old, amrex::MultiFab& hydro_src,
+                               amrex::MultiFab& S_border, amrex::MultiFab& D_border, 
+                               amrex::MultiFab& ext_src_old, amrex::MultiFab& hydro_src, 
                                amrex::MultiFab& grav, amrex::MultiFab& divu_cc,
                                bool init_flux_register, bool add_to_flux_register);
 
-    void update_state_with_sources( amrex::MultiFab& S_old      , amrex::MultiFab& S_new,
+    void update_state_with_sources( amrex::MultiFab& S_old      , amrex::MultiFab& S_new, 
                                     amrex::MultiFab& ext_src_old, amrex::MultiFab& hydro_src,
                                     amrex::MultiFab& grav       , amrex::MultiFab& divu_cc,
                                     amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
@@ -444,10 +451,16 @@ public:
 
 #ifdef SDC
     void sdc_reactions ( amrex::MultiFab& state_old, amrex::MultiFab& state_new, amrex::MultiFab&  dstate,
-                         amrex::MultiFab& hydro_src, amrex::MultiFab& IR,
-                         amrex::Real dt, amrex::Real a_old, amrex::Real a_new,
+                         amrex::MultiFab& hydro_src, amrex::MultiFab& IR, 
+                         amrex::Real dt, amrex::Real a_old, amrex::Real a_new, 
                          int sdc_iter);
 #endif
+  
+   int integrate_state_box(amrex::MultiFab &state,   amrex::MultiFab &diag_eos, const amrex::Real& a, const amrex::Real& delta_time);
+   int integrate_state_grownbox(amrex::MultiFab &state,   amrex::MultiFab &diag_eos, const amrex::Real& a, const amrex::Real& delta_time);
+  
+  int integrate_state_vec(amrex::MultiFab &state,   amrex::MultiFab &diag_eos, const amrex::Real& a, const amrex::Real& delta_time);
+   int integrate_state_grownvec(amrex::MultiFab &state,   amrex::MultiFab &diag_eos, const amrex::Real& a, const amrex::Real& delta_time);
 
     amrex::Real advance_particles_only (amrex::Real time, amrex::Real dt, int iteration, int ncycle);
 

@@ -77,7 +77,7 @@ module eos_module
 
       subroutine nyx_eos_S_given_Re(S, R, T, Ne, a)
 
-        use bl_constants_module, only: M_PI
+        use amrex_constants_module, only: M_PI
         use atomic_rates_module, ONLY: YHELIUM
         use fundamental_constants_module, only: mp_over_kb
         use fundamental_constants_module, only: k_B, hbar, m_proton
@@ -273,6 +273,8 @@ module eos_module
 
       ii = 0
       ne(1:veclen) = 1.0d0 ! 0 is a bad guess
+      JH(1:veclen) = 0.0d0
+      JHe(1:veclen) = 0.0d0
 
       do  ! Newton-Raphson solver
          ii = ii + 1
@@ -561,13 +563,12 @@ module eos_module
 
          if (abs(dne) < xacc) exit
 
-         if (i .gt. 10) then
-            !$OMP CRITICAL
+         !$OMP CRITICAL
+         if (i .gt. 12) then
             print*, "ITERATION: ", i, " NUMBERS: ", z, t, ne, nhp, nhep, nhepp, df
-            if (i .gt. 12) &
-               STOP 'iterate_ne(): No convergence in Newton-Raphson!'
-            !$OMP END CRITICAL
+            STOP 'iterate_ne(): No convergence in Newton-Raphson!'
          endif
+         !$OMP END CRITICAL
 
       enddo
 
