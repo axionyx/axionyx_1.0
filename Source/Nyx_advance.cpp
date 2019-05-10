@@ -222,7 +222,7 @@ Nyx::advance_hydro_plus_particles (Real time,
     const Real cur_time  = state[State_Type].curTime();
     const Real a_old     = get_comoving_a(prev_time);
     const Real a_new     = get_comoving_a(cur_time);
-
+    ////    amrex::Cuda::setLaunchRegion(false);
 #ifdef GRAVITY
     //
     // We now do a multilevel solve for old Gravity. This goes to the 
@@ -293,7 +293,7 @@ Nyx::advance_hydro_plus_particles (Real time,
     }
 
 #endif
-
+    ////    amrex::Cuda::setLaunchRegion(true);
     //
     // Call the hydro advance at each level to be advanced
     //
@@ -330,7 +330,7 @@ Nyx::advance_hydro_plus_particles (Real time,
         get_level(lev).average_down(  State_Type);
         get_level(lev).average_down(DiagEOS_Type);
     }
-
+    ////    amrex::Cuda::setLaunchRegion(false);
 #ifdef GRAVITY
 
     //
@@ -456,7 +456,7 @@ Nyx::advance_hydro_plus_particles (Real time,
         }
     }
 #endif
-
+    ////    amrex::Cuda::setLaunchRegion(true);
     //
     // Synchronize Energies
     //
