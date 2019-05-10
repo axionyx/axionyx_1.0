@@ -1,12 +1,5 @@
 f90EXE_sources += Prob_3d.f90	probdata.f90 axion_params.f90
 
-f90EXE_sources += bc_fill_3d.f90
+CEXE_sources += prescribe_grav_potential.cpp
 
-ifeq ($(USE_SGS), TRUE)
-	f90EXE_sources += sgs_sources.f90 refine_correction_3d.f90
-endif
-
-#CEXE_sources += swfft_solver.cpp
-#CEXE_sources += swfft_test.cpp
-#CEXE_headers += SWFFT_Test.H SWFFT_TestF.H
 F90EXE_sources += SWFFT_Test_F.F90

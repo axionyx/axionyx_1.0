@@ -31,7 +31,9 @@ using namespace amrex;
 
 
 typedef NyxParticleContainer<1+BL_SPACEDIM+3> StellarParticleContainer;
-
+#ifdef CGRAV
+void prescribe_grav_potential(MultiFab& phi, Geometry& geom, int level, int finest_level);
+#endif
 #ifdef NO_HYDRO
 enum StateType {
     PhiGrav_Type = 0,

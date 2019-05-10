@@ -147,8 +147,19 @@ Nyx::advance_FDM (amrex::Real time,
         // If a single-level calculation we can still use the previous phi as a guess.
         // TODO: Check this.
         int use_previous_phi_as_guess = 0;
+#ifdef CGRAV
+        MultiFab& phi_old = get_level(level).get_old_data(PhiGrav_Type);
+        MultiFab& phi_new = get_level(level).get_new_data(PhiGrav_Type);
+
+        prescribe_grav_potential(phi_old, Geom() , level, finest_level);
+
+        MultiFab::Copy(phi_new, phi_old, 0, 0, phi_old.nComp(), 0);
+
+
+#else
         gravity->multilevel_solve_for_old_phi(level, finest_level,
                                               use_previous_phi_as_guess);
+#endif
     }
 //    //
 //    // Advance Particles

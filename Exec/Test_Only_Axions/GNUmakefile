@@ -21,11 +21,12 @@ USE_HPGMG = FALSE
 USE_FDM = TRUE
 
 PRECISION = DOUBLE
-DEBUG     = FALSE
+DEBUG     = TRUE
 
 # physics
 DIM      = 3
 USE_GRAV = TRUE
+USE_CGRAV = FALSE
 
 Bpack := ./Make.package
 Blocs := .
