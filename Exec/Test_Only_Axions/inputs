@@ -1,5 +1,5 @@
 # ------------------  INPUTS TO MAIN PROGRAM  -------------------
-max_step = 500
+max_step = 100
 
 nyx.comoving_OmB = 0.0
 nyx.comoving_OmM = 0.3
@@ -15,17 +15,14 @@ nyx.initial_dt = 1.e-6
 #nyx.max_timestep = 2.e-6
 nyx.vonNeumann_dt = 1
 
-#File written during the run: nstep | time | dt | redshift | a
-amr.data_log = runlog
-
 #This is how we restart from a checkpoint and write an ascii particle file
 #Leave this commented out in cvs version
-#amr.restart = chk30000
+#amr.restart = chk01000
 nyx.dump_old = 1
 #particles.particle_output_file = particle_output
 particles.write_in_plotfile = 0
 
-gravity.gravity_type = PoissonGrav
+gravity.gravity_type = StaticGrav #PoissonGrav
 gravity.no_sync      = 1
 gravity.no_composite = 1
 
@@ -41,14 +38,18 @@ geometry.is_periodic =  1 1 1
 geometry.coord_sys   =  0
 
 
-geometry.prob_lo     =  -0 -0 -0
+geometry.prob_lo     =  0.0 0.0 0.0
 geometry.prob_hi     =   0.512 0.512 0.512
 
 amr.n_cell           = 32 32 32
 amr.max_grid_size    = 32
-amr.blocking_factor  = 16
+amr.blocking_factor  = 32
 nyx.n_particles      = 1  1  1
 
+#amr.n_cell           = 4 4 4
+#amr.max_grid_size    = 4
+#amr.blocking_factor  = 4
+#nyx.n_particles      = 1  1  1
 
 # >>>>>>>>>>>>>  BC FLAGS <<<<<<<<<<<<<<<<
 # 0 = Interior           3 = Symmetry
@@ -118,6 +119,9 @@ amr.check_int       = 5000
 amr.plot_file       = plt
 #amr.plot_per       = 1.e-6
 amr.plot_int	    = 10
+
+#LOG FILE nstep | time | dt | redshift | a
+amr.data_log = runlog
 
 amr.derive_plot_vars = AxPhase # these variables appear in the plotfile
 amr.plot_vars = AxDens AxRe AxIm phi_grav #AxDens AxMomX AxMomY AxMomZ phi_grav #ALL #density xmom ymom zmom phi_grav #

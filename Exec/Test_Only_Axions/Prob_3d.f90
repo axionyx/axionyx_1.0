@@ -119,9 +119,9 @@
       close(un)
       !print *,"star is at ", pos
 
-      do i=1,3
-         pos(1,i)=center(i)
-      enddo
+      ! do i=1,3
+      !    pos(1,i)=center(i)
+      ! enddo
 
       pi = 4.d0 * atan(1.d0)
       tpi = 2.0d0 * pi
@@ -132,8 +132,8 @@
       rc = 1.3d0 * 0.012513007848917703d0 / (dsqrt(m_tt * hubl) * comoving_OmAx**(0.25d0))
 
       ! hbaroverm = 0.01917152d0 / m_tt
-      velFac = 1.0d0
-      sigmaR = 10.0d0
+      velFac = 10.0d0
+      sigmaR = 0.1d0
 
       !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)
@@ -175,9 +175,7 @@
                     rx = xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1) - pos(h,1)
                     ry = xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2) - pos(h,2)
                     rz = xlo(3)+(k-lo(3))*delta(3) + 0.5d0*delta(3) - pos(h,3)
-                    ! rx = xlo(1)+(i-lo(1))*delta(1) - pos(h,1)
-                    ! ry = xlo(2)+(j-lo(2))*delta(2) - pos(h,2)
-                    ! rz = xlo(3)+(k-lo(3))*delta(3) - pos(h,3)
+
                     ! print *, xlo(2), lo(2), pos(h,2), xhi(2), hi(2)
                     if (abs(rx) .gt. (boxsize(1)/2.0d0)) then
                        rx = boxsize(1)-abs(rx)
@@ -191,17 +189,28 @@
 
                     r = dsqrt(rx**2 + ry**2 + rz**2)
 
-                    !!!! GASSIAN DENSITY PROFILE
-                    axion(i,j,k,UAXDENS) = meandens*exp(-0.5d0*r**2/sigmaR/sigmaR)/sigmaR/length
+                    ! !!!!! SINUSOIDAL DENSITY PROFILE in x direction
+                    ! axion(i,j,k,UAXDENS) = 0.001*(sin(tpi*rx/xhi(1))+1.0)
 
-                    !!! SOME SOLITON-FITTING PROFILE
+                    ! !!!! GASSIAN DENSITY PROFILE
+                    ! axion(i,j,k,UAXDENS) = axion(i,j,k,UAXDENS) + exp(-0.5d0*(r**2)/sigmaR/sigmaR)/sigmaR/length
+                    ! !!!! GASSIAN DENSITY PROFILE - x direction
+                    ! axion(i,j,k,UAXDENS) = axion(i,j,k,UAXDENS) + exp(-0.5d0*(rx**2)/sigmaR/sigmaR)/sigmaR/length
+
+                    !!!!!! CONSTANT DENSITY profile
+                    ! rx = xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1)
+                    ! axion(i,j,k,UAXRE)   =  sin(tpi*rx/xhi(1))
+                    ! axion(i,j,k,UAXIM)   =  cos(tpi*rx/xhi(1))
+                    axion(i,j,k,UAXDENS) = meandens
+
+                    !!!! SOME SOLITON-FITTING PROFILE
                     ! axion(i,j,k,UAXDENS) = axion(i,j,k,UAXDENS) + meandens/((1.d0+9.1d-2*(r/rc)**2.d0)**8.0d0)/length
 
-                    !! CONSTANT VELOCITY KICK IN A DIAGONAL DIRECTION
+                    ! !!!! CONSTANT VELOCITY KICK IN A DIAGONAL DIRECTION
                     ! axion(i,j,k,UAXRE)   = dsqrt(axion(i,j,k,UAXDENS)) * cos(velFac*(xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1) - pos(h,1)+xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2) - pos(h,2)))
                     ! axion(i,j,k,UAXIM)   = dsqrt(axion(i,j,k,UAXDENS)) * sin(velFac*(xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1) - pos(h,1)+xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2) - pos(h,2)))
 
-                    !!! NO INITIAL VELOCITY
+                    !!!!! NO INITIAL VELOCITY
                     axion(i,j,k,UAXRE)   = dsqrt(axion(i,j,k,UAXDENS))
                     axion(i,j,k,UAXIM)   = 0.0d0
 

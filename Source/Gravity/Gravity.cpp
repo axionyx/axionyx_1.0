@@ -256,7 +256,7 @@ Gravity::swap_time_levels (int level)
         for (int n=0; n < BL_SPACEDIM; n++)
         {
 	    std::swap(grad_phi_prev[level][n], grad_phi_curr[level][n]);
-            grad_phi_curr[level][n].reset(new MultiFab(BoxArray(grids[level]).surroundingNodes(n), 
+            grad_phi_curr[level][n].reset(new MultiFab(BoxArray(grids[level]).surroundingNodes(n),
 						       dmap[level], 1, 1));
             grad_phi_curr[level][n]->setVal(1.e50);
         }
@@ -498,7 +498,7 @@ Gravity::solve_for_phi (int               level,
         const Real* dx  = parent->Geom(0).CellSize();
         Real domain_vol = grids[0].d_numPts() * dx[0] * dx[1] * dx[2];
         sum /= domain_vol;
-        std::cout << "subtracting " << sum << std::endl; 
+        std::cout << "subtracting " << sum << std::endl;
         phi.plus(-sum, 0, 1, 0);
       }
 
@@ -577,7 +577,7 @@ Gravity::gravity_sync (int crse_level, int fine_level, int iteration, int ncycle
     }
 
     // Do multi-level solve for delta_phi
-    solve_for_delta_phi(crse_level, fine_level, crse_rhs, 
+    solve_for_delta_phi(crse_level, fine_level, crse_rhs,
 			amrex::GetVecOfPtrs(delta_phi),
 			amrex::GetVecOfVecOfPtrs(ec_gdPhi));
 
@@ -713,7 +713,7 @@ Gravity::get_crse_grad_phi (int               level,
     for (int i = 0; i < BL_SPACEDIM; ++i)
     {
         BL_ASSERT(!grad_phi_crse[i]);
-        grad_phi_crse[i].reset(new MultiFab(Nyx_crse_lev->getEdgeBoxArray(i), 
+        grad_phi_crse[i].reset(new MultiFab(Nyx_crse_lev->getEdgeBoxArray(i),
 					    Nyx_crse_lev->DistributionMap(),
 					    1, 0));
 
@@ -760,7 +760,7 @@ Gravity::multilevel_solve_for_new_phi (int level,
     }
 
     int is_new = 1;
-    actual_multilevel_solve(level, finest_level, 
+    actual_multilevel_solve(level, finest_level,
 			    amrex::GetVecOfVecOfPtrs(grad_phi_curr),
                             is_new, ngrow_for_solve, use_previous_phi_as_guess);
 }
@@ -1035,7 +1035,7 @@ Gravity::get_old_grav_vector (int       level,
        grad_phi_prev[level][i]->FillBoundary(geom.periodicity());
 
     // Average edge-centered gradients to cell centers.
-    amrex::average_face_to_cellcenter(grav_vector, 
+    amrex::average_face_to_cellcenter(grav_vector,
 				      amrex::GetVecOfConstPtrs(grad_phi_prev[level]),
 				      geom);
 
@@ -1059,7 +1059,7 @@ Gravity::get_old_grav_vector (int       level,
 
     // This is a hack-y way to fill the ghost cell values of grav_vector
     //   before returning it
-    // Note that this fills ghost cells over the coarse grid from interpolation, 
+    // Note that this fills ghost cells over the coarse grid from interpolation,
     //  not from the ghost cell values previously filled after the fill_ec_grow stuff.
     AmrLevel* amrlev = &parent->getLevel(level);
     int ng = grav_vector.nGrow();
@@ -1135,7 +1135,7 @@ Gravity::get_new_grav_vector (int       level,
 
     // This is a hack-y way to fill the ghost cell values of grav_vector
     //   before returning it
-    // Note that this fills ghost cells over the coarse grid from interpolation, 
+    // Note that this fills ghost cells over the coarse grid from interpolation,
     //  not from the ghost cell values previously filled after the fill_ec_grow stuff.
     AmrLevel* amrlev = &parent->getLevel(level) ;
     int ng = grav_vector.nGrow();
@@ -1457,7 +1457,7 @@ Gravity::set_mass_offset (Real time)
         mass_offset /= geom.ProbSize();
 
         if (verbose)
-            amrex::Print() << "Gravity ... defining average density in Gravity::set_mass_offset to be " 
+            amrex::Print() << "Gravity ... defining average density in Gravity::set_mass_offset to be "
                            << mass_offset << '\n';
     }
 
@@ -1750,7 +1750,7 @@ Gravity::solve_with_HPGMG(int level,
     {
       if (ParallelDescriptor::IOProcessor())
       {
-        std::cerr << "WARNING: Periodic boundary conditions, but f does not sum to zero... mean(f)=" 
+        std::cerr << "WARNING: Periodic boundary conditions, but f does not sum to zero... mean(f)="
                 << average_value_of_f << std::endl;
         std::cerr << "Subtracting mean(f) from RHS ..." << std::endl;
       }
@@ -1828,7 +1828,7 @@ Gravity::compute_multilevel_average (int       level,
         while (!parent->getAmrLevels()[flev])
             flev--;
     }
-    
+
     BoxArray baf;
     if (level < flev)
     {
@@ -1897,7 +1897,7 @@ Gravity::solve_for_delta_phi_with_mlmg (int crse_level, int fine_level, MultiFab
         amrex::Print() << "... solving for delta_phi at crse_level = " << crse_level << '\n';
         amrex::Print() << "...                    up to fine_level = " << fine_level << '\n';
     }
-    
+
     const int num_levels = fine_level - crse_level + 1;
 
     BL_ASSERT(grad_delta_phi.size() == num_levels);
@@ -1963,7 +1963,7 @@ Gravity::solve_with_MLMG (int crse_level, int fine_level,
     {
         mlpoisson.setCoarseFineBC(crse_bcdata, parent->refRatio(crse_level-1)[0]);
     }
-    
+
     for (int ilev = 0; ilev < nlevs; ++ilev)
     {
         mlpoisson.setLevelBC(ilev, phi[ilev]);
@@ -2010,5 +2010,3 @@ Gravity::set_boundary(BndryData& bd, MultiFab& rhs, const Real* dx)
     }
   }
 }
-
-
