@@ -40,9 +40,10 @@ chk*
 *.xmgr
 ic_sb_32.ascii
 fixed_grids
-*Test*-*
-*Test*o*
-*Test*e*
+#change by Christoph Behrens - commented to allow adding files in Test_Only_Axions
+#*Test*-*
+#*Test*o*
+#*Test*e*
 
 # build directories
 o/
