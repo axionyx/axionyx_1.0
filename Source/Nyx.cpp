@@ -1724,6 +1724,7 @@ Nyx::postCoarseTimeStep (Real cumtime)
 
    int nstep = parent->levelSteps(0);
 
+#ifndef NO_HYDRO
    if (slice_int > -1 && nstep%slice_int == 0)
    {
       BL_PROFILE("Nyx::postCoarseTimeStep: get_all_slice_data");
@@ -1842,6 +1843,7 @@ Nyx::postCoarseTimeStep (Real cumtime)
     }
 
    }
+#endif
 }
 
 void
@@ -2582,6 +2584,22 @@ Nyx::CreateLevelDirectory (const std::string &dir)
     }
 #endif
 
+#ifdef FDM
+    std::string fdm(dir + "/" + Nyx::retrieveFDM());
+    if(ParallelDescriptor::IOProcessor()) {
+      if( ! amrex::UtilCreateDirectory(fdm, 0755)) {
+        amrex::CreateDirectoryFailed(fdm);
+      }
+    }
+
+    LevelDirectoryNames(dir, Nyx::retrieveFDM(), LevelDir, FullPath);
+    if(ParallelDescriptor::IOProcessor()) {
+      if( ! amrex::UtilCreateDirectory(FullPath, 0755)) {
+        amrex::CreateDirectoryFailed(FullPath);
+      }
+    }
+#endif
+
     if(parent->UsingPrecreateDirectories()) {
       if(Nyx::theDMPC()) {
         Nyx::theDMPC()->SetLevelDirectoriesCreated(true);
@@ -2589,6 +2607,14 @@ Nyx::CreateLevelDirectory (const std::string &dir)
 #ifdef AGN
       if(Nyx::theAPC()) {
         Nyx::theAPC()->SetLevelDirectoriesCreated(true);
+      }
+#endif
+#ifdef FDM
+      if(Nyx::theFDMwkbPC()) {
+	Nyx::theFDMwkbPC()->SetLevelDirectoriesCreated(true);
+      }
+      if(Nyx::theFDMPC()) {
+        Nyx::theFDMPC()->SetLevelDirectoriesCreated(true);
       }
 #endif
     }

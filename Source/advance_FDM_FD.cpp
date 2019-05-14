@@ -56,7 +56,7 @@ Nyx::advance_FDM_FD (amrex::Real time,
 
     // Define the gravity vector so we can pass this to ca_umdrv.
     // MultiFab grav_vector(grids, BL_SPACEDIM, 3, Fab_allocate);
-    const auto& dm = get_level(level).get_new_data(State_Type).DistributionMap();
+    const auto& dm = get_level(level).get_new_data(Axion_Type).DistributionMap();
     amrex::MultiFab grav_vector(grids, dm, BL_SPACEDIM, 1);
     grav_vector.setVal(0);
 

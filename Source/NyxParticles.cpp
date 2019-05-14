@@ -9,7 +9,9 @@
 #include <Nyx_F.H>
 #include <AMReX_Particles_F.H>
 
+#ifdef FDM
 #include "fdm_F.H"
+#endif
 
 using namespace amrex;
 
@@ -429,7 +431,7 @@ Nyx::init_particles ()
         return;
 
 #ifdef FDM
-    const Real a = get_comoving_a(state[State_Type].curTime());
+    const Real a = get_comoving_a(state[Axion_Type].curTime());
 #endif
     //
     // Need to initialize particles before defining gravity.
@@ -589,6 +591,10 @@ Nyx::init_particles ()
 					 BL_SPACEDIM + 1,
 					 particle_skip_factor);
         }
+	else if (particle_init_type == "Cosmological")
+	  {
+	    // moved to Nyx_initcosmo.cpp                                                                                                                                                                            
+	  }
 #ifdef FDM
 	else if (particle_init_type == "GaussianBeams" && partlevel)
 	  {
@@ -1497,7 +1503,7 @@ Nyx::particle_est_time_step (Real& est_dt)
 	const Real est_dt_fdm1 = FDMwkbPC->estTimestep(grav, a, level, particle_cfl);
 	MultiFab& phi = get_new_data(PhiGrav_Type);
 	Real beam_cfl_reduced = beam_cfl*2.0*M_PI*hbaroverm;
-	const Real est_dt_fdm2 = FDMwkbPC->estTimestepFDM(phi, level, beam_cfl_reduced);
+	const Real est_dt_fdm2 = FDMwkbPC->estTimestepFDM(phi, a, level, beam_cfl_reduced);
 	const Real est_dt_fdm = std::min(est_dt_fdm1 ,est_dt_fdm2);
 	// const Real est_dt_fdm = FDMwkbPC->estTimestep(grav, a, level, particle_cfl);
 	
@@ -1523,7 +1529,7 @@ Nyx::particle_est_time_step (Real& est_dt)
 	const Real est_dt_fdm1 = FDMPC->estTimestep(grav, a, level, particle_cfl);
 	MultiFab& phi = get_new_data(PhiGrav_Type);
 	Real beam_cfl_reduced = beam_cfl*2.0*M_PI*hbaroverm;
-	const Real est_dt_fdm2 = FDMPC->estTimestepFDM(phi, level, beam_cfl_reduced);
+	const Real est_dt_fdm2 = FDMPC->estTimestepFDM(phi, a, level, beam_cfl_reduced);
 	const Real est_dt_fdm = std::min(est_dt_fdm1 ,est_dt_fdm2);
 	// const Real est_dt_fdm = FDMPC->estTimestep(grav, a, level, particle_cfl);
 	

@@ -6,8 +6,8 @@ nyx.comoving_OmB = 0.0
 nyx.comoving_OmM = 0.3
 nyx.comoving_h = 0.7
 
-nyx.initial_z = 4.0
-nyx.initial_dt = 1.e-6
+nyx.initial_z = 60.0
+nyx.initial_dt = 1.e-10
 #nyx.fixed_dt = 1.e-5
 nyx.vonNeumann_dt = 1
 
@@ -34,9 +34,9 @@ geometry.coord_sys   =  0
 #geometry.is_periodic = 0 0 0 
 geometry.is_periodic = 1 1 1 
 geometry.prob_lo     =  0     0     0
-geometry.prob_hi     = 2.0 2.0 2.0
+geometry.prob_hi     = 2.9493 2.9493 2.9493
 #amr.n_cell           = 128 128 128
-amr.n_cell           = 16 16 16 
+amr.n_cell           = 64 64 64 
 #amr.n_cell           = 256 256 256
 #amr.max_grid_size    = 128 # 64 #32
 
@@ -44,12 +44,12 @@ amr.n_cell           = 16 16 16
 
 nyx.num_particle_fdm = 1
 nyx.num_particle_dm  = 1
-nyx.levelmethod = 0
+nyx.levelmethod = 1
 nyx.particle_init_type = GaussianBeams
 nyx.sigma_fdm = 0.1
 nyx.theta_fdm = 4.0
 nyx.alpha_fdm = 1000.0; #1.8 # 0.4 #10000.0
-nyx.wkb_approx = 0
+nyx.wkb_approx = 1
 nyx.beam_cfl = 0.1
 nyx.m_tt = 2.5
 #nyx.do_dm_particles = 1

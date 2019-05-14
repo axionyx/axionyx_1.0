@@ -62,8 +62,6 @@ void Nyx::icReadAndPrepareFab(std::string mfDirName, int nghost, MultiFab &mf)
 
     mf.copy(mf_read,0,0,nc);
 
-    mf_read.clear();
-
     if (! ((ba.contains(ba_read) && ba_read.contains(ba))) )
     {
 	if (ParallelDescriptor::IOProcessor()){
@@ -77,6 +75,8 @@ void Nyx::icReadAndPrepareFab(std::string mfDirName, int nghost, MultiFab &mf)
             amrex::Abort();
 	}
     }
+
+    mf_read.clear();
 
     mf.FillBoundary();
     mf.EnforcePeriodicity(geom.periodicity());
@@ -117,6 +117,7 @@ void Nyx::initcosmo()
     Real redshift=-1;
     Vector<int> n_part(BL_SPACEDIM);
 
+#ifndef NO_HYDRO
     if (level > parent->useFixedUpToLevel())
     {
         std::cout << "You have more refinement than grids, there might be a problem with your refinement criterion..." << std::endl;
@@ -128,7 +129,7 @@ void Nyx::initcosmo()
         FillCoarsePatch(D_new, 0, 0, DiagEOS_Type, 0, D_new.nComp());
 	return;
     }
-
+#endif
     //
     // Read the init directory name and particle mass from the inputs file
     //
@@ -333,13 +334,39 @@ void Nyx::initcosmo()
     // we also have to restrict the creation of particles to non refined parts of the domain.
 //    if (level == 0)
     Nyx::theDMPC()->InitCosmo1ppcMultiLevel(mf, dis_fac, vel_fac, 
-		                  particleMass, 
-				  part_dx, part_vx,
-				  myBaWhereNot,
-	                          level, parent->initialBaLevels()+1);
+					    particleMass, 
+					    part_dx, part_vx,
+					    myBaWhereNot,
+					    level, parent->initialBaLevels()+1);
 //    Nyx::theDMPC()->InitCosmo(mf, vel_fac, n_part, particleMass);
     //Nyx::theDMPC()->InitCosmo(mf, vel_fac, n_part, particleMass, part_dx, part_vx);
 
+#ifdef FDM
+    std::cout<<"parent->initialBaLevels() = "<<level<<" "<<partlevel<<" "<<parent->initialBaLevels()<<std::endl; 
+    if(partlevel && level==(parent->initialBaLevels())){                                                                                                                                          
+      Vector<std::unique_ptr<MultiFab> > particle_mf;
+      Nyx::theDMPC()->AssignDensity(particle_mf);
+
+      for(int lev=0;lev<=parent->initialBaLevels();lev++){
+	BoxArray baWhereNotfdm;
+	if (lev < parent->initialBaLevels())
+	  baWhereNotfdm = parent->initialBa(lev+1);
+	BoxArray myBaWhereNotfdm(baWhereNotfdm.size());
+	for (int i=0; i < baWhereNotfdm.size(); i++)
+	  myBaWhereNotfdm.set(i, baWhereNotfdm[i]);
+	if (lev < parent->initialBaLevels())
+	  myBaWhereNotfdm.coarsen(parent->refRatio(lev));
+
+	if(wkb_approx)
+	  Nyx::theFDMwkbPC()->InitCosmo1ppcMultiLevel(particle_mf, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
+	else
+	  Nyx::theFDMPC()->InitCosmo1ppcMultiLevel(particle_mf, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
+      }
+    }
+    MultiFab& Ax_new = get_level(level).get_new_data(Axion_Type);
+    Ax_new.setVal(0.);
+#endif
+#ifndef NO_HYDRO
     MultiFab& S_new = get_level(level).get_new_data(State_Type);
     MultiFab& D_new = get_level(level).get_new_data(DiagEOS_Type);
 
@@ -449,11 +476,12 @@ void Nyx::initcosmo()
     }
     else
     {
+      std::cout<<"ghostcells = "<<S_new.nGrow()<<" "<<S_new.nComp()<<" "<<D_new.nGrow()<<" "<<D_new.nComp()<<" "<<mf.nGrow()<<" "<<mf.nComp()<<" "<<Density<<" "<<Temp_comp<<" "<<Ne_comp<<std::endl;
        S_new.setVal(0.0, Density);
        D_new.setVal(-23, Temp_comp);
        D_new.setVal(-42, Ne_comp);
     }
-       
+#endif //ifndef NO_HYDRO       
     mf.clear();
 
 #endif //ifdef GRAVITY

@@ -26,6 +26,8 @@ DEBUG     = FALSE
 # physics
 DIM      = 3
 USE_GRAV = TRUE
+#USE_CGRAV = TRUE
+NO_HYDRO = TRUE
 
 Bpack := ./Make.package
 Blocs := .

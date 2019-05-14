@@ -209,10 +209,15 @@ Nyx::particle_derive (const std::string& name, Real time, int ngrow)
         return derive_dat; 
       }
 #ifndef NO_HYDRO
-      else 
+      else  
       {
         return derive("density",time,0);
       }
+#else
+      else
+	{
+	  return derive(name, time, ngrow);
+	}
 #endif
 
 #else
@@ -221,6 +226,6 @@ Nyx::particle_derive (const std::string& name, Real time, int ngrow)
     }
     else
     {
-        return AmrLevel::derive(name, time, ngrow);
+        return derive(name, time, ngrow);
     }
 }

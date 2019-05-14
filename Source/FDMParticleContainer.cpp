@@ -585,6 +585,7 @@ FDMParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_imag, 
 
 amrex::Real
 FDMParticleContainer::estTimestepFDM(amrex::MultiFab&       phi,
+				     amrex::Real              a,
 				     int                    lev,
 				     amrex::Real            cfl) const
 {
@@ -638,7 +639,7 @@ FDMParticleContainer::estTimestepFDM(amrex::MultiFab&       phi,
       if (p.id() <= 0) continue;
 
       amrex::Real vel_square = (p.rdata(1)*p.rdata(1)+p.rdata(2)*p.rdata(2)+p.rdata(3)*p.rdata(3));
-      amrex::Real dt_part = (vel_square > 0) ? (cfl * 2.0 / vel_square) : 1e50;
+      amrex::Real dt_part = (vel_square > 0) ? (cfl * 2.0 * a * a / vel_square) : 1e50;
       amrex::IntVect cell = this->Index(p, lev);
       const amrex::Real pot = phifab(cell,0);
       if (pot > 0)
@@ -682,10 +683,8 @@ FDMParticleContainer::estTimestepFDM(amrex::MultiFab&       phi,
 
 
 void
-FDMParticleContainer::InitCosmo1ppcMultiLevel(
-                        MultiFab& mf, const Real disp_fac[], const Real vel_fac[], 
-                        const Real particleMass, int disp_idx, int vel_idx, 
-                        BoxArray &baWhereNot, int lev, int nlevs)
+FDMParticleContainer::InitCosmo1ppcMultiLevel(amrex::Vector<std::unique_ptr<amrex::MultiFab> >& mf, const Real gamma_ax, const Real particleMass, 
+					      BoxArray &baWhereNot, int lev, int nlevs)
 {
     BL_PROFILE("FDMParticleContainer::InitCosmo1ppcMultiLevel()");
     const int       MyProc   = ParallelDescriptor::MyProc();
@@ -707,11 +706,6 @@ FDMParticleContainer::InitCosmo1ppcMultiLevel(
     particles.resize(nlevs);
 
     ParticleType p;
-    Real         disp[BL_SPACEDIM];
-    Real         vel[BL_SPACEDIM];
-    
-    Real 	mean_disp[BL_SPACEDIM]={D_DECL(0,0,0)};
-
 
     //
     // The mf should be initialized according to the ics...
@@ -720,9 +714,12 @@ FDMParticleContainer::InitCosmo1ppcMultiLevel(
     long outcount[3]={0,0,0};
     long outcountminus[3]={0,0,0};
     long totalcount=0;
-    for (MFIter mfi(mf); mfi.isValid(); ++mfi)
+
+    Real Amp;
+
+    for (MFIter mfi(*(mf[lev])); mfi.isValid(); ++mfi)
     {
-        FArrayBox&  myFab  = mf[mfi];
+      FArrayBox&  myFab  = (*(mf[lev]))[mfi];
 	const Box&  vbx    = mfi.validbox();
         const int  *fab_lo = vbx.loVect();
         const int  *fab_hi = vbx.hiVect();
@@ -742,27 +739,15 @@ FDMParticleContainer::InitCosmo1ppcMultiLevel(
 
 	            for (int n = 0; n < BL_SPACEDIM; n++)
 	            {
-                        disp[n] = myFab(indices,disp_idx+n);
-                        //
-			// Start with homogeneous distribution (for 1 p per cell in the center of the cell),
-			//
-	                p.pos(n) = geom.ProbLo(n) + 
-                            (indices[n]+Real(0.5))*dx[n];
-			if(disp[n]*disp_fac[n]>dx[n]/2.0)
-			  outcount[n]++;
-			if(disp[n]*disp_fac[n]<-dx[n]/2.0)
-			  outcountminus[n]++;
-			mean_disp[n]+=fabs(disp[n]);
-			//
-                        // then add the displacement (input values weighted by domain length).
-                        //
-	                p.pos(n) += disp[n] * disp_fac[n];
-
-                        //
-			// Set the velocities.
-                        //
-                        vel[n] = myFab(indices,vel_idx+n);
-	                p.rdata(n+1) = vel[n] * vel_fac[n];
+		      //
+		      // Set positions (1 p per cell in the center of the cell)
+		      //
+		      p.pos(n) = geom.ProbLo(n) + 
+			(indices[n]+Real(0.5))*dx[n];
+		      //
+		      // Set velocities
+		      //
+		      p.rdata(n+1) = 0.0;
 	            }
                     //
 		    // Set the mass of the particle from the input value.
@@ -770,6 +755,58 @@ FDMParticleContainer::InitCosmo1ppcMultiLevel(
 	            p.rdata(0)  = particleMass;
 	            p.id()      = ParticleType::NextID();
 	            p.cpu()     = MyProc;
+
+		    Amp = std::sqrt(myFab(indices));
+
+		    //set phase
+		    p.rdata( 4) = 0.0;
+		    //set amplitude
+		    p.rdata( 5) = pow(2.0*gamma_ax*Amp,1.5);
+		    p.rdata( 6) = 0.0;
+		    //set width
+		    p.rdata( 7) = gamma_ax;
+		    //set Jacobian qq
+		    p.rdata( 8) = Amp;
+		    p.rdata( 9) = 0.0;
+		    p.rdata(10) = 0.0;
+		    p.rdata(11) = 0.0;
+		    p.rdata(12) = Amp;
+		    p.rdata(13) = 0.0;
+		    p.rdata(14) = 0.0;
+		    p.rdata(15) = 0.0;
+		    p.rdata(16) = Amp;
+		    //set Jacobian pq
+		    p.rdata(17) = 0.0;
+		    p.rdata(18) = 0.0;
+		    p.rdata(19) = 0.0;
+		    p.rdata(20) = 0.0;
+		    p.rdata(21) = 0.0;
+		    p.rdata(22) = 0.0;
+		    p.rdata(23) = 0.0;
+		    p.rdata(24) = 0.0;
+		    p.rdata(25) = 0.0;
+		    //set Jacobian qp
+		    p.rdata(26) = 0.0;
+		    p.rdata(27) = 0.0;
+		    p.rdata(28) = 0.0;
+		    p.rdata(29) = 0.0;
+		    p.rdata(30) = 0.0;
+		    p.rdata(31) = 0.0;
+		    p.rdata(32) = 0.0;
+		    p.rdata(33) = 0.0;
+		    p.rdata(34) = 0.0;
+		    //set Jacobian pp
+		    p.rdata(35) = Amp;
+		    p.rdata(36) = 0.0;
+		    p.rdata(37) = 0.0;
+		    p.rdata(38) = 0.0;
+		    p.rdata(39) = Amp;
+		    p.rdata(40) = 0.0;
+		    p.rdata(41) = 0.0;
+		    p.rdata(42) = 0.0;
+		    p.rdata(43) = Amp;
+
+
 	
 	            if (!this->Where(p, pld))
                     {

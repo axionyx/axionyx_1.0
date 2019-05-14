@@ -392,6 +392,7 @@ Nyx::compute_average_species (int          nspec,
     } // end if not use_const_species
 }
 
+#endif
 
 #ifdef FDM
 void
@@ -418,6 +419,4 @@ Nyx::compute_axion_quantities (Real& mass, Real& epot, Real& ekinrho, Real& ekin
     }
     //epot -= grav_pot*mass/2;
 }
-#endif
-
 #endif
