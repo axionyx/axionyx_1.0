@@ -30,7 +30,6 @@ amr.data_log = runlog
 gravity.gravity_type = PoissonGrav
 gravity.no_sync      = 1
 gravity.no_composite = 1
-gravity.use_mlmg_solver = 1
 
 mg.bottom_solver = 1
 
@@ -70,7 +69,7 @@ nyx.do_grav  = 1
 # COMOVING
 nyx.comoving_OmM = 1.0
 nyx.comoving_OmB = 0.1
-nyx.comoving_h   = 0.5d0
+nyx.comoving_h   = 0.5e0
 
 # PARTICLES
 nyx.do_dm_particles = 1

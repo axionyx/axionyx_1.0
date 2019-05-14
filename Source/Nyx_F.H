@@ -30,6 +30,9 @@ BL_FORT_PROC_DECL(FORT_ADVANCE_FDM_FD, fort_advance_fdm_fd)
   void fort_alloc_simd_vec();
   void fort_dealloc_simd_vec();
 
+  void fort_integrate_time_given_a
+    (amrex::Real* a0, amrex::Real* a1, amrex::Real* dt);
+
   void fort_integrate_comoving_a
     (amrex::Real* old_a, amrex::Real* new_a, amrex::Real* dt);
 
@@ -43,7 +46,7 @@ BL_FORT_PROC_DECL(FORT_ADVANCE_FDM_FD, fort_advance_fdm_fd)
 
   //  void fort_get_omm    (amrex::Real* omm);
   //  void fort_get_omb    (amrex::Real* frac);
-  //  void fort_get_hubble (amrex::Real* hubble);
+  void fort_get_hubble (amrex::Real* hubble);
 
   void fort_set_omm    (const amrex::Real& omm);
   void fort_set_omb    (const amrex::Real& frac);
@@ -316,6 +319,10 @@ BL_FORT_PROC_DECL(FORT_ADVANCE_FDM_FD, fort_advance_fdm_fd)
      BL_FORT_FAB_ARG(IR),
      const amrex::Real* a, const amrex::Real* delta_time,
      const int* min_iter, const int* max_iter);
+
+  void RhsFnReal(double t, double* u, double* udot, double* rpar, int neq);
+  void fort_ode_eos_finalize(double* e_out, double* rpar, int neq);
+  void fort_ode_eos_setup(const amrex::Real& a,const amrex::Real& half_dt);
 
   void fort_compute_temp
     (const int lo[], const int hi[],

@@ -1656,13 +1656,13 @@ Nyx::particle_redistribute (int lbase, int iteration, bool my_init)
 
 #ifdef FDM
 	    if(DMPC)
-	      DMPC->Redistribute(lbase, DMPC->finestLevel(), iteration);
+	      DMPC->Redistribute(lbase, -1, parent->levelCount(lbase));
 	    if(FDMPC)
-	      FDMPC->Redistribute(lbase, FDMPC->finestLevel(), iteration);
+	      FDMPC->Redistribute(lbase, -1, parent->levelCount(lbase));
 	    if(FDMwkbPC)
-	      FDMwkbPC->Redistribute(lbase, FDMwkbPC->finestLevel(), iteration);
+	      FDMwkbPC->Redistribute(lbase, -1, parent->levelCount(lbase));
 #else
-            DMPC->Redistribute(lbase, DMPC->finestLevel(), iteration);
+            DMPC->Redistribute(lbase, -1, parent->levelCount(lbase));
 #endif
             //
             // Use the new BoxArray and DistMap to define ba and dm for next time.

@@ -55,40 +55,26 @@ Nyx::advance_particles_only (Real time,
  
     int ghost_width = ncycle + stencil_deposition_width;
 
-// #ifdef FDM
-//     // it is okay to use ghost_width in setup_ghost_particels since ghost_width_fdm for FDM                                                                                                                    
-//     // Gaussian kernels is separately set in setup_ghost_particles                                                                                                                                          
-//     int ghost_width_fdm = ncycle + stencil_deposition_width_fdm;
-// #endif 
-
-    // *** where_width ***  is used                                                                                                                                                                            
-    //   *) to set how many cells the Where call in moveKickDrift tests =                                                                                                                                      
-    //      ghost_width + (1-iteration) - 1:                                                                                                                                                                   
-    //      the minus 1 arises because this occurs *after* the move                                                                                                                                            
+    // *** where_width ***  is used
+    //   *) to set how many cells the Where call in moveKickDrift tests =
+    //      ghost_width + (1-iteration) - 1:
+    //      the minus 1 arises because this occurs *after* the move
 
     int where_width =  ghost_width + (1-iteration)  - 1;
-
-// #ifdef FDM
-//     int where_width_fdm =  ghost_width_fdm + (1-iteration)  - 1;
-// #endif
-
-    // *** grav_n_grow *** is used                                                                                                                                                                               
-    //   *) to determine how many ghost cells we need to fill in the MultiFab from                                                                                                                              
-    //      which the particle interpolates its acceleration                                                                                                                                                    
-    //   *) to set how many cells the Where call in moveKickDrift tests = (grav.nGrow()-2).                                                                                                                     
-    //   *) the (1-iteration) arises because the ghost particles are created on the coarser                                                                                                                     
-    //      level which means in iteration 2 the ghost particles may have moved 1 additional cell along                                                                                                         
-
+ 
+    // *** grav_n_grow *** is used
+    //   *) to determine how many ghost cells we need to fill in the MultiFab from
+    //      which the particle interpolates its acceleration
+    //   *) to set how many cells the Where call in moveKickDrift tests = (grav.nGrow()-2).
+    //   *) the (1-iteration) arises because the ghost particles are created on the coarser
+    //      level which means in iteration 2 the ghost particles may have moved 1 additional cell along
+ 
     int grav_n_grow = ghost_width + (1-iteration) + (iteration-1) +
-      stencil_interpolation_width ;
-
+                      stencil_interpolation_width ;
 #ifdef FDM
     // Plus one since we need to take the derivative of grav_vector                                                                                                                                            
     // in order to obtain hession of potential
     grav_n_grow += 1;
-    // if(partlevel)
-    //   grav_n_grow = ghost_width_fdm + (1-iteration) + (iteration-1) +
-    // 	stencil_interpolation_width + 1;
 #endif
 
     // Sanity checks
@@ -236,7 +222,7 @@ Nyx::advance_particles_only (Real time,
                 get_level(lev).gravity->get_old_grav_vector(lev, grav_vec_old, time);
                 
                 for (int i = 0; i < Nyx::theActiveParticles().size(); i++)
-		  Nyx::theActiveParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_old, a_half,where_width);
+                    Nyx::theActiveParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_old, a_half, where_width);
 
                 // Only need the coarsest virtual particles here.
                 if (lev == level && level < finest_level)
