@@ -317,6 +317,14 @@ Gravity::solve_for_new_phi (int               level,
     MultiFab Rhs(grids[level], dmap[level], 1, 0);
     Rhs.setVal(0.0);
 
+#ifndef NO_HYDRO
+    if (Nyx::Do_Hydro() == 1)
+    {
+       MultiFab& S_new = LevelData[level]->get_new_data(State_Type);
+       MultiFab::Copy(Rhs, S_new, density, 0, 1, 0);
+    }
+#endif
+
 #ifdef FDM
     if(Nyx::levelmethod[level]==Nyx::FDlevel)
       {
@@ -345,14 +353,6 @@ Gravity::solve_for_new_phi (int               level,
 // 	}
 // #endif
       Ax_new.FillBoundary(Nyx::AxDens,1,parent->Geom(level).periodicity());
-    }
-#endif
-
-#ifndef NO_HYDRO
-    if (Nyx::Do_Hydro() == 1)
-    {
-       MultiFab& S_new = LevelData[level]->get_new_data(State_Type);
-       MultiFab::Add(Rhs, S_new, density, 0, 1, 0);
     }
 #endif
 
@@ -655,7 +655,7 @@ Gravity::multilevel_solve_for_new_phi (int level,
 
     int is_new = 1;
     actual_multilevel_solve(level, finest_level, 
-			    amrex::GetVecOfVecOfPtrs(grad_phi_curr),
+    			    amrex::GetVecOfVecOfPtrs(grad_phi_curr),
                             is_new, ngrow_for_solve, use_previous_phi_as_guess);
 }
 
@@ -868,6 +868,7 @@ Gravity::actual_multilevel_solve (int                       level,
                                             grad_phi[amrlev][1],
                                             grad_phi[amrlev][2])});
     }
+
     solve_with_MLMG(level, finest_level, phi_p, amrex::GetVecOfConstPtrs(Rhs_p),
                     grad_phi_aa, crse_bcdata, rel_eps, abs_eps);
 

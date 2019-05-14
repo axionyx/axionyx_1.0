@@ -476,7 +476,6 @@ void Nyx::initcosmo()
     }
     else
     {
-      std::cout<<"ghostcells = "<<S_new.nGrow()<<" "<<S_new.nComp()<<" "<<D_new.nGrow()<<" "<<D_new.nComp()<<" "<<mf.nGrow()<<" "<<mf.nComp()<<" "<<Density<<" "<<Temp_comp<<" "<<Ne_comp<<std::endl;
        S_new.setVal(0.0, Density);
        D_new.setVal(-23, Temp_comp);
        D_new.setVal(-42, Ne_comp);

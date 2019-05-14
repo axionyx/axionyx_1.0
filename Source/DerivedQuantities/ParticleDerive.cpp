@@ -216,7 +216,7 @@ Nyx::particle_derive (const std::string& name, Real time, int ngrow)
 #else
       else
 	{
-	  return derive(name, time, ngrow);
+	  return AmrLevel::derive(name, time, ngrow);
 	}
 #endif
 
@@ -226,6 +226,6 @@ Nyx::particle_derive (const std::string& name, Real time, int ngrow)
     }
     else
     {
-        return derive(name, time, ngrow);
+      return AmrLevel::derive(name, time, ngrow);
     }
 }
