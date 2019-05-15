@@ -1,5 +1,5 @@
 # Contents
-[Documentation](#Documentation)
+[Documentation](#Documentation)  
 [Installation](#installation)  
 [File structure](#file-structure-of-nyx)  
 [More file structure](#more-file-structure)   
