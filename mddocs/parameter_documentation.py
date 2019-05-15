@@ -23,31 +23,42 @@ def scan_files(dirs,recursive=False):
 def scan_file(fname):
     with open(fname) as f:
         lines = f.readlines()
+    pname=None
     for i, line in enumerate(lines):
-        r=re.search(r"(pp\.get|pp\.query|pp\.getarr|pp\.queryarr)\(\"(.*?)\"",line)
-        if (r is not None):
-            param = r.group(2)
-            if("get" in r.group(1)):
-                    type_string = ("_(obligatory)_")
-            else:
-                    type_string = ("_(optional)_")
-            if(not param in params):
-                params.append(param)
-            #print "found parameter",param
-            if(i==0):
-                continue
-            myline = lines[i-1]
-            r=re.search(r"(\\pparam) (.*)", myline) 
+#        print line 
+        r=re.search(r"ParmParse (.*?)(\(\"(.*?)\"\)|);",line)
+        if(r is not None):
+            pname = r.group(1)
+            psubdir = r.group(3)
+        
+        
+        if(pname is not None):
+            r=re.search(r"({}\.get|{}\.query|{}\.getarr|{}\.queryarr)\(\"(.*?)\"".format(pname,pname,pname,pname),line)
             if (r is not None):
-                docstring = r.group(2)
-                #print "found docstring:",docstring
-                entry = {"location":[fname,i],"docstring":type_string+" "+docstring}
-                if(param in our_dict):
-                    if (our_dict[param]["docstring"] != ""):
-                        print "WARNING: parameter",param,"has two doc strings. Originally in",our_dict[param]["location"],
-                        "again found in", entry["location"]
+                param = r.group(2)
+                if(psubdir!=None):
+                    param = psubdir + "." +  param
+                if("get" in r.group(1)):
+                        type_string = ("_(obligatory)_")
                 else:
-                    our_dict[param] = entry
+                        type_string = ("_(optional)_")
+                if(not param in params):
+                    params.append(param)
+                #print "found parameter",param
+                if(i==0):
+                    continue
+                myline = lines[i-1]
+                r=re.search(r"(\\pparam) (.*)", myline) 
+                if (r is not None):
+                    docstring = r.group(2)
+                    #print "found docstring:",docstring
+                    entry = {"location":[fname,i],"docstring":type_string+" "+docstring}
+                    if(param in our_dict):
+                        if (our_dict[param]["docstring"] != ""):
+                            print "WARNING: parameter",param,"has two doc strings. Originally in",our_dict[param]["location"],
+                            "again found in", entry["location"]
+                    else:
+                        our_dict[param] = entry
 def check_dict():
     for p in params:
         if(p not in our_dict.keys()):
