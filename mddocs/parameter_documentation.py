@@ -9,10 +9,12 @@ our_dict = {}
 params = []
 def scan_files(dirs,recursive=False):
     if(recursive):
-        for root, dirs, files in os.walk("../Source/"):
+        for root, dirs, files in os.walk(BASEPATH+"/../Source/"):
                 for file in files:
                     if(r".cpp" in file or r".H" in file):
-                            scan_file(os.path.join(root,file))
+                            full_path = os.path.join(root,file)
+                            print full_path
+                            scan_file(full_path)
 
     else:
         for D in dirs:
@@ -77,6 +79,11 @@ def write_params_doc(fname):
         f.write(get_header())
         for key in ks:
             f.write(get_doc_line(key,our_dict[key]))
+        f.write("### Undocumented Input Parameters\n\n")
+        for key in params:
+            if(key not in ks):
+                f.write(get_doc_line(key,{"docstring":""}))
 scan_files(dirs,recursive=True)    
+print our_dict
 check_dict()
 write_params_doc(BASEPATH+"/input_parameters.md")

@@ -29,7 +29,7 @@
 
 | Type | Name |
 | ---: | :--- |
-| class | [**Nyx**](classNyx.md) <br> |
+| class | [**Nyx**](classNyx.md) <br>_AmrLevel-derived class for hyperbolic conservation equations for stellar media._  |
 
 ## Public Types
 

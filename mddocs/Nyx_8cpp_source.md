@@ -264,7 +264,7 @@ Nyx::read_params ()
     done = true;  // ?
 
     ParmParse pp_nyx("nyx");
-
+    //\pparam this is an example of a docstring for an input parameter. This line lives in Source/Nyx.cpp, line 258
     pp_nyx.query("v", verbose);
     pp_nyx.get("init_shrink", init_shrink);
     pp_nyx.get("cfl", cfl);

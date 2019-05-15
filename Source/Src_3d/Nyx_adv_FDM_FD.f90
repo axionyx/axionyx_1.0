@@ -297,9 +297,10 @@
       
 ! :::
 ! ::: ----------------------------------------------------------------
-! ::: Solves the Schroedinger-Newton (Gross-Pitaevskii) equation for a self-gravitating 
-! ::: Bose-Einstein condensate of an ultralight scalar field using explicit RK4 and 
-! ::: directional splitting.
+!> Solves the Schroedinger-Newton (Gross-Pitaevskii) equation for a self-gravitating 
+!! Bose-Einstein condensate of an ultralight scalar field using explicit RK4 and 
+!! directional splitting. (Also, this is an example of how to document Fortran
+!! code, in line 300 of Source/Src_3d/Nyx_adv_FDM_FD.f90) 
 
       subroutine fort_advance_fdm_fd(time,lo,hi,&
            uin,  uin_l1,uin_l2,uin_l3,uin_h1,uin_h2,uin_h3, &

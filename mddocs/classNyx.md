@@ -6,8 +6,9 @@
 
 
 
+_AmrLevel-derived class for hyperbolic conservation equations for stellar media._ 
 
-
+* `#include <Nyx.H>`
 
 
 
@@ -48,29 +49,29 @@ Inherits the following classes: AmrLevel,  AmrLevel
 |  int | [**Ymom**](classNyx.md#variable-ymom)   = = -1<br> |
 |  int | [**Zhi\_comp**](classNyx.md#variable-zhi-comp)   = = -1<br> |
 |  int | [**Zmom**](classNyx.md#variable-zmom)   = = -1<br> |
-|  amrex::Real | [**absolute\_max\_change\_a**](classNyx.md#variable-absolute-max-change-a)   = = -1.0<br> |
-|  amrex::Real | [**comoving\_OmB**](classNyx.md#variable-comoving-omb)  <br> |
+|  amrex::Real | [**absolute\_max\_change\_a**](classNyx.md#variable-absolute-max-change-a)   = = -1.0<br>_Absolute change in a allowed in one timestep for fixed delta\_a._  |
+|  amrex::Real | [**comoving\_OmB**](classNyx.md#variable-comoving-omb)  <br>_comoving parameters_  |
 |  amrex::Real | [**comoving\_OmM**](classNyx.md#variable-comoving-omm)  <br> |
 |  amrex::Real | [**comoving\_h**](classNyx.md#variable-comoving-h)  <br> |
-|  amrex::Real | [**dt\_binpow**](classNyx.md#variable-dt-binpow)   = = -1.0<br> |
-|  amrex::Real | [**final\_a**](classNyx.md#variable-final-a)   = = -1.0<br> |
-|  amrex::Real | [**final\_time**](classNyx.md#variable-final-time)   = = -1.0<br> |
-|  amrex::Real | [**final\_z**](classNyx.md#variable-final-z)   = = -1.0<br> |
+|  amrex::Real | [**dt\_binpow**](classNyx.md#variable-dt-binpow)   = = -1.0<br>_Positive number means use powers of 2 binning for relative dt._  |
+|  amrex::Real | [**final\_a**](classNyx.md#variable-final-a)   = = -1.0<br>_Final a_  _used as stopping criterion if positive._ |
+|  amrex::Real | [**final\_time**](classNyx.md#variable-final-time)   = = -1.0<br>_End time in code units._  |
+|  amrex::Real | [**final\_z**](classNyx.md#variable-final-z)   = = -1.0<br>_Final z_  _used as stopping criterion if positive._ |
 |  int | [**init\_with\_sph\_particles**](classNyx.md#variable-init-with-sph-particles)   = = 0<br> |
-|  amrex::Real | [**initial\_time**](classNyx.md#variable-initial-time)   = = -1.0<br> |
-|  amrex::Real | [**initial\_z**](classNyx.md#variable-initial-z)   = = -1.0<br> |
+|  amrex::Real | [**initial\_time**](classNyx.md#variable-initial-time)   = = -1.0<br>_Initial time in code units._  |
+|  amrex::Real | [**initial\_z**](classNyx.md#variable-initial-z)   = = -1.0<br>_Initial redshift._  |
 |  amrex::Real | [**new\_a**](classNyx.md#variable-new-a)   = = -1.0<br> |
 |  amrex::Real | [**new\_a\_time**](classNyx.md#variable-new-a-time)   = = -1.0<br> |
-|  amrex::Real | [**old\_a**](classNyx.md#variable-old-a)   = = -1.0<br> |
-|  amrex::Real | [**old\_a\_time**](classNyx.md#variable-old-a-time)   = = -1.0<br> |
-|  amrex::Real | [**particle\_cfl**](classNyx.md#variable-particle-cfl)   = = 0.5<br> |
+|  amrex::Real | [**old\_a**](classNyx.md#variable-old-a)   = = -1.0<br>_"a" at old\_a\_time and new\_a\_time_  |
+|  amrex::Real | [**old\_a\_time**](classNyx.md#variable-old-a-time)   = = -1.0<br>_Old and new times at which "old\_a" and "new\_a" are defined._  |
+|  amrex::Real | [**particle\_cfl**](classNyx.md#variable-particle-cfl)   = = 0.5<br>_Default cfl of particles in Particle class._  |
 |  std::string | [**particle\_plotfile\_format**](classNyx.md#variable-particle-plotfile-format)   = = "NATIVE"<br> |
-|  int | [**particle\_verbose**](classNyx.md#variable-particle-verbose)   = = 1<br> |
-|  int | [**print\_fortran\_warnings**](classNyx.md#variable-print-fortran-warnings)   = = true<br> |
-|  amrex::Real | [**relative\_max\_change\_a**](classNyx.md#variable-relative-max-change-a)   = =  0.01<br> |
+|  int | [**particle\_verbose**](classNyx.md#variable-particle-verbose)   = = 1<br>_Default verbosity of Particle class._  |
+|  int | [**print\_fortran\_warnings**](classNyx.md#variable-print-fortran-warnings)   = = true<br>_If true then print the warnings from the Fortran routines._  |
+|  amrex::Real | [**relative\_max\_change\_a**](classNyx.md#variable-relative-max-change-a)   = =  0.01<br>_Relative change in a allowed in one timestep._  |
 |  int | [**strict\_subcycling**](classNyx.md#variable-strict-subcycling)   = = 0<br> |
 |  int | [**write\_coarsened\_particles**](classNyx.md#variable-write-coarsened-particles)   = = 0<br> |
-|  int | [**write\_parameters\_in\_plotfile**](classNyx.md#variable-write-parameters-in-plotfile)   = = true<br> |
+|  int | [**write\_parameters\_in\_plotfile**](classNyx.md#variable-write-parameters-in-plotfile)   = = true<br>_Write all parameters into specified directory._  |
 |  int | [**write\_particle\_density\_at\_init**](classNyx.md#variable-write-particle-density-at-init)   = = 0<br> |
 
 ## Public Functions
@@ -83,13 +84,13 @@ Inherits the following classes: AmrLevel,  AmrLevel
 |  void | [**LevelDirectoryNames**](classNyx.md#function-leveldirectorynames-1-2) (const std::string & dir, const std::string & secondDir, std::string & LevelDir, std::string & FullPath) <br>_Get the level directory names._  |
 |  void | [**Lya\_statistics**](classNyx.md#function-lya-statistics-1-2) () <br> |
 |  void | [**Lya\_statistics**](classNyx.md#function-lya-statistics-1-2) () <br> |
+|   | [**Nyx**](classNyx.md#function-nyx-1-4) () <br>_Default constructor. Builds invalid object._  |
+|   | [**Nyx**](classNyx.md#function-nyx-2-4) (amrex::Amr & papa, int lev, const amrex::Geometry & level\_geom, const amrex::BoxArray & bl, const amrex::DistributionMapping & dm, amrex::Real time) <br>_The basic constructor._  |
 |   | [**Nyx**](classNyx.md#function-nyx-1-4) () <br> |
 |   | [**Nyx**](classNyx.md#function-nyx-2-4) (amrex::Amr & papa, int lev, const amrex::Geometry & level\_geom, const amrex::BoxArray & bl, const amrex::DistributionMapping & dm, amrex::Real time) <br> |
-|   | [**Nyx**](classNyx.md#function-nyx-1-4) () <br> |
-|   | [**Nyx**](classNyx.md#function-nyx-2-4) (amrex::Amr & papa, int lev, const amrex::Geometry & level\_geom, const amrex::BoxArray & bl, const amrex::DistributionMapping & dm, amrex::Real time) <br> |
+|  void | [**ReadPlotFile**](classNyx.md#function-readplotfile-1-2) (bool first, const std::string & plot\_file\_name, bool & rhoe\_infile) <br>_Initialize grid data from a plotfile at problem start-up._  |
 |  void | [**ReadPlotFile**](classNyx.md#function-readplotfile-1-2) (bool first, const std::string & plot\_file\_name, bool & rhoe\_infile) <br> |
-|  void | [**ReadPlotFile**](classNyx.md#function-readplotfile-1-2) (bool first, const std::string & plot\_file\_name, bool & rhoe\_infile) <br> |
-| virtual amrex::Real | [**advance**](classNyx.md#function-advance-1-2) (amrex::Real time, amrex::Real dt, int iteration, int ncycle) <br> |
+| virtual amrex::Real | [**advance**](classNyx.md#function-advance-1-2) (amrex::Real time, amrex::Real dt, int iteration, int ncycle) <br>_Advance grids at this level in time._  |
 | virtual amrex::Real | [**advance**](classNyx.md#function-advance-1-2) (amrex::Real time, amrex::Real dt, int iteration, int ncycle) <br> |
 |  amrex::Real | [**advance\_hydro**](classNyx.md#function-advance-hydro-1-2) (amrex::Real time, amrex::Real dt, int iteration, int ncycle) <br> |
 |  amrex::Real | [**advance\_hydro**](classNyx.md#function-advance-hydro-1-2) (amrex::Real time, amrex::Real dt, int iteration, int ncycle) <br> |
@@ -99,29 +100,29 @@ Inherits the following classes: AmrLevel,  AmrLevel
 |  amrex::Real | [**advance\_no\_hydro**](classNyx.md#function-advance-no-hydro-1-2) (amrex::Real time, amrex::Real dt, int iteration, int ncycle) <br> |
 |  amrex::Real | [**advance\_particles\_only**](classNyx.md#function-advance-particles-only-1-2) (amrex::Real time, amrex::Real dt, int iteration, int ncycle) <br> |
 |  amrex::Real | [**advance\_particles\_only**](classNyx.md#function-advance-particles-only-1-2) (amrex::Real time, amrex::Real dt, int iteration, int ncycle) <br> |
-|  void | [**analysis\_z\_est\_time\_step**](classNyx.md#function-analysis-z-est-time-step-1-2) (amrex::Real & est\_dt, bool & dt\_changed) <br> |
+|  void | [**analysis\_z\_est\_time\_step**](classNyx.md#function-analysis-z-est-time-step-1-2) (amrex::Real & est\_dt, bool & dt\_changed) <br>_Time step control based on "z" not passing one of the specified analysis\_z\_values._  |
 |  void | [**analysis\_z\_est\_time\_step**](classNyx.md#function-analysis-z-est-time-step-1-2) (amrex::Real & est\_dt, bool & dt\_changed) <br> |
 |  amrex::MultiFab \* | [**build\_fine\_mask**](classNyx.md#function-build-fine-mask-1-2) () <br> |
 |  amrex::MultiFab \* | [**build\_fine\_mask**](classNyx.md#function-build-fine-mask-2-2) () <br> |
-| virtual void | [**checkPoint**](classNyx.md#function-checkpoint-1-2) (const std::string & dir, std::ostream & os, amrex::VisMF::How how, bool dump\_old) <br> |
+| virtual void | [**checkPoint**](classNyx.md#function-checkpoint-1-2) (const std::string & dir, std::ostream & os, amrex::VisMF::How how, bool dump\_old) <br>_Call amrex::AmrLevel::checkPoint and then add radiation info._  |
 | virtual void | [**checkPoint**](classNyx.md#function-checkpoint-1-2) (const std::string & dir, std::ostream & os, amrex::VisMF::How how, bool dump\_old) <br> |
 | virtual void | [**checkPointPost**](classNyx.md#function-checkpointpost-1-2) (const std::string & dir, std::ostream & os) <br> |
 | virtual void | [**checkPointPost**](classNyx.md#function-checkpointpost-2-2) (const std::string & dir, std::ostream & os) <br> |
 | virtual void | [**checkPointPre**](classNyx.md#function-checkpointpre-1-2) (const std::string & dir, std::ostream & os) <br> |
 | virtual void | [**checkPointPre**](classNyx.md#function-checkpointpre-2-2) (const std::string & dir, std::ostream & os) <br> |
+|  void | [**comoving\_a\_post\_restart**](classNyx.md#function-comoving-a-post-restart-1-2) (const std::string & restart\_file) <br>_How to initialize "a" at restart (from checkpoint or plotfile)_  |
 |  void | [**comoving\_a\_post\_restart**](classNyx.md#function-comoving-a-post-restart-1-2) (const std::string & restart\_file) <br> |
-|  void | [**comoving\_a\_post\_restart**](classNyx.md#function-comoving-a-post-restart-1-2) (const std::string & restart\_file) <br> |
+|  void | [**comoving\_est\_time\_step**](classNyx.md#function-comoving-est-time-step-1-2) (amrex::Real & cur\_time, amrex::Real & est\_dt) <br>_Time step control based on "a" not growing too fast._  |
 |  void | [**comoving\_est\_time\_step**](classNyx.md#function-comoving-est-time-step-1-2) (amrex::Real & cur\_time, amrex::Real & est\_dt) <br> |
-|  void | [**comoving\_est\_time\_step**](classNyx.md#function-comoving-est-time-step-1-2) (amrex::Real & cur\_time, amrex::Real & est\_dt) <br> |
+| virtual void | [**computeInitialDt**](classNyx.md#function-computeinitialdt-1-2) (int finest\_level, int sub\_cycle, amrex::Vector&lt; int &gt; & n\_cycle, const amrex::Vector&lt; amrex::IntVect &gt; & ref\_ratio, amrex::Vector&lt; amrex::Real &gt; & dt\_level, amrex::Real stop\_time) <br>_Compute initial_  _dt_ _._ |
 | virtual void | [**computeInitialDt**](classNyx.md#function-computeinitialdt-1-2) (int finest\_level, int sub\_cycle, amrex::Vector&lt; int &gt; & n\_cycle, const amrex::Vector&lt; amrex::IntVect &gt; & ref\_ratio, amrex::Vector&lt; amrex::Real &gt; & dt\_level, amrex::Real stop\_time) <br> |
-| virtual void | [**computeInitialDt**](classNyx.md#function-computeinitialdt-1-2) (int finest\_level, int sub\_cycle, amrex::Vector&lt; int &gt; & n\_cycle, const amrex::Vector&lt; amrex::IntVect &gt; & ref\_ratio, amrex::Vector&lt; amrex::Real &gt; & dt\_level, amrex::Real stop\_time) <br> |
-| virtual void | [**computeNewDt**](classNyx.md#function-computenewdt-1-2) (int finest\_level, int sub\_cycle, amrex::Vector&lt; int &gt; & n\_cycle, const amrex::Vector&lt; amrex::IntVect &gt; & ref\_ratio, amrex::Vector&lt; amrex::Real &gt; & dt\_min, amrex::Vector&lt; amrex::Real &gt; & dt\_level, amrex::Real stop\_time, int post\_regrid\_flag) <br> |
+| virtual void | [**computeNewDt**](classNyx.md#function-computenewdt-1-2) (int finest\_level, int sub\_cycle, amrex::Vector&lt; int &gt; & n\_cycle, const amrex::Vector&lt; amrex::IntVect &gt; & ref\_ratio, amrex::Vector&lt; amrex::Real &gt; & dt\_min, amrex::Vector&lt; amrex::Real &gt; & dt\_level, amrex::Real stop\_time, int post\_regrid\_flag) <br>_Compute new_  _dt_ _._ |
 | virtual void | [**computeNewDt**](classNyx.md#function-computenewdt-1-2) (int finest\_level, int sub\_cycle, amrex::Vector&lt; int &gt; & n\_cycle, const amrex::Vector&lt; amrex::IntVect &gt; & ref\_ratio, amrex::Vector&lt; amrex::Real &gt; & dt\_min, amrex::Vector&lt; amrex::Real &gt; & dt\_level, amrex::Real stop\_time, int post\_regrid\_flag) <br> |
 |  void | [**compute\_gas\_fractions**](classNyx.md#function-compute-gas-fractions-1-2) (amrex::Real T\_cut, amrex::Real rho\_cut, amrex::Real & whim\_mass\_frac, amrex::Real & whim\_vol\_frac, amrex::Real & hh\_mass\_frac, amrex::Real & hh\_vol\_frac, amrex::Real & igm\_mass\_frac, amrex::Real & igm\_vol\_frac) <br> |
 |  void | [**compute\_gas\_fractions**](classNyx.md#function-compute-gas-fractions-1-2) (amrex::Real T\_cut, amrex::Real rho\_cut, amrex::Real & whim\_mass\_frac, amrex::Real & whim\_vol\_frac, amrex::Real & hh\_mass\_frac, amrex::Real & hh\_vol\_frac, amrex::Real & igm\_mass\_frac, amrex::Real & igm\_vol\_frac) <br> |
 |  void | [**compute\_hydro\_sources**](classNyx.md#function-compute-hydro-sources-1-2) (amrex::Real time, amrex::Real dt, amrex::Real a\_old, amrex::Real a\_new, amrex::MultiFab & S\_border, amrex::MultiFab & D\_border, amrex::MultiFab & ext\_src\_old, amrex::MultiFab & hydro\_src, amrex::MultiFab & grav, amrex::MultiFab & divu\_cc, bool init\_flux\_register, bool add\_to\_flux\_register) <br> |
 |  void | [**compute\_hydro\_sources**](classNyx.md#function-compute-hydro-sources-1-2) (amrex::Real time, amrex::Real dt, amrex::Real a\_old, amrex::Real a\_new, amrex::MultiFab & S\_border, amrex::MultiFab & D\_border, amrex::MultiFab & ext\_src\_old, amrex::MultiFab & hydro\_src, amrex::MultiFab & grav, amrex::MultiFab & divu\_cc, bool init\_flux\_register, bool add\_to\_flux\_register) <br> |
-|  void | [**compute\_new\_temp**](classNyx.md#function-compute-new-temp-1-2) (amrex::MultiFab & S\_new, amrex::MultiFab & D\_new) <br> |
+|  void | [**compute\_new\_temp**](classNyx.md#function-compute-new-temp-1-2) (amrex::MultiFab & S\_new, amrex::MultiFab & D\_new) <br>_Note: this no longer includes the call to reset\_internal\_energy._  |
 |  void | [**compute\_new\_temp**](classNyx.md#function-compute-new-temp-1-2) (amrex::MultiFab & S\_new, amrex::MultiFab & D\_new) <br> |
 |  void | [**compute\_rho\_temp**](classNyx.md#function-compute-rho-temp-1-2) (amrex::Real & rho\_T\_avg, amrex::Real & T\_avg, amrex::Real & Tinv\_avg, amrex::Real & T\_meanrho) <br> |
 |  void | [**compute\_rho\_temp**](classNyx.md#function-compute-rho-temp-1-2) (amrex::Real & rho\_T\_avg, amrex::Real & T\_avg, amrex::Real & Tinv\_avg, amrex::Real & T\_meanrho) <br> |
@@ -131,15 +132,15 @@ Inherits the following classes: AmrLevel,  AmrLevel
 |  void | [**derive**](classNyx.md#function-derive-2-4) (const std::string & name, amrex::Real time, amrex::MultiFab & mf, int dcomp) <br> |
 |  std::unique\_ptr&lt; amrex::MultiFab &gt; | [**derive**](classNyx.md#function-derive-1-4) (const std::string & name, amrex::Real time, int ngrow) <br> |
 |  void | [**derive**](classNyx.md#function-derive-2-4) (const std::string & name, amrex::Real time, amrex::MultiFab & mf, int dcomp) <br> |
+|  bool | [**doAnalysisNow**](classNyx.md#function-doanalysisnow-1-2) () <br>_Tell_ [_**Nyx**_](classNyx.md) _to do analysis now._ |
 |  bool | [**doAnalysisNow**](classNyx.md#function-doanalysisnow-1-2) () <br> |
-|  bool | [**doAnalysisNow**](classNyx.md#function-doanalysisnow-1-2) () <br> |
+|  void | [**do\_energy\_diagnostics**](classNyx.md#function-do-energy-diagnostics-1-2) () <br>_Print information about energy budget._  |
 |  void | [**do\_energy\_diagnostics**](classNyx.md#function-do-energy-diagnostics-1-2) () <br> |
-|  void | [**do\_energy\_diagnostics**](classNyx.md#function-do-energy-diagnostics-1-2) () <br> |
+| virtual void | [**errorEst**](classNyx.md#function-errorest-1-2) (amrex::TagBoxArray & tb, int clearval, int tagval, amrex::Real time, int n\_error\_buf=0, int ngrow=0) <br>_Error estimation for regridding._  |
 | virtual void | [**errorEst**](classNyx.md#function-errorest-1-2) (amrex::TagBoxArray & tb, int clearval, int tagval, amrex::Real time, int n\_error\_buf=0, int ngrow=0) <br> |
-| virtual void | [**errorEst**](classNyx.md#function-errorest-1-2) (amrex::TagBoxArray & tb, int clearval, int tagval, amrex::Real time, int n\_error\_buf=0, int ngrow=0) <br> |
+|  amrex::Real | [**est\_time\_step**](classNyx.md#function-est-time-step-1-2) (amrex::Real dt\_old) <br>_Estimate time step._  |
 |  amrex::Real | [**est\_time\_step**](classNyx.md#function-est-time-step-1-2) (amrex::Real dt\_old) <br> |
-|  amrex::Real | [**est\_time\_step**](classNyx.md#function-est-time-step-1-2) (amrex::Real dt\_old) <br> |
-|  amrex::Real | [**get\_comoving\_a**](classNyx.md#function-get-comoving-a-1-2) (amrex::Real time) <br> |
+|  amrex::Real | [**get\_comoving\_a**](classNyx.md#function-get-comoving-a-1-2) (amrex::Real time) <br>_Get the comoving coordinate "a"._  |
 |  amrex::Real | [**get\_comoving\_a**](classNyx.md#function-get-comoving-a-1-2) (amrex::Real time) <br> |
 |  void | [**get\_new\_source**](classNyx.md#function-get-new-source-1-2) (amrex::Real old\_time, amrex::Real new\_time, amrex::Real dt, amrex::MultiFab & Rhs) <br> |
 |  void | [**get\_new\_source**](classNyx.md#function-get-new-source-1-2) (amrex::Real old\_time, amrex::Real new\_time, amrex::Real dt, amrex::MultiFab & Rhs) <br> |
@@ -151,21 +152,21 @@ Inherits the following classes: AmrLevel,  AmrLevel
 |  void | [**halo\_find**](classNyx.md#function-halo-find-1-2) (amrex::Real dt) <br> |
 |  void | [**halo\_merge**](classNyx.md#function-halo-merge-1-2) () <br> |
 |  void | [**halo\_merge**](classNyx.md#function-halo-merge-1-2) () <br> |
-| virtual void | [**init**](classNyx.md#function-init-1-4) (amrex::AmrLevel & old) <br> |
-| virtual void | [**init**](classNyx.md#function-init-2-4) () <br> |
+| virtual void | [**init**](classNyx.md#function-init-1-4) (amrex::AmrLevel & old) <br>_Initialize data on this level from another_ [_**Nyx**_](classNyx.md) _(during regrid)._ |
+| virtual void | [**init**](classNyx.md#function-init-2-4) () <br>_Initialize data on this level after regridding if old level did not._  |
 | virtual void | [**init**](classNyx.md#function-init-3-4) (amrex::AmrLevel & old) <br> |
 | virtual void | [**init**](classNyx.md#function-init-4-4) () <br> |
-| virtual void | [**initData**](classNyx.md#function-initdata-1-2) () <br> |
+| virtual void | [**initData**](classNyx.md#function-initdata-1-2) () <br>_Initialize grid data at problem start-up._  |
 | virtual void | [**initData**](classNyx.md#function-initdata-2-2) () <br> |
+|  void | [**init\_from\_plotfile**](classNyx.md#function-init-from-plotfile-1-2) () <br>_Initialize grid data from a plotfile at problem start-up._  |
 |  void | [**init\_from\_plotfile**](classNyx.md#function-init-from-plotfile-1-2) () <br> |
-|  void | [**init\_from\_plotfile**](classNyx.md#function-init-from-plotfile-1-2) () <br> |
-| virtual void | [**init\_particles**](classNyx.md#function-init-particles-1-2) () <br> |
+| virtual void | [**init\_particles**](classNyx.md#function-init-particles-1-2) () <br>_Initialize particle locations and velocities (and strengths if relevant)_  |
 | virtual void | [**init\_particles**](classNyx.md#function-init-particles-2-2) () <br> |
+|  void | [**init\_zhi**](classNyx.md#function-init-zhi-1-2) () <br>_Initialize the zhi component of the EOS from a binary input file._  |
 |  void | [**init\_zhi**](classNyx.md#function-init-zhi-1-2) () <br> |
-|  void | [**init\_zhi**](classNyx.md#function-init-zhi-1-2) () <br> |
+|  void | [**initcosmo**](classNyx.md#function-initcosmo-1-2) () <br>_Initialize from MUSIC._  |
 |  void | [**initcosmo**](classNyx.md#function-initcosmo-1-2) () <br> |
-|  void | [**initcosmo**](classNyx.md#function-initcosmo-1-2) () <br> |
-|  amrex::Real | [**initial\_time\_step**](classNyx.md#function-initial-time-step-1-2) () <br> |
+|  amrex::Real | [**initial\_time\_step**](classNyx.md#function-initial-time-step-1-2) () <br>_Compute initial time step._  |
 |  amrex::Real | [**initial\_time\_step**](classNyx.md#function-initial-time-step-2-2) () <br> |
 |  void | [**integrate\_comoving\_a**](classNyx.md#function-integrate-comoving-a-1-2) (amrex::Real time, amrex::Real dt) <br> |
 |  void | [**integrate\_comoving\_a**](classNyx.md#function-integrate-comoving-a-1-2) (amrex::Real time, amrex::Real dt) <br> |
@@ -183,51 +184,51 @@ Inherits the following classes: AmrLevel,  AmrLevel
 |  void | [**moveKickDriftExact**](classNyx.md#function-movekickdriftexact-1-2) (amrex::Real dt) <br> |
 |  void | [**moveKickExact**](classNyx.md#function-movekickexact-1-2) (amrex::Real dt) <br> |
 |  void | [**moveKickExact**](classNyx.md#function-movekickexact-1-2) (amrex::Real dt) <br> |
-| virtual int | [**okToContinue**](classNyx.md#function-oktocontinue-1-2) () <br> |
+| virtual int | [**okToContinue**](classNyx.md#function-oktocontinue-1-2) () <br>_Proceed with next timestep?_  |
 | virtual int | [**okToContinue**](classNyx.md#function-oktocontinue-2-2) () <br> |
+|  void | [**particle\_check\_point**](classNyx.md#function-particle-check-point-1-2) (const std::string & dir) <br>_Write particles in checkpoint directories._  |
 |  void | [**particle\_check\_point**](classNyx.md#function-particle-check-point-1-2) (const std::string & dir) <br> |
-|  void | [**particle\_check\_point**](classNyx.md#function-particle-check-point-1-2) (const std::string & dir) <br> |
+|  std::unique\_ptr&lt; amrex::MultiFab &gt; | [**particle\_derive**](classNyx.md#function-particle-derive-1-2) (const std::string & name, amrex::Real time, int ngrow) <br>_Derived quantities associated with particles._  |
 |  std::unique\_ptr&lt; amrex::MultiFab &gt; | [**particle\_derive**](classNyx.md#function-particle-derive-1-2) (const std::string & name, amrex::Real time, int ngrow) <br> |
-|  std::unique\_ptr&lt; amrex::MultiFab &gt; | [**particle\_derive**](classNyx.md#function-particle-derive-1-2) (const std::string & name, amrex::Real time, int ngrow) <br> |
+|  void | [**particle\_est\_time\_step**](classNyx.md#function-particle-est-time-step-1-2) (amrex::Real & est\_dt) <br>_Time step control based on particles._  |
 |  void | [**particle\_est\_time\_step**](classNyx.md#function-particle-est-time-step-1-2) (amrex::Real & est\_dt) <br> |
-|  void | [**particle\_est\_time\_step**](classNyx.md#function-particle-est-time-step-1-2) (amrex::Real & est\_dt) <br> |
+|  void | [**particle\_move\_random**](classNyx.md#function-particle-move-random-1-2) () <br>_Move randomly._  |
 |  void | [**particle\_move\_random**](classNyx.md#function-particle-move-random-1-2) () <br> |
-|  void | [**particle\_move\_random**](classNyx.md#function-particle-move-random-1-2) () <br> |
+|  void | [**particle\_plot\_file**](classNyx.md#function-particle-plot-file-1-2) (const std::string & dir) <br>_Write particles in plotfile directories._  |
 |  void | [**particle\_plot\_file**](classNyx.md#function-particle-plot-file-1-2) (const std::string & dir) <br> |
-|  void | [**particle\_plot\_file**](classNyx.md#function-particle-plot-file-1-2) (const std::string & dir) <br> |
+|  void | [**particle\_post\_restart**](classNyx.md#function-particle-post-restart-1-2) (const std::string & restart\_file, bool is\_checkpoint=true) <br>_How to initialize at restart._  |
 |  void | [**particle\_post\_restart**](classNyx.md#function-particle-post-restart-1-2) (const std::string & restart\_file, bool is\_checkpoint=true) <br> |
-|  void | [**particle\_post\_restart**](classNyx.md#function-particle-post-restart-1-2) (const std::string & restart\_file, bool is\_checkpoint=true) <br> |
+|  void | [**particle\_redistribute**](classNyx.md#function-particle-redistribute-1-2) (int lbase=0, bool init=false) <br>_Redistribute._  |
 |  void | [**particle\_redistribute**](classNyx.md#function-particle-redistribute-1-2) (int lbase=0, bool init=false) <br> |
-|  void | [**particle\_redistribute**](classNyx.md#function-particle-redistribute-1-2) (int lbase=0, bool init=false) <br> |
+|  void | [**plot\_z\_est\_time\_step**](classNyx.md#function-plot-z-est-time-step-1-2) (amrex::Real & est\_dt, bool & dt\_changed) <br>_Time step control based on "z" not passing one of the specified plot\_z\_values._  |
 |  void | [**plot\_z\_est\_time\_step**](classNyx.md#function-plot-z-est-time-step-1-2) (amrex::Real & est\_dt, bool & dt\_changed) <br> |
-|  void | [**plot\_z\_est\_time\_step**](classNyx.md#function-plot-z-est-time-step-1-2) (amrex::Real & est\_dt, bool & dt\_changed) <br> |
+| virtual void | [**postCoarseTimeStep**](classNyx.md#function-postcoarsetimestep-1-2) (amrex::Real cumtime) <br>_Contains operations to be done only after a full coarse timestep._  |
 | virtual void | [**postCoarseTimeStep**](classNyx.md#function-postcoarsetimestep-1-2) (amrex::Real cumtime) <br> |
-| virtual void | [**postCoarseTimeStep**](classNyx.md#function-postcoarsetimestep-1-2) (amrex::Real cumtime) <br> |
+| virtual void | [**post\_init**](classNyx.md#function-post-init-1-2) (amrex::Real stop\_time) <br>_Do work after_ `init()` _._ |
 | virtual void | [**post\_init**](classNyx.md#function-post-init-1-2) (amrex::Real stop\_time) <br> |
-| virtual void | [**post\_init**](classNyx.md#function-post-init-1-2) (amrex::Real stop\_time) <br> |
-| virtual void | [**post\_regrid**](classNyx.md#function-post-regrid-1-2) (int lbase, int new\_finest) <br> |
+| virtual void | [**post\_regrid**](classNyx.md#function-post-regrid-1-2) (int lbase, int new\_finest) <br>_Do work after_ `regrid()` _._ |
 | virtual void | [**post\_regrid**](classNyx.md#function-post-regrid-2-2) (int lbase, int new\_finest) <br> |
-| virtual void | [**post\_restart**](classNyx.md#function-post-restart-1-2) () <br> |
+| virtual void | [**post\_restart**](classNyx.md#function-post-restart-1-2) () <br>_Do work after a_ `restart()` _._ |
 | virtual void | [**post\_restart**](classNyx.md#function-post-restart-2-2) () <br> |
-| virtual void | [**post\_timestep**](classNyx.md#function-post-timestep-1-2) (int iteration) <br> |
+| virtual void | [**post\_timestep**](classNyx.md#function-post-timestep-1-2) (int iteration) <br>_Do work after timestep()._  |
 | virtual void | [**post\_timestep**](classNyx.md#function-post-timestep-2-2) (int iteration) <br> |
 |  void | [**primitive\_to\_conserved**](classNyx.md#function-primitive-to-conserved-1-2) (amrex::MultiFab & state) <br> |
 |  void | [**primitive\_to\_conserved**](classNyx.md#function-primitive-to-conserved-1-2) (amrex::MultiFab & state) <br> |
+|  void | [**remove\_ghost\_particles**](classNyx.md#function-remove-ghost-particles-1-2) () <br>_Remove ghost particles (for this level) if necessary._  |
 |  void | [**remove\_ghost\_particles**](classNyx.md#function-remove-ghost-particles-1-2) () <br> |
-|  void | [**remove\_ghost\_particles**](classNyx.md#function-remove-ghost-particles-1-2) () <br> |
+|  void | [**remove\_virtual\_particles**](classNyx.md#function-remove-virtual-particles-1-2) () <br>_Remove virtual particles if necessary._  |
 |  void | [**remove\_virtual\_particles**](classNyx.md#function-remove-virtual-particles-1-2) () <br> |
-|  void | [**remove\_virtual\_particles**](classNyx.md#function-remove-virtual-particles-1-2) () <br> |
+|  void | [**reset\_internal\_energy**](classNyx.md#function-reset-internal-energy-1-2) (amrex::MultiFab & State, amrex::MultiFab & DiagEOS, amrex::MultiFab & reset\_e\_src) <br>_Synchronize (rho e) and (rho E) so they are consistent with each other._  |
 |  void | [**reset\_internal\_energy**](classNyx.md#function-reset-internal-energy-1-2) (amrex::MultiFab & State, amrex::MultiFab & DiagEOS, amrex::MultiFab & reset\_e\_src) <br> |
-|  void | [**reset\_internal\_energy**](classNyx.md#function-reset-internal-energy-1-2) (amrex::MultiFab & State, amrex::MultiFab & DiagEOS, amrex::MultiFab & reset\_e\_src) <br> |
-| virtual void | [**restart**](classNyx.md#function-restart-1-2) (amrex::Amr & papa, istream & is, bool b\_read\_special=false) <br> |
+| virtual void | [**restart**](classNyx.md#function-restart-1-2) (amrex::Amr & papa, istream & is, bool b\_read\_special=false) <br>_Restart from a checkpoint file._  |
 | virtual void | [**restart**](classNyx.md#function-restart-1-2) (amrex::Amr & papa, istream & is, bool b\_read\_special=false) <br> |
 | virtual void | [**setPlotVariables**](classNyx.md#function-setplotvariables-1-2) () <br> |
 | virtual void | [**setPlotVariables**](classNyx.md#function-setplotvariables-2-2) () <br> |
+| virtual void | [**setTimeLevel**](classNyx.md#function-settimelevel-1-2) (amrex::Real time, amrex::Real dt\_old, amrex::Real dt\_new) <br>_Set time levels of state data._  |
 | virtual void | [**setTimeLevel**](classNyx.md#function-settimelevel-1-2) (amrex::Real time, amrex::Real dt\_old, amrex::Real dt\_new) <br> |
-| virtual void | [**setTimeLevel**](classNyx.md#function-settimelevel-1-2) (amrex::Real time, amrex::Real dt\_old, amrex::Real dt\_new) <br> |
+|  void | [**setup\_ghost\_particles**](classNyx.md#function-setup-ghost-particles-1-2) (int ngrow) <br>_Setup ghost particles (for finer levels) if necessary._  |
 |  void | [**setup\_ghost\_particles**](classNyx.md#function-setup-ghost-particles-1-2) (int ngrow) <br> |
-|  void | [**setup\_ghost\_particles**](classNyx.md#function-setup-ghost-particles-1-2) (int ngrow) <br> |
-|  void | [**setup\_virtual\_particles**](classNyx.md#function-setup-virtual-particles-1-2) () <br> |
+|  void | [**setup\_virtual\_particles**](classNyx.md#function-setup-virtual-particles-1-2) () <br>_Setup virtual particles if necessary._  |
 |  void | [**setup\_virtual\_particles**](classNyx.md#function-setup-virtual-particles-1-2) () <br> |
 |  void | [**strang\_first\_step**](classNyx.md#function-strang-first-step-1-2) (amrex::Real time, amrex::Real dt, amrex::MultiFab & state, amrex::MultiFab & dstate) <br> |
 |  void | [**strang\_first\_step**](classNyx.md#function-strang-first-step-1-2) (amrex::Real time, amrex::Real dt, amrex::MultiFab & state, amrex::MultiFab & dstate) <br> |
@@ -251,19 +252,19 @@ Inherits the following classes: AmrLevel,  AmrLevel
 |  amrex::Real | [**vol\_weight\_sum**](classNyx.md#function-vol-weight-sum-2-4) (amrex::MultiFab & mf, bool masked) <br> |
 |  void | [**writeJobInfo**](classNyx.md#function-writejobinfo-1-2) (const std::string & dir) <br> |
 |  void | [**writeJobInfo**](classNyx.md#function-writejobinfo-1-2) (const std::string & dir) <br> |
+|  void | [**writeMultiFabAsPlotFile**](classNyx.md#function-writemultifabasplotfile-1-2) (const std::string & pltfile, const amrex::MultiFab & mf, std::string componentName) <br>_Write amrex::MultiFab as plot file._  |
 |  void | [**writeMultiFabAsPlotFile**](classNyx.md#function-writemultifabasplotfile-1-2) (const std::string & pltfile, const amrex::MultiFab & mf, std::string componentName) <br> |
-|  void | [**writeMultiFabAsPlotFile**](classNyx.md#function-writemultifabasplotfile-1-2) (const std::string & pltfile, const amrex::MultiFab & mf, std::string componentName) <br> |
-| virtual void | [**writePlotFile**](classNyx.md#function-writeplotfile-1-2) (const std::string & dir, ostream & os, amrex::VisMF::How how) <br> |
+| virtual void | [**writePlotFile**](classNyx.md#function-writeplotfile-1-2) (const std::string & dir, ostream & os, amrex::VisMF::How how) <br>_Write a plotfile to specified directory._  |
 | virtual void | [**writePlotFile**](classNyx.md#function-writeplotfile-1-2) (const std::string & dir, ostream & os, amrex::VisMF::How how) <br> |
 | virtual void | [**writePlotFilePost**](classNyx.md#function-writeplotfilepost-1-2) (const std::string & dir, ostream & os) <br> |
 | virtual void | [**writePlotFilePost**](classNyx.md#function-writeplotfilepost-2-2) (const std::string & dir, ostream & os) <br> |
 | virtual void | [**writePlotFilePre**](classNyx.md#function-writeplotfilepre-1-2) (const std::string & dir, ostream & os) <br> |
 | virtual void | [**writePlotFilePre**](classNyx.md#function-writeplotfilepre-2-2) (const std::string & dir, ostream & os) <br> |
-|  bool | [**writePlotNow**](classNyx.md#function-writeplotnow-1-2) () <br> |
+|  bool | [**writePlotNow**](classNyx.md#function-writeplotnow-1-2) () <br>_Tell amrex::Amr to write a plotfile now._  |
 |  bool | [**writePlotNow**](classNyx.md#function-writeplotnow-1-2) () <br> |
 | virtual void | [**write\_parameter\_file**](classNyx.md#function-write-parameter-file-1-2) (const std::string & dir) <br> |
 | virtual void | [**write\_parameter\_file**](classNyx.md#function-write-parameter-file-2-2) (const std::string & dir) <br> |
-| virtual  | [**~Nyx**](classNyx.md#function-nyx-1-2) () <br> |
+| virtual  | [**~Nyx**](classNyx.md#function-nyx-1-2) () <br>_The destructor._  |
 | virtual  | [**~Nyx**](classNyx.md#function-nyx-2-2) () <br> |
 
 ## Public Static Functions
@@ -280,7 +281,7 @@ Inherits the following classes: AmrLevel,  AmrLevel
 |  void | [**alloc\_simd\_vec**](classNyx.md#function-alloc-simd-vec-1-2) () <br> |
 |  void | [**dealloc\_simd\_vec**](classNyx.md#function-dealloc-simd-vec-1-2) () <br> |
 |  void | [**dealloc\_simd\_vec**](classNyx.md#function-dealloc-simd-vec-1-2) () <br> |
-|  void | [**error\_setup**](classNyx.md#function-error-setup-1-2) () <br> |
+|  void | [**error\_setup**](classNyx.md#function-error-setup-1-2) () <br>_Define tagging functions._  |
 |  void | [**error\_setup**](classNyx.md#function-error-setup-2-2) () <br> |
 |  void | [**hydro\_setup**](classNyx.md#function-hydro-setup-1-2) () <br> |
 |  void | [**hydro\_setup**](classNyx.md#function-hydro-setup-2-2) () <br> |
@@ -288,11 +289,11 @@ Inherits the following classes: AmrLevel,  AmrLevel
 |  void | [**no\_hydro\_setup**](classNyx.md#function-no-hydro-setup-1-2) () <br> |
 |  int | [**num\_grow**](classNyx.md#function-num-grow-1-2) () <br> |
 |  int | [**num\_grow**](classNyx.md#function-num-grow-2-2) () <br> |
-|  void | [**read\_comoving\_params**](classNyx.md#function-read-comoving-params-1-2) () <br> |
+|  void | [**read\_comoving\_params**](classNyx.md#function-read-comoving-params-1-2) () <br>_Read inputs related to comoving coordinates._  |
 |  void | [**read\_comoving\_params**](classNyx.md#function-read-comoving-params-2-2) () <br> |
-|  void | [**read\_init\_params**](classNyx.md#function-read-init-params-1-2) () <br> |
+|  void | [**read\_init\_params**](classNyx.md#function-read-init-params-1-2) () <br>_Read initialization-related inputs._  |
 |  void | [**read\_init\_params**](classNyx.md#function-read-init-params-2-2) () <br> |
-|  void | [**read\_particle\_params**](classNyx.md#function-read-particle-params-1-2) () <br> |
+|  void | [**read\_particle\_params**](classNyx.md#function-read-particle-params-1-2) () <br>_Read particle-related inputs._  |
 |  void | [**read\_particle\_params**](classNyx.md#function-read-particle-params-2-2) () <br> |
 |  void | [**set\_simd\_width**](classNyx.md#function-set-simd-width-1-2) (const int simd\_width) <br> |
 |  void | [**set\_simd\_width**](classNyx.md#function-set-simd-width-1-2) (const int simd\_width) <br> |
@@ -314,9 +315,9 @@ Inherits the following classes: AmrLevel,  AmrLevel
 |  [**StellarParticleContainer**](classNyxParticleContainer.md) \* | [**theVirtSPC**](classNyx.md#function-thevirtspc-2-2) () <br> |
 |  amrex::Vector&lt; [**NyxParticleContainerBase**](classNyxParticleContainerBase.md) \* &gt; & | [**theVirtualParticles**](classNyx.md#function-thevirtualparticles-1-2) () <br> |
 |  amrex::Vector&lt; [**NyxParticleContainerBase**](classNyxParticleContainerBase.md) \* &gt; & | [**theVirtualParticles**](classNyx.md#function-thevirtualparticles-2-2) () <br> |
-|  void | [**variable\_cleanup**](classNyx.md#function-variable-cleanup-1-2) () <br> |
+|  void | [**variable\_cleanup**](classNyx.md#function-variable-cleanup-1-2) () <br>_Cleanup data descriptors at end of run._  |
 |  void | [**variable\_cleanup**](classNyx.md#function-variable-cleanup-2-2) () <br> |
-|  void | [**variable\_setup**](classNyx.md#function-variable-setup-1-2) () <br> |
+|  void | [**variable\_setup**](classNyx.md#function-variable-setup-1-2) () <br>_Define data descriptors._  |
 |  void | [**variable\_setup**](classNyx.md#function-variable-setup-2-2) () <br> |
 
 
@@ -325,7 +326,7 @@ Inherits the following classes: AmrLevel,  AmrLevel
 
 | Type | Name |
 | ---: | :--- |
-|  bool | [**FillPatchedOldState\_ok**](classNyx.md#variable-fillpatchedoldstate-ok)  <br> |
+|  bool | [**FillPatchedOldState\_ok**](classNyx.md#variable-fillpatchedoldstate-ok)  <br>_These are the value of "z" at which to perform analysis._  |
 |  amrex::FluxRegister \* | [**flux\_reg**](classNyx.md#variable-flux-reg)  <br> |
 
 ## Protected Static Attributes
@@ -334,9 +335,9 @@ Inherits the following classes: AmrLevel,  AmrLevel
 | ---: | :--- |
 |  int | [**NUM\_GROW**](classNyx.md#variable-num-grow)   = = -1<br> |
 |  amrex::IntVect | [**Nrep**](classNyx.md#variable-nrep)  <br> |
-|  int | [**add\_ext\_src**](classNyx.md#variable-add-ext-src)   = = 0<br> |
+|  int | [**add\_ext\_src**](classNyx.md#variable-add-ext-src)   = = 0<br>_if true, define an additional source term_  |
 |  int | [**allow\_untagging**](classNyx.md#variable-allow-untagging)   = = 0<br> |
-|  amrex::Vector&lt; amrex::Real &gt; | [**analysis\_z\_values**](classNyx.md#variable-analysis-z-values)  <br> |
+|  amrex::Vector&lt; amrex::Real &gt; | [**analysis\_z\_values**](classNyx.md#variable-analysis-z-values)  <br>_These are the value of "z" at which to dump plotfiles._  |
 |  amrex::Real | [**average\_dm\_density**](classNyx.md#variable-average-dm-density)   = = 0<br> |
 |  amrex::Real | [**average\_gas\_density**](classNyx.md#variable-average-gas-density)   = = 0<br> |
 |  amrex::Real | [**average\_neutr\_density**](classNyx.md#variable-average-neutr-density)   = = 0<br> |
@@ -345,9 +346,9 @@ Inherits the following classes: AmrLevel,  AmrLevel
 |  amrex::Real | [**change\_max**](classNyx.md#variable-change-max)   = = 1.1<br> |
 |  int | [**corner\_coupling**](classNyx.md#variable-corner-coupling)   = = 1<br> |
 |  bool | [**do\_dm\_particles**](classNyx.md#variable-do-dm-particles)   = = false<br> |
-|  int | [**do\_forcing**](classNyx.md#variable-do-forcing)   = =  0<br> |
-|  int | [**do\_grav**](classNyx.md#variable-do-grav)   = =  0<br> |
-|  int | [**do\_hydro**](classNyx.md#variable-do-hydro)   = = -1<br> |
+|  int | [**do\_forcing**](classNyx.md#variable-do-forcing)   = =  0<br>_permits forcing to be switched on and off_  |
+|  int | [**do\_grav**](classNyx.md#variable-do-grav)   = =  0<br>_permits gravity calculation to be turned on and off_  |
+|  int | [**do\_hydro**](classNyx.md#variable-do-hydro)   = = -1<br>_permits hydro to be turned on and off for running pure rad problems:_  |
 |  int | [**do\_reflux**](classNyx.md#variable-do-reflux)   = = 1<br> |
 |  int | [**do\_special\_tagging**](classNyx.md#variable-do-special-tagging)   = = 0<br> |
 |  bool | [**dump\_old**](classNyx.md#variable-dump-old)   = = false<br> |
@@ -355,9 +356,9 @@ Inherits the following classes: AmrLevel,  AmrLevel
 |  amrex::Real | [**gamma**](classNyx.md#variable-gamma)   = =  0<br> |
 |  amrex::Real | [**h\_species**](classNyx.md#variable-h-species)   = = 0.0<br> |
 |  amrex::Real | [**he\_species**](classNyx.md#variable-he-species)   = = 0.0<br> |
-|  int | [**heat\_cool\_type**](classNyx.md#variable-heat-cool-type)   = = 0<br> |
+|  int | [**heat\_cool\_type**](classNyx.md#variable-heat-cool-type)   = = 0<br>_specifies the heating/cooling source term_  |
 |  int | [**inhomo\_grid**](classNyx.md#variable-inhomo-grid)   = = -1<br> |
-|  int | [**inhomo\_reion**](classNyx.md#variable-inhomo-reion)   = = 0<br> |
+|  int | [**inhomo\_reion**](classNyx.md#variable-inhomo-reion)   = = 0<br>_specifies inhomogeneous reionization type_  |
 |  std::string | [**inhomo\_zhi\_file**](classNyx.md#variable-inhomo-zhi-file)   = = ""<br> |
 |  amrex::Real | [**init\_shrink**](classNyx.md#variable-init-shrink)   = = 1.0<br> |
 |  int | [**normalize\_species**](classNyx.md#variable-normalize-species)   = = 0<br> |
@@ -372,7 +373,7 @@ Inherits the following classes: AmrLevel,  AmrLevel
 |  std::string | [**particle\_move\_type**](classNyx.md#variable-particle-move-type)   = = ""<br> |
 |  int | [**particle\_skip\_factor**](classNyx.md#variable-particle-skip-factor)   = = 1<br> |
 |  amrex::BCRec | [**phys\_bc**](classNyx.md#variable-phys-bc)  <br> |
-|  amrex::Vector&lt; amrex::Real &gt; | [**plot\_z\_values**](classNyx.md#variable-plot-z-values)  <br> |
+|  amrex::Vector&lt; amrex::Real &gt; | [**plot\_z\_values**](classNyx.md#variable-plot-z-values)  <br>_how many times the initial conditions are replicated in each direction_  |
 |  int | [**ppm\_flatten\_before\_integrals**](classNyx.md#variable-ppm-flatten-before-integrals)   = = 0<br> |
 |  int | [**ppm\_reference**](classNyx.md#variable-ppm-reference)   = = 1<br> |
 |  int | [**ppm\_type**](classNyx.md#variable-ppm-type)   = = 1<br> |
@@ -380,7 +381,7 @@ Inherits the following classes: AmrLevel,  AmrLevel
 |  amrex::Real | [**small\_dens**](classNyx.md#variable-small-dens)   = = -1.e200<br> |
 |  amrex::Real | [**small\_temp**](classNyx.md#variable-small-temp)   = = -1.e200<br> |
 |  amrex::Real | [**startCPUTime**](classNyx.md#variable-startcputime)   = = 0.0<br> |
-|  int | [**strang\_split**](classNyx.md#variable-strang-split)   = = 1<br> |
+|  int | [**strang\_split**](classNyx.md#variable-strang-split)   = = 1<br>_if true , incorporate the source term through Strang-splitting_  |
 |  int | [**use\_colglaz**](classNyx.md#variable-use-colglaz)   = = 0<br> |
 |  int | [**use\_const\_species**](classNyx.md#variable-use-const-species)   = = 0<br> |
 |  int | [**use\_exact\_gravity**](classNyx.md#variable-use-exact-gravity)   = = 0<br> |
@@ -791,6 +792,10 @@ int Nyx::write_coarsened_particles;
 ```
 
 
+Shall we write an ascii file with only the particles in every other cell  this is a cheap way of creating a "coarser" particle file 
+
+
+        
 
 ### <a href="#variable-write-parameters-in-plotfile" id="variable-write-parameters-in-plotfile">variable write\_parameters\_in\_plotfile </a>
 
@@ -809,6 +814,10 @@ int Nyx::write_particle_density_at_init;
 ```
 
 
+Shall we write the initial single-level particle density into a multifab called "ParticleDensity"? 
+
+
+        
 ## Public Functions Documentation
 
 
@@ -1494,6 +1503,10 @@ std::unique_ptr< amrex::MultiFab > Nyx::derive (
 ```
 
 
+Returns a amrex::MultiFab containing the derived data for this level. The user is responsible for deleting this pointer when done with it. If `ngrow` &gt; 0 the amrex::MultiFab is built on the appropriately grown amrex::BoxArray. 
+
+
+        
 
 ### <a href="#function-derive-2-4" id="function-derive-2-4">function derive [2/4]</a>
 
@@ -1508,6 +1521,10 @@ void Nyx::derive (
 ```
 
 
+This version of `derive()` fills the dcomp'th component of mf with the derived quantity. 
+
+
+        
 
 ### <a href="#function-derive-1-4" id="function-derive-1-4">function derive [1/4]</a>
 
@@ -2059,6 +2076,10 @@ virtual void Nyx::manual_tags_placement (
 ```
 
 
+Called in grid\_places after other tagging routines to modify the list of tagged points 
+
+
+        
 
 ### <a href="#function-manual-tags-placement-1-2" id="function-manual-tags-placement-1-2">function manual\_tags\_placement [1/2]</a>
 
@@ -2710,6 +2731,10 @@ virtual std::string Nyx::thePlotFileType () const
 ```
 
 
+A string written as the first item in `write_plot_file()` at level zero. It is so we can distinguish between different types of plot files. For [**Nyx**](classNyx.md) it has the form: Nyx-Vnnn. 
+
+
+        
 
 ### <a href="#function-theplotfiletype-2-2" id="function-theplotfiletype-2-2">function thePlotFileType [2/2]</a>
 
@@ -3811,6 +3836,10 @@ std::string Nyx::particle_init_type;
 ```
 
 
+How do we want to initialize the particles? Must be "Random", "Cosmological" or "AsciiFile" 
+
+
+        
 
 ### <a href="#variable-particle-initrandom-count" id="variable-particle-initrandom-count">variable particle\_initrandom\_count </a>
 
@@ -3865,6 +3894,10 @@ std::string Nyx::particle_move_type;
 ```
 
 
+How do we want to move the particles? Must be "Random" or "Gravitational" 
+
+
+        
 
 ### <a href="#variable-particle-skip-factor" id="variable-particle-skip-factor">variable particle\_skip\_factor </a>
 
@@ -3928,6 +3961,10 @@ static amrex::Real Nyx::previousCPUTimeUsed;
 ```
 
 
+for keeping track of the amount of CPU time used  this will persist after restarts 
+
+
+        
 
 ### <a href="#variable-small-dens" id="variable-small-dens">variable small\_dens </a>
 

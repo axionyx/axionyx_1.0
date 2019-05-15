@@ -8,7 +8,7 @@ Here are the classes, structs, unions and interfaces with brief descriptions:
 * **class** [**DarkMatterParticleContainer**](classDarkMatterParticleContainer.md)   
 * **class** [**Gravity**](classGravity.md)   
 * **class** [**MemInfo**](classMemInfo.md)   
-* **class** [**Nyx**](classNyx.md)   
+* **class** [**Nyx**](classNyx.md) _AmrLevel-derived class for hyperbolic conservation equations for stellar media._   
 * **class** [**NyxBld**](classNyxBld.md)   
 * **class** [**NyxParticleContainer**](classNyxParticleContainer.md)   
 * **class** [**NyxParticleContainerBase**](classNyxParticleContainerBase.md)   

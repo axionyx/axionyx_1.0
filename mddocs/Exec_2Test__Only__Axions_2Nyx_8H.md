@@ -29,7 +29,7 @@
 
 | Type | Name |
 | ---: | :--- |
-| class | [**Nyx**](classNyx.md) <br> |
+| class | [**Nyx**](classNyx.md) <br>_AmrLevel-derived class for hyperbolic conservation equations for stellar media._  |
 
 ## Public Types
 
@@ -43,8 +43,8 @@
 
 | Type | Name |
 | ---: | :--- |
-|  int | [**gimlet\_int**](Exec_2Test__Only__Axions_2Nyx_8H.md#variable-gimlet-int)  <br> |
-|  int | [**reeber\_int**](Exec_2Test__Only__Axions_2Nyx_8H.md#variable-reeber-int)  <br> |
+|  int | [**gimlet\_int**](Exec_2Test__Only__Axions_2Nyx_8H.md#variable-gimlet-int)  <br>_time step interval for doing Gimlet post-processing_  |
+|  int | [**reeber\_int**](Exec_2Test__Only__Axions_2Nyx_8H.md#variable-reeber-int)  <br>_time step interval for finding halos_  |
 
 
 

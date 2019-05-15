@@ -12,7 +12,7 @@ namespace amrex {
 
 const char* buildInfoGetBuildDate() {
 
-  static const char BUILD_DATE[] = "2019-05-15 12:11:11.816876";
+  static const char BUILD_DATE[] = "2019-05-15 13:58:10.240352";
   return BUILD_DATE;
 }
 
@@ -42,7 +42,7 @@ const char* buildInfoGetComp() {
 
 const char* buildInfoGetCompVersion() {
 
-  static const char COMP_VERSION[] = "";
+  static const char COMP_VERSION[] = "17.0.2";
   return COMP_VERSION;
 }
 
@@ -74,7 +74,7 @@ const char* buildInfoGetFName() {
 
 const char* buildInfoGetCXXFlags() {
 
-  static const char CXX_flags[] = " -g -O2 -ip -qopt-report=5 -qopt-report-phase=vec -std=c++14  -qopenmp -DNDEBUG -DBL_USE_MPI -DAMREX_USE_MPI -DBL_USE_OMP -DAMREX_USE_OMP -DAMREX_GIT_VERSION=\"19.05-2-gdf41312c9566-dirty\" -DAMREX_LAUNCH= -DAMREX_DEVICE= -DAMREX_CUDA_FORT_GLOBAL= -DAMREX_CUDA_FORT_DEVICE= -DAMREX_CUDA_FORT_HOST= -DBL_SPACEDIM=3 -DAMREX_SPACEDIM=3 -DBL_FORT_USE_UNDERSCORE -DAMREX_FORT_USE_UNDERSCORE -DBL_Linux -DAMREX_Linux -DAMREX_PARTICLES -DCRSEGRNDOMP -DGRAVITY -DCGRAV -DFDM -DBL_NOLINEVALUES -I. -I/usr/users/cbehren2/local/include -I../../../amrex/Src/Extern/SWFFT -I/usr/lib/x86_64-linux-gnu/../include -I. -I../../Source -I../../Source/Src_3d -I../../Source/HydroFortran -I../../Source/Tagging -I../../Source/Initialization -I../../Source/EOS -I../../Source/Network -I../../Source/HeatCool -I../../Source/SourceTerms -I../../Source/DerivedQuantities -I../../Source/Monitors -I../../Source/Gravity -I../../../amrex/Src/Base -I../../../amrex/Src/AmrCore -I../../../amrex/Src/Amr -I../../../amrex/Src/Boundary -I../../../amrex/Src/Particle -I../../../amrex/Src/Extern/amrdata -I../../../amrex/Src/Base -I../../../amrex/Src/AmrCore -I../../../amrex/Src/Amr -I../../../amrex/Src/Boundary -I../../../amrex/Src/Particle -I../../../amrex/Src/Extern/amrdata -I../../Source/Constants -I../../../amrex/Src/LinearSolvers/C_CellMG -I../../../amrex/Src/LinearSolvers/C_CellMG -I../../../amrex/Src/LinearSolvers/MLMG -I../../../amrex/Src/LinearSolvers/MLMG -I../../Util/VODE -I../../Util/BLAS -I../../../amrex/Tools/C_scripts";
+  static const char CXX_flags[] = " -g -O2 -ip -qopt-report=5 -qopt-report-phase=vec -std=c++14  -qopenmp -DNDEBUG -DBL_USE_MPI -DAMREX_USE_MPI -DBL_USE_OMP -DAMREX_USE_OMP -DAMREX_GIT_VERSION=\"19.05-2-gdf41312c9566-dirty\" -DAMREX_LAUNCH= -DAMREX_DEVICE= -DAMREX_CUDA_FORT_GLOBAL= -DAMREX_CUDA_FORT_DEVICE= -DAMREX_CUDA_FORT_HOST= -DBL_SPACEDIM=3 -DAMREX_SPACEDIM=3 -DBL_FORT_USE_UNDERSCORE -DAMREX_FORT_USE_UNDERSCORE -DBL_Linux -DAMREX_Linux -DAMREX_PARTICLES -DCRSEGRNDOMP -DGRAVITY -DCGRAV -DFDM -DBL_NOLINEVALUES -I. -I/usr/users/cbehren2/local/include -I../../../amrex/Src/Extern/SWFFT -I/usr/users/cbehren2/local_libs/lib/../include -I. -I../../Source -I../../Source/Src_3d -I../../Source/HydroFortran -I../../Source/Tagging -I../../Source/Initialization -I../../Source/EOS -I../../Source/Network -I../../Source/HeatCool -I../../Source/SourceTerms -I../../Source/DerivedQuantities -I../../Source/Monitors -I../../Source/Gravity -I../../../amrex/Src/Base -I../../../amrex/Src/AmrCore -I../../../amrex/Src/Amr -I../../../amrex/Src/Boundary -I../../../amrex/Src/Particle -I../../../amrex/Src/Extern/amrdata -I../../../amrex/Src/Base -I../../../amrex/Src/AmrCore -I../../../amrex/Src/Amr -I../../../amrex/Src/Boundary -I../../../amrex/Src/Particle -I../../../amrex/Src/Extern/amrdata -I../../Source/Constants -I../../../amrex/Src/LinearSolvers/C_CellMG -I../../../amrex/Src/LinearSolvers/C_CellMG -I../../../amrex/Src/LinearSolvers/MLMG -I../../../amrex/Src/LinearSolvers/MLMG -I../../Util/VODE -I../../Util/BLAS -I../../../amrex/Tools/C_scripts";
   return CXX_flags;
 }
 
@@ -92,7 +92,7 @@ const char* buildInfoGetLinkFlags() {
 
 const char* buildInfoGetLibraries() {
 
-  static const char libraries[] = "-L/usr/users/cbehren2/local/lib -lfftw3_mpi -lfftw3 -lfftw3_omp -L/usr/lib/x86_64-linux-gnu -fopenmp -march=nocona -mtune=haswell -fPIC -fstack-protector-strong -O2 -pipe -Wl,-O2 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now -Wl,-rpath,/usr/users/cbehren2/anaconda2/lib -L/usr/users/cbehren2/anaconda2/lib -I/usr/users/cbehren2/anaconda2/include -I/usr/users/cbehren2/anaconda2/include -L/usr/users/cbehren2/anaconda2/lib -lmpichf90 -Wl,-rpath -Wl,/usr/users/cbehren2/anaconda2/lib -lmpichf90 -lmpich -lopa -lmpl -lrt -lpthread -lifcore -lifcoremt";
+  static const char libraries[] = "-L/usr/users/cbehren2/local/lib -lfftw3_mpi -lfftw3 -lfftw3_omp -L/usr/users/cbehren2/local_libs/lib  -lifcore -lifcoremt";
   return libraries;
 }
 
@@ -145,7 +145,7 @@ const char* buildInfoGetModuleVal(int i) {
 const char* buildInfoGetGitHash(int i) {
 
   //static const char HASH1[] = "${GIT[1]}";
-  static const char HASH1[] = "18.05-225-g77842af-dirty";
+  static const char HASH1[] = "18.05-227-gd8a4aae-dirty";
   static const char HASH2[] = "19.05-2-gdf41312-dirty";
 
   static const char EMPT[] = "";

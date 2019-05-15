@@ -20,7 +20,7 @@ This inheritance list is sorted roughly, but not completely, alphabetically:
   * **class** [**NyxParticleContainer**](classNyxParticleContainer.md) 
   * **class** [**NyxParticleContainer**](classNyxParticleContainer.md) 
 * **class** **AmrLevel**  
-  * **class** [**Nyx**](classNyx.md) 
-  * **class** [**Nyx**](classNyx.md) 
+  * **class** [**Nyx**](classNyx.md) _AmrLevel-derived class for hyperbolic conservation equations for stellar media._ 
+  * **class** [**Nyx**](classNyx.md) _AmrLevel-derived class for hyperbolic conservation equations for stellar media._ 
 * **class** **LevelBld**  
   * **class** [**NyxBld**](classNyxBld.md) 
