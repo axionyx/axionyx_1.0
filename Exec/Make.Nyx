@@ -212,3 +212,7 @@ include $(AMREX_HOME)/Tools/GNUMake/Make.rules
 
 clean::
 	$(SILENT) $(RM) AMReX_buildInfo.cpp
+make mddoc:
+	cd ../../mddocs;sh make_doc.sh
+	python ../../mddocs/parameter_documentation.py
+	git add ../../mddocs
