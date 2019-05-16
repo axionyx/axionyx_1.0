@@ -32,12 +32,12 @@ void Nyx::advance_FDM_FD (amrex::Real time,
                       amrex::Real a_old,
                       amrex::Real a_new)
 {
-    amrex::Real se, ske;
+    // amrex::Real se, ske;
     const amrex::Real prev_time    = state[State_Type].prevTime();
     const amrex::Real cur_time     = state[State_Type].curTime();
-    const int  finest_level = parent->finestLevel();
+    // const int  finest_level = parent->finestLevel();
 
-    const amrex::Real a_half = 0.5 * (a_old + a_new);
+    // const amrex::Real a_half = 0.5 * (a_old + a_new);
 
     amrex::MultiFab&  Ax_old = get_old_data(Axion_Type);
     amrex::MultiFab&  Ax_new = get_new_data(Axion_Type);
@@ -47,19 +47,19 @@ void Nyx::advance_FDM_FD (amrex::Real time,
     if ( amrex::ParallelDescriptor::IOProcessor() ){
 	std::cout << "Advancing the axions at level " << level <<  "...\n";
     }
-#ifndef NDEBUG
-    if (Ax_old.contains_nan(0, Ax_old.nComp(), 0))
-    {
-        for (int i = 0; i < Ax_old.nComp(); i++)
-        {
-            if (Ax_old.contains_nan(i,1,0))
-            {
-                std::cout << "Testing component i for NaNs: " << i << std::endl;
-                amrex::Abort("Ax_old has NaNs in this component::advance_FDM_FD()");
-            }
-        }
-    }
-#endif
+// #ifndef NDEBUG
+//     if (Ax_old.contains_nan(0, Ax_old.nComp(), 0))
+//     {
+//         for (int i = 0; i < Ax_old.nComp(); i++)
+//         {
+//             if (Ax_old.contains_nan(i,1,0))
+//             {
+//                 std::cout << "Testing component i for NaNs: " << i << std::endl;
+//                 amrex::Abort("Ax_old has NaNs in this component::advance_FDM_FD()");
+//             }
+//         }
+//     }
+// #endif
 
     const amrex::Real* dx      = geom.CellSize();
     amrex::Real        courno  = -1.0e+200;
@@ -71,19 +71,19 @@ void Nyx::advance_FDM_FD (amrex::Real time,
 
     // Define the gravity vector so we can pass this to ca_umdrv.
     // MultiFab grav_vector(grids, BL_SPACEDIM, 3, Fab_allocate);
-    const auto& dm = get_level(level).get_new_data(State_Type).DistributionMap();
-    amrex::MultiFab grav_vector(grids, dm, BL_SPACEDIM, 1);
-    grav_vector.setVal(0);
+    // const auto& dm = get_level(level).get_new_data(State_Type).DistributionMap();
+    // amrex::MultiFab grav_vector(grids, dm, BL_SPACEDIM, 1);
+    // grav_vector.setVal(0);
 
 
-#ifdef GRAVITY
-    gravity->get_old_grav_vector(level, grav_vector, time);
-    grav_vector.FillBoundary();
-    grav_vector.EnforcePeriodicity(geom.periodicity());
-    //TODO check if this is ok
-    //geom.FillPeriodicBoundary(grav_vector, 0, BL_SPACEDIM);
-#endif
-    {
+// #ifdef GRAVITY
+//     gravity->get_old_grav_vector(level, grav_vector, time);
+//     grav_vector.FillBoundary();
+//     grav_vector.EnforcePeriodicity(geom.periodicity());
+//     //TODO check if this is ok
+//     //geom.FillPeriodicBoundary(grav_vector, 0, BL_SPACEDIM);
+// #endif
+    // {
 
       //  // maybe 4 should be NUM_GROW
       // for (FillPatchIterator
@@ -116,15 +116,15 @@ void Nyx::advance_FDM_FD (amrex::Real time,
             (&time, bx.loVect(), bx.hiVect(),
 	     BL_TO_FORTRAN(axion),
              BL_TO_FORTRAN(axionout),
-             BL_TO_FORTRAN(grav_vector[fpi]),
+             // BL_TO_FORTRAN(grav_vector[fpi]),
              BL_TO_FORTRAN(phiold),
              dx, prob_lo, prob_hi, &dt,
              &cflLoc, &a_old, &a_new, verbose);
         courno = std::max(courno, cflLoc);
        }
-    }
+    // }
 
-    grav_vector.clear();
+    // grav_vector.clear();
 
     amrex::ParallelDescriptor::ReduceRealMax(courno);
 

@@ -271,12 +271,12 @@ Nyx::advance_FDM (amrex::Real time,
 //        }
 //    }
 
-    //we need to get new grids, since it implicitely fills the new part of the
-    //Gravity_Type, which we need for the interpolated values of G at higher
-    //levels when filling ghosts from lower levels.
-    const auto& dm = get_level(level).get_new_data(State_Type).DistributionMap();
-    MultiFab grav_vec_new(grids, dm, BL_SPACEDIM, grav_n_grow);
-    get_level(level).gravity->get_new_grav_vector(level, grav_vec_new, cur_time);
+    // //we need to get new grids, since it implicitely fills the new part of the
+    // //Gravity_Type, which we need for the interpolated values of G at higher
+    // //levels when filling ghosts from lower levels.
+    // const auto& dm = get_level(level).get_new_data(State_Type).DistributionMap();
+    // MultiFab grav_vec_new(grids, dm, BL_SPACEDIM, grav_n_grow);
+    // get_level(level).gravity->get_new_grav_vector(level, grav_vec_new, cur_time);
 
     if (show_timings)
     {
