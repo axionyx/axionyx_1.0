@@ -81,6 +81,7 @@ Nyx::advance_FDM (amrex::Real time,
     // Move current data to previous, clear current.
     // Don't do this if a coarser level has done this already.
     //
+#ifndef NO_HYDRO
     if (level == 0 || iteration > 1)
     {
         for (int lev = level; lev <= finest_level; lev++)
@@ -101,9 +102,9 @@ Nyx::advance_FDM (amrex::Real time,
             MultiFab::Copy(D_new, D_old, 0, 0, D_old.nComp(), 0);
         }
     }
-
-    const amrex::Real prev_time = state[State_Type].prevTime();
-    const amrex::Real cur_time  = state[State_Type].curTime();
+#endif
+    const amrex::Real prev_time = state[Axion_Type].prevTime();
+    const amrex::Real cur_time  = state[Axion_Type].curTime();
 
     const amrex::Real a_old     = get_comoving_a(prev_time);
     const amrex::Real a_new     = get_comoving_a(cur_time);
@@ -204,7 +205,7 @@ Nyx::advance_FDM (amrex::Real time,
     for (int lev = level; lev <= finest_level_to_advance; lev++)
         if(lev==0)
             //here is the hook:
-            get_level(lev).advance_FDM_FFT(time, dt, a_old, a_new);
+            get_level(lev).advance_FDM_FFT_fourth_order(time, dt, a_old, a_new);
         else
             get_level(lev).advance_FDM_FD(time, dt, a_old, a_new);
 
