@@ -284,35 +284,10 @@ void Nyx::advance_FDM_FFT (amrex::Real time,
     hacc::Dfft dfft(d);
 
 
-////////////////////////////////////////////////////////////////////////////////
+
     const int *self = dfft.self_kspace();
     const int *local_ng = dfft.local_ng_kspace();
     const int *global_ng = dfft.global_ng();
-
-    for (MFIter mfi(real_old); mfi.isValid(); ++mfi){
-         const Box& box = mfi.validbox();
-
-         size_t local_indx = 0;
-
-         double center_phi = 0.512/2;
-         // for(size_t i=0; i<(size_t)local_ng[0]; i++) {
-         //     double global_x = double(local_ng[0]*self[0] + i)/double(global_ng[0])*0.512;
-         //     for(size_t j=0; j<(size_t)local_ng[1]; j++) {
-         //         // double global_y = double(local_ng[1]*self[1] + j)/double(global_ng[1]);
-         //         for(size_t k=0; k<(size_t)local_ng[2]; k++) {
-         //             // double global_z = double(local_ng[2]*self[2] + k)/double(global_ng[1]);
-         //
-         //             phi[mfi].dataPtr()[local_indx] = 0.5*std::pow(0.1,-4)*std::pow(global_x-center_phi,2);
-         //             local_indx++;
-         //         }
-         //     }
-         // }
-
-         for(size_t i=0; i<(size_t)gridsize; i++){
-             phi[mfi].dataPtr()[i] = 0.0;
-         }
-     }
-////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -363,13 +338,6 @@ void Nyx::advance_FDM_FFT (amrex::Real time,
         //  Compute the forward transform
         //  *******************************************
         dfft.forward(&a[0]);
-
-// ////////////////////////////////////////////////////////////////////////////////
-//       const int *self = dfft.self_kspace();
-//       const int *local_ng = dfft.local_ng_kspace();
-//       const int *global_ng = dfft.global_ng();
-// ////////////////////////////////////////////////////////////////////////////////
-
 
 
         const std::complex<double> imagi(0.0,1.0);
