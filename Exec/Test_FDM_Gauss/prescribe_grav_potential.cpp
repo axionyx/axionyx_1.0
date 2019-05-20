@@ -33,7 +33,7 @@ void prescribe_grav_potential(MultiFab& phi,const Geometry &geom, int level, int
                     //here, x, y, z are the physical coordinates of the cell (i,j,k).
                     Real &value = src(i,j,k,our_comp);
                     // value = 0.0;
-                    value = 0.5* x*x*omega*omega;
+                    value = -0.5* x*x*omega*omega;
 
                 }
 

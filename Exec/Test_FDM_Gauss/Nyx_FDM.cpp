@@ -307,7 +307,7 @@ void Nyx::advance_FDM_FFT (amrex::Real time,
 
         for(size_t i=0; i<(size_t)gridsize; i++){
             std::complex<double> psi(real_old[mfi].dataPtr()[i],imag_old[mfi].dataPtr()[i]);
-            psi = std::exp( - imagi * phi[mfi].dataPtr()[i] / hbaroverm  * dt ) * psi;
+            psi = std::exp(imagi * phi[mfi].dataPtr()[i] / hbaroverm  * dt ) * psi;
             real_old[mfi].dataPtr()[i] = std::real(psi);
             imag_old[mfi].dataPtr()[i] = std::imag(psi);
         }

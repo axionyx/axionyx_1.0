@@ -948,7 +948,7 @@ Nyx::est_time_step (Real dt_old)
     Real a = get_comoving_a(cur_time);
     if (vonNeumann_dt >0){
       const MultiFab& phi = get_new_data(PhiGrav_Type);
-      Real phi_max = phi.max(0);
+      Real phi_max = std::abs(phi.max(0)-phi.min(0));
       const Real* dx = geom.CellSize();
       //from BODO
       Real m_tt = 2.5;

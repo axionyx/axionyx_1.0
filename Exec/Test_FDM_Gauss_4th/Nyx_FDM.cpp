@@ -624,10 +624,9 @@ void Nyx::advance_FDM_FFT_fourth_order (amrex::Real time,
 	dens_new[mfi].dataPtr()[i] = std::real(a[i])*std::real(a[i])+std::imag(a[i])*std::imag(a[i]);
       Ax_new[mfi].copy(dens_new[mfi], 0, Nyx::AxDens, 1);
       
-      gravity->solve_for_new_phi(level,get_new_data(PhiGrav_Type),
+      gravity->solve_for_new_phi(level,phi,
 				 gravity->get_grad_phi_curr(level),
 				 fill_interior, grav_n_grow);
-      MultiFab::Copy(phi, get_new_data(PhiGrav_Type), 0, 0, 1, 0);
       
       weighted_dt = v_one*dt;
       for(size_t i=0; i<(size_t)gridsize; i++)
@@ -640,10 +639,9 @@ void Nyx::advance_FDM_FFT_fourth_order (amrex::Real time,
 	dens_new[mfi].dataPtr()[i] = std::real(a[i])*std::real(a[i])+std::imag(a[i])*std::imag(a[i]);
       Ax_new[mfi].copy(dens_new[mfi], 0, Nyx::AxDens, 1);
       
-      gravity->solve_for_new_phi(level,get_new_data(PhiGrav_Type),
+      gravity->solve_for_new_phi(level,phi,
 				 gravity->get_grad_phi_curr(level),
 				 fill_interior, grav_n_grow);
-      MultiFab::Copy(phi, get_new_data(PhiGrav_Type), 0, 0, 1, 0);
 
       weighted_dt = v_zero*dt;
       for(size_t i=0; i<(size_t)gridsize; i++)
@@ -656,10 +654,9 @@ void Nyx::advance_FDM_FFT_fourth_order (amrex::Real time,
 	dens_new[mfi].dataPtr()[i] = std::real(a[i])*std::real(a[i])+std::imag(a[i])*std::imag(a[i]);
       Ax_new[mfi].copy(dens_new[mfi], 0, Nyx::AxDens, 1);
       
-      gravity->solve_for_new_phi(level,get_new_data(PhiGrav_Type),
+      gravity->solve_for_new_phi(level,phi,
 				 gravity->get_grad_phi_curr(level),
 				 fill_interior, grav_n_grow);
-      MultiFab::Copy(phi, get_new_data(PhiGrav_Type), 0, 0, 1, 0);
       
       weighted_dt = v_one*dt;
       for(size_t i=0; i<(size_t)gridsize; i++)
@@ -672,10 +669,9 @@ void Nyx::advance_FDM_FFT_fourth_order (amrex::Real time,
 	dens_new[mfi].dataPtr()[i] = std::real(a[i])*std::real(a[i])+std::imag(a[i])*std::imag(a[i]);
       Ax_new[mfi].copy(dens_new[mfi], 0, Nyx::AxDens, 1);
       
-      gravity->solve_for_new_phi(level,get_new_data(PhiGrav_Type),
+      gravity->solve_for_new_phi(level,phi,
 				 gravity->get_grad_phi_curr(level),
 				 fill_interior, grav_n_grow);
-      MultiFab::Copy(phi, get_new_data(PhiGrav_Type), 0, 0, 1, 0);
 
       weighted_dt = v_two*dt;
       for(size_t i=0; i<(size_t)gridsize; i++)
