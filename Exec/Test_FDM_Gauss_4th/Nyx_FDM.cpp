@@ -26,8 +26,14 @@
 
 using namespace amrex;
 
-void drift(hacc::Dfft *dfft, complex_t *a, int const gridzise, Real const dt, 
+void drift(hacc::Dfft &dfft, complex_t *a, int const gridsize, Real const dt, 
 	   Real const h, Real const a_half, Real const hbaroverm);
+
+void fdm_timestep(hacc::Dfft &dfft, complex_t *a, FArrayBox &dens_new, FArrayBox &Ax_new, 
+		  FArrayBox &phi_fab, MultiFab &phi,  Gravity::Gravity *gravity, 
+		  int const level, int const gridsize, Real const h, Real const dt_c,  
+		  Real const a_c, Real const dt_d, Real const a_d, Real const a_new, 
+		  Real const hbaroverm, const std::complex<double> imagi);
 
 void Nyx::advance_FDM_FD (amrex::Real time,
                       amrex::Real dt,
@@ -466,7 +472,7 @@ void Nyx::advance_FDM_FFT (amrex::Real time,
 }
 
 //TODO_JENS: The stub I added. This guy should be called in Nyx::advance_FDM when needed (ie. on level 0), prepare the data, and call swfft_solve.
-void Nyx::advance_FDM_FFT_fourth_order (amrex::Real time,
+void Nyx::advance_FDM_FFT_higher_order (amrex::Real time,
 					amrex::Real dt,
 					amrex::Real a_old,
 					amrex::Real a_new)
@@ -480,15 +486,64 @@ void Nyx::advance_FDM_FFT_fourth_order (amrex::Real time,
     const Real h = geom.CellSize(0);
 
     //******************************************
-    //define weights for time steps (see arXiv: 1801.04864 eq. 14)
+    //define weights for time steps (see Levkov et. al. 2018)
     //******************************************
-    const Real v_one  = 121.0/3924.0*(12.0-std::sqrt(471));
-    const Real w      = std::sqrt(3.0-12.0*v_one+9.0*v_one*v_one);
-    const Real t_two  = 0.25*(1.0-std::sqrt((9.0*v_one-4.0+2.0*w)/3.0/v_one));
-    const Real t_one  = 0.5-t_two;
-    const Real v_two  = 1.0/6.0-4.0*v_one*t_one*t_one;
-    const Real v_zero = 1.0-2.0*(v_one+v_two);
-    Real weighted_dt  = dt;
+    const Real w1 = -1.17767998417887;
+    const Real w2 = 0.235573213359359;
+    const Real w3 = 0.784513610477560;
+    const Real w0 = 1.0-2.0*(w1+w2+w3);
+
+    const Real c1 = w3/2.0*dt;
+    const Real c2 = (w2+w3)/2.0*dt;
+    const Real c3 = (w1+w2)/2.0*dt;
+    const Real c4 = (w0+w1)/2.0*dt;
+    const Real c5 = (w0+w1)/2.0*dt;
+    const Real c6 = (w1+w2)/2.0*dt;
+    const Real c7 = (w2+w3)/2.0*dt;
+    const Real c8 = w3/2.0*dt;
+
+    const Real d1 = w3*dt;
+    const Real d2 = w2*dt;
+    const Real d3 = w1*dt;
+    const Real d4 = w0*dt;
+    const Real d5 = w1*dt;
+    const Real d6 = w2*dt;
+    const Real d7 = w3*dt;
+    const Real d8 = 0.0;
+
+    Real a_time = state[Axion_Type].prevTime()+0.5*c1;
+    const Real a_c1 = get_comoving_a(a_time);
+    a_time += 0.5*(c1+c2);
+    const Real a_c2 = get_comoving_a(a_time);
+    a_time += 0.5*(c2+c3);
+    const Real a_c3 = get_comoving_a(a_time);
+    a_time += 0.5*(c3+c4);
+    const Real a_c4 = get_comoving_a(a_time);
+    a_time += 0.5*(c4+c5);
+    const Real a_c5 = get_comoving_a(a_time);
+    a_time += 0.5*(c5+c6);
+    const Real a_c6 = get_comoving_a(a_time);
+    a_time += 0.5*(c6+c7);
+    const Real a_c7 = get_comoving_a(a_time);
+    a_time += 0.5*(c7+c8);
+    const Real a_c8 = get_comoving_a(a_time);
+
+    a_time = state[Axion_Type].prevTime()+0.5*d1;
+    const Real a_d1 = get_comoving_a(a_time);
+    a_time += 0.5*(d1+d2);
+    const Real a_d2 = get_comoving_a(a_time);
+    a_time += 0.5*(d2+d3);
+    const Real a_d3 = get_comoving_a(a_time);
+    a_time += 0.5*(d3+d4);
+    const Real a_d4 = get_comoving_a(a_time);
+    a_time += 0.5*(d4+d5);
+    const Real a_d5 = get_comoving_a(a_time);
+    a_time += 0.5*(d5+d6);
+    const Real a_d6 = get_comoving_a(a_time);
+    a_time += 0.5*(d6+d7);
+    const Real a_d7 = get_comoving_a(a_time);
+    a_time += 0.5*(d7+d8);
+    const Real a_d8 = get_comoving_a(a_time);
 
     // *****************************************
     // Defining through Axion_Type
@@ -590,11 +645,8 @@ void Nyx::advance_FDM_FFT_fourth_order (amrex::Real time,
     hacc::Distribution d(MPI_COMM_WORLD,n,Ndims,&rank_mapping[0]);
     hacc::Dfft dfft(d);
 
-    int fill_interior = 0;
-    int grav_n_grow = 0;
-
     //  *******************************************
-    //  4th order time step
+    //  higher order time step
     //  *******************************************
     for (MFIter mfi(real_old,false); mfi.isValid(); ++mfi){
 
@@ -613,69 +665,14 @@ void Nyx::advance_FDM_FFT_fourth_order (amrex::Real time,
 	a[i] = complex_t(real_old[mfi].dataPtr()[i],imag_old[mfi].dataPtr()[i]);
       }
 
-      weighted_dt = v_two*dt;
-      for(size_t i=0; i<(size_t)gridsize; i++)
-	a[i] = std::exp( imagi * phi[mfi].dataPtr()[i] / hbaroverm  * weighted_dt ) * a[i];
-	
-      weighted_dt = t_two*dt;
-      drift(&dfft, &a[0], gridsize, weighted_dt, h, a_half, hbaroverm);
-
-      for(size_t i=0; i<(size_t)gridsize; i++)
-	dens_new[mfi].dataPtr()[i] = std::real(a[i])*std::real(a[i])+std::imag(a[i])*std::imag(a[i]);
-      Ax_new[mfi].copy(dens_new[mfi], 0, Nyx::AxDens, 1);
-      
-      gravity->solve_for_new_phi(level,phi,
-				 gravity->get_grad_phi_curr(level),
-				 fill_interior, grav_n_grow);
-      
-      weighted_dt = v_one*dt;
-      for(size_t i=0; i<(size_t)gridsize; i++)
-	a[i] = std::exp( imagi * phi[mfi].dataPtr()[i] / hbaroverm  * weighted_dt ) * a[i];
-
-      weighted_dt = t_one*dt;
-      drift(&dfft, &a[0], gridsize, weighted_dt, h, a_half, hbaroverm);
-      
-      for(size_t i=0; i<(size_t)gridsize; i++)
-	dens_new[mfi].dataPtr()[i] = std::real(a[i])*std::real(a[i])+std::imag(a[i])*std::imag(a[i]);
-      Ax_new[mfi].copy(dens_new[mfi], 0, Nyx::AxDens, 1);
-      
-      gravity->solve_for_new_phi(level,phi,
-				 gravity->get_grad_phi_curr(level),
-				 fill_interior, grav_n_grow);
-
-      weighted_dt = v_zero*dt;
-      for(size_t i=0; i<(size_t)gridsize; i++)
-	a[i] = std::exp( imagi * phi[mfi].dataPtr()[i] / hbaroverm  * weighted_dt ) * a[i];
-
-      weighted_dt = t_one*dt;
-      drift(&dfft, &a[0], gridsize, weighted_dt, h, a_half, hbaroverm);
-
-      for(size_t i=0; i<(size_t)gridsize; i++)
-	dens_new[mfi].dataPtr()[i] = std::real(a[i])*std::real(a[i])+std::imag(a[i])*std::imag(a[i]);
-      Ax_new[mfi].copy(dens_new[mfi], 0, Nyx::AxDens, 1);
-      
-      gravity->solve_for_new_phi(level,phi,
-				 gravity->get_grad_phi_curr(level),
-				 fill_interior, grav_n_grow);
-      
-      weighted_dt = v_one*dt;
-      for(size_t i=0; i<(size_t)gridsize; i++)
-	a[i] = std::exp( imagi * phi[mfi].dataPtr()[i] / hbaroverm  * weighted_dt ) * a[i];
-
-      weighted_dt = t_two*dt;
-      drift(&dfft, &a[0], gridsize, weighted_dt, h, a_half, hbaroverm);
-      
-      for(size_t i=0; i<(size_t)gridsize; i++)
-	dens_new[mfi].dataPtr()[i] = std::real(a[i])*std::real(a[i])+std::imag(a[i])*std::imag(a[i]);
-      Ax_new[mfi].copy(dens_new[mfi], 0, Nyx::AxDens, 1);
-      
-      gravity->solve_for_new_phi(level,phi,
-				 gravity->get_grad_phi_curr(level),
-				 fill_interior, grav_n_grow);
-
-      weighted_dt = v_two*dt;
-      for(size_t i=0; i<(size_t)gridsize; i++)
-	a[i] = std::exp( imagi * phi[mfi].dataPtr()[i] / hbaroverm  * weighted_dt ) * a[i];
+      fdm_timestep(dfft, &a[0], dens_new[mfi], Ax_new[mfi], phi[mfi], phi, gravity, level, gridsize, h, c1, a_c1, d1, a_d1, a_new, hbaroverm, imagi);
+      fdm_timestep(dfft, &a[0], dens_new[mfi], Ax_new[mfi], phi[mfi], phi, gravity, level, gridsize, h, c2, a_c2, d2, a_d2, a_new, hbaroverm, imagi);
+      fdm_timestep(dfft, &a[0], dens_new[mfi], Ax_new[mfi], phi[mfi], phi, gravity, level, gridsize, h, c3, a_c3, d3, a_d3, a_new, hbaroverm, imagi);
+      fdm_timestep(dfft, &a[0], dens_new[mfi], Ax_new[mfi], phi[mfi], phi, gravity, level, gridsize, h, c4, a_c4, d4, a_d4, a_new, hbaroverm, imagi);
+      fdm_timestep(dfft, &a[0], dens_new[mfi], Ax_new[mfi], phi[mfi], phi, gravity, level, gridsize, h, c5, a_c5, d5, a_d5, a_new, hbaroverm, imagi);
+      fdm_timestep(dfft, &a[0], dens_new[mfi], Ax_new[mfi], phi[mfi], phi, gravity, level, gridsize, h, c6, a_c6, d6, a_d6, a_new, hbaroverm, imagi);
+      fdm_timestep(dfft, &a[0], dens_new[mfi], Ax_new[mfi], phi[mfi], phi, gravity, level, gridsize, h, c7, a_c7, d7, a_d7, a_new, hbaroverm, imagi);
+      fdm_timestep(dfft, &a[0], dens_new[mfi], Ax_new[mfi], phi[mfi], phi, gravity, level, gridsize, h, c8, a_c8, d8, a_d8, a_new, hbaroverm, imagi);
 
       for(size_t i=0; i<(size_t)gridsize; i++) {
 	real_new[mfi].dataPtr()[i] = std::real(a[i]);
@@ -687,17 +684,6 @@ void Nyx::advance_FDM_FFT_fourth_order (amrex::Real time,
       Ax_new[mfi].copy(dens_new[mfi], 0, Nyx::AxDens, 1);
 
     }//MFIter loop
-    
-    // //  *******************************************
-    // //  Update axion state
-    // //  *******************************************
-    // Ax_new.ParallelCopy(real_new, 0, Nyx::AxRe, 1, real_new.nGrow(), Ax_new.nGrow(), geom.periodicity(),FabArrayBase::COPY);
-    // Ax_new.ParallelCopy(imag_new, 0, Nyx::AxIm, 1, imag_new.nGrow(), Ax_new.nGrow(), geom.periodicity(),FabArrayBase::COPY);
-    
-    // for (MFIter mfi(Ax_new); mfi.isValid(); ++mfi){
-    //   const Box& box = Ax_new[mfi].box();
-    //   fort_ax_fields(Ax_new[mfi].dataPtr(), box.loVect(), box.hiVect());
-    // }
     
     Ax_new.FillBoundary(geom.periodicity());
     
@@ -717,20 +703,53 @@ void Nyx::advance_FDM_FFT_fourth_order (amrex::Real time,
     
 }
 
-inline void drift(hacc::Dfft *dfft, complex_t *a, int const gridsize, Real const dt, 
+inline void fdm_timestep(hacc::Dfft &dfft, complex_t *a, FArrayBox &dens_new, FArrayBox &Ax_new, 
+			 FArrayBox &phi_fab, MultiFab &phi,  Gravity::Gravity *gravity, 
+			 int const level, int const gridsize, Real const h, Real const dt_c,  
+			 Real const a_c, Real const dt_d, Real const a_d, Real const a_new, 
+			 Real const hbaroverm, const std::complex<double> imagi)
+{
+      //  *******************************************
+      //  drift by dt_c
+      //  *******************************************
+      drift(dfft, a, gridsize, dt_c, h, a_c, hbaroverm);
+      if(!dt_d) return;
+
+      //  *******************************************
+      //  re-calculate potential
+      //  *******************************************
+      for(size_t i=0; i<(size_t)gridsize; i++)
+	dens_new.dataPtr()[i] = std::real(a[i])*std::real(a[i])+std::imag(a[i])*std::imag(a[i]);
+      Ax_new.copy(dens_new, 0, Nyx::AxDens, 1);
+      int fill_interior = 0;
+      int grav_n_grow = 0;
+      gravity->solve_for_new_phi(level,phi,
+				 gravity->get_grad_phi_curr(level),
+				 fill_interior, grav_n_grow);
+
+      //  *******************************************
+      //  kick by dt_d 
+      //  *******************************************
+      for(size_t i=0; i<(size_t)gridsize; i++)
+	a[i] = std::exp( imagi * phi_fab.dataPtr()[i] * a_new / a_d / hbaroverm  * dt_d ) * a[i];
+
+}
+
+inline void drift(hacc::Dfft &dfft, complex_t *a, int const gridsize, Real const dt, 
 		  Real const h, Real const a_half, Real const hbaroverm)
 {
+  if(!dt) return;
 
   const Real pi = 4 * std::atan(1.0);
   const Real tpi = 2 * pi;
   const Real hsq = h*h;
   const std::complex<double> imagi(0.0,1.0);
-  const int *self = dfft->self_kspace();
-  const int *local_ng = dfft->local_ng_kspace();
-  const int *global_ng = dfft->global_ng();
+  const int *self = dfft.self_kspace();
+  const int *local_ng = dfft.local_ng_kspace();
+  const int *global_ng = dfft.global_ng();
   size_t local_indx = 0;
 
-  dfft->forward(a);
+  dfft.forward(a);
       
   for(size_t i=0; i<(size_t)local_ng[0]; i++) {
     int global_i = local_ng[0]*self[0] + i;
@@ -764,10 +783,10 @@ inline void drift(hacc::Dfft *dfft, complex_t *a, int const gridsize, Real const
     }
   }
   
-  dfft->backward(a);
+  dfft.backward(a);
   
   for(size_t i=0; i<(size_t)gridsize; i++)
-    a[i]/= dfft->global_size();
+    a[i]/= dfft.global_size();
   
 }
 

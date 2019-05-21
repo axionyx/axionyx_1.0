@@ -205,7 +205,7 @@ Nyx::advance_FDM (amrex::Real time,
     for (int lev = level; lev <= finest_level_to_advance; lev++)
         if(lev==0)
             //here is the hook:
-            get_level(lev).advance_FDM_FFT_fourth_order(time, dt, a_old, a_new);
+            get_level(lev).advance_FDM_FFT_higher_order(time, dt, a_old, a_new);
         else
             get_level(lev).advance_FDM_FD(time, dt, a_old, a_new);
 
