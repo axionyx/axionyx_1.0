@@ -624,7 +624,7 @@ public:
     //! missing doc
     static int NUM_AX;
     //! missing doc
-  static amrex::Real vonNeumann_dt;
+    static amrex::Real vonNeumann_dt;
 #endif
 
     static int Temp_comp, Ne_comp, Zhi_comp;

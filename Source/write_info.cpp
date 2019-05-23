@@ -7,7 +7,7 @@ void
 Nyx::write_info ()
 {
     int ndatalogs = parent->NumDataLogs();
-    Real time_unit = 3.0856776e19 / 31557600.0; // conversion to Julian years
+    Real time_unit = 1.0;//3.0856776e19 / 31557600.0; // conversion to Julian years
 
     if (ndatalogs > 0)
     {
@@ -33,7 +33,8 @@ Nyx::write_info ()
         Real mass=0.0, epot=0.0, ekinrho=0.0, ekinv=0.0, etot=0.0;
         Real angmom_x=0.0, angmom_y=0.0, angmom_z=0.0, grav_pot=0.0, phase=0.0;
         compute_axion_quantities(mass, epot, ekinrho, ekinv, angmom_x, angmom_y, angmom_z, grav_pot, phase);
-         etot = epot + ekinrho + ekinv;
+	etot = epot + ekinrho + ekinv;
+	Real max_dens = get_new_data(Axion_Type).max(Nyx::AxDens);
 #endif
 
 #ifdef NO_HYDRO
@@ -51,16 +52,18 @@ Nyx::write_info ()
             if (time == 0.0)
             {
                 data_loga << std::setw( 8) <<  "#  nstep";
-                data_loga << std::setw(14) <<  "       time    ";
-                data_loga << std::setw(14) <<  "       dt      ";
-                data_loga << std::setw(14) <<  "         z     ";
+                data_loga << std::setw(14) <<  "       time   ";
+                data_loga << std::setw(14) <<  "       dt     ";
+                data_loga << std::setw(14) <<  "         z    ";
 #ifdef FDM
                  data_loga << std::setw(14) <<  "     Mass";
                  data_loga << std::setw(14) <<  "     Epot";
                  data_loga << std::setw(14) <<  "  Ekinrho";
                  data_loga << std::setw(14) <<  "    Ekinv";
                  data_loga << std::setw(14) <<  "     Etot";
+                 data_loga << std::setw(14) <<  " max_dens";
 #endif
+                 data_loga << std::setw(14) <<  "        a";
 #ifndef NO_HYDRO
                 if (do_hydro == 1)
                 {
@@ -91,6 +94,7 @@ Nyx::write_info ()
                  data_loga << std::setw(14) <<  std::setprecision(6) << ekinrho;
                  data_loga << std::setw(14) <<  std::setprecision(6) << ekinv;
                  data_loga << std::setw(14) <<  std::setprecision(6) << etot;
+                 data_loga << std::setw(14) <<  std::setprecision(6) << max_dens;
 #endif
                 data_loga << std::setw(14) <<  std::setprecision(6) << old_a;
 #ifndef NO_HYDRO
@@ -126,6 +130,7 @@ Nyx::write_info ()
                  data_loga << std::setw(14) <<  std::setprecision(6) << ekinrho;
                  data_loga << std::setw(14) <<  std::setprecision(6) << ekinv;
                  data_loga << std::setw(14) <<  std::setprecision(6) << etot;
+                 data_loga << std::setw(14) <<  std::setprecision(6) << max_dens;
 #endif
                 data_loga << std::setw(14) <<  std::setprecision(6) << new_a;
 #ifndef NO_HYDRO

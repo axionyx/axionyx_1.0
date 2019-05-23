@@ -1,0 +1,1 @@
+bsub -n 64 -a openmp -o out.%J -R span[ptile=24] -W 12:00 -q smp-upsw mpirun ./Nyx3d.intel.MPI.ex inputs

@@ -715,7 +715,7 @@ Nyx::init_santa_barbara (int init_sb_vels)
                  na, BL_TO_FORTRAN(Ax_new[mfi]),
 #endif
                  nd,BL_TO_FORTRAN(D_new[mfi]), dx,
-                 gridloc.lo(), gridloc.hi(), geom.ProbHi());
+                 gridloc.lo(), gridloc.hi(), geom.ProbLo(), geom.ProbHi());
         }
 
         if (inhomo_reion) init_zhi();
