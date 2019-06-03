@@ -26,41 +26,12 @@
 
 using namespace amrex;
 
-inline void copy_c2fortran(std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >& a, MultiFab &refab, MultiFab &imfab, MFIter& mfi)
-{
- const Array4<Real> const& imarr = imfab[mfi].array();
- const Array4<Real> const& rearr = refab[mfi].array();
- const Box& bx = mfi.validbox();
- const Dim3 lo = amrex::lbound(bx);
- const Dim3 hi = amrex::ubound(bx);
- const Dim3 w ={hi.x-lo.x,hi.y-lo.y,hi.z-lo.z};
- size_t local_indx = 0;
-       for(size_t i=0; i<=(size_t)w.x; i++) {
-        for(size_t j=0; j<=(size_t)w.y; j++) {
-         for(size_t k=0; k<=(size_t)w.z; k++) {
-        complex_t temp(rearr(i+lo.x,j+lo.y,k+lo.z),imarr(i+lo.x,j+lo.y,k+lo.z));
-        a[local_indx] = temp;
-        local_indx++;
-        }}}
-}
-inline void copy_fortran2c(std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >& a, MultiFab &refab, MultiFab &imfab, MFIter& mfi)
-{
- Array4<Real> const& imarr = imfab[mfi].array();
- Array4<Real> const& rearr = refab[mfi].array();
- const Box& bx = mfi.validbox();
- const Dim3 lo = amrex::lbound(bx);
- const Dim3 hi = amrex::ubound(bx);
- const Dim3 w ={hi.x-lo.x,hi.y-lo.y,hi.z-lo.z};
- size_t local_indx = 0;
-       for(size_t i=0; i<=(size_t)w.x; i++) {
-        for(size_t j=0; j<=(size_t)w.y; j++) {
-         for(size_t k=0; k<=(size_t)w.z; k++) {
-        complex_t temp = a[local_indx];
-        rearr(i+lo.x,j+lo.y,k+lo.z)=std::real(temp);
-        imarr(i+lo.x,j+lo.y,k+lo.z)=std::imag(temp);
-        local_indx++;
-        }}}
-}
+void copy_c2fortran(std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >& a, 
+		    MultiFab &refab, MultiFab &imfab, MFIter& mfi);
+
+void copy_fortran2c(std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >& a, 
+		    MultiFab &refab, MultiFab &imfab, MFIter& mfi);
+
 void drift(hacc::Dfft &dfft, MultiFab &real, MultiFab &imag, MultiFab &dens, 
 	   int const gridsize, Real const dt, Real const h, Real const a_half, 
 	   Real const hbaroverm);
@@ -783,10 +754,7 @@ inline void drift(hacc::Dfft &dfft, MultiFab &real, MultiFab &imag, MultiFab &de
     
     dfft.makePlans(&a[0],&b[0],&a[0],&b[0]);
     
-   // for(size_t i=0; i<(size_t)gridsize; i++){
-   //   a[i] = complex_t(real[mfi].dataPtr()[i],imag[mfi].dataPtr()[i]);
-   // }
-    copy_fortran2c(a,real,imag,mfi);
+    copy_c2fortran(a,real,imag,mfi);
 
     dfft.forward(&a[0]);
       
@@ -824,13 +792,50 @@ inline void drift(hacc::Dfft &dfft, MultiFab &real, MultiFab &imag, MultiFab &de
     
     dfft.backward(&a[0]);
   
-    copy_c2fortran(a,real,imag,mfi);
+    copy_fortran2c(a,real,imag,mfi);
     for(size_t i=0; i<(size_t)gridsize; i++) {
-//      a[i]/= dfft.global_size();
-//      real[mfi].dataPtr()[i] = std::real(a[i]);
-//      imag[mfi].dataPtr()[i] = std::imag(a[i]);
-    dens[mfi].dataPtr()[i] = real[mfi].dataPtr()[i]*real[mfi].dataPtr()[i]+imag[mfi].dataPtr()[i]*imag[mfi].dataPtr()[i];
+      dens[mfi].dataPtr()[i] = real[mfi].dataPtr()[i]*real[mfi].dataPtr()[i]+imag[mfi].dataPtr()[i]*imag[mfi].dataPtr()[i];
     }
   }  
 }
+
+inline void copy_c2fortran(std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >& a, 
+			   MultiFab &refab, MultiFab &imfab, MFIter& mfi)
+{
+ const Array4<Real> const& imarr = imfab[mfi].array();
+ const Array4<Real> const& rearr = refab[mfi].array();
+ const Box& bx = mfi.validbox();
+ const Dim3 lo = amrex::lbound(bx);
+ const Dim3 hi = amrex::ubound(bx);
+ const Dim3 w ={hi.x-lo.x,hi.y-lo.y,hi.z-lo.z};
+ size_t local_indx = 0;
+       for(size_t i=0; i<=(size_t)w.x; i++) {
+        for(size_t j=0; j<=(size_t)w.y; j++) {
+         for(size_t k=0; k<=(size_t)w.z; k++) {
+        complex_t temp(rearr(i+lo.x,j+lo.y,k+lo.z),imarr(i+lo.x,j+lo.y,k+lo.z));
+        a[local_indx] = temp;
+        local_indx++;
+        }}}
+}
+
+inline void copy_fortran2c(std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >& a, 
+			   MultiFab &refab, MultiFab &imfab, MFIter& mfi)
+{
+ Array4<Real> const& imarr = imfab[mfi].array();
+ Array4<Real> const& rearr = refab[mfi].array();
+ const Box& bx = mfi.validbox();
+ const Dim3 lo = amrex::lbound(bx);
+ const Dim3 hi = amrex::ubound(bx);
+ const Dim3 w ={hi.x-lo.x,hi.y-lo.y,hi.z-lo.z};
+ size_t local_indx = 0;
+       for(size_t i=0; i<=(size_t)w.x; i++) {
+        for(size_t j=0; j<=(size_t)w.y; j++) {
+         for(size_t k=0; k<=(size_t)w.z; k++) {
+        complex_t temp = a[local_indx];
+        rearr(i+lo.x,j+lo.y,k+lo.z)=std::real(temp);
+        imarr(i+lo.x,j+lo.y,k+lo.z)=std::imag(temp);
+        local_indx++;
+        }}}
+}
+
 #endif //FDM
