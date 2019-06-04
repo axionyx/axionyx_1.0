@@ -633,7 +633,7 @@ void Nyx::advance_FDM_FFT_higher_order (amrex::Real time,
         int i = ba[ib].smallEnd(0) / nx;
         int j = ba[ib].smallEnd(1) / ny;
         int k = ba[ib].smallEnd(2) / nz;
-        int local_index = k*nbx*nby + j*nbx + i;
+        int local_index = i*nbx*nby + j*nbx + k;
 
         rank_mapping[local_index] = dm[ib];
 
@@ -748,33 +748,35 @@ inline void drift(hacc::Dfft &dfft, MultiFab &real, MultiFab &imag, MultiFab &de
     
     std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> > a;
     std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> > b;
-    
     a.resize(gridsize);
     b.resize(gridsize);
     
     dfft.makePlans(&a[0],&b[0],&a[0],&b[0]);
     
-    copy_c2fortran(a,real,imag,mfi);
+   copy_fortran2c(a,real,imag,mfi);
+   // for(size_t i=0; i<(size_t)gridsize; i++){
+   //   a[i] = complex_t(real[mfi].dataPtr()[i],imag[mfi].dataPtr()[i]);
+   // }
 
     dfft.forward(&a[0]);
       
     for(size_t i=0; i<(size_t)local_ng[0]; i++) {
       int global_i = local_ng[0]*self[0] + i;
-      if (global_i >= global_ng[0]/2){
+      if (global_i > global_ng[0]/2.){
 	global_i = global_i - global_ng[0];
       }
 	
 	
       for(size_t j=0; j<(size_t)local_ng[1]; j++) {
 	int global_j = local_ng[1]*self[1] + j;
-	if (global_j >= global_ng[1]/2){
+	if (global_j > global_ng[1]/2.){
 	  global_j = global_j - global_ng[1];
 	}
 	  
 	  
 	for(size_t k=0; k<(size_t)local_ng[2]; k++) {
 	  int global_k = local_ng[2]*self[2] + k;
-	  if (global_k >= global_ng[2]/2){
+	  if (global_k > global_ng[2]/2.){
 	    global_k = global_k - global_ng[2];
 	  }
 	    
@@ -792,14 +794,18 @@ inline void drift(hacc::Dfft &dfft, MultiFab &real, MultiFab &imag, MultiFab &de
     
     dfft.backward(&a[0]);
   
-    copy_fortran2c(a,real,imag,mfi);
+    copy_c2fortran(a,real,imag,mfi);
+    //for(size_t i=0; i<(size_t)gridsize; i++) {
+    //          real[mfi].dataPtr()[i] = std::real(a[i]);
+    //          imag[mfi].dataPtr()[i] = std::imag(a[i]);
+    //}
     for(size_t i=0; i<(size_t)gridsize; i++) {
       dens[mfi].dataPtr()[i] = real[mfi].dataPtr()[i]*real[mfi].dataPtr()[i]+imag[mfi].dataPtr()[i]*imag[mfi].dataPtr()[i];
     }
   }  
 }
 
-inline void copy_c2fortran(std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >& a, 
+inline void copy_fortran2c(std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >& a, 
 			   MultiFab &refab, MultiFab &imfab, MFIter& mfi)
 {
  const Array4<Real> const& imarr = imfab[mfi].array();
@@ -808,6 +814,7 @@ inline void copy_c2fortran(std::vector<complex_t, hacc::AlignedAllocator<complex
  const Dim3 lo = amrex::lbound(bx);
  const Dim3 hi = amrex::ubound(bx);
  const Dim3 w ={hi.x-lo.x,hi.y-lo.y,hi.z-lo.z};
+
  size_t local_indx = 0;
        for(size_t i=0; i<=(size_t)w.x; i++) {
         for(size_t j=0; j<=(size_t)w.y; j++) {
@@ -818,7 +825,7 @@ inline void copy_c2fortran(std::vector<complex_t, hacc::AlignedAllocator<complex
         }}}
 }
 
-inline void copy_fortran2c(std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >& a, 
+inline void copy_c2fortran(std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >& a, 
 			   MultiFab &refab, MultiFab &imfab, MFIter& mfi)
 {
  Array4<Real> const& imarr = imfab[mfi].array();
