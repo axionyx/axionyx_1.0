@@ -226,11 +226,11 @@ Nyx::initData ()
                 fort_initdata
                     (level, cur_time, bx.loVect(), bx.hiVect(),
                      ns, BL_TO_FORTRAN(S_new[mfi]),
-                     nd, BL_TO_FORTRAN(D_new[mfi]),
 #ifdef FDM
                      na, BL_TO_FORTRAN(Ax_new[mfi]),
 #endif
-                     dx, gridloc.lo(), gridloc.hi(), geom.ProbLo(), geom.ProbHi());
+                     nd, BL_TO_FORTRAN(D_new[mfi]),
+                     dx, gridloc.lo(), gridloc.hi(), geom.Domain().loVect(), geom.Domain().hiVect());
             }
 
             if (inhomo_reion) init_zhi();
@@ -257,7 +257,7 @@ Nyx::initData ()
                      na, BL_TO_FORTRAN(Ax_new[mfi]),
 #endif
                      ns, BL_TO_FORTRAN(S_new[mfi]),
-                     dx, gridloc.lo(), gridloc.hi(), geom.ProbLo(), geom.ProbHi());
+                     dx, gridloc.lo(), gridloc.hi(), geom.Domain().loVect(), geom.Domain().hiVect());
             }
         }
     }
