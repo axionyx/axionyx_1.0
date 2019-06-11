@@ -8,6 +8,7 @@
 
 ````cpp
 
+! \testproblem this is a test problem
       subroutine amrex_probinit (init,name,namlen,problo,probhi) bind(C)
 
       use probdata_module

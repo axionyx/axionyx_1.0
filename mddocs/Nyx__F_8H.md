@@ -58,7 +58,7 @@
 |  void | [**fort\_init\_e\_from\_rhoe**](Nyx__F_8H.md#function-fort-init-e-from-rhoe) (BL\_FORT\_FAB\_ARG(state), const int \* num\_state, const int \* lo, const int \* hi, amrex::Real \* comoving\_a) <br> |
 |  void | [**fort\_init\_e\_from\_t**](Nyx__F_8H.md#function-fort-init-e-from-t) (BL\_FORT\_FAB\_ARG(state), const int \* num\_state, BL\_FORT\_FAB\_ARG(diag), const int \* num\_diag, const int \* lo, const int \* hi, amrex::Real \* comoving\_a) <br> |
 |  void | [**fort\_init\_zhi**](Nyx__F_8H.md#function-fort-init-zhi) (const int \* lo, const int \* hi, const int & num\_diag, BL\_FORT\_FAB\_ARG(diag\_eos), const int & ratio, BL\_FORT\_FAB\_ARG(zhi)) <br> |
-|  void | [**fort\_initdata**](Nyx__F_8H.md#function-fort-initdata) (const int & level, const amrex::Real & time, const int \* lo, const int \* hi, const int & num\_state, BL\_FORT\_FAB\_ARG(state), const int & num\_diag, BL\_FORT\_FAB\_ARG(diag\_eos), const amrex::Real dx, const amrex::Real xlo, const amrex::Real xhi, const amrex::Real boxsize) <br> |
+|  void | [**fort\_initdata**](Nyx__F_8H.md#function-fort-initdata) (const int & level, const amrex::Real & time, const int \* lo, const int \* hi, const int & num\_state, BL\_FORT\_FAB\_ARG(state), const int & num\_diag, BL\_FORT\_FAB\_ARG(diag\_eos), const amrex::Real dx, const amrex::Real xlo, const amrex::Real xhi, const amrex::Real domlo, const amrex::Real domhi) <br> |
 |  void | [**fort\_integrate\_comoving\_a**](Nyx__F_8H.md#function-fort-integrate-comoving-a) (amrex::Real \* old\_a, amrex::Real \* new\_a, amrex::Real \* dt) <br> |
 |  void | [**fort\_integrate\_comoving\_a\_to\_a**](Nyx__F_8H.md#function-fort-integrate-comoving-a-to-a) (amrex::Real \* old\_a, amrex::Real \* a\_value, amrex::Real \* dt) <br> |
 |  void | [**fort\_integrate\_comoving\_a\_to\_z**](Nyx__F_8H.md#function-fort-integrate-comoving-a-to-z) (amrex::Real \* old\_a, amrex::Real \* z\_value, amrex::Real \* dt) <br> |
@@ -572,7 +572,8 @@ void fort_initdata (
     const amrex::Real dx,
     const amrex::Real xlo,
     const amrex::Real xhi,
-    const amrex::Real boxsize
+    const amrex::Real domlo,
+    const amrex::Real domhi
 ) 
 ```
 

@@ -24,7 +24,7 @@ BL_FORT_PROC_DECL(FORT_ADVANCE_FDM_FD, fort_advance_fdm_fd)
      const int lo[], const int hi[],
      const BL_FORT_FAB_ARG(state),
            BL_FORT_FAB_ARG(stateout),
-     const BL_FORT_FAB_ARG(grav),
+     // const BL_FORT_FAB_ARG(grav),
      const BL_FORT_FAB_ARG(phi),
      const amrex::Real dx[],const amrex::Real prob_lo[],
      const amrex::Real prob_hi[], const amrex::Real* dt,
@@ -118,7 +118,7 @@ BL_FORT_PROC_DECL(FORT_ADVANCE_FDM_FD, fort_advance_fdm_fd)
     const int& num_ax, BL_FORT_FAB_ARG(axions),
 #endif
      const int& num_diag,  BL_FORT_FAB_ARG(diag_eos), const amrex::Real dx[],
-     const amrex::Real xlo[], const amrex::Real xhi[], const amrex::Real boxsize[]);
+     const amrex::Real xlo[], const amrex::Real xhi[], const amrex::Real domlo[], const amrex::Real domhi[]);
 
   void fort_init_zhi
     (const int* lo, const int* hi,
