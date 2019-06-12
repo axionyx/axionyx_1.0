@@ -297,14 +297,15 @@
       
 ! :::
 ! ::: ----------------------------------------------------------------
-! ::: Solves the Schroedinger-Newton (Gross-Pitaevskii) equation for a self-gravitating 
-! ::: Bose-Einstein condensate of an ultralight scalar field using explicit RK4 and 
-! ::: directional splitting.
+!> Solves the Schroedinger-Newton (Gross-Pitaevskii) equation for a self-gravitating 
+!! Bose-Einstein condensate of an ultralight scalar field using explicit RK4 and 
+!! directional splitting. (Also, this is an example of how to document Fortran
+!! code, in line 300 of Source/Src_3d/Nyx_adv_FDM_FD.f90) 
 
       subroutine fort_advance_fdm_fd(time,lo,hi,&
            uin,  uin_l1,uin_l2,uin_l3,uin_h1,uin_h2,uin_h3, &
            uout, uout_l1,uout_l2,uout_l3,uout_h1,uout_h2,uout_h3, &
-           grav, g_l1,g_l2,g_l3,g_h1,g_h2,g_h3, &
+           ! grav, g_l1,g_l2,g_l3,g_h1,g_h2,g_h3, &
            phi,  p_l1,p_l2,p_l3,p_h1,p_h2,p_h3, &
            delta,prob_lo,prob_hi,dt, &
            courno,a_old,a_half,a_new,verbose)
@@ -320,11 +321,11 @@
       integer          lo(3),hi(3),verbose
       integer          uin_l1,uin_l2,uin_l3,uin_h1,uin_h2,uin_h3
       integer          uout_l1,uout_l2,uout_l3,uout_h1,uout_h2,uout_h3
-      integer          g_l1,g_l2,g_l3,g_h1,g_h2,g_h3
+      ! integer          g_l1,g_l2,g_l3,g_h1,g_h2,g_h3
       integer          p_l1,p_l2,p_l3,p_h1,p_h2,p_h3
       double precision  uin(  uin_l1:uin_h1,   uin_l2:uin_h2,   uin_l3:uin_h3,  NAXVAR)
       double precision uout( uout_l1:uout_h1, uout_l2:uout_h2, uout_l3:uout_h3, NAXVAR)
-      double precision grav(   g_l1:g_h1,     g_l2:g_h2,     g_l3:g_h3,   3)
+      ! double precision grav(   g_l1:g_h1,     g_l2:g_h2,     g_l3:g_h3,   3)
       double precision  phi(   p_l1:p_h1,     p_l2:p_h2,     p_l3:p_h3)
       double precision delta(3),prob_lo(3),prob_hi(3),dt,time,courno
       double precision a_old, a_half, a_new

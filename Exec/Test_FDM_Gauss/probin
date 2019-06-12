@@ -1,0 +1,7 @@
+&fortin
+
+  max_num_part = 0
+
+  comoving_OmAx = 1.000d0
+/
+

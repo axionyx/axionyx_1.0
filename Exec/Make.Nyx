@@ -108,7 +108,7 @@ ifeq ($(GIMLET), TRUE)
 
 endif
 
-#These are the directories in Nyx 
+#These are the directories in Nyx
 
 Bdirs 	:= Source Source/Src_3d Source/HydroFortran Source/Tagging Source/Initialization
 Bdirs 	+= Source/EOS Source/Network Source/HeatCool
@@ -128,6 +128,7 @@ ifeq ($(USE_AGN), TRUE)
 endif
 ifeq ($(USE_FDM), TRUE)
    Bdirs 	+= Source/FDM
+   Bdirs        += Source/AMReX_axionyx
 endif
 
 Bpack	+= $(foreach dir, $(Bdirs), $(TOP)/$(dir)/Make.package)
@@ -139,7 +140,7 @@ VPATH_LOCATIONS   += $(Blocs)
 
 #These are the directories in AMReX
 
-Pdirs   := Base AmrCore Amr Boundary Particle Extern/amrdata # F_Interfaces/Base
+Pdirs   := Base AmrCore Amr Boundary Particle Extern/amrdata
 Ppack	+= $(foreach dir, $(Pdirs), $(AMREX_HOME)/Src/$(dir)/Make.package)
 Plocs	+= $(foreach dir, $(Pdirs), $(AMREX_HOME)/Src/$(dir))
 
@@ -183,7 +184,7 @@ INCLUDE_LOCATIONS += $(BLAS_dir)
 VPATH_LOCATIONS   += $(VODE_dir)
 VPATH_LOCATIONS   += $(BLAS_dir)
 
-all: $(executable) 
+all: $(executable)
 	$(SILENT) $(RM) AMReX_buildInfo.cpp
 	@echo SUCCESS
 
@@ -192,7 +193,7 @@ CEXE_sources += AMReX_buildInfo.cpp
 CEXE_headers += $(AMREX_HOME)/Tools/C_scripts/AMReX_buildInfo.H
 INCLUDE_LOCATIONS +=  $(AMREX_HOME)/Tools/C_scripts
 
-AMReX_buildInfo.cpp: 
+AMReX_buildInfo.cpp:
 	$(AMREX_HOME)/Tools/C_scripts/makebuildinfo_C.py \
           --amrex_home "$(AMREX_HOME)" \
           --COMP "$(COMP)" --COMP_VERSION "$(COMP_VERSION)" \
@@ -214,4 +215,7 @@ include $(AMREX_HOME)/Tools/GNUMake/Make.rules
 
 clean::
 	$(SILENT) $(RM) AMReX_buildInfo.cpp
-
+make mddoc:
+	cd ../../mddocs;sh make_doc.sh
+	python ../../mddocs/parameter_documentation.py
+	git add ../../mddocs

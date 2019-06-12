@@ -15,7 +15,7 @@
 
 !
 !     Build "probin" filename -- the name of file containing fortin namelist.
-!     
+!
       integer maxlen
       parameter (maxlen=256)
       character probin*(maxlen)
@@ -43,16 +43,16 @@
 
 ! ::: -----------------------------------------------------------
 ! ::: This routine is called at problem setup time and is used
-! ::: to initialize data on each grid.  
-! ::: 
+! ::: to initialize data on each grid.
+! :::
 ! ::: NOTE:  all arrays have one cell of ghost zones surrounding
 ! :::        the grid interior.  Values in these cells need not
 ! :::        be set here.
-! ::: 
+! :::
 ! ::: INPUTS/OUTPUTS:
-! ::: 
+! :::
 ! ::: level     => amr level of grid
-! ::: time      => time at which to init data             
+! ::: time      => time at which to init data
 ! ::: lo,hi     => index limits of grid interior (cell centered)
 ! ::: nstate    => number of state components.  You should know
 ! :::		   this already!
@@ -62,11 +62,14 @@
 ! :::              right hand corner of grid.  (does not include
 ! :::		   ghost region).
 ! ::: -----------------------------------------------------------
+!TODO_JENS: you might want to change the initialization code below in
+!order to initialize the fields to sth simpler; right now this is really
+!just the axion star.
       subroutine fort_initdata(level,time,lo,hi, &
                              ns, state   ,s_l1,s_l2,s_l3,s_h1,s_h2,s_h3, &
                              na, axion,   a_l1,a_l2,a_l3,a_h1,a_h2,a_h3, &
                              nd, diag_eos,d_l1,d_l2,d_l3,d_h1,d_h2,d_h3, &
-                             delta,xlo,xhi) bind(C)
+                             delta,xlo,xhi,boxsize) bind(C)
       use probdata_module
       use atomic_rates_module, only : XHYDROGEN
       use meth_params_module, only : URHO, UMX, UMY, UMZ, UEDEN, UEINT,&
@@ -77,15 +80,15 @@
       use comoving_module, only : comoving_h, comoving_OmAx, comoving_OmM
       use interpolate_module
       use amrex_parmparse_module
- 
+
       implicit none
- 
+
       integer level, ns, nd, na
       integer lo(3), hi(3)
       integer s_l1,s_l2,s_l3,s_h1,s_h2,s_h3
       integer d_l1,d_l2,d_l3,d_h1,d_h2,d_h3
       integer a_l1,a_l2,a_l3,a_h1,a_h2,a_h3
-      double precision xlo(3), xhi(3), time, delta(3)
+      double precision xlo(3), xhi(3), time, delta(3), boxsize(3)
       double precision    state(s_l1:s_h1,s_l2:s_h2,s_l3:s_h3,ns)
       double precision diag_eos(d_l1:d_h1,d_l2:d_h2,d_l3:d_h3,nd)
       double precision    axion(a_l1:a_h1,a_l2:a_h2,a_l3:a_h3,na)
@@ -95,6 +98,7 @@
       double precision hubl
       double precision r,rc,alpha
       double precision d
+      double precision pi, tpi
       double precision, allocatable :: m(:), pos(:,:)
 
       type(amrex_parmparse) :: pp
@@ -119,7 +123,13 @@
       end do
       close(un)
       !print *,"star is at ", pos
-        
+
+      ! do i=1,3
+      !    pos(1,i)=center(i)
+      ! enddo
+
+      pi = 4.d0 * atan(1.d0)
+      tpi = 2.0d0 * pi
 
       hubl = 0.7d0
       meandens = 2.775d11 * hubl**2* comoving_OmM !background density 
@@ -127,24 +137,28 @@
 
       rc = 1.3d0 * 0.012513007848917703d0 / (dsqrt(m_tt * hubl) * comoving_OmM**(0.25d0))
 
+      ! hbaroverm = 0.01917152d0 / m_tt
+      velFac = 10.0d0
+      sigmaR = 0.1d0
+
       !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)
          do j = lo(2), hi(2)
             do i = lo(1), hi(1)
-               
+
                state(i,j,k,URHO)    = 1.5d0 * small_dens
                state(i,j,k,URHO)    = 0.0d0
-               
+
                if (UMX .gt. -1) then
                   state(i,j,k,UMX:UMZ) = 0.0d0
-                  
+
                   ! These will both be set later in the call to init_e.
                   state(i,j,k,UEINT) = 0.d0
                   state(i,j,k,UEDEN) = 0.d0
                   diag_eos(i,j,k,TEMP_COMP) = 1000.d0
                   diag_eos(i,j,k,  NE_COMP) =    0.d0
                end if
-               
+
                if (UFS .gt. -1) then
                   state(i,j,k,UFS  ) = XHYDROGEN
                   state(i,j,k,UFS+1) = (1.d0 - XHYDROGEN)

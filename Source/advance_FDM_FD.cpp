@@ -2,7 +2,7 @@
  
 #include "Nyx.H"
 #include "Nyx_F.H"
-#include <AMReX_Particles_F.H>
+//#include <AMReX_Particles_F.H>
 #include <AMReX_MultiFab.H>
 #ifdef GRAVITY
 #	include "Gravity.H"
@@ -101,7 +101,7 @@ Nyx::advance_FDM_FD (amrex::Real time,
             (&time, bx.loVect(), bx.hiVect(), 
 	     BL_TO_FORTRAN(axion),
              BL_TO_FORTRAN(axionout),
-             BL_TO_FORTRAN(grav_vector[fpi]),
+             // BL_TO_FORTRAN(grav_vector[fpi]),
              BL_TO_FORTRAN(phiold),
              dx, prob_lo, prob_hi, &dt,
              &cflLoc, &a_old, &a_half, &a_new, verbose);

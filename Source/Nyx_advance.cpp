@@ -1,7 +1,7 @@
 
 #include "Nyx.H"
 #include "Nyx_F.H"
-#include <AMReX_Particles_F.H>
+//#include <AMReX_Particles_F.H>
 
 #ifdef GRAVITY
 #include "Gravity.H"
@@ -259,9 +259,19 @@ Nyx::advance_hydro_plus_particles (Real time,
         //
         int use_previous_phi_as_guess = 1;
         int ngrow_for_solve = iteration + stencil_deposition_width;
+
+#ifdef CGRAV
+        MultiFab& phi_old = get_level(level).get_old_data(PhiGrav_Type);
+        MultiFab& phi_new = get_level(level).get_new_data(PhiGrav_Type);
+
+        prescribe_grav_potential(phi_old, Geom() , level, finest_level);
+
+	MultiFab::Copy(phi_new, phi_old, 0, 0, phi_old.nComp(), 0);
+#else
         gravity->multilevel_solve_for_old_phi(level, finest_level,
                                               ngrow_for_solve,
                                               use_previous_phi_as_guess);
+#endif
     }
     BL_PROFILE_VAR_STOP(solve_for_old_phi);
     //
@@ -360,6 +370,8 @@ Nyx::advance_hydro_plus_particles (Real time,
     for (int lev = level; lev <= finest_level_to_advance; lev++)
       if(levelmethod[lev]==FDlevel)
 	get_level(lev).advance_FDM_FD(time, dt, a_old, a_new);
+      else if(levelmethod[lev]==PSlevel)
+	get_level(lev).advance_FDM_PS(time, dt, a_old, a_new);
 
     // Always average down from finer to coarser.                                                                                                                                                              
     for (int lev = finest_level_to_advance-1; lev >= level; lev--)
@@ -633,7 +645,10 @@ Nyx::advance_hydro (Real time,
 #endif
 
 #ifdef FDM
-    advance_FDM_FD(time, dt, a_old, a_new);
+    if(levelmethod[level]==PSlevel)
+      advance_FDM_PS(time, dt, a_old, a_new);
+    else
+      advance_FDM_FD(time, dt, a_old, a_new);
 #endif
 
     // Call the hydro advance itself

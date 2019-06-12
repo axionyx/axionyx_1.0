@@ -283,7 +283,7 @@ Gravity::solve_for_old_phi (int               level,
 #endif
 
 #ifdef FDM
-    if(Nyx::levelmethod[level]==Nyx::FDlevel){
+    if(Nyx::levelmethod[level]==Nyx::FDlevel || Nyx::levelmethod[level]==Nyx::PSlevel){
         MultiFab& Ax_old = LevelData[level]->get_old_data(Axion_Type);
         MultiFab::Add(Rhs, Ax_old, Nyx::AxDens, 0, 1, 0);
     }
@@ -326,7 +326,7 @@ Gravity::solve_for_new_phi (int               level,
 #endif
 
 #ifdef FDM
-    if(Nyx::levelmethod[level]==Nyx::FDlevel)
+    if(Nyx::levelmethod[level]==Nyx::FDlevel || Nyx::levelmethod[level]==Nyx::PSlevel)
       {
 	MultiFab& Ax_new = LevelData[level]->get_new_data(Axion_Type);
 	MultiFab::Add(Rhs, Ax_new, Nyx::AxDens, 0, 1, 0);
@@ -666,6 +666,12 @@ Gravity::multilevel_solve_for_old_phi (int level,
                                        int use_previous_phi_as_guess)
 {
     BL_PROFILE("Gravity::multilevel_solve_for_old_phi()");
+
+#ifdef CGRAV
+    if (gravity_type == "StaticGrav")
+      return;
+#endif
+
     if (verbose)
         amrex::Print() << "Gravity ... multilevel solve for old phi at base level " << level
                        << " to finest level " << finest_level << '\n';
@@ -779,7 +785,7 @@ Gravity::actual_multilevel_solve (int                       level,
 	      Ax_new.ParallelCopy(*Rhs_particles[lev], 0, Nyx::AxDens, 1, 0, Ax_new.nGrow(), parent->Geom(level+lev).periodicity(),FabArrayBase::COPY);
 	    }
 
-	if(Nyx::levelmethod[level+lev]==Nyx::FDlevel)
+	if(Nyx::levelmethod[level+lev]==Nyx::FDlevel || Nyx::levelmethod[level+lev]==Nyx::PSlevel)
 	{
 	  if (is_new == 1)
 	    {
@@ -1333,7 +1339,7 @@ Gravity::set_mass_offset (Real time)
                 mass_offset += Nyx::theActiveParticles()[i]->sumParticleMass(lev);
 #ifdef FDM
             //TODO check if the third argument needs to be true!
-	    if(Nyx::levelmethod[lev]==Nyx::FDlevel)
+	    if(Nyx::levelmethod[lev]==Nyx::FDlevel || Nyx::levelmethod[lev]==Nyx::PSlevel)
 	      mass_offset += cs->vol_weight_sum("AxDens", time, true);
 #endif
         }

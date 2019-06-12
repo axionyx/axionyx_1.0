@@ -19,7 +19,7 @@ using std::string;
 #include <Derive_F.H>
 #include <AMReX_VisMF.H>
 #include <AMReX_TagBox.H>
-#include <AMReX_Particles_F.H>
+//#include <AMReX_Particles_F.H>
 #include <AMReX_Utility.H>
 #include <AMReX_Print.H>
 
@@ -108,13 +108,13 @@ int Nyx::AxDens = -1;
 int Nyx::AxRe   = -1;
 int Nyx::AxIm   = -1;
 int Nyx::NUM_AX = -1;
-int Nyx::vonNeumann_dt = 0;
 Real Nyx::m_tt = 2.5;
 Real Nyx::hbaroverm = 0.01917152 / m_tt;
 Real Nyx::meandens = 1.0;
 int Nyx::FDlevel = 0;
 int Nyx::GBlevel = 1;
 int Nyx::NBlevel = 2;
+int Nyx::PSlevel = 3;
 bool Nyx::partlevel = false;
 Vector<int> Nyx::levelmethod;
 Real Nyx::theta_fdm = 1.0;
@@ -123,6 +123,7 @@ Real Nyx::gamma_fdm = 1.0;
 Real Nyx::alpha_fdm = 1.0;
 int  Nyx::wkb_approx = 1;
 Real Nyx::beam_cfl = 0.2;
+Real Nyx::vonNeumann_dt = 0;
 #endif
 
 int Nyx::Temp_comp = -1;
@@ -274,7 +275,7 @@ Nyx::read_params ()
     done = true;  // ?
 
     ParmParse pp_nyx("nyx");
-
+    //\pparam this is an example of a docstring for an input parameter. This line lives in Source/Nyx.cpp, line 258
     pp_nyx.query("v", verbose);
     pp_nyx.get("init_shrink", init_shrink);
     pp_nyx.get("cfl", cfl);
@@ -306,7 +307,7 @@ Nyx::read_params ()
 	levelmethod.resize(nlevs);
 	pp_nyx.queryarr("levelmethod",levelmethod,0,nlevs);
 	for(int lev = 0; lev<levelmethod.size(); lev++)
-	  if(levelmethod[lev]!=FDlevel)
+	  if(levelmethod[lev]!=FDlevel && levelmethod[lev]!=PSlevel)
 	    partlevel = true;
       }
     else
@@ -998,17 +999,12 @@ Nyx::est_time_step (Real dt_old)
 
 //add time step requirements here.
 #ifdef FDM
-    if (vonNeumann_dt >0 && levelmethod[level]==FDlevel){
+    if (vonNeumann_dt >0 && (levelmethod[level]==FDlevel || levelmethod[level]==PSlevel) ){
       Real a = get_comoving_a(cur_time);
       const MultiFab& phi = get_new_data(PhiGrav_Type);
       Real phi_max = std::abs(phi.max(0)-phi.min(0));
       const Real* dx = geom.CellSize();
-      Real cfl_vN = 0.5;
-      //from BODO
-      // Real m_tt = 2.5;
-      // Real hbaroverm = 0.01917152 / m_tt;
-      Real time_step = cfl_vN*std::min(dx[0]*dx[0]*a*a/6/hbaroverm,hbaroverm/phi_max); 
-      //Real time_step = std::min(10.0*dx[0]*dx[0]*a*a,0.002/phi_max);
+      Real time_step = vonNeumann_dt*std::min(dx[0]*dx[0]*a*a/6/hbaroverm,hbaroverm/phi_max); 
       if (verbose && ParallelDescriptor::IOProcessor())
         std::cout << "...estdt from von Neumann stability :  "<< time_step << " " <<phi_max<<'\n';
       return time_step;

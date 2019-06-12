@@ -1,0 +1,314 @@
+
+# File NeutrinoParticleContainer.cpp
+
+[**File List**](files.md) **>** [**Source**](dir_74389ed8173ad57b461b9d623a1f3867.md) **>** [**NeutrinoParticleContainer.cpp**](NeutrinoParticleContainer_8cpp.md)
+
+[Go to the documentation of this file.](NeutrinoParticleContainer_8cpp.md) 
+
+
+````cpp
+#ifdef NEUTRINO_PARTICLES
+
+#include "NeutrinoParticleContainer.H"
+#include "NeutrinoParticles_F.H"
+
+using namespace amrex;
+
+void
+NeutrinoParticleContainer::AssignRelativisticDensity (Vector<std::unique_ptr<MultiFab> >& mf_to_be_filled,
+                                                      int               lev_min,
+                                                      int               ncomp,
+                                                      int               finest_level,
+                                                      int               ngrow) const
+{    
+    BL_PROFILE("NeutrinoParticleContainer::AssignRelativisticDensity()");
+    
+    BL_ASSERT(NStructReal >= 1);
+    BL_ASSERT(NStructReal >= ncomp);
+    BL_ASSERT(ncomp == AMREX_SPACEDIM+1);
+    
+    if (finest_level == -1) {
+        finest_level = this->finestLevel();
+    }
+    while (!m_gdb->LevelDefined(finest_level)) {
+        finest_level--;
+    }
+
+    ngrow = std::max(ngrow, 2);
+    
+    // Create the space for mf_to_be_filled, regardless of whether we'll need a temporary mf
+    mf_to_be_filled.resize(finest_level+1);
+    for (int lev = lev_min; lev <= finest_level; lev++)
+    {        
+        auto ng = lev == lev_min ? IntVect(AMREX_D_DECL(ngrow,ngrow,ngrow)) : m_gdb->refRatio(lev-1);
+        mf_to_be_filled[lev].reset(new MultiFab(m_gdb->boxArray(lev),
+                                                m_gdb->DistributionMap(lev), ncomp, ng));
+        mf_to_be_filled[lev]->setVal(0.0);
+    }
+    
+    // Test whether the grid structure of the boxArray is the same as the ParticleBoxArray at all levels 
+    bool all_grids_the_same = true; 
+    for (int lev = lev_min; lev <= finest_level; lev++)
+    {
+        if (!OnSameGrids(lev, *mf_to_be_filled[lev]))
+        {
+            all_grids_the_same = false;
+            break;
+        }
+    }
+    
+    Vector<std::unique_ptr<MultiFab> > mf_part;
+    if (!all_grids_the_same)
+    { 
+        // Create the space for the temporary, mf_part
+        mf_part.resize(finest_level+1);
+        for (int lev = lev_min; lev <= finest_level; lev++)
+        {
+            auto ng = lev == lev_min ? IntVect(AMREX_D_DECL(ngrow,ngrow,ngrow)) : m_gdb->refRatio(lev-1);
+            mf_part[lev].reset(new MultiFab(ParticleBoxArray(lev), 
+                                            ParticleDistributionMap(lev), ncomp, ng));
+            mf_part[lev]->setVal(0.0);
+        }
+    }
+    
+    auto & mf = (all_grids_the_same) ? mf_to_be_filled : mf_part;
+    
+    if (finest_level == 0)
+    {
+        //
+        // Just use the far simpler single-level version.
+        //
+        AssignRelativisticDensitySingleLevel(*mf[0], 0, ncomp);
+        //
+        // I believe that we don't need any information in ghost cells so we don't copy those.
+        //
+        if ( ! all_grids_the_same) {
+            mf_to_be_filled[0]->copy(*mf[0],0,0,ncomp);
+        }
+        return;
+    }
+    
+    PhysBCFunct cphysbc, fphysbc;
+    int lo_bc[] = {BCType::int_dir, BCType::int_dir, BCType::int_dir}; // periodic boundaries
+    int hi_bc[] = {BCType::int_dir, BCType::int_dir, BCType::int_dir};
+    Vector<BCRec> bcs(1, BCRec(lo_bc, hi_bc));
+    PCInterp mapper;
+    
+    Vector<std::unique_ptr<MultiFab> > tmp(finest_level+1);
+    for (int lev = lev_min; lev <= finest_level; ++lev) {
+        const BoxArray& ba = mf[lev]->boxArray();
+        const DistributionMapping& dm = mf[lev]->DistributionMap();
+        tmp[lev].reset(new MultiFab(ba, dm, 1, 0));
+        tmp[lev]->setVal(0.0);
+    }
+    
+    for (int lev = lev_min; lev <= finest_level; ++lev) {
+        
+        AssignRelativisticDensitySingleLevel(*mf[lev], lev, 1, 0);
+        
+        if (lev < finest_level) {
+            amrex::InterpFromCoarseLevel(*tmp[lev+1], 0.0, *mf[lev],
+                                         0, 0, ncomp,
+                                         m_gdb->Geom(lev),
+                                         m_gdb->Geom(lev+1),
+                                         cphysbc, fphysbc,
+                                         m_gdb->refRatio(lev), &mapper, bcs);
+        }
+        
+        if (lev > lev_min) {
+            // Note - this will double count the mass on the coarse level in 
+            // regions covered by the fine level, but this will be corrected
+            // below in the call to average_down.
+            amrex::sum_fine_to_coarse(*mf[lev], *mf[lev-1], 0, 1,
+                                      m_gdb->refRatio(lev-1),
+                                      m_gdb->Geom(lev-1),
+                                      m_gdb->Geom(lev));
+        }
+        
+        mf[lev]->plus(*tmp[lev], 0, ncomp, 0);
+    }
+    
+    for (int lev = finest_level - 1; lev >= lev_min; --lev) {
+        amrex::average_down(*mf[lev+1], *mf[lev], 0, ncomp, m_gdb->refRatio(lev));
+    }
+    
+    if (!all_grids_the_same) {
+        for (int lev = lev_min; lev <= finest_level; lev++) {
+            mf_to_be_filled[lev]->copy(*mf_part[lev],0,0,1);
+        }
+    }
+    if (lev_min > 0) {
+        int nlevels = finest_level - lev_min + 1;
+        for (int i = 0; i < nlevels; i++)
+            {
+                mf_to_be_filled[i] = std::move(mf_to_be_filled[i+lev_min]);
+            }
+        mf_to_be_filled.resize(nlevels);
+    }
+}
+
+//
+// This is the single-level version for cell-centered density
+//
+void
+NeutrinoParticleContainer::AssignRelativisticDensitySingleLevel (MultiFab& mf_to_be_filled,
+                                                                 int       lev,
+                                                                 int       ncomp,
+                                                                 int       particle_lvl_offset) const
+{
+    BL_PROFILE("NeutrinoParticleContainer::AssignCellDensitySingleLevel()");
+    
+    MultiFab* mf_pointer;
+
+    if (OnSameGrids(lev, mf_to_be_filled)) {
+      // If we are already working with the internal mf defined on the 
+      // particle_box_array, then we just work with this.
+      mf_pointer = &mf_to_be_filled;
+    }
+    else {
+      // If mf_to_be_filled is not defined on the particle_box_array, then we need 
+      // to make a temporary here and copy into mf_to_be_filled at the end.
+      mf_pointer = new MultiFab(ParticleBoxArray(lev), 
+                ParticleDistributionMap(lev),
+                ncomp, mf_to_be_filled.nGrow());
+    }
+
+    // We must have ghost cells for each FAB so that a particle in one grid can spread 
+    // its effect to an adjacent grid by first putting the value into ghost cells of its
+    // own grid.  The mf->sumBoundary call then adds the value from one grid's ghost cell
+    // to another grid's valid region.
+    if (mf_pointer->nGrow() < 1) 
+       amrex::Error("Must have at least one ghost cell when in AssignRelativisticDensitySingleLevel");
+
+#ifdef _OPENMP
+    const int       ng          = mf_pointer->nGrow();
+#endif
+    const Real      strttime    = amrex::second();
+    const Geometry& gm          = Geom(lev);
+    const Real*     plo         = gm.ProbLo();
+    const Real*     dx_particle = Geom(lev + particle_lvl_offset).CellSize();
+    const Real*     dx          = gm.CellSize();
+
+    if (gm.isAnyPeriodic() && ! gm.isAllPeriodic()) {
+      amrex::Error("AssignRelativisticDensitySingleLevel: problem must be periodic in no or all directions");
+    }
+    
+    for (MFIter mfi(*mf_pointer); mfi.isValid(); ++mfi) {
+        (*mf_pointer)[mfi].setVal(0);
+    }
+
+//  using ParConstIter = ParConstIter<NStructReal, NStructInt, NArrayReal, NArrayInt>;
+
+#ifdef _OPENMP
+#pragma omp parallel
+#endif
+    {
+        FArrayBox local_rho;
+        for (MyConstParIter pti(*this, lev); pti.isValid(); ++pti) {
+            const auto& particles = pti.GetArrayOfStructs();
+            int nstride = particles.dataShape().first;
+            const long np = pti.numParticles();
+            FArrayBox& fab = (*mf_pointer)[pti];
+            Real* data_ptr;
+            const int *lo, *hi;
+#ifdef _OPENMP
+            Box tile_box = pti.tilebox();
+            tile_box.grow(ng);
+            local_rho.resize(tile_box,ncomp);
+            local_rho = 0.0;
+            data_ptr = local_rho.dataPtr();
+            lo = tile_box.loVect();
+            hi = tile_box.hiVect();
+#else
+            const Box& box = fab.box();
+            data_ptr = fab.dataPtr();
+            lo = box.loVect();
+            hi = box.hiVect();
+#endif
+
+            if (dx == dx_particle) {
+                if (m_relativistic) {
+                    neutrino_deposit_relativistic_cic(particles.data(), nstride, np, ncomp, 
+                                                      data_ptr, lo, hi, plo, dx, m_csq);
+                } else {
+                    amrex_deposit_cic(particles.data(), nstride, np, ncomp, 
+                                      data_ptr, lo, hi, plo, dx);
+                }
+            } else {
+                if (m_relativistic) {
+                    neutrino_deposit_particle_dx_relativistic_cic(particles.data(), nstride, np, ncomp,
+                                                                  data_ptr, lo, hi, plo, dx, dx_particle, m_csq);
+                } else {
+                    amrex_deposit_particle_dx_cic(particles.data(), nstride, np, ncomp,
+                                                  data_ptr, lo, hi, plo, dx, dx_particle);
+                }
+            }
+                
+#ifdef _OPENMP
+            amrex_atomic_accumulate_fab(BL_TO_FORTRAN_3D(local_rho), 
+                                        BL_TO_FORTRAN_3D(fab), ncomp);
+#endif
+
+        }
+    }
+
+    mf_pointer->SumBoundary(gm.periodicity());
+    
+    // If ncomp > 1, first divide the momenta (component n) 
+    // by the mass (component 0) in order to get velocities.
+    // Be careful not to divide by zero.
+    for (int n = 1; n < ncomp; n++){
+      for (MFIter mfi(*mf_pointer); mfi.isValid(); ++mfi) {
+    (*mf_pointer)[mfi].protected_divide((*mf_pointer)[mfi],0,n,1);
+      }
+    }
+
+    // Only multiply the first component by (1/vol) because this converts mass
+    // to density. If there are additional components (like velocity), we don't
+    // want to divide those by volume.
+    const Real vol = AMREX_D_TERM(dx[0], *dx[1], *dx[2]);
+
+    mf_pointer->mult(1.0/vol, 0, 1, mf_pointer->nGrow());
+
+    // If mf_to_be_filled is not defined on the particle_box_array, then we need
+    // to copy here from mf_pointer into mf_to_be_filled. I believe that we don't
+    // need any information in ghost cells so we don't copy those.
+    if (mf_pointer != &mf_to_be_filled) {
+      mf_to_be_filled.copy(*mf_pointer,0,0,ncomp);
+      delete mf_pointer;
+    }
+    
+    if (m_verbose > 1) {
+      Real stoptime = amrex::second() - strttime;
+      
+      ParallelDescriptor::ReduceRealMax(stoptime,ParallelDescriptor::IOProcessorNumber());
+      
+      amrex::Print() << "NeutrinoParticleContainer::AssignRelativisticDensitySingleLevel time: " << stoptime << '\n';
+    }
+}
+
+void
+NeutrinoParticleContainer::moveKickDrift (amrex::MultiFab&       acceleration,
+                                            int                    lev,
+                                            amrex::Real            dt,
+                                            amrex::Real            a_old,
+                                            amrex::Real            a_half,
+                                            int                    where_width)
+{
+    amrex::Error("We shouldnt actually call moveKickDrift for neutrinos");
+}
+
+void
+NeutrinoParticleContainer::moveKick (MultiFab&       acceleration,
+                                       int             lev,
+                                       Real            dt,
+                                       Real            a_new,
+                                       Real            a_half)
+{
+    amrex::Error("We shouldnt actually call moveKick for neutrinos");
+}
+
+#endif
+
+````
+

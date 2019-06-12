@@ -1,9 +1,17 @@
 # Contents
+[Documentation](#Documentation)  
 [Installation](#installation)  
 [File structure](#file-structure-of-nyx)  
 [More file structure](#more-file-structure)   
 [Call graph of Axionyx](#call-graph-of-axionyx)  
 [Output](#output)  
+
+# Documentation 
+A detailed documentation is not available yet. But you can find an API reference here:  
+[Available input parameters](mddocs/input_parameters.md)  
+[Classes](mddocs/classes.md)  
+[Functions](mddocs/functions.md)    
+[Files](mddocs/files.md)     
 
 # Installation
 

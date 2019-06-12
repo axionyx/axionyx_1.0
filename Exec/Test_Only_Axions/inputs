@@ -1,6 +1,5 @@
 # ------------------  INPUTS TO MAIN PROGRAM  -------------------
-max_step = 2
-#stop_time = 1.262326e17
+max_step = 100
 
 nyx.comoving_OmB = 0.0
 nyx.comoving_OmM = 0.3
@@ -21,38 +20,39 @@ nyx.small_dens = 1.0e-32
 nyx.small_temp = 1.0
 nyx.small_pres = 1.0e-20
 
-#File written during the run: nstep | time | dt | redshift | a
-amr.data_log = runlog #stats_full stats_delta stats_l0 stats_l1 stats_l2 stats_l3
-amr.grid_log = grdlog
-
 #This is how we restart from a checkpoint and write an ascii particle file
 #Leave this commented out in cvs version
-#amr.restart = chk00250
+#amr.restart = chk01000
+nyx.dump_old = 1
+#particles.particle_output_file = particle_output
+particles.write_in_plotfile = 0
+
+gravity.gravity_type = StaticGrav #PoissonGrav
+gravity.no_sync      = 1
+gravity.no_composite = 1
+
+gravity.ml_tol    = 1.e-10
+gravity.sl_tol    = 1.e-10
+gravity.delta_tol = 1.e-10
+gravity.use_previous_phi_as_guess = 0
+
+mg.bottom_solver = 1
 
 # PROBLEM SIZE & GEOMETRY
 geometry.coord_sys   =  0
-#geometry.is_periodic = 0 0 0 
-geometry.is_periodic = 1 1 1 
-geometry.prob_lo     =  0     0     0
-geometry.prob_hi     = 2.9493 2.9493 2.9493
-#amr.n_cell           = 128 128 128
-amr.n_cell           = 64 64 64 
-#amr.n_cell           = 256 256 256
-#amr.max_grid_size    = 128 # 64 #32
 
-# >>>>>>>>> FDM PHYSICS <<<<<<<<<<<
+geometry.prob_lo     =  0.0 0.0 0.0
+geometry.prob_hi     =   0.512 0.512 0.512
 
-nyx.num_particle_fdm = 1
-nyx.num_particle_dm  = 1
-nyx.levelmethod = 1
-nyx.particle_init_type = GaussianBeams
-nyx.sigma_fdm = 0.1
-nyx.theta_fdm = 4.0
-nyx.alpha_fdm = 1000.0 #1.8 # 0.4 #10000.0
-nyx.wkb_approx = 1
-nyx.beam_cfl = 0.1
-nyx.m_tt = 2.5
-#nyx.do_dm_particles = 1
+amr.n_cell           = 64 64 64
+amr.max_grid_size    = 32
+amr.blocking_factor  = 32
+nyx.n_particles      = 1  1  1
+
+#amr.n_cell           = 4 4 4
+#amr.max_grid_size    = 4
+#amr.blocking_factor  = 4
+#nyx.n_particles      = 1  1  1
 
 # >>>>>>>>>>>>>  BC FLAGS <<<<<<<<<<<<<<<<
 # 0 = Interior           3 = Symmetry
@@ -96,10 +96,10 @@ amr.max_level          = 0        # maximum level number allowed
 #amr.regrid_int         = 4 4 4 4
 #amr.n_error_buf        = 2 2 2 2
 #amr.refine_grid_layout = 1
-#amr.regrid_on_restart  = 1
-amr.blocking_factor    = 16
-#amr.subcycling_mode    = Auto
-#amr.grid_eff           = 0.8 0.8 0.8 0.8
+amr.regrid_on_restart  = 0
+amr.subcycling_mode    = Manual
+amr.subcycling_iterations = 4
+amr.grid_eff           = 0.7
 
 # CHECKPOINT FILES
 amr.check_file      = chk
@@ -107,14 +107,14 @@ amr.check_int       = 2500000
 
 # PLOTFILES
 amr.plot_file       = plt
-amr.plot_int        = 100
-#amr.plot_per        = 3.155815e15
-#nyx.plot_z_values   = 99.5 60.0 40.0 20.0 10.0 8.0 7.0 6.0 5.0 4.0 3.0 2.5 2.0 1.5 1.0 0.5 0.1
+#amr.plot_per       = 1.e-6
+amr.plot_int	    = 10
+
+#LOG FILE nstep | time | dt | redshift | a
+amr.data_log = runlog
 
 amr.plot_vars        = ALL
 amr.derive_plot_vars = fdm_mass_density fdm_particle_count particle_mass_density particle_count AxPhase
 
 #PROBIN FILENAME
 amr.probin_file = probin
-
-particles.write_in_plotfile = 1

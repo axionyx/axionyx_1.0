@@ -3,6 +3,7 @@ CEXE_headers   += FDMParticleContainer.H
 CEXE_sources   += FDMParticleContainer.cpp
 CEXE_headers   += FDMwkbParticleContainer.H
 CEXE_sources   += FDMwkbParticleContainer.cpp
+CEXE_sources   += prescribe_grav_potential.cpp
 FEXE_headers   += fdm_F.H
 f90EXE_sources += fdm_3d.f90
 f90EXE_sources += Derive_fdm_3d.f90

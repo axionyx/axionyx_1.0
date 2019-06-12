@@ -7,7 +7,7 @@
 #endif
 
 #include <Nyx_F.H>
-#include <AMReX_Particles_F.H>
+//#include <AMReX_Particles_F.H>
 
 #ifdef FDM
 #include "fdm_F.H"
@@ -18,7 +18,7 @@ using namespace amrex;
 namespace
 {
     bool virtual_particles_set = false;
-    
+
     std::string ascii_particle_file;
     std::string binary_particle_file;
     std::string    sph_particle_file;
@@ -153,7 +153,7 @@ std::string Nyx::particle_init_type = "";
 std::string Nyx::particle_move_type = "";
 
 // Allows us to output particles in the plotfile
-//   in either single (IEEE32) or double (NATIVE) precision.  
+//   in either single (IEEE32) or double (NATIVE) precision.
 // Particles are always written in double precision
 //   in the checkpoint files.
 
@@ -171,8 +171,8 @@ Real Nyx::particle_cfl = 0.5;
 Real Nyx::neutrino_cfl = 0.5;
 #endif
 #ifdef FDM
-long Nyx::num_particle_fdm;
-long Nyx::num_particle_dm;
+long Nyx::num_particle_fdm = 0;
+long Nyx::num_particle_dm = 0;
 #endif
 
 IntVect Nyx::Nrep;
@@ -212,34 +212,34 @@ Nyx::theGhostPC ()
     return GhostPC;
 }
 
-StellarParticleContainer* 
+StellarParticleContainer*
 Nyx::theSPC ()
 {
       return SPC;
 }
-StellarParticleContainer* 
+StellarParticleContainer*
 Nyx::theVirtSPC ()
 {
       return VirtSPC;
 }
-StellarParticleContainer* 
+StellarParticleContainer*
 Nyx::theGhostSPC ()
 {
       return GhostSPC;
 }
 
 #ifdef AGN
-AGNParticleContainer* 
+AGNParticleContainer*
 Nyx::theAPC ()
 {
       return APC;
 }
-AGNParticleContainer* 
+AGNParticleContainer*
 Nyx::theVirtAPC ()
 {
       return VirtAPC;
 }
-AGNParticleContainer* 
+AGNParticleContainer*
 Nyx::theGhostAPC ()
 {
       return GhostAPC;
@@ -247,17 +247,17 @@ Nyx::theGhostAPC ()
 #endif
 
 #ifdef NEUTRINO_PARTICLES
-NeutrinoParticleContainer* 
+NeutrinoParticleContainer*
 Nyx::theNPC ()
 {
       return NPC;
 }
-NeutrinoParticleContainer* 
+NeutrinoParticleContainer*
 Nyx::theVirtNPC ()
 {
       return VirtNPC;
 }
-NeutrinoParticleContainer* 
+NeutrinoParticleContainer*
 Nyx::theGhostNPC ()
 {
       return GhostNPC;
@@ -367,7 +367,7 @@ Nyx::read_particle_params ()
 
     // Input error check
     if (!binary_particle_file.empty() && (particle_init_type != "BinaryFile" &&
-                                          particle_init_type != "BinaryMetaFile" && 
+                                          particle_init_type != "BinaryMetaFile" &&
 					  particle_init_type != "BinaryMortonFile"))
     {
         if (ParallelDescriptor::IOProcessor())
@@ -440,7 +440,7 @@ Nyx::init_particles ()
     {
         BL_ASSERT (DMPC == 0);
         DMPC = new DarkMatterParticleContainer(parent);
-        ActiveParticles.push_back(DMPC); 
+        ActiveParticles.push_back(DMPC);
 
         if (init_with_sph_particles == 1)
            SPHPC = new DarkMatterParticleContainer(parent);
@@ -449,7 +449,7 @@ Nyx::init_particles ()
 #endif
 	{
 	    VirtPC = new DarkMatterParticleContainer(parent);
-            VirtualParticles.push_back(VirtPC); 
+            VirtualParticles.push_back(VirtPC);
 
 	    GhostPC = new DarkMatterParticleContainer(parent);
             GhostParticles.push_back(GhostPC); }
@@ -635,15 +635,15 @@ Nyx::init_particles ()
         // Note that we don't initialize any actual AGN particles here, we just create the container.
         BL_ASSERT (APC == 0);
         APC = new AGNParticleContainer(parent, num_particle_ghosts);
-        ActiveParticles.push_back(APC); 
+        ActiveParticles.push_back(APC);
 
 	if (parent->subCycle())
 	{
 	    VirtAPC = new AGNParticleContainer(parent, num_particle_ghosts);
-            VirtualParticles.push_back(VirtAPC); 
+            VirtualParticles.push_back(VirtAPC);
 
 	    GhostAPC = new AGNParticleContainer(parent, num_particle_ghosts);
-            GhostParticles.push_back(GhostAPC); 
+            GhostParticles.push_back(GhostAPC);
 	}
         //
         // 2 gives more stuff than 1.
@@ -655,7 +655,7 @@ Nyx::init_particles ()
     {
         BL_ASSERT (NPC == 0);
         NPC = new NeutrinoParticleContainer(parent);
-        ActiveParticles.push_back(NPC); 
+        ActiveParticles.push_back(NPC);
 
         // Set the relativistic flag to 1 so that the density will be gamma-weighted
         //     when returned by AssignDensity calls.
@@ -668,14 +668,14 @@ Nyx::init_particles ()
 	if (parent->subCycle())
 	{
 	    VirtNPC = new NeutrinoParticleContainer(parent);
-            VirtualParticles.push_back(VirtNPC); 
+            VirtualParticles.push_back(VirtNPC);
 
             // Set the relativistic flag to 1 so that the density will be gamma-weighted
             //     when returned by AssignDensity calls.
             VirtNPC->SetRelativistic(1);
 
 	    GhostNPC = new NeutrinoParticleContainer(parent);
-            GhostParticles.push_back(GhostNPC); 
+            GhostParticles.push_back(GhostNPC);
 
             // Set the relativistic flag to 1 so that the density will be gamma-weighted
             //     when returned by AssignDensity calls.
@@ -1118,14 +1118,14 @@ Nyx::init_santa_barbara (int init_sb_vels)
     Real cur_time = state[State_Type].curTime();
     Real a = old_a;
 
-    amrex::Print() << "... time and comoving a when data is initialized at level " 
+    amrex::Print() << "... time and comoving a when data is initialized at level "
                    << level << " " << cur_time << " " << a << '\n';
 
     if (level == 0)
     {
         Real frac_for_hydro = comoving_OmB / comoving_OmM;
         Real omfrac = 1.0 - frac_for_hydro;
- 
+
         if ( (init_with_sph_particles == 0) && (frac_for_hydro != 1.0) ) {
             DMPC->MultiplyParticleMass(level, omfrac);
 	}
@@ -1182,7 +1182,7 @@ Nyx::init_santa_barbara (int init_sb_vels)
 #endif
 
         int ns = S_new.nComp();
-        int nd = D_new.nComp(); 
+        int nd = D_new.nComp();
         for (MFIter mfi(S_new); mfi.isValid(); ++mfi)
         {
             RealBox gridloc = RealBox(grids[mfi.index()],
@@ -1198,18 +1198,18 @@ Nyx::init_santa_barbara (int init_sb_vels)
             D_new[mfi].setVal(0,   Ne_comp);
 
             fort_initdata
-                (level, cur_time, lo, hi, 
-                 ns,BL_TO_FORTRAN(S_new[mfi]), 
+                (level, cur_time, lo, hi,
+                 ns,BL_TO_FORTRAN(S_new[mfi]),
 #ifdef FDM
                  na, BL_TO_FORTRAN(Ax_new[mfi]),
 #endif
                  nd,BL_TO_FORTRAN(D_new[mfi]), dx,
-                 gridloc.lo(), gridloc.hi());
+                 gridloc.lo(), gridloc.hi(), geom.Domain().loVect(), geom.Domain().hiVect());
         }
 
         if (inhomo_reion) init_zhi();
 
-        // Add the particle density to the gas density 
+        // Add the particle density to the gas density
         MultiFab::Add(S_new, *particle_mf[level], 0, Density, 1, S_new.nGrow());
 
         if (init_sb_vels == 1)
@@ -1230,7 +1230,7 @@ Nyx::init_santa_barbara (int init_sb_vels)
 
         MultiFab& D_new = get_new_data(DiagEOS_Type);
         FillCoarsePatch(D_new, 0, cur_time, DiagEOS_Type, 0, D_new.nComp());
- 
+
         MultiFab& Phi_new = get_new_data(PhiGrav_Type);
         FillCoarsePatch(Phi_new, 0, cur_time, PhiGrav_Type, 0, Phi_new.nComp());
 
@@ -1258,7 +1258,7 @@ Nyx::init_santa_barbara (int init_sb_vels)
         const int* hi = box.hiVect();
 
         fort_init_e_from_t
-            (BL_TO_FORTRAN(S_new[mfi]), &ns, 
+            (BL_TO_FORTRAN(S_new[mfi]), &ns,
              BL_TO_FORTRAN(D_new[mfi]), &nd, lo, hi, &a);
     }
 
@@ -1279,18 +1279,20 @@ Nyx::particle_post_restart (const std::string& restart_file, bool is_checkpoint)
 
     if (level > 0)
         return;
-     
+
     if (do_dm_particles)
     {
         BL_ASSERT(DMPC == 0);
         DMPC = new DarkMatterParticleContainer(parent);
         ActiveParticles.push_back(DMPC);
- 
-        // if (parent->subCycle())
+
+#ifndef FDM
+        if (parent->subCycle())
+#endif
         {
             VirtPC = new DarkMatterParticleContainer(parent);
             VirtualParticles.push_back(VirtPC);
- 
+
             GhostPC = new DarkMatterParticleContainer(parent);
             GhostParticles.push_back(GhostPC);
         }
@@ -1322,12 +1324,12 @@ Nyx::particle_post_restart (const std::string& restart_file, bool is_checkpoint)
         BL_ASSERT(APC == 0);
         APC = new AGNParticleContainer(parent, num_particle_ghosts);
         ActiveParticles.push_back(APC);
- 
+
         if (parent->subCycle())
         {
           VirtAPC = new AGNParticleContainer(parent, num_particle_ghosts);
           VirtualParticles.push_back(VirtAPC);
- 
+
           GhostAPC = new AGNParticleContainer(parent, num_particle_ghosts);
           GhostParticles.push_back(GhostAPC);
         }
@@ -1564,10 +1566,10 @@ Nyx::particle_redistribute (int lbase, int iteration, bool my_init)
     if (DMPC)
 #endif
     {
-        //  
+        //
         // If we are calling with my_init = true, then we want to force the redistribute
         //    without checking whether the grids have changed.
-        //  
+        //
         if (my_init)
         {
 #ifdef FDM
@@ -1595,11 +1597,11 @@ Nyx::particle_redistribute (int lbase, int iteration, bool my_init)
         bool ba_size_changed = false;
 
         int flev = parent->finestLevel();
-	
+
         while ( parent->getAmrLevels()[flev] == nullptr ) {
             flev--;
 	}
- 
+
         if (ba.size() != flev+1)
         {
             amrex::Print() << "BA SIZE " << ba.size() << std::endl;
