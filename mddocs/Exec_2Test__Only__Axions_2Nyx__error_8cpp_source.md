@@ -62,11 +62,11 @@ Nyx::error_setup()
     //err_list.add("total_density",1,ErrorRec::UseAverage,
     //             BL_FORT_PROC_CALL(TAG_OVERDENSITY, tag_overdensity));
 
-//     err_list.add("AxDens",1,ErrorRec::UseAverage,
-//                  BL_FORT_PROC_CALL(TAG_OVERDENSITY, tag_overdensity));
-
     err_list.add("AxDens",1,ErrorRec::UseAverage,
-                 BL_FORT_PROC_CALL(TAG_CENTER, tag_center));
+                 BL_FORT_PROC_CALL(TAG_OVERDENSITY, tag_overdensity));
+
+    // err_list.add("AxDens",1,ErrorRec::UseAverage,
+    //              BL_FORT_PROC_CALL(TAG_CENTER, tag_center));
 
     // err_list.add("AxRe_err_x",1,ErrorRec::Standard,
     //              BL_FORT_PROC_CALL(TAG_AXVEL, tag_axvel));

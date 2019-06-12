@@ -35,4 +35,4 @@
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/SourceTerms/Nyx_sources.cpp`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/SourceTerms/Nyx_sources.cpp`

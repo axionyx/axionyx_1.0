@@ -10,7 +10,7 @@
 #include <iomanip>
 #include <Nyx.H>
 #include <Nyx_F.H>
-#include <AMReX_Particles_F.H>
+//#include <AMReX_Particles_F.H>
 
 #ifdef GRAVITY
 #include <Gravity.H>
@@ -141,6 +141,11 @@ Nyx::init_zhi ()
 {
     BL_PROFILE("Nyx::init_zhi()");
 
+#ifdef NO_HYDRO
+    if (ParallelDescriptor::IOProcessor()) std::cout << "NO_HYDRO flag set, so why are we here...";
+    return;
+#else
+
     if (ParallelDescriptor::IOProcessor()) std::cout << "Reading z_HI from file...";
 
     const int file_res = inhomo_grid;
@@ -175,6 +180,7 @@ Nyx::init_zhi ()
     }
 
     if (ParallelDescriptor::IOProcessor()) std::cout << "done.\n";
+#endif
 }
 
 void
@@ -189,9 +195,8 @@ Nyx::initData ()
         return;
     }
 
-    MultiFab&   S_new    = get_new_data(State_Type);
-
 #ifndef NO_HYDRO
+    MultiFab&   S_new    = get_new_data(State_Type);
     // We need this because otherwise we might operate on uninitialized data.
     S_new.setVal(0.0);
 #endif
@@ -235,11 +240,11 @@ Nyx::initData ()
                 fort_initdata
                     (level, cur_time, bx.loVect(), bx.hiVect(),
                      ns, BL_TO_FORTRAN(S_new[mfi]),
-                     nd, BL_TO_FORTRAN(D_new[mfi]),
 #ifdef FDM
                      na, BL_TO_FORTRAN(Ax_new[mfi]),
 #endif
-                     dx, gridloc.lo(), gridloc.hi(), geom.ProbLo(), geom.ProbHi());
+                     nd, BL_TO_FORTRAN(D_new[mfi]),
+                     dx, gridloc.lo(), gridloc.hi(), geom.Domain().loVect(), geom.Domain().hiVect());
             }
 
             if (inhomo_reion) init_zhi();
@@ -266,7 +271,7 @@ Nyx::initData ()
                      na, BL_TO_FORTRAN(Ax_new[mfi]),
 #endif
                      ns, BL_TO_FORTRAN(S_new[mfi]),
-                     dx, gridloc.lo(), gridloc.hi(), geom.ProbLo(), geom.ProbHi());
+                     dx, gridloc.lo(), gridloc.hi(), geom.Domain().loVect(), geom.Domain().hiVect());
             }
         }
     }
@@ -332,7 +337,7 @@ Nyx::initData ()
         std::cout << "Readin stuff...done\n";
     }
 #endif
-
+    
     if (level == 0)
         init_particles();
 

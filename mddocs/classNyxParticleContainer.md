@@ -49,7 +49,7 @@ Inherits the following classes: amrex::NeighborParticleContainer< NSR, NSI >,  [
 |  void | [**GetParticleVelocities**](classNyxParticleContainer.md#function-getparticlevelocities) (amrex::Vector&lt; amrex::Real &gt; & part\_vels) <br> |
 |  void | [**MultiplyParticleMass**](classNyxParticleContainer.md#function-multiplyparticlemass) (int lev, amrex::Real mult) <br> |
 | virtual void | [**NyxCheckpoint**](classNyxParticleContainer.md#function-nyxcheckpoint) (const std::string & dir, const std::string & name) const<br> |
-|   | [**NyxParticleContainer**](classNyxParticleContainer.md#function-nyxparticlecontainer) (amrex::Amr \* amr, int nghost=0) <br> |
+|   | [**NyxParticleContainer**](classNyxParticleContainer.md#function-nyxparticlecontainer) ([**amrex::Amr**](classamrex_1_1Amr.md) \* amr, int nghost=0) <br> |
 | virtual void | [**Redistribute**](classNyxParticleContainer.md#function-redistribute) (int lev\_min=0, int lev\_max=-1, int nGrow=0) override<br> |
 | virtual void | [**RemoveParticlesAtLevel**](classNyxParticleContainer.md#function-removeparticlesatlevel) (int level) override<br> |
 |  void | [**SetParticleVelocities**](classNyxParticleContainer.md#function-setparticlevelocities) (amrex::Vector&lt; amrex::Real &gt; & part\_data) <br> |
@@ -378,4 +378,4 @@ bool NyxParticleContainer< NSR, NSI, NAR, NAI >::sub_cycle;
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/NyxParticleContainer.H`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/NyxParticleContainer.H`

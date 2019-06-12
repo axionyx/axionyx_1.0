@@ -21,7 +21,6 @@
 
 | Type | Name |
 | ---: | :--- |
-| namespace | [**amrex\_parmparse\_module**](namespaceamrex__parmparse__module.md) <br> |
 | namespace | [**atomic\_rates\_module**](namespaceatomic__rates__module.md) <br> |
 
 
@@ -39,4 +38,4 @@
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/EOS/atomic_rates.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/EOS/atomic_rates.f90`

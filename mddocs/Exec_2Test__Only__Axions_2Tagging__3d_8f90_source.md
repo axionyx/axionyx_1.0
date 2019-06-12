@@ -48,8 +48,13 @@
 
       integer i, j, k
 
-      over_den = 2.0d0**(3*(level+1)) * avg_den
-      ! critdens = 2.775d11 * 0.7d0**2 * comoving_OmAx !3 * (100)**2 *0.7d0**2 *  comoving_OmAx / ( 8 * PI * Gconst)                                                                                                                                                          
+      ! over_den = 2.0d0**(3*(level+1)) * avg_den
+      critdens = 2.775d11 * 0.7d0**2 * 0.3d0! * comoving_OmAx !3 * (100)**2 *0.7d0**2 *  comoving_OmAx / ( 8 * PI * Gconst)                                                                                       
+      
+      over_den = 8.0d0**(level+1) * critdens! * 1.0d-2
+      ! print *, " "
+      ! print *, over_den
+      ! print *, " "
       ! over_den = 2.0d0**(3*(level+1))*critdens
 !     Tag on regions of overdensity
       do k = lo(3), hi(3)
@@ -137,7 +142,7 @@
 !          enddo
 !       enddo
 
-      r = (5-level)/16.d0*domhi(1)
+      r = 0.025d0*domhi(1)
 
       do k = lo(3), hi(3)
          do j = lo(2), hi(2)

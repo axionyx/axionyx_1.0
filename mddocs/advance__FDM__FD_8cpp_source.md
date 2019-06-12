@@ -1,9 +1,9 @@
 
-# File Nyx\_FDM.cpp
+# File advance\_FDM\_FD.cpp
 
-[**File List**](files.md) **>** [**Source**](dir_74389ed8173ad57b461b9d623a1f3867.md) **>** [**Nyx\_FDM.cpp**](Source_2Nyx__FDM_8cpp.md)
+[**File List**](files.md) **>** [**Source**](dir_74389ed8173ad57b461b9d623a1f3867.md) **>** [**advance\_FDM\_FD.cpp**](advance__FDM__FD_8cpp.md)
 
-[Go to the documentation of this file.](Source_2Nyx__FDM_8cpp.md) 
+[Go to the documentation of this file.](advance__FDM__FD_8cpp.md) 
 
 
 ````cpp
@@ -11,7 +11,7 @@
  
 #include "Nyx.H"
 #include "Nyx_F.H"
-#include <AMReX_Particles_F.H>
+//#include <AMReX_Particles_F.H>
 #include <AMReX_MultiFab.H>
 #ifdef GRAVITY
 #   include "Gravity.H"
@@ -24,10 +24,10 @@ Nyx::advance_FDM_FD (amrex::Real time,
                       amrex::Real a_old,
                       amrex::Real a_new)
 {
-    amrex::Real se, ske;
-    const amrex::Real prev_time    = state[State_Type].prevTime();
-    const amrex::Real cur_time     = state[State_Type].curTime();
-    const int  finest_level = parent->finestLevel();
+    // amrex::Real se, ske;
+    // const amrex::Real prev_time    = state[State_Type].prevTime();
+    // const amrex::Real cur_time     = state[State_Type].curTime();
+    // const int  finest_level = parent->finestLevel();
 
     const amrex::Real a_half = 0.5 * (a_old + a_new);
 
@@ -51,6 +51,8 @@ Nyx::advance_FDM_FD (amrex::Real time,
             }
         }
     }
+    if (Phi_old.contains_nan(0, 1, 0))
+      amrex::Abort("Phi_new has NaNs::advance_FDM_FD()");
 #endif
 
     const amrex::Real* dx      = geom.CellSize();
@@ -63,7 +65,7 @@ Nyx::advance_FDM_FD (amrex::Real time,
 
     // Define the gravity vector so we can pass this to ca_umdrv.
     // MultiFab grav_vector(grids, BL_SPACEDIM, 3, Fab_allocate);
-    const auto& dm = get_level(level).get_new_data(State_Type).DistributionMap();
+    const auto& dm = get_level(level).get_new_data(Axion_Type).DistributionMap();
     amrex::MultiFab grav_vector(grids, dm, BL_SPACEDIM, 1);
     grav_vector.setVal(0);
 
@@ -84,13 +86,13 @@ Nyx::advance_FDM_FD (amrex::Real time,
       //       fpi.isValid() && pfpi.isValid();
       //       ++fpi,++pfpi)
       for (amrex::FillPatchIterator 
-         fpi(*this,  Ax_new, 2, time, Axion_Type,   0, Nyx::NUM_AX),
-         pfpi(*this, Phi_new, 1, time, PhiGrav_Type, 0, 1);
+         fpi(*this,  Ax_new, 4, time, Axion_Type,   0, Nyx::NUM_AX),
+         pfpi(*this, Phi_old, 4, time, PhiGrav_Type, 0, 1);
          fpi.isValid() && pfpi.isValid();
          ++fpi,++pfpi)
        {
         // Create FAB for extended grid values (including boundaries) and fill.
-        const int  mfi_index = fpi.index();
+        // const int  mfi_index = fpi.index();
         const amrex::Box& bx        = fpi.UngrownBox();
         amrex::FArrayBox& axion     = fpi();
         amrex::FArrayBox& axionout  = Ax_new[fpi];
@@ -108,10 +110,10 @@ Nyx::advance_FDM_FD (amrex::Real time,
             (&time, bx.loVect(), bx.hiVect(), 
          BL_TO_FORTRAN(axion),
              BL_TO_FORTRAN(axionout),
-             BL_TO_FORTRAN(grav_vector[fpi]),
+             // BL_TO_FORTRAN(grav_vector[fpi]),
              BL_TO_FORTRAN(phiold),
              dx, prob_lo, prob_hi, &dt,
-             &cflLoc, &a_old, &a_new, verbose);
+             &cflLoc, &a_old, &a_half, &a_new, verbose);
         courno = std::max(courno, cflLoc);
        }
     }
@@ -140,10 +142,6 @@ Nyx::advance_FDM_FD (amrex::Real time,
         }
     }
     int ang = Ax_new.nGrow();
-
-    if ( amrex::ParallelDescriptor::IOProcessor() ){
-    std::cout << "Ax_New.nGrow(): " << ang << "\n";
-    }
 
     for (int i = 0; i < Ax_new.nComp(); i++)
     {

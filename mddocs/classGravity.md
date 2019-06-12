@@ -33,7 +33,7 @@
 
 | Type | Name |
 | ---: | :--- |
-|   | [**Gravity**](classGravity.md#function-gravity) (amrex::Amr \* Parent, int \_finest\_level, amrex::BCRec \* \_phys\_bc, int \_Density) <br> |
+|   | [**Gravity**](classGravity.md#function-gravity) ([**amrex::Amr**](classamrex_1_1Amr.md) \* Parent, int \_finest\_level, amrex::BCRec \* \_phys\_bc, int \_Density) <br> |
 |  void | [**actual\_multilevel\_solve**](classGravity.md#function-actual-multilevel-solve) (int level, int finest\_level, const amrex::Vector&lt; amrex::Vector&lt; amrex::MultiFab \* &gt; &gt; & grad\_phi, int is\_new, int ngrow\_for\_solve, int use\_previous\_phi\_as\_guess=0) <br> |
 |  void | [**add\_to\_fluxes**](classGravity.md#function-add-to-fluxes) (int level, int iteration, int ncycle) <br> |
 |  void | [**average\_fine\_ec\_onto\_crse\_ec**](classGravity.md#function-average-fine-ec-onto-crse-ec) (int level, int is\_new) <br> |
@@ -50,7 +50,7 @@
 |  int | [**get\_no\_sync**](classGravity.md#function-get-no-sync) () <br> |
 |  void | [**get\_old\_grav\_vector**](classGravity.md#function-get-old-grav-vector) (int level, amrex::MultiFab & grav\_vector, amrex::Real time) <br> |
 |  void | [**gravity\_sync**](classGravity.md#function-gravity-sync) (int crse\_level, int fine\_level, int iteration, int ncycle, const amrex::MultiFab & drho\_and\_drhoU, const amrex::MultiFab & dphi, const amrex::Vector&lt; amrex::MultiFab \* &gt; & grad\_delta\_phi\_cc) <br> |
-|  void | [**install\_level**](classGravity.md#function-install-level) (int level, amrex::AmrLevel \* level\_data\_to\_install) <br> |
+|  void | [**install\_level**](classGravity.md#function-install-level) (int level, [**amrex::AmrLevel**](classamrex_1_1AmrLevel.md) \* level\_data\_to\_install) <br> |
 |  void | [**make\_mg\_bc**](classGravity.md#function-make-mg-bc) () <br> |
 |  void | [**multilevel\_solve\_for\_new\_phi**](classGravity.md#function-multilevel-solve-for-new-phi) (int level, int finest\_level, int ngrow\_for\_solve, int use\_previous\_phi\_as\_guess=0) <br> |
 |  void | [**multilevel\_solve\_for\_old\_phi**](classGravity.md#function-multilevel-solve-for-old-phi) (int level, int finest\_level, int ngrow\_for\_solve, int use\_previous\_phi\_as\_guess=0) <br> |
@@ -77,7 +77,7 @@
 
 | Type | Name |
 | ---: | :--- |
-|  amrex::Vector&lt; amrex::AmrLevel \* &gt; | [**LevelData**](classGravity.md#variable-leveldata)  <br> |
+|  amrex::Vector&lt; [**amrex::AmrLevel**](classamrex_1_1AmrLevel.md) \* &gt; | [**LevelData**](classGravity.md#variable-leveldata)  <br> |
 |  int | [**density**](classGravity.md#variable-density)  <br> |
 |  const amrex::Vector&lt; amrex::DistributionMapping &gt; & | [**dmap**](classGravity.md#variable-dmap)  <br> |
 |  int | [**finest\_level**](classGravity.md#variable-finest-level)  <br> |
@@ -86,7 +86,7 @@
 |  amrex::Vector&lt; amrex::Vector&lt; std::unique\_ptr&lt; amrex::MultiFab &gt; &gt; &gt; | [**grad\_phi\_prev**](classGravity.md#variable-grad-phi-prev)  <br> |
 |  const amrex::Vector&lt; amrex::BoxArray &gt; & | [**grids**](classGravity.md#variable-grids)  <br> |
 |  amrex::Vector&lt; amrex::Real &gt; | [**level\_solver\_resnorm**](classGravity.md#variable-level-solver-resnorm)  <br> |
-|  amrex::Amr \* | [**parent**](classGravity.md#variable-parent)  <br> |
+|  [**amrex::Amr**](classamrex_1_1Amr.md) \* | [**parent**](classGravity.md#variable-parent)  <br> |
 |  amrex::Vector&lt; std::unique\_ptr&lt; amrex::FluxRegister &gt; &gt; | [**phi\_flux\_reg**](classGravity.md#variable-phi-flux-reg)  <br> |
 |  amrex::BCRec \* | [**phys\_bc**](classGravity.md#variable-phys-bc)  <br> |
 
@@ -915,4 +915,4 @@ void Gravity::fill_ec_grow (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/Gravity/Gravity.H`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Gravity/Gravity.H`

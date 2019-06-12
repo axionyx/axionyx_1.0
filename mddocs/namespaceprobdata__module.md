@@ -59,4 +59,4 @@ integer, save probdata_module::max_num_part;
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Exec/Test_Only_Axions/probdata.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Exec/Test_Only_Axions/probdata.f90`

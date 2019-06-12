@@ -58,4 +58,4 @@ subroutine nyx_burner_module::burner (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/Network/nyx_burner.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Network/nyx_burner.f90`

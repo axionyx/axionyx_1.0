@@ -27,10 +27,14 @@
 | ---: | :--- |
 |  double precision, save | [**critvalue**](namespaceaxion__params__module.md#variable-critvalue)   = = 0.3d0<br> |
 |  double precision, save | [**epsilon\_l**](namespaceaxion__params__module.md#variable-epsilon-l)   = = 0.3d0<br> |
+|  double precision, save | [**gamma\_ax**](namespaceaxion__params__module.md#variable-gamma-ax)  <br> |
+|  double precision, save | [**hbaroverm**](namespaceaxion__params__module.md#variable-hbaroverm)  <br> |
 |  double complex, parameter | [**ii**](namespaceaxion__params__module.md#variable-ii)   = = (0., 1.)<br> |
-|  double precision, save | [**m\_tt**](namespaceaxion__params__module.md#variable-m-tt)   = = 2.5d0<br> |
+|  double precision, save | [**m\_tt**](namespaceaxion__params__module.md#variable-m-tt)  <br> |
 |  double precision, save | [**meandens**](namespaceaxion__params__module.md#variable-meandens)  <br> |
 |  double precision, save | [**mindens**](namespaceaxion__params__module.md#variable-mindens)   = = 1.0d+3<br> |
+|  double precision, save | [**sigma\_ax**](namespaceaxion__params__module.md#variable-sigma-ax)  <br> |
+|  double precision, save | [**theta\_ax**](namespaceaxion__params__module.md#variable-theta-ax)  <br> |
 
 
 
@@ -58,6 +62,24 @@ double precision, save axion_params_module::critvalue;
 
 ```cpp
 double precision, save axion_params_module::epsilon_l;
+```
+
+
+
+### <a href="#variable-gamma-ax" id="variable-gamma-ax">variable gamma\_ax </a>
+
+
+```cpp
+double precision, save axion_params_module::gamma_ax;
+```
+
+
+
+### <a href="#variable-hbaroverm" id="variable-hbaroverm">variable hbaroverm </a>
+
+
+```cpp
+double precision, save axion_params_module::hbaroverm;
 ```
 
 
@@ -98,5 +120,23 @@ double precision, save axion_params_module::mindens;
 
 
 
+### <a href="#variable-sigma-ax" id="variable-sigma-ax">variable sigma\_ax </a>
+
+
+```cpp
+double precision, save axion_params_module::sigma_ax;
+```
+
+
+
+### <a href="#variable-theta-ax" id="variable-theta-ax">variable theta\_ax </a>
+
+
+```cpp
+double precision, save axion_params_module::theta_ax;
+```
+
+
+
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Exec/Test_Only_Axions/axion_params.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Exec/Test_Only_Axions/axion_params.f90`

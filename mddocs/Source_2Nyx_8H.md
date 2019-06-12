@@ -8,6 +8,7 @@
 
 
 
+* `#include <AMReX_Vector.H>`
 * `#include <AMReX_BC_TYPES.H>`
 * `#include <AMReX_AmrLevel.H>`
 * `#include <AMReX_ErrorList.H>`
@@ -43,8 +44,8 @@
 
 | Type | Name |
 | ---: | :--- |
-|  int | [**gimlet\_int**](Source_2Nyx_8H.md#variable-gimlet-int)  <br> |
-|  int | [**reeber\_int**](Source_2Nyx_8H.md#variable-reeber-int)  <br> |
+|  int | [**gimlet\_int**](Source_2Nyx_8H.md#variable-gimlet-int)  <br>_time step interval for doing Gimlet post-processing_  |
+|  int | [**reeber\_int**](Source_2Nyx_8H.md#variable-reeber-int)  <br>_time step interval for finding halos_  |
 
 
 
@@ -104,4 +105,4 @@ int reeber_int;
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/Nyx.H`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Nyx.H`

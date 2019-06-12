@@ -36,7 +36,39 @@ module particle_mod
      integer(c_int)  :: id
      integer(c_int)  :: cpu
   end type agn_particle_t
+
+  public  fdm_particle_t
   
+  type, bind(C)  :: fdm_particle_t
+     real(c_real)    :: pos(3)
+     real(c_real)    :: mass
+     real(c_real)    :: vel(3)
+     real(c_real)    :: phase
+     real(c_real)    :: amp(2)
+     real(c_real)    :: width
+     real(c_real)    :: qq(9)
+     real(c_real)    :: pq(9)
+     real(c_real)    :: qp(9)
+     real(c_real)    :: pp(9)
+     integer(c_int)  :: id
+     integer(c_int)  :: cpu
+  end type fdm_particle_t
+
+  public  fdm_particle_wkb_t
+  
+  type, bind(C)  :: fdm_particle_wkb_t
+     real(c_real)    :: pos(3)
+     real(c_real)    :: mass
+     real(c_real)    :: vel(3)
+     real(c_real)    :: phase
+     real(c_real)    :: amp(2)
+     real(c_real)    :: width
+     real(c_real)    :: qq(9)
+     real(c_real)    :: pq(9)
+     integer(c_int)  :: id
+     integer(c_int)  :: cpu
+  end type fdm_particle_wkb_t
+
 end module
 ````
 

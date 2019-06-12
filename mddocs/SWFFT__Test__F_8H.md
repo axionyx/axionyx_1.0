@@ -72,4 +72,4 @@ void fort_kick (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Exec/Test_Only_Axions/SWFFT_Test_F.H`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Exec/Test_Only_Axions/SWFFT_Test_F.H`

@@ -12,7 +12,6 @@
 * `#include <Nyx.H>`
 * `#include <Nyx_F.H>`
 * `#include <NyxParticleContainer.H>`
-* `#include <AMReX_Particles_F.H>`
 
 
 
@@ -38,4 +37,4 @@
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/Initialization/Nyx_initcosmo.cpp`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Initialization/Nyx_initcosmo.cpp`

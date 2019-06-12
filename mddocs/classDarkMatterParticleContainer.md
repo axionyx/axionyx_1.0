@@ -53,7 +53,7 @@ Inherits the following classes: [NyxParticleContainer](classNyxParticleContainer
 | Type | Name |
 | ---: | :--- |
 |  void | [**AssignDensityAndVels**](classDarkMatterParticleContainer.md#function-assigndensityandvels) (amrex::Vector&lt; std::unique\_ptr&lt; amrex::MultiFab &gt; &gt; & mf, int lev\_min=0) const<br> |
-|   | [**DarkMatterParticleContainer**](classDarkMatterParticleContainer.md#function-darkmatterparticlecontainer) (amrex::Amr \* amr) <br> |
+|   | [**DarkMatterParticleContainer**](classDarkMatterParticleContainer.md#function-darkmatterparticlecontainer) ([**amrex::Amr**](classamrex_1_1Amr.md) \* amr) <br> |
 |  void | [**InitCosmo**](classDarkMatterParticleContainer.md#function-initcosmo-1-2) (amrex::MultiFab & mf, const amrex::Real vel\_fac, const amrex::Vector&lt; int &gt; n\_part, const amrex::Real particleMass) <br> |
 |  void | [**InitCosmo**](classDarkMatterParticleContainer.md#function-initcosmo-2-2) (amrex::MultiFab & mf, const amrex::Real vel\_fac, const amrex::Vector&lt; int &gt; n\_part, const amrex::Real particleMass, const amrex::Real shift) <br> |
 |  void | [**InitCosmo1ppc**](classDarkMatterParticleContainer.md#function-initcosmo1ppc) (amrex::MultiFab & mf, const amrex::Real vel\_fac, const amrex::Real particleMass) <br> |
@@ -72,7 +72,7 @@ Inherits the following classes: [NyxParticleContainer](classNyxParticleContainer
 |  void | [**GetParticleVelocities**](classNyxParticleContainer.md#function-getparticlevelocities) (amrex::Vector&lt; amrex::Real &gt; & part\_vels) <br> |
 |  void | [**MultiplyParticleMass**](classNyxParticleContainer.md#function-multiplyparticlemass) (int lev, amrex::Real mult) <br> |
 | virtual void | [**NyxCheckpoint**](classNyxParticleContainer.md#function-nyxcheckpoint) (const std::string & dir, const std::string & name) const<br> |
-|   | [**NyxParticleContainer**](classNyxParticleContainer.md#function-nyxparticlecontainer) (amrex::Amr \* amr, int nghost=0) <br> |
+|   | [**NyxParticleContainer**](classNyxParticleContainer.md#function-nyxparticlecontainer) ([**amrex::Amr**](classamrex_1_1Amr.md) \* amr, int nghost=0) <br> |
 | virtual void | [**Redistribute**](classNyxParticleContainer.md#function-redistribute) (int lev\_min=0, int lev\_max=-1, int nGrow=0) override<br> |
 | virtual void | [**RemoveParticlesAtLevel**](classNyxParticleContainer.md#function-removeparticlesatlevel) (int level) override<br> |
 |  void | [**SetParticleVelocities**](classNyxParticleContainer.md#function-setparticlevelocities) (amrex::Vector&lt; amrex::Real &gt; & part\_data) <br> |
@@ -290,4 +290,4 @@ inline virtual DarkMatterParticleContainer::~DarkMatterParticleContainer ()
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/DarkMatterParticleContainer.H`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/DarkMatterParticleContainer.H`

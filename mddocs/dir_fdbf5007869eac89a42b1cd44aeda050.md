@@ -1,5 +1,5 @@
 
-# Dir /home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/Gravity
+# Dir /home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Gravity
 
 
 [**File List**](files.md) **>** [**Gravity**](dir_fdbf5007869eac89a42b1cd44aeda050.md)
@@ -45,4 +45,4 @@
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/Gravity/`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Gravity/`

@@ -19,11 +19,6 @@
 
 
 
-## Namespaces
-
-| Type | Name |
-| ---: | :--- |
-| namespace | [**amrex**](namespaceamrex.md) <br> |
 
 
 
@@ -40,4 +35,4 @@
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Exec/Test_Only_Axions/Nyx_error.cpp`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Exec/Test_Only_Axions/Nyx_error.cpp`

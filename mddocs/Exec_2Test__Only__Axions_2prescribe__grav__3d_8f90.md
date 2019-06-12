@@ -67,4 +67,4 @@ subroutine fort_prescribe_grav (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Exec/Test_Only_Axions/prescribe_grav_3d.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Exec/Test_Only_Axions/prescribe_grav_3d.f90`

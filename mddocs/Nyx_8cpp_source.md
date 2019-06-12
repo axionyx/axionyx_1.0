@@ -28,7 +28,7 @@ using std::string;
 #include <Derive_F.H>
 #include <AMReX_VisMF.H>
 #include <AMReX_TagBox.H>
-#include <AMReX_Particles_F.H>
+//#include <AMReX_Particles_F.H>
 #include <AMReX_Utility.H>
 #include <AMReX_Print.H>
 
@@ -55,6 +55,10 @@ using std::string;
 
 #ifdef AGN
 #include "agn_F.H"
+#endif
+
+#ifdef FDM
+#include "fdm_F.H"
 #endif
 
 using namespace amrex;
@@ -113,8 +117,24 @@ int Nyx::AxDens = -1;
 int Nyx::AxRe   = -1;
 int Nyx::AxIm   = -1;
 int Nyx::NUM_AX = -1;
-Real Nyx::vonNeumann_dt =   0;
+Real Nyx::m_tt = 2.5;
+Real Nyx::hbaroverm = 0.01917152 / m_tt;
+Real Nyx::meandens = 1.0;
+int Nyx::FDlevel = 0;
+int Nyx::GBlevel = 1;
+int Nyx::NBlevel = 2;
+int Nyx::PSlevel = 3;
+bool Nyx::partlevel = false;
+Vector<int> Nyx::levelmethod;
+Real Nyx::theta_fdm = 1.0;
+Real Nyx::sigma_fdm = 1.0;
+Real Nyx::gamma_fdm = 1.0;
+Real Nyx::alpha_fdm = 1.0;
+int  Nyx::wkb_approx = 1;
+Real Nyx::beam_cfl = 0.2;
+Real Nyx::vonNeumann_dt = 0;
 #endif
+
 int Nyx::Temp_comp = -1;
 int Nyx::  Ne_comp = -1;
 int Nyx:: Zhi_comp = -1;
@@ -277,6 +297,30 @@ Nyx::read_params ()
     pp_nyx.get("dt_cutoff", dt_cutoff);
 #ifdef FDM
     pp_nyx.query("vonNeumann_dt", vonNeumann_dt);
+    pp_nyx.query("m_tt", m_tt);
+    fort_set_mtt(m_tt);
+    hbaroverm = 0.01917152 / m_tt;
+    fort_set_hbaroverm(hbaroverm);
+    pp_nyx.query("theta_fdm", theta_fdm);
+    fort_set_theta(theta_fdm);
+    pp_nyx.query("sigma_fdm", sigma_fdm);
+    fort_set_sigma(sigma_fdm);
+    gamma_fdm = 0.5/sigma_fdm/sigma_fdm;
+    fort_set_gamma(gamma_fdm);
+    pp_nyx.query("alpha_fdm", alpha_fdm);
+    pp_nyx.query("wkb_approx", wkb_approx);
+    pp_nyx.query("beam_cfl", beam_cfl);
+    if (pp_nyx.contains("levelmethod"))
+      {
+    int nlevs = pp_nyx.countval("levelmethod");
+    levelmethod.resize(nlevs);
+    pp_nyx.queryarr("levelmethod",levelmethod,0,nlevs);
+    for(int lev = 0; lev<levelmethod.size(); lev++)
+      if(levelmethod[lev]!=FDlevel && levelmethod[lev]!=PSlevel)
+        partlevel = true;
+      }
+    else
+      amrex::Abort("Need to specify levelmethod for FDM routines");
 #endif
     pp_nyx.query("dump_old", dump_old);
 
@@ -367,6 +411,16 @@ Nyx::read_params ()
     fort_set_omb(comoving_OmB);
     fort_set_omm(comoving_OmM);
     fort_set_hubble(comoving_h);
+
+#ifdef FDM
+    if(comoving_h && comoving_OmM)
+      meandens = 2.775e+11*comoving_h*comoving_h*comoving_OmM;
+    else{
+      meandens = 2.775e+11*0.7*0.7*0.3;
+      amrex::Print()<<"WARNING: Automatically set meandens to "<<meandens<<" in Nyx.cpp."<<std::endl;
+    }
+    fort_set_meandens(meandens);
+#endif
 
     pp_nyx.get("do_hydro", do_hydro);
 #ifdef NO_HYDRO
@@ -954,19 +1008,15 @@ Nyx::est_time_step (Real dt_old)
 
 //add time step requirements here.
 #ifdef FDM
-    Real a = get_comoving_a(cur_time);
-    if (vonNeumann_dt >0){
+    if (vonNeumann_dt >0 && (levelmethod[level]==FDlevel || levelmethod[level]==PSlevel) ){
+      Real a = get_comoving_a(cur_time);
       const MultiFab& phi = get_new_data(PhiGrav_Type);
       Real phi_max = std::abs(phi.max(0)-phi.min(0));
       const Real* dx = geom.CellSize();
-      //from BODO
-      Real m_tt = 2.5;
-      Real hbaroverm = 0.01917152 / m_tt;
       Real time_step = vonNeumann_dt*std::min(dx[0]*dx[0]*a*a/6/hbaroverm,hbaroverm/phi_max); 
-      //Real time_step = std::min(10.0*dx[0]*dx[0]*a*a,0.002/phi_max);
       if (verbose && ParallelDescriptor::IOProcessor())
-        std::cout << "...estdt from von Neumann stability :  "<< time_step << '\n';
-      est_dt = std::min(time_step,est_dt);
+        std::cout << "...estdt from von Neumann stability :  "<< time_step << " " <<phi_max<<'\n';
+      return time_step;
     }
 #endif
 
@@ -1369,6 +1419,16 @@ Nyx::post_timestep (int iteration)
             theActiveParticles()[i]->Redistribute(level,
                                                   theActiveParticles()[i]->finestLevel(),
                                                   iteration);
+#ifdef FDM
+    if(theFDMPC())
+      theFDMPC()->Redistribute(level,
+                   theFDMPC()->finestLevel(),
+                   iteration);
+    if(theFDMwkbPC())
+      theFDMwkbPC()->Redistribute(level,
+                   theFDMwkbPC()->finestLevel(),
+                   iteration);
+#endif
     }
 
 #ifndef NO_HYDRO
@@ -1677,6 +1737,7 @@ Nyx::postCoarseTimeStep (Real cumtime)
 
    int nstep = parent->levelSteps(0);
 
+#ifndef NO_HYDRO
    if (slice_int > -1 && nstep%slice_int == 0)
    {
       BL_PROFILE("Nyx::postCoarseTimeStep: get_all_slice_data");
@@ -1795,10 +1856,12 @@ Nyx::postCoarseTimeStep (Real cumtime)
     }
 
    }
+#endif
 }
 
 void
 Nyx::post_regrid (int lbase,
+          int iteration,
                   int new_finest)
 {
     BL_PROFILE("Nyx::post_regrid()");
@@ -1809,7 +1872,7 @@ Nyx::post_regrid (int lbase,
 #endif
 
     if (level == lbase) {
-        particle_redistribute(lbase, false);
+      particle_redistribute(lbase, iteration, false);
     }
 
 #ifdef GRAVITY
@@ -2137,7 +2200,7 @@ Nyx::errorEst (TagBoxArray& tags,
                 avg = average_total_density;
             }
 #ifdef FDM
-            else if (err_list[j].name() == "AxDens")
+            else if (err_list[j].name() == "AxDens" || err_list[j].name() == "fdm_mass_density")
             {
                 avg = average_ax_density;
             }
@@ -2534,6 +2597,22 @@ Nyx::CreateLevelDirectory (const std::string &dir)
     }
 #endif
 
+#ifdef FDM
+    std::string fdm(dir + "/" + Nyx::retrieveFDM());
+    if(ParallelDescriptor::IOProcessor()) {
+      if( ! amrex::UtilCreateDirectory(fdm, 0755)) {
+        amrex::CreateDirectoryFailed(fdm);
+      }
+    }
+
+    LevelDirectoryNames(dir, Nyx::retrieveFDM(), LevelDir, FullPath);
+    if(ParallelDescriptor::IOProcessor()) {
+      if( ! amrex::UtilCreateDirectory(FullPath, 0755)) {
+        amrex::CreateDirectoryFailed(FullPath);
+      }
+    }
+#endif
+
     if(parent->UsingPrecreateDirectories()) {
       if(Nyx::theDMPC()) {
         Nyx::theDMPC()->SetLevelDirectoriesCreated(true);
@@ -2541,6 +2620,14 @@ Nyx::CreateLevelDirectory (const std::string &dir)
 #ifdef AGN
       if(Nyx::theAPC()) {
         Nyx::theAPC()->SetLevelDirectoriesCreated(true);
+      }
+#endif
+#ifdef FDM
+      if(Nyx::theFDMwkbPC()) {
+    Nyx::theFDMwkbPC()->SetLevelDirectoriesCreated(true);
+      }
+      if(Nyx::theFDMPC()) {
+        Nyx::theFDMPC()->SetLevelDirectoriesCreated(true);
       }
 #endif
     }

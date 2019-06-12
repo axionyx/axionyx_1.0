@@ -10,6 +10,7 @@
 * **alphahep** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **alphahepp** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **alphahp** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
+* **a** ([**fdm\_params\_module**](namespacefdm__params__module.md))
 * **a\_rad** ([**fundamental\_constants\_module**](namespacefundamental__constants__module.md))
 * **aion** ([**network**](namespacenetwork.md))
 
@@ -29,7 +30,11 @@
 ## c
 
 * **cutoff\_vel** ([**agn\_params\_module**](namespaceagn__params__module.md))
-* **critvalue** ([**axion\_params\_module**](namespaceaxion__params__module.md))
+* **checkpoint\_files\_output** ([**amrex**](namespaceamrex.md))
+* **checkpoint\_nfiles** ([**amrex**](namespaceamrex.md))
+* **checkpoint\_on\_restart** ([**amrex**](namespaceamrex.md))
+* **compute\_new\_dt\_on\_regrid** ([**amrex**](namespaceamrex.md))
+* **critvalue** ([**axion\_params\_module**](namespaceaxion__params__module.md), [**fdm\_params\_module**](namespacefdm__params__module.md))
 * **comoving\_h** ([**comoving\_module**](namespacecomoving__module.md))
 * **comoving\_omax** ([**comoving\_module**](namespacecomoving__module.md))
 * **comoving\_omb** ([**comoving\_module**](namespacecomoving__module.md))
@@ -62,7 +67,7 @@
 * **eh0** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **ehe0** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **ehep** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
-* **epsilon\_l** ([**axion\_params\_module**](namespaceaxion__params__module.md))
+* **epsilon\_l** ([**axion\_params\_module**](namespaceaxion__params__module.md), [**fdm\_params\_module**](namespacefdm__params__module.md))
 * **eos\_assume\_neutral** ([**eos\_module**](namespaceeos__module.md))
 * **eos\_input\_re** ([**eos\_module**](namespaceeos__module.md))
 * **eos\_input\_rt** ([**eos\_module**](namespaceeos__module.md))
@@ -94,6 +99,8 @@
 * **ggh0** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **gghe0** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **gghep** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
+* **gamma\_ax** ([**axion\_params\_module**](namespaceaxion__params__module.md))
+* **gamma\_fdm** ([**fdm\_params\_module**](namespacefdm__params__module.md))
 * **gconst** ([**fundamental\_constants\_module**](namespacefundamental__constants__module.md))
 * **gamma\_const** ([**meth\_params\_module**](namespacemeth__params__module.md))
 * **gamma\_minus\_1** ([**meth\_params\_module**](namespacemeth__params__module.md))
@@ -102,6 +109,7 @@
 
 ## h
 
+* **hbaroverm** ([**axion\_params\_module**](namespaceaxion__params__module.md), [**fdm\_params\_module**](namespacefdm__params__module.md))
 * **h\_species** ([**eos\_params\_module**](namespaceeos__params__module.md))
 * **he\_species** ([**eos\_params\_module**](namespaceeos__params__module.md))
 * **hbar** ([**fundamental\_constants\_module**](namespacefundamental__constants__module.md))
@@ -113,7 +121,9 @@
 
 ## i
 
-* **ii** ([**axion\_params\_module**](namespaceaxion__params__module.md))
+* **initialized** ([**amrex::anonymous\_namespace{AMReX\_Amr.cpp}**](namespaceamrex_1_1anonymous__namespace_02AMReX__Amr_8cpp_03.md), [**amrex::anonymous\_namespace{AMReX\_AmrCore.cpp}**](namespaceamrex_1_1anonymous__namespace_02AMReX__AmrCore_8cpp_03.md))
+* **insitu\_on\_restart** ([**amrex**](namespaceamrex.md))
+* **ii** ([**axion\_params\_module**](namespaceaxion__params__module.md), [**fdm\_params\_module**](namespacefdm__params__module.md))
 * **inhomo\_reion** ([**meth\_params\_module**](namespacemeth__params__module.md))
 * **iorder** ([**meth\_params\_module**](namespacemeth__params__module.md))
 * **isnt\_init** ([**ps\_grav**](namespaceps__grav.md))
@@ -148,11 +158,12 @@
 ## m
 
 * **max\_frac\_removed** ([**agn\_params\_module**](namespaceagn__params__module.md))
+* **mffile\_nstreams** ([**amrex**](namespaceamrex.md))
 * **mean\_rhob** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **mproton** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
-* **m\_tt** ([**axion\_params\_module**](namespaceaxion__params__module.md))
-* **meandens** ([**axion\_params\_module**](namespaceaxion__params__module.md))
-* **mindens** ([**axion\_params\_module**](namespaceaxion__params__module.md))
+* **m\_tt** ([**axion\_params\_module**](namespaceaxion__params__module.md), [**fdm\_params\_module**](namespacefdm__params__module.md))
+* **meandens** ([**axion\_params\_module**](namespaceaxion__params__module.md), [**fdm\_params\_module**](namespacefdm__params__module.md))
+* **mindens** ([**axion\_params\_module**](namespaceaxion__params__module.md), [**fdm\_params\_module**](namespacefdm__params__module.md))
 * **modes\_even** ([**forcing\_spect\_module**](namespaceforcing__spect__module.md))
 * **modes\_odd** ([**forcing\_spect\_module**](namespaceforcing__spect__module.md))
 * **m\_e** ([**fundamental\_constants\_module**](namespacefundamental__constants__module.md))
@@ -196,6 +207,12 @@
 
 ## p
 
+* **plot\_files\_output** ([**amrex**](namespaceamrex.md))
+* **plot\_nfiles** ([**amrex**](namespaceamrex.md))
+* **plotfile\_on\_restart** ([**amrex**](namespaceamrex.md))
+* **precreateDirectories** ([**amrex**](namespaceamrex.md))
+* **prereadFAHeaders** ([**amrex**](namespaceamrex.md))
+* **probinit\_natonce** ([**amrex**](namespaceamrex.md))
 * **pi** ([**fundamental\_constants\_module**](namespacefundamental__constants__module.md))
 * **ppm\_flatten\_before\_integrals** ([**meth\_params\_module**](namespacemeth__params__module.md))
 * **ppm\_reference** ([**meth\_params\_module**](namespacemeth__params__module.md))
@@ -222,6 +239,7 @@
 
 ## r
 
+* **regrid\_on\_restart** ([**amrex**](namespaceamrex.md))
 * **rechep** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **rechepp** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **rechp** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
@@ -243,6 +261,8 @@
 * **SPC** ([**anonymous\_namespace{NyxParticles.cpp}**](namespaceanonymous__namespace_02NyxParticles_8cpp_03.md))
 * **SPHPC** ([**anonymous\_namespace{NyxParticles.cpp}**](namespaceanonymous__namespace_02NyxParticles_8cpp_03.md))
 * **sph\_particle\_file** ([**anonymous\_namespace{NyxParticles.cpp}**](namespaceanonymous__namespace_02NyxParticles_8cpp_03.md), [**anonymous\_namespace{Nyx\_initdata.cpp}**](namespaceanonymous__namespace_02Nyx__initdata_8cpp_03.md))
+* **sigma\_ax** ([**axion\_params\_module**](namespaceaxion__params__module.md))
+* **sigma\_fdm** ([**fdm\_params\_module**](namespacefdm__params__module.md))
 * **sigma\_sb** ([**fundamental\_constants\_module**](namespacefundamental__constants__module.md))
 * **sigma\_t** ([**fundamental\_constants\_module**](namespacefundamental__constants__module.md))
 * **small\_dens** ([**meth\_params\_module**](namespacemeth__params__module.md))
@@ -263,6 +283,8 @@
 * **tcoolmin** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **tcoolmin\_r** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **this\_z** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
+* **theta\_ax** ([**axion\_params\_module**](namespaceaxion__params__module.md))
+* **theta\_fdm** ([**fdm\_params\_module**](namespacefdm__params__module.md))
 * **t\_unit** ([**fundamental\_constants\_module**](namespacefundamental__constants__module.md))
 * **temp\_comp** ([**meth\_params\_module**](namespacemeth__params__module.md))
 * **t\_zheii** ([**reion\_aux\_module**](namespacereion__aux__module.md))
@@ -273,6 +295,7 @@
 
 ## u
 
+* **use\_efficient\_regrid** ([**amrex**](namespaceamrex.md))
 * **uvb\_density\_a** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **uvb\_density\_b** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **uaxdens** ([**meth\_params\_module**](namespacemeth__params__module.md))

@@ -10,7 +10,6 @@
 
 * `#include "Nyx.H"`
 * `#include "Nyx_F.H"`
-* `#include <AMReX_Particles_F.H>`
 
 
 
@@ -36,4 +35,4 @@
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/strang_hydro.cpp`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/strang_hydro.cpp`

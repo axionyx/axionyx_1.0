@@ -67,4 +67,4 @@ subroutine enforce_minimum_density (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/HydroFortran/enforce_minimum_density_3d.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/HydroFortran/enforce_minimum_density_3d.f90`

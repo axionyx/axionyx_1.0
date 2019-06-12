@@ -244,4 +244,4 @@ integer(c_int) function get_comp_urho ()
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/Nyx_nd.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Nyx_nd.f90`

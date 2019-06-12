@@ -375,4 +375,4 @@ subroutine, public eos_module::nyx_eos_t_given_re_vec (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/EOS/eos_hc.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/EOS/eos_hc.f90`

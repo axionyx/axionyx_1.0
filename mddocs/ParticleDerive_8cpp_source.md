@@ -48,6 +48,26 @@ Nyx::particle_derive (const std::string& name, Real time, int ngrow)
         return derive_dat;
     }
 #endif
+#ifdef FDM
+    else if (Nyx::theFDMPC() && name == "fdm_particle_count")                                                                                                                                                
+      {                                                                                                                                                                                                          
+    std::unique_ptr<MultiFab> derive_dat(new MultiFab(grids, dmap, 1, 0));                                                                                                          
+        MultiFab temp_dat(grids, dmap, 1, 0);                                                                                                                                                               
+        temp_dat.setVal(0);                                                                                                                                                                                      
+    Nyx::theFDMPC()->Increment(temp_dat, level);                                                                                                                                                              
+    MultiFab::Copy(*derive_dat, temp_dat, 0, 0, 1, 0);                                                                                                                                                       
+        return derive_dat;                                                                                                                                                                                       
+      }
+    else if (Nyx::theFDMwkbPC() && name == "fdm_particle_count")                                                                                                                                                
+      {                                                                                                                                                                                                          
+    std::unique_ptr<MultiFab> derive_dat(new MultiFab(grids, dmap, 1, 0));                                                                                                          
+        MultiFab temp_dat(grids, dmap, 1, 0);                                                                                                                                                               
+        temp_dat.setVal(0);                                                                                                                                                                                      
+    Nyx::theFDMwkbPC()->Increment(temp_dat, level);                                                                                                                                                         
+    MultiFab::Copy(*derive_dat, temp_dat, 0, 0, 1, 0);                                                                                                                                                       
+        return derive_dat;                                                                                                                                                                                       
+      }
+#endif
     else if (Nyx::theDMPC() && name == "total_particle_count")
     {
         //
@@ -198,10 +218,15 @@ Nyx::particle_derive (const std::string& name, Real time, int ngrow)
         return derive_dat; 
       }
 #ifndef NO_HYDRO
-      else 
+      else  
       {
         return derive("density",time,0);
       }
+#else
+      else
+    {
+      return AmrLevel::derive(name, time, ngrow);
+    }
 #endif
 
 #else
@@ -210,7 +235,7 @@ Nyx::particle_derive (const std::string& name, Real time, int ngrow)
     }
     else
     {
-        return AmrLevel::derive(name, time, ngrow);
+      return AmrLevel::derive(name, time, ngrow);
     }
 }
 ````

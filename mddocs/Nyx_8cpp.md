@@ -20,7 +20,6 @@
 * `#include <Derive_F.H>`
 * `#include <AMReX_VisMF.H>`
 * `#include <AMReX_TagBox.H>`
-* `#include <AMReX_Particles_F.H>`
 * `#include <AMReX_Utility.H>`
 * `#include <AMReX_Print.H>`
 
@@ -220,4 +219,4 @@ int reeber_int (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/Nyx.cpp`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Nyx.cpp`

@@ -59,8 +59,8 @@ Nyx::error_setup()
     //err_list.add("entropy", 1, ErrorRec::Standard,
     //             BL_FORT_PROC_CALL(TAG_ENTERROR, tag_enterror));
 
-    err_list.add("total_density",1,ErrorRec::UseAverage,
-                 BL_FORT_PROC_CALL(TAG_OVERDENSITY, tag_overdensity));
+    // err_list.add("total_density",1,ErrorRec::UseAverage,
+    //              BL_FORT_PROC_CALL(TAG_OVERDENSITY, tag_overdensity));
 
 }
 

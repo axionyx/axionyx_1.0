@@ -30,6 +30,9 @@ namespace
 
     const std::string agn_chk_particle_file("AGN");
     const std::string agn_plt_particle_file("AGN");
+
+    const std::string fdm_chk_particle_file("FDM");
+    const std::string fdm_plt_particle_file("FDM");
 }
 
 std::string
@@ -51,6 +54,13 @@ Nyx::retrieveDM () {
 std::string
 Nyx::retrieveAGN () {
     return agn_chk_particle_file;
+}
+#endif
+
+#ifdef FDM
+std::string
+Nyx::retrieveFDM () {
+    return fdm_chk_particle_file;
 }
 #endif
 
@@ -169,6 +179,21 @@ Nyx::writePlotFile (const std::string& dir,
                     derive_names.push_back(it->name());
                     num_derive++;
                 }
+#endif
+#ifdef FDM
+            } else if (it->name() == "fdm_particle_count" ||
+                       it->name() == "fdm_mass_density")
+          {
+                if (Nyx::theFDMPC())
+          {
+                    derive_names.push_back(it->name());
+                    num_derive++;
+          }
+                if (Nyx::theFDMwkbPC())
+          {
+                    derive_names.push_back(it->name());
+                    num_derive++;
+          }
 #endif
             } else if (it->name() == "Rank") {
                 derive_names.push_back(it->name());
@@ -576,6 +601,17 @@ Nyx::particle_plot_file (const std::string& dir)
             Nyx::theAPC()->WriteNyxPlotFile(dir, agn_plt_particle_file);
           }
 #endif
+#ifdef FDM
+        if (Nyx::theFDMPC())
+          {
+            Nyx::theFDMPC()->WriteNyxPlotFile(dir, fdm_plt_particle_file);
+          }
+
+        if (Nyx::theFDMwkbPC())
+          {
+            Nyx::theFDMwkbPC()->WriteNyxPlotFile(dir, fdm_plt_particle_file);
+          }
+#endif
 
 #ifdef NO_HYDRO
         Real cur_time = state[PhiGrav_Type].curTime();
@@ -631,6 +667,34 @@ Nyx::particle_plot_file (const std::string& dir)
             File.close();
         }
 #endif
+#ifdef FDM
+        // Write particle_plotfile_format into its own file in the particle directory
+        if (Nyx::theFDMPC() && ParallelDescriptor::IOProcessor())
+        {
+            std::string FileName = dir + "/" + fdm_plt_particle_file + "/precision";
+            std::ofstream File;
+            File.open(FileName.c_str(), std::ios::out|std::ios::trunc);
+            if ( ! File.good()) {
+                amrex::FileOpenFailed(FileName);
+        }
+            File.precision(15);
+            File << particle_plotfile_format << '\n';
+            File.close();
+        }
+
+        if (Nyx::theFDMwkbPC() && ParallelDescriptor::IOProcessor())
+        {
+            std::string FileName = dir + "/" + fdm_plt_particle_file + "/precision";
+            std::ofstream File;
+            File.open(FileName.c_str(), std::ios::out|std::ios::trunc);
+            if ( ! File.good()) {
+                amrex::FileOpenFailed(FileName);
+        }
+            File.precision(15);
+            File << particle_plotfile_format << '\n';
+            File.close();
+        }
+#endif
     }
 }
 
@@ -648,6 +712,17 @@ Nyx::particle_check_point (const std::string& dir)
       if (Nyx::theAPC())
         {
           Nyx::theAPC()->NyxCheckpoint(dir, agn_chk_particle_file);
+        }
+#endif
+#ifdef FDM
+      if (Nyx::theFDMPC())
+        {
+          Nyx::theFDMPC()->NyxCheckpoint(dir, fdm_chk_particle_file);
+        }
+
+      if (Nyx::theFDMwkbPC())
+        {
+          Nyx::theFDMwkbPC()->NyxCheckpoint(dir, fdm_chk_particle_file);
         }
 #endif
 
@@ -839,6 +914,14 @@ Nyx::checkPoint (const std::string& dir,
       Nyx::theAPC()->SetLevelDirectoriesCreated(false);
     }
 #endif
+#ifdef FDM
+    if(Nyx::theFDMPC()) {
+      Nyx::theFDMPC()->SetLevelDirectoriesCreated(false);
+    }
+    if(Nyx::theFDMwkbPC()) {
+      Nyx::theFDMwkbPC()->SetLevelDirectoriesCreated(false);
+    }
+#endif
 
 }
 
@@ -852,6 +935,14 @@ Nyx::checkPointPre (const std::string& dir,
 #ifdef AGN
   if(Nyx::theAPC()) {
     Nyx::theAPC()->CheckpointPre();
+  }
+#endif
+#ifdef FDM
+  if(Nyx::theFDMPC()) {
+    Nyx::theFDMPC()->CheckpointPre();
+  }
+  if(Nyx::theFDMwkbPC()) {
+    Nyx::theFDMwkbPC()->CheckpointPre();
   }
 #endif
 
@@ -868,6 +959,14 @@ Nyx::checkPointPost (const std::string& dir,
 #ifdef AGN
   if(Nyx::theAPC()) {
     Nyx::theAPC()->CheckpointPost();
+  }
+#endif
+#ifdef FDM
+  if(Nyx::theFDMPC()) {
+    Nyx::theFDMPC()->CheckpointPost();
+  }
+  if(Nyx::theFDMwkbPC()) {
+    Nyx::theFDMwkbPC()->CheckpointPost();
   }
 #endif
 }

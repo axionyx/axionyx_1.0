@@ -31,6 +31,8 @@
 |  const std::string | [**agn\_plt\_particle\_file**](namespaceanonymous__namespace_02Nyx__output_8cpp_03.md#function-agn-plt-particle-file) ("AGN") <br> |
 |  const std::string | [**dm\_chk\_particle\_file**](namespaceanonymous__namespace_02Nyx__output_8cpp_03.md#function-dm-chk-particle-file) ("DM") <br> |
 |  const std::string | [**dm\_plt\_particle\_file**](namespaceanonymous__namespace_02Nyx__output_8cpp_03.md#function-dm-plt-particle-file) ("DM") <br> |
+|  const std::string | [**fdm\_chk\_particle\_file**](namespaceanonymous__namespace_02Nyx__output_8cpp_03.md#function-fdm-chk-particle-file) ("FDM") <br> |
+|  const std::string | [**fdm\_plt\_particle\_file**](namespaceanonymous__namespace_02Nyx__output_8cpp_03.md#function-fdm-plt-particle-file) ("FDM") <br> |
 
 
 
@@ -86,5 +88,27 @@ const std::string anonymous_namespace{Nyx_output.cpp}::dm_plt_particle_file (
 
 
 
+### <a href="#function-fdm-chk-particle-file" id="function-fdm-chk-particle-file">function fdm\_chk\_particle\_file </a>
+
+
+```cpp
+const std::string anonymous_namespace{Nyx_output.cpp}::fdm_chk_particle_file (
+    "FDM"
+) 
+```
+
+
+
+### <a href="#function-fdm-plt-particle-file" id="function-fdm-plt-particle-file">function fdm\_plt\_particle\_file </a>
+
+
+```cpp
+const std::string anonymous_namespace{Nyx_output.cpp}::fdm_plt_particle_file (
+    "FDM"
+) 
+```
+
+
+
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/Nyx_output.cpp`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Nyx_output.cpp`

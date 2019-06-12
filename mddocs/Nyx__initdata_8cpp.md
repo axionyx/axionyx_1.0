@@ -11,7 +11,6 @@
 * `#include <iomanip>`
 * `#include <Nyx.H>`
 * `#include <Nyx_F.H>`
-* `#include <AMReX_Particles_F.H>`
 
 
 
@@ -94,4 +93,4 @@ int init_sb_vels;
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/Initialization/Nyx_initdata.cpp`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Initialization/Nyx_initdata.cpp`

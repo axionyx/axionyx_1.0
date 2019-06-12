@@ -208,4 +208,4 @@ void mt_write (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/Forcing/MersenneTwister.cpp`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Forcing/MersenneTwister.cpp`

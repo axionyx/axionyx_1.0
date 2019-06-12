@@ -11,7 +11,6 @@
 * `#include <iomanip>`
 * `#include <Nyx.H>`
 * `#include <Nyx_F.H>`
-* `#include <AMReX_Particles_F.H>`
 
 
 
@@ -42,4 +41,4 @@
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/NyxParticles.cpp`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/NyxParticles.cpp`

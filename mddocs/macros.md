@@ -39,6 +39,11 @@
 * **MAX\_LEV** ([**Gravity.cpp**](Gravity_8cpp.md))
 
 
+## s
+
+* **STRIP** ([**AMReX\_Amr.cpp**](AMReX__Amr_8cpp.md))
+
+
 ## t
 
 * **TWIST** ([**MersenneTwister.cpp**](MersenneTwister_8cpp.md))

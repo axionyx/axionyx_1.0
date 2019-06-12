@@ -219,4 +219,4 @@ const std::string anonymous_namespace{NyxParticles.cpp}::dm_chk_particle_file (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/rootfft/Source/NyxParticles.cpp`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/NyxParticles.cpp`

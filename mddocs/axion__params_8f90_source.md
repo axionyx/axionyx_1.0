@@ -1,9 +1,9 @@
 
 # File axion\_params.f90
 
-[**File List**](files.md) **>** [**Exec**](dir_43a12cefb7942b6f49b5b628aafd3192.md) **>** [**Test\_Only\_Axions**](dir_eb24725df855cf6c732a19e4912f662a.md) **>** [**axion\_params.f90**](Exec_2Test__Only__Axions_2axion__params_8f90.md)
+[**File List**](files.md) **>** [**Exec**](dir_43a12cefb7942b6f49b5b628aafd3192.md) **>** [**Test\_Only\_Axions**](dir_eb24725df855cf6c732a19e4912f662a.md) **>** [**axion\_params.f90**](axion__params_8f90.md)
 
-[Go to the documentation of this file.](Exec_2Test__Only__Axions_2axion__params_8f90.md) 
+[Go to the documentation of this file.](axion__params_8f90.md) 
 
 
 ````cpp
@@ -13,7 +13,11 @@ module axion_params_module
   ! These are only used for the axion model.
   ! They have to be set/overwritten in Prob_3d.f90.
   
-  double precision, save :: m_tt = 2.5d0 !particle mass in units of 10^(-22) eV
+  double precision, save :: m_tt
+  double precision, save :: hbaroverm
+  double precision, save :: theta_ax
+  double precision, save :: sigma_ax
+  double precision, save :: gamma_ax
   double precision, save :: meandens !background axion density, set in ca_initdata
 
   double complex, parameter :: ii = (0., 1.)   
