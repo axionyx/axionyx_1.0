@@ -1,0 +1,22 @@
+I had to add something to doxybook in order to have it run correctly on the xml output;
+
+in /usr/users/cbehren2/anaconda2/envs/py36/lib/python3.6/site-packages/doxybook/property.py;
+class Specifiers:
+        def __init__(self, xml: Element, parser: XmlParser, kind: Kind):
+            self.xml = xml
+            self.parser = parser
+            self.kind = kind
+
+        def md(self, plain: bool = False) -> str:
+            return self.plain()
+
+        def plain(self) -> str:
+            argss = self.xml.find('argsstring')
+-->         if argss is None:
+-->             return ''
+
+            argsstring = argss.text
+            ret = []
+            if(argsstring is None):
+                return ''
+
