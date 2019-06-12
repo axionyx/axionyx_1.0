@@ -1,5 +1,0 @@
-f90EXE_sources += Prob_3d.f90	probdata.f90 axion_params.f90
-
-CEXE_sources += prescribe_grav_potential.cpp
-
-F90EXE_sources += SWFFT_Test_F.F90

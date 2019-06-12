@@ -787,4 +787,113 @@ DarkMatterParticleContainer::InitFromBinaryMortonFile(const std::string& particl
   
   Redistribute();
 }
+#ifdef FDM
+void
+DarkMatterParticleContainer::InitGaussianBeams (long num_particle_dm, int lev, int nlevs, const Real fact, const Real alpha, const Real a)
+{
 
+  const int       MyProc      = ParallelDescriptor::MyProc();
+  const int       nprocs      = ParallelDescriptor::NProcs();
+  const Geometry& geom        = m_gdb->Geom(lev);
+
+  static Vector<int> calls;
+  calls.resize(nlevs);
+  calls[lev]++;
+  if (calls[lev] > 1) return;
+  Vector<ParticleLevel>& particles = this->GetParticles();
+
+  int  npart = num_particle_dm;
+  int  npart_tot = nprocs*npart; //Each processor initializes num_particle_fdm beams
+  Real q0[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
+  Real q[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
+  Real p0[] = {0.0,0.0,0.0};
+  Real sigma = 0.5/sqrt(alpha);/*remember that we square amplitude alpha->2*alpha*/
+
+  //calculate dm particle mass
+  Real mass = 1.0/npart_tot;
+  mass *= pow(2.0*alpha/M_PI,-1.5);
+  mass *= 100.0*fact;
+
+  particles.reserve(15);  // So we don't ever have to do any copying on a resize.                                                                                                                                  
+  particles.resize(nlevs);
+
+  for (int i = 0; i < particles.size(); i++)
+    {
+      BL_ASSERT(particles[i].empty());
+    }
+
+  ParticleType part;
+  ParticleLocData pld;
+
+  amrex::InitRandom(MyProc);
+
+  for(int index=0;index<npart;index++){
+
+    q[0] = generateGaussianNoise(q0[0],sigma);
+    q[1] = generateGaussianNoise(q0[1],sigma);
+    q[2] = generateGaussianNoise(q0[2],sigma);
+
+    if(q[0]>geom.ProbLo(0) && q[0]<geom.ProbHi(0) && q[1]>geom.ProbLo(1) && q[1]<geom.ProbHi(1) && q[2]>geom.ProbLo(2) && q[2]<geom.ProbHi(2)){
+      
+      part.id()      = ParticleType::NextID();
+      part.cpu()     = MyProc;
+      
+      //set position
+      for (int n = 0; n < BL_SPACEDIM; n++)
+	part.pos( n) = q[n];
+      //set mass
+      part.rdata( 0) =  mass;
+      //set velocity
+      part.rdata( 1) = p0[0]/a;
+      part.rdata( 2) = p0[1]/a;
+      part.rdata( 3) = p0[2]/a;
+      
+      if (!this->Where(part,pld))
+	amrex::Abort("ParticleContainer<N>::InitGaussianBeams(): invalid particle");
+      
+      //add particle                                                                                                                                                                                            
+      particles[pld.m_lev][std::make_pair(pld.m_grid, pld.m_tile)].push_back(part);
+    }    
+    else
+      index--;
+  }
+  if (ParallelDescriptor::IOProcessor() && m_verbose)
+    {
+      std::cout << "Done DM particle initilization for Gaussian Beam potential.\n";
+    }
+  //                                                                                                                                                                                                            
+  // Let Redistribute() sort out where the particles belong.                                                                                                                                                    
+  //                                                                                                                                                                                                            
+  Redistribute();
+  
+  if (ParallelDescriptor::IOProcessor() && m_verbose)
+    {
+      std::cout << "Redistribute done" << '\n';
+    }
+}
+
+amrex::Real
+DarkMatterParticleContainer::generateGaussianNoise(const amrex::Real &mean, const amrex::Real &stdDev) {
+
+  static bool hasSpare = false;
+  static amrex::Real spare;
+
+  if(hasSpare) {
+    hasSpare = false;
+    return mean + stdDev * spare;
+  }
+
+  hasSpare = true;
+  static amrex::Real u, v, s;
+  do {
+    u = (rand() / ((amrex::Real) RAND_MAX)) * 2.0 - 1.0;
+    v = (rand() / ((amrex::Real) RAND_MAX)) * 2.0 - 1.0;
+    s = u * u + v * v;
+  }
+  while( (s >= 1.0) || (s == 0.0) );
+
+  s = sqrt(-2.0 * log(s) / s);
+  spare = v * s;
+  return mean + stdDev * u * s;
+}
+#endif

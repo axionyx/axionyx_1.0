@@ -7,7 +7,11 @@
 #endif
 
 #include <Nyx_F.H>
-#include <AMReX_Particles_F.H>
+//#include <AMReX_Particles_F.H>
+
+#ifdef FDM
+#include "fdm_F.H"
+#endif
 
 using namespace amrex;
 
@@ -27,10 +31,16 @@ namespace
     std::string neutrino_particle_file;
 #endif
 
+#ifdef FDM
+    std::string fdm_particle_file;
+#endif
+
   // const std::string chk_particle_file("DM");
     const std::string dm_chk_particle_file("DM");
     const std::string agn_chk_particle_file("AGN");
-
+#ifdef FDM
+    const std::string fdm_chk_particle_file("FDM");
+#endif
     //
     // We want to call this routine when on exit to clean up particles.
     //
@@ -59,7 +69,10 @@ namespace
 #ifdef NEUTRINO_PARTICLES
     NeutrinoParticleContainer*    NPC = 0;
 #endif
-
+#ifdef FDM
+    FDMwkbParticleContainer* FDMwkbPC = 0;
+    FDMParticleContainer*       FDMPC = 0;
+#endif
     //
     // This is only used as a temporary container for
     //  reading in SPH particles and using them to
@@ -78,6 +91,10 @@ namespace
 #ifdef NEUTRINO_PARTICLES
     NeutrinoParticleContainer*   VirtNPC = 0;
 #endif
+#ifdef FDM
+    FDMwkbParticleContainer* VirtFDMwkbPC = 0;
+    FDMParticleContainer*       VirtFDMPC = 0;
+#endif
     //
     // Container for temporary, ghost Particles
     //
@@ -88,6 +105,10 @@ namespace
 #endif
 #ifdef NEUTRINO_PARTICLES
     NeutrinoParticleContainer*   GhostNPC = 0;
+#endif
+#ifdef FDM
+    FDMwkbParticleContainer* GhostFDMwkbPC = 0;
+    FDMParticleContainer*       GhostFDMPC = 0;
 #endif
 
     void RemoveParticlesOnExit ()
@@ -107,6 +128,20 @@ namespace
             delete VirtualParticles[i];
             VirtualParticles[i] = 0;
         }
+#ifdef FDM
+	if(FDMwkbPC)
+	  delete FDMwkbPC;
+	if(GhostFDMwkbPC)
+	  delete GhostFDMwkbPC;
+	if(VirtFDMwkbPC)
+	  delete VirtFDMwkbPC;
+	if(FDMPC)
+	  delete FDMPC;
+	if(GhostFDMPC)
+	  delete GhostFDMPC;
+	if(VirtFDMPC)
+	  delete VirtFDMPC;
+#endif
     }
 }
 
@@ -134,6 +169,10 @@ int Nyx::write_coarsened_particles      = 0;
 Real Nyx::particle_cfl = 0.5;
 #ifdef NEUTRINO_PARTICLES
 Real Nyx::neutrino_cfl = 0.5;
+#endif
+#ifdef FDM
+long Nyx::num_particle_fdm = 0;
+long Nyx::num_particle_dm = 0;
 #endif
 
 IntVect Nyx::Nrep;
@@ -225,15 +264,51 @@ Nyx::theGhostNPC ()
 }
 #endif
 
+#ifdef FDM
+FDMParticleContainer*
+Nyx::theFDMPC ()
+{
+  return FDMPC;
+}
+FDMParticleContainer*
+Nyx::theVirtFDMPC ()
+{
+  return VirtFDMPC;
+}
+FDMParticleContainer*
+Nyx::theGhostFDMPC ()
+{
+  return GhostFDMPC;
+}
+FDMwkbParticleContainer*
+Nyx::theFDMwkbPC ()
+{
+  return FDMwkbPC;
+}
+FDMwkbParticleContainer*
+Nyx::theVirtFDMwkbPC ()
+{
+  return VirtFDMwkbPC;
+}
+FDMwkbParticleContainer*
+Nyx::theGhostFDMwkbPC ()
+{
+  return GhostFDMwkbPC;
+}
+#endif
+
 void
 Nyx::read_particle_params ()
 {
+
     ParmParse pp("nyx");
     pp.query("do_dm_particles", do_dm_particles);
-#if defined(FDM) || defined(ONLYFDM)
-        do_dm_particles = 0;
+#ifdef FDM
+    if(partlevel)
+      //If Gaussian Beam Method is chosen for FDM evolution, we need dm_particles for the construction of the gravitational potential.
+      do_dm_particles = 1;
 #endif
-#if defined(AGN) || defined(ONLYFDM)
+#ifdef AGN
     pp.get("particle_init_type", particle_init_type);
     pp.get("particle_move_type", particle_move_type);
 #else
@@ -320,6 +395,13 @@ Nyx::read_particle_params ()
     }
 #endif
 
+#ifdef FDM
+    if(partlevel){
+      pp.get("num_particle_fdm", num_particle_fdm);
+      pp.get("num_particle_dm", num_particle_dm);
+    }
+#endif
+
     pp.query("write_particle_density_at_init", write_particle_density_at_init);
     pp.query("write_coarsened_particles", write_coarsened_particles);
     //
@@ -348,6 +430,9 @@ Nyx::init_particles ()
     if (level > 0)
         return;
 
+#ifdef FDM
+    const Real a = get_comoving_a(state[Axion_Type].curTime());
+#endif
     //
     // Need to initialize particles before defining gravity.
     //
@@ -359,14 +444,16 @@ Nyx::init_particles ()
 
         if (init_with_sph_particles == 1)
            SPHPC = new DarkMatterParticleContainer(parent);
-
+#ifndef FDM
 	if (parent->subCycle())
+#endif
 	{
 	    VirtPC = new DarkMatterParticleContainer(parent);
             VirtualParticles.push_back(VirtPC);
 
 	    GhostPC = new DarkMatterParticleContainer(parent);
             GhostParticles.push_back(GhostPC); }
+
         //
         // Make sure to call RemoveParticlesOnExit() on exit.
         //
@@ -504,6 +591,25 @@ Nyx::init_particles ()
 					 BL_SPACEDIM + 1,
 					 particle_skip_factor);
         }
+	else if (particle_init_type == "Cosmological")
+	  {
+	    // moved to Nyx_initcosmo.cpp                                                                                                                                                                            
+	  }
+#ifdef FDM
+	else if (particle_init_type == "GaussianBeams" && partlevel)
+	  {
+	    if (verbose)
+	      {
+		amrex::Print() << "\nInitializing DM particles for FDM gravitational potential...\n\n";
+		if (init_with_sph_particles == 1)
+		  amrex::Error("FDM computations are not supported for sph particles.");
+	      }
+	    if(num_particle_dm > 0)
+	      DMPC->InitGaussianBeams(num_particle_dm, level, parent->initialBaLevels()+1, meandens, alpha_fdm, a);
+	    else
+	      amrex::Error("\nNeed num_particle_dm > 0 for DM InitGaussianBeams!\n\n");
+	  }
+#endif
         else
         {
             amrex::Error("not a valid input for nyx.particle_init_type");
@@ -618,6 +724,389 @@ Nyx::init_particles ()
         }
     }
 #endif
+#ifdef FDM
+    if(partlevel){
+    // if(false){
+    if(wkb_approx)
+    {
+      BL_ASSERT (FDMwkbPC == 0);
+      FDMwkbPC = new FDMwkbParticleContainer(parent);
+
+      // if (parent->subCycle())
+        {
+      	  VirtFDMwkbPC = new FDMwkbParticleContainer(parent);
+
+      	  GhostFDMwkbPC = new FDMwkbParticleContainer(parent);
+        }
+
+      //                                                                                                                                                                                                         
+      // Make sure to call RemoveParticlesOnExit() on exit.                                                                                                                                                      
+      //   (if do_dm_particles then we have already called ExecOnFinalize)                                                                                                                                       
+      //                                                                                                                                                                                                         
+      if (!do_dm_particles)
+	amrex::ExecOnFinalize(RemoveParticlesOnExit);
+      //                                                                                                                                                                                                         
+      // 2 gives more stuff than 1.                                                                                                                                                                              
+      //                                                                                                                                                                                                         
+      FDMwkbPC->SetVerbose(particle_verbose);
+
+      if (particle_init_type == "AsciiFile")
+        {
+	  if (verbose && ParallelDescriptor::IOProcessor())
+            {
+	      amrex::Print() << "\nInitializing FDM particles from \""
+			     << ascii_particle_file << "\" ...\n\n";
+            }
+	  //                                                                                                                                                                                                     
+	  // The second argument is how many Reals we read into `m_data[]`                                                                                                                                       
+	  // after reading in `m_pos[]`. Here we're reading in the particle                                                                                                                                      
+	  // mass and velocity. This might have to be extended to all Gauss 
+	  // Beam arguments.                                                                                                                                                               
+	  FDMwkbPC->InitFromAsciiFile(ascii_particle_file, BL_SPACEDIM + 1, &Nrep);
+        }
+      else if (particle_init_type == "BinaryFile")
+        {
+	  if (verbose)
+            {
+	      amrex::Print() << "\nInitializing FDM particles from \""
+			     << binary_particle_file << "\" ...\n\n";
+            }
+	  //                                                                                                                                                                                                     
+	  // The second argument is how many Reals we read into `m_data[]`                                                                                                                                       
+	  // after reading in `m_pos[]`. Here we're reading in the particle                                                                                                                                      
+	  // mass and velocity. This might have to be extended to all Gauss                                                                                                                          
+          // Beam arguments.                                                                                                                                                                           
+	  FDMwkbPC->InitFromBinaryFile(binary_particle_file, BL_SPACEDIM + 1);
+        }
+      else if (particle_init_type == "BinaryMetaFile")
+        {
+	  if (verbose)
+            {
+	      amrex::Print() << "\nInitializing FDM particles from meta file\""
+			     << binary_particle_file << "\" ...\n\n";
+            }
+	  //                                                                                                                                                                                                     
+	  // The second argument is how many Reals we read into `m_data[]`                                                                                                                                       
+	  // after reading in `m_pos[]` in each of the binary particle files.                                                                                                                                    
+	  // Here we're reading in the particle mass and velocity. This might 
+	  // have to be extended to all Gauss Beam arguments.                                                                        
+	  FDMwkbPC->InitFromBinaryMetaFile(binary_particle_file, BL_SPACEDIM + 1);
+        }
+      else if (particle_init_type == "BinaryMortonFile")
+        {
+          if (verbose)
+            {
+	      amrex::Print() << "\nInitializing FDM particles from morton-ordered binary file\""
+                             << binary_particle_file << "\" ...\n\n";
+            }
+	  //                                                                                                                                                                                                     
+	  // The second argument is how many Reals we read into `m_data[]`                                                                                                                                       
+	  // after reading in `m_pos[]` in each of the binary particle files.                                                                                                                                    
+	  // Here we're reading in the particle mass and velocity. This might                                                                                               
+	  // have to be extended to all Gauss Beam arguments.                                                                                                                                          
+          FDMwkbPC->InitFromBinaryMortonFile(binary_particle_file,
+                                         BL_SPACEDIM + 1,
+                                         particle_skip_factor);
+        }
+      else if (particle_init_type == "Cosmological")
+        {
+	  // moved to Nyx_initcosmo.cpp                                                                                                                                                                      
+        }
+      //do init                                                                                                                                                                                                  
+      // else if(particle_init_type == "Bosonstar")
+      //   {
+      // 	  const int initDataDim = 4; //FIXME: depends on setup... I guess                                                                                                                                        
+      // 	  const Real * dx = geom.CellSize();
+      // 	  const Real cur_time = state[State_Type].curTime();
+      // 	  MultiFab InitData(grids,dmap,initDataDim,0);
+
+      // 	  for (MFIter mfi(InitData); mfi.isValid(); ++mfi)
+      //       {
+      // 	      RealBox gridloc = RealBox(grids[mfi.index()], geom.CellSize(), geom.ProbLo());
+      // 	      const Box& box = mfi.validbox();
+      // 	      const int* lo = box.loVect();
+      // 	      const int* hi = box.hiVect();
+
+      // 	      // BL_FORT_PROC_CALL(INITPART, initpart)
+      // 	      initpart(&level, &cur_time,
+      // 		 lo, hi,
+      // 		 &initDataDim, BL_TO_FORTRAN(InitData[mfi]),
+      // 		 dx, gridloc.lo(), gridloc.hi());
+      //       }
+
+ 
+      // 	  BoxArray baWhereNot;
+      // 	  if (level < parent->initialBaLevels())
+      // 	    baWhereNot = parent->initialBa(level+1);
+      // 	  BoxArray myBaWhereNot(baWhereNot.size());
+      // 	  for (int i=0; i < baWhereNot.size(); i++)
+      // 	    myBaWhereNot.set(i, baWhereNot[i]);
+      // 	  if (level < parent->initialBaLevels())
+      // 	    myBaWhereNot.coarsen(parent->refRatio(level));
+
+      // 	  if(num_particle_fdm > 0)
+      // 	    FDMwkbPC->InitVarCount(InitData, num_particle_fdm, myBaWhereNot, level, parent->initialBaLevels()+1);
+      // 	  else
+      // 	    amrex::Error("\nNeed num_particle_fdm > 0 for InitVarCount!\n\n");
+
+      //   }
+      else if(particle_init_type == "GaussianBeams")
+        {
+	  if (!do_dm_particles)
+	    amrex::Print() << "\n DM particles are needed for the construction of the gravitational potential!!\n\n";
+	  if(num_particle_fdm > 0)
+	    FDMwkbPC->InitGaussianBeams(num_particle_fdm, level, parent->initialBaLevels()+1, hbaroverm, sigma_fdm, gamma_fdm, meandens, alpha_fdm, a);
+	  else
+	    amrex::Error("\nNeed num_particle_fdm > 0 for InitGaussianBeams!\n\n");
+
+	  MultiFab& Ax_new = get_level(level).get_new_data(Axion_Type);
+	  Ax_new.setVal(0.);
+
+	  // if(levelmethod[level]==GBlevel){
+
+	  // //Define neccessary number of ghost cells                                                                                                                                              
+	  // int ng = ceil(Nyx::sigma_fdm*Nyx::theta_fdm/get_level(level).Geom().CellSize()[0]);
+
+	  // //Initialize MultiFabs                                                                                                                                                                      
+	  // MultiFab fdmreal(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
+	  // fdmreal.setVal(0.);
+	  // MultiFab fdmimag(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
+	  // fdmimag.setVal(0.);
+
+	  // const Real cur_time  = state[State_Type].curTime();
+	  // const Real a_new = get_comoving_a(cur_time);
+
+	  // //Deposit Gaussian Beams                                                                                                                                                         
+	  // if(Nyx::theFDMPC())
+	  //   Nyx::theFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+	  // if(Nyx::theGhostFDMPC())
+	  //   Nyx::theGhostFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+	  // if(Nyx::theVirtFDMPC())
+	  //   Nyx::theVirtFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+	  // if(Nyx::theFDMwkbPC())
+	  //   Nyx::theFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+	  // if(Nyx::theGhostFDMwkbPC())
+	  //   Nyx::theGhostFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+	  // if(Nyx::theVirtFDMwkbPC())
+	  //   Nyx::theVirtFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+
+	  // //Update real part in FDM state                                                                                                                                                            
+	  // Ax_new.ParallelCopy(fdmreal, 0, Nyx::AxRe, 1, fdmreal.nGrow(),
+	  // 		      Ax_new.nGrow(), parent->Geom(level).periodicity(),FabArrayBase::ADD);
+
+	  // //Update imaginary part in FDM state                                                                                                                                                   
+	  // Ax_new.ParallelCopy(fdmimag, 0, Nyx::AxIm, 1, fdmimag.nGrow(),
+	  // 		      Ax_new.nGrow(), parent->Geom(level).periodicity(),FabArrayBase::ADD);
+
+	  // //Update density in FDM state                                                                                                                                                                 
+	  // AmrLevel* amrlev = &parent->getLevel(level);
+	  // for (amrex::FillPatchIterator fpi(*amrlev,Ax_new); fpi.isValid(); ++fpi)
+	  //   {
+	  //     if (Ax_new[fpi].contains_nan())
+	  // 	amrex::Abort("Nans in state just before FDM density update");
+	  //     BL_FORT_PROC_CALL(FORT_FDM_FIELDS, fort_fdm_fields)
+	  // 	(BL_TO_FORTRAN(Ax_new[fpi]));
+	  //     if (Ax_new[fpi].contains_nan())
+	  // 	amrex::Abort("Nans in state just after FDM density update");
+	  //   }
+	  // }
+
+        } else {
+	//FIXME                                                                                                                                                                                                            
+	std::cout << "multilevel init not implemented, yet!" << std::endl;
+      }
+
+    }else{
+      BL_ASSERT (FDMPC == 0);
+      FDMPC = new FDMParticleContainer(parent);
+
+      // if (parent->subCycle())
+        {
+      	  VirtFDMPC = new FDMParticleContainer(parent);
+
+      	  GhostFDMPC = new FDMParticleContainer(parent);
+        }
+
+      //                                                                                                                                                                                                         
+      // Make sure to call RemoveParticlesOnExit() on exit.                                                                                                                                                      
+      //   (if do_dm_particles then we have already called ExecOnFinalize)                                                                                                                                       
+      //                                                                                                                                                                                                         
+      if (!do_dm_particles)
+	amrex::ExecOnFinalize(RemoveParticlesOnExit);
+      //                                                                                                                                                                                                         
+      // 2 gives more stuff than 1.                                                                                                                                                                              
+      //                                                                                                                                                                                                         
+      FDMPC->SetVerbose(particle_verbose);
+
+      if (particle_init_type == "AsciiFile")
+        {
+	  if (verbose && ParallelDescriptor::IOProcessor())
+            {
+	      amrex::Print() << "\nInitializing FDM particles from \""
+			     << ascii_particle_file << "\" ...\n\n";
+            }
+	  //                                                                                                                                                                                                     
+	  // The second argument is how many Reals we read into `m_data[]`                                                                                                                                       
+	  // after reading in `m_pos[]`. Here we're reading in the particle                                                                                                                                      
+	  // mass and velocity. This might have to be extended to all Gauss 
+	  // Beam arguments.                                                                                                                                                               
+	  FDMPC->InitFromAsciiFile(ascii_particle_file, BL_SPACEDIM + 1, &Nrep);
+        }
+      else if (particle_init_type == "BinaryFile")
+        {
+	  if (verbose)
+            {
+	      amrex::Print() << "\nInitializing FDM particles from \""
+			     << binary_particle_file << "\" ...\n\n";
+            }
+	  //                                                                                                                                                                                                     
+	  // The second argument is how many Reals we read into `m_data[]`                                                                                                                                       
+	  // after reading in `m_pos[]`. Here we're reading in the particle                                                                                                                                      
+	  // mass and velocity. This might have to be extended to all Gauss                                                                                                                          
+          // Beam arguments.                                                                                                                                                                           
+	  FDMPC->InitFromBinaryFile(binary_particle_file, BL_SPACEDIM + 1);
+        }
+      else if (particle_init_type == "BinaryMetaFile")
+        {
+	  if (verbose)
+            {
+	      amrex::Print() << "\nInitializing FDM particles from meta file\""
+			     << binary_particle_file << "\" ...\n\n";
+            }
+	  //                                                                                                                                                                                                     
+	  // The second argument is how many Reals we read into `m_data[]`                                                                                                                                       
+	  // after reading in `m_pos[]` in each of the binary particle files.                                                                                                                                    
+	  // Here we're reading in the particle mass and velocity. This might 
+	  // have to be extended to all Gauss Beam arguments.                                                                        
+	  FDMPC->InitFromBinaryMetaFile(binary_particle_file, BL_SPACEDIM + 1);
+        }
+      else if (particle_init_type == "BinaryMortonFile")
+        {
+          if (verbose)
+            {
+	      amrex::Print() << "\nInitializing FDM particles from morton-ordered binary file\""
+                             << binary_particle_file << "\" ...\n\n";
+            }
+	  //                                                                                                                                                                                                     
+	  // The second argument is how many Reals we read into `m_data[]`                                                                                                                                       
+	  // after reading in `m_pos[]` in each of the binary particle files.                                                                                                                                    
+	  // Here we're reading in the particle mass and velocity. This might                                                                                               
+	  // have to be extended to all Gauss Beam arguments.                                                                                                                                          
+          FDMPC->InitFromBinaryMortonFile(binary_particle_file,
+                                         BL_SPACEDIM + 1,
+                                         particle_skip_factor);
+        }
+      else if (particle_init_type == "Cosmological")
+        {
+	  // moved to Nyx_initcosmo.cpp                                                                                                                                                                      
+        }
+      //do init                                                                                                                                                                                                  
+      // else if(particle_init_type == "Bosonstar")
+      //   {
+      // 	  const int initDataDim = 4; //FIXME: depends on setup... I guess                                                                                                                                        
+      // 	  const Real * dx = geom.CellSize();
+      // 	  const Real cur_time = state[State_Type].curTime();
+      // 	  MultiFab InitData(grids,dmap,initDataDim,0);
+
+      // 	  for (MFIter mfi(InitData); mfi.isValid(); ++mfi)
+      //       {
+      // 	      RealBox gridloc = RealBox(grids[mfi.index()], geom.CellSize(), geom.ProbLo());
+      // 	      const Box& box = mfi.validbox();
+      // 	      const int* lo = box.loVect();
+      // 	      const int* hi = box.hiVect();
+
+      // 	      // BL_FORT_PROC_CALL(INITPART, initpart)
+      // 	      initpart(&level, &cur_time,
+      // 		 lo, hi,
+      // 		 &initDataDim, BL_TO_FORTRAN(InitData[mfi]),
+      // 		 dx, gridloc.lo(), gridloc.hi());
+      //       }
+
+ 
+      // 	  BoxArray baWhereNot;
+      // 	  if (level < parent->initialBaLevels())
+      // 	    baWhereNot = parent->initialBa(level+1);
+      // 	  BoxArray myBaWhereNot(baWhereNot.size());
+      // 	  for (int i=0; i < baWhereNot.size(); i++)
+      // 	    myBaWhereNot.set(i, baWhereNot[i]);
+      // 	  if (level < parent->initialBaLevels())
+      // 	    myBaWhereNot.coarsen(parent->refRatio(level));
+
+      // 	  if(num_particle_fdm > 0)
+      // 	    FDMPC->InitVarCount(InitData, num_particle_fdm, myBaWhereNot, level, parent->initialBaLevels()+1);
+      // 	  else
+      // 	    amrex::Error("\nNeed num_particle_fdm > 0 for InitVarCount!\n\n");
+
+      //   }
+      else if(particle_init_type == "GaussianBeams")
+        {
+	  if (!do_dm_particles)
+	    amrex::Print() << "\n DM particles are needed for the construction of the gravitational potential!!\n\n";
+	  if(num_particle_fdm > 0)
+	    FDMPC->InitGaussianBeams(num_particle_fdm, level, parent->initialBaLevels()+1, hbaroverm, sigma_fdm, gamma_fdm, meandens, alpha_fdm, a);
+	  else
+	    amrex::Error("\nNeed num_particle_fdm > 0 for InitGaussianBeams!\n\n");
+
+	  MultiFab& Ax_new = get_level(level).get_new_data(Axion_Type);
+	  Ax_new.setVal(0.);
+	  
+	  // if(levelmethod[level]==GBlevel){
+	  
+	  // //Define neccessary number of ghost cells                                                                                                                                              
+	  // int ng = ceil(Nyx::sigma_fdm*Nyx::theta_fdm/get_level(level).Geom().CellSize()[0]);
+
+	  // //Initialize MultiFabs                                                                                                                                                                      
+	  // MultiFab fdmreal(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
+	  // fdmreal.setVal(0.);
+	  // MultiFab fdmimag(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
+	  // fdmimag.setVal(0.);
+
+          // const Real cur_time  = state[State_Type].curTime();
+	  // const Real a_new = get_comoving_a(cur_time);
+
+	  // //Deposit Gaussian Beams                                                                                                                                                         
+	  // if(Nyx::theFDMPC())
+	  //   Nyx::theFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+	  // if(Nyx::theGhostFDMPC())
+	  //   Nyx::theGhostFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+	  // if(Nyx::theVirtFDMPC())
+	  //   Nyx::theVirtFDMPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+	  // if(Nyx::theFDMwkbPC())
+	  //   Nyx::theFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+	  // if(Nyx::theGhostFDMwkbPC())
+	  //   Nyx::theGhostFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+	  // if(Nyx::theVirtFDMwkbPC())
+	  //   Nyx::theVirtFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,level,a_new);
+
+	  // //Update real part in FDM state                                                                                                                                                            
+	  // Ax_new.ParallelCopy(fdmreal, 0, Nyx::AxRe, 1, fdmreal.nGrow(),
+	  // 		      Ax_new.nGrow(), parent->Geom(level).periodicity(),FabArrayBase::ADD);
+
+	  // //Update imaginary part in FDM state                                                                                                                                                   
+	  // Ax_new.ParallelCopy(fdmimag, 0, Nyx::AxIm, 1, fdmimag.nGrow(),
+	  // 		      Ax_new.nGrow(), parent->Geom(level).periodicity(),FabArrayBase::ADD);
+
+	  // //Update density in FDM state                                                                                                                                                                 
+	  // AmrLevel* amrlev = &parent->getLevel(level);
+	  // for (amrex::FillPatchIterator fpi(*amrlev,Ax_new); fpi.isValid(); ++fpi)
+	  //   {
+	  //     if (Ax_new[fpi].contains_nan())
+	  // 	amrex::Abort("Nans in state just before FDM density update");
+	  //     BL_FORT_PROC_CALL(FORT_FDM_FIELDS, fort_fdm_fields)
+	  // 	(BL_TO_FORTRAN(Ax_new[fpi]));
+	  //     if (Ax_new[fpi].contains_nan())
+	  // 	amrex::Abort("Nans in state just after FDM density update");
+	  //   }
+	  // }
+	  
+        } else {
+	//FIXME                                                                                                                                                                                                            
+	std::cout << "multilevel init not implemented, yet!" << std::endl;
+      }
+
+    }
+    }
+#endif
 }
 
 #ifdef GRAVITY
@@ -715,7 +1204,7 @@ Nyx::init_santa_barbara (int init_sb_vels)
                  na, BL_TO_FORTRAN(Ax_new[mfi]),
 #endif
                  nd,BL_TO_FORTRAN(D_new[mfi]), dx,
-                 gridloc.lo(), gridloc.hi(), geom.ProbLo(), geom.ProbHi());
+                 gridloc.lo(), gridloc.hi(), geom.Domain().loVect(), geom.Domain().hiVect());
         }
 
         if (inhomo_reion) init_zhi();
@@ -797,7 +1286,9 @@ Nyx::particle_post_restart (const std::string& restart_file, bool is_checkpoint)
         DMPC = new DarkMatterParticleContainer(parent);
         ActiveParticles.push_back(DMPC);
 
+#ifndef FDM
         if (parent->subCycle())
+#endif
         {
             VirtPC = new DarkMatterParticleContainer(parent);
             VirtualParticles.push_back(VirtPC);
@@ -866,6 +1357,89 @@ Nyx::particle_post_restart (const std::string& restart_file, bool is_checkpoint)
         }
     }
 #endif
+#ifdef FDM
+    {
+      if(partlevel){
+      if(wkb_approx){
+	BL_ASSERT (FDMwkbPC == 0);
+	FDMwkbPC = new FDMwkbParticleContainer(parent);
+	
+	// ActiveParticles.push_back(FDMwkbPC);
+	
+	// if (parent->subCycle())
+	  {
+	    VirtFDMwkbPC = new FDMwkbParticleContainer(parent);
+	    // VirtualParticles.push_back(VirtFDMwkbPC);
+	    
+	    GhostFDMwkbPC = new FDMwkbParticleContainer(parent);
+	    // GhostParticles.push_back(GhostFDMwkbPC);
+	  }
+	
+	//                                                                                                                                                                                                     
+	// Make sure to call RemoveParticlesOnExit() on exit.                                                                                                                                                  
+	//   (if do_dm_particles then we have already called ExecOnFinalize)                                                                                                                                  
+	//                                                                                                                                                                                                   
+	if (!do_dm_particles)
+	  amrex::ExecOnFinalize(RemoveParticlesOnExit);
+	//                                                                                                                                                                                                      
+	// 2 gives more stuff than 1.                                                                                                                                                                          
+	//                                                                                                                                                                                                     
+	FDMwkbPC->SetVerbose(particle_verbose);
+	FDMwkbPC->Restart(restart_file, fdm_chk_particle_file, is_checkpoint);
+	//                                                                                                                                                                                                       
+	// We want the ability to write the particles out to an ascii file.                                                                                                                                     
+	//                                                                                                                                                                                                      
+	ParmParse pp("particles");
+	
+	std::string fdm_particle_output_file;
+	pp.query("fdm_particle_output_file", fdm_particle_output_file);
+	
+	if (!fdm_particle_output_file.empty())
+	  {
+	    FDMwkbPC->WriteAsciiFile(fdm_particle_output_file);
+	  }
+      }else{
+	BL_ASSERT (FDMPC == 0);
+	FDMPC = new FDMParticleContainer(parent);
+	
+	// ActiveParticles.push_back(FDMPC);
+	
+	// if (parent->subCycle())
+	  {
+	    VirtFDMPC = new FDMParticleContainer(parent);
+	    // VirtualParticles.push_back(VirtFDMPC);
+	    
+	    GhostFDMPC = new FDMParticleContainer(parent);
+	    // GhostParticles.push_back(GhostFDMPC);
+	  }
+	
+	//                                                                                                                                                                                                     
+	// Make sure to call RemoveParticlesOnExit() on exit.                                                                                                                                                  
+	//   (if do_dm_particles then we have already called ExecOnFinalize)                                                                                                                                   
+	//                                                                                                                                                                                                     
+	if (!do_dm_particles)
+	  amrex::ExecOnFinalize(RemoveParticlesOnExit);
+	//                                                                                                                                                                                                     
+	// 2 gives more stuff than 1.                                                                                                                                                                          
+	//                                                                                                                                                                                                     
+	FDMPC->SetVerbose(particle_verbose);
+	FDMPC->Restart(restart_file, fdm_chk_particle_file, is_checkpoint);
+	//                                                                                                                                                                                                    
+	// We want the ability to write the particles out to an ascii file.                                                                                                                                   
+	//                                                                                                                                                                                                    
+	ParmParse pp("particles");
+	
+	std::string fdm_particle_output_file;
+	pp.query("fdm_particle_output_file", fdm_particle_output_file);
+	
+	if (!fdm_particle_output_file.empty())
+	  {
+	    FDMPC->WriteAsciiFile(fdm_particle_output_file);
+	  }
+      }
+    }
+    }
+#endif
 }
 
 #ifdef GRAVITY
@@ -873,23 +1447,18 @@ void
 Nyx::particle_est_time_step (Real& est_dt)
 {
     BL_PROFILE("Nyx::particle_est_time_step()");
+
+    const Real cur_time = state[PhiGrav_Type].curTime();
+    const Real a = get_comoving_a(cur_time);
+    MultiFab& grav = get_new_data(Gravity_Type);
+
     if (DMPC && particle_move_type == "Gravitational")
-    {
-        const Real cur_time = state[PhiGrav_Type].curTime();
-        const Real a = get_comoving_a(cur_time);
-        MultiFab& grav = get_new_data(Gravity_Type);
+      {
         const Real est_dt_particle = DMPC->estTimestep(grav, a, level, particle_cfl);
-
+	
         if (est_dt_particle > 0) {
-            est_dt = std::min(est_dt, est_dt_particle);
+	  est_dt = std::min(est_dt, est_dt_particle);
 	}
-
-#ifdef NEUTRINO_PARTICLES
-        const Real est_dt_neutrino = NPC->estTimestep(grav, a, level, neutrino_cfl);
-        if (est_dt_neutrino > 0) {
-            est_dt = std::min(est_dt, est_dt_neutrino);
-	}
-#endif
 
         if (verbose)
         {
@@ -903,23 +1472,99 @@ Nyx::particle_est_time_step (Real& est_dt)
                 amrex::Print() << "...there are no particles at level "
                           << level << '\n';
             }
+	}
+      }
 #ifdef NEUTRINO_PARTICLES
+    if (NPC && particle_move_type == "Gravitational")
+      {
+        const Real est_dt_neutrino = NPC->estTimestep(grav, a, level, neutrino_cfl);
+
+        if (est_dt_neutrino > 0) {
+	  est_dt = std::min(est_dt, est_dt_neutrino);
+	}
+
+        if (verbose)
+        {
             if (est_dt_neutrino > 0)
             {
                 amrex::Print() << "...estdt from neutrinos at level "
                           << level << ": " << est_dt_neutrino << '\n';
             }
+            else
+            {
+                amrex::Print() << "...there are no neutrinos at level "
+                          << level << '\n';
+            }
+	}
+      }
 #endif
-        }
-    }
+
+#ifdef FDM
+    if (FDMwkbPC && particle_move_type == "Gravitational")
+      {
+	const Real est_dt_fdm1 = FDMwkbPC->estTimestep(grav, a, level, particle_cfl);
+	MultiFab& phi = get_new_data(PhiGrav_Type);
+	Real beam_cfl_reduced = beam_cfl*2.0*M_PI*hbaroverm;
+	const Real est_dt_fdm2 = FDMwkbPC->estTimestepFDM(phi, a, level, beam_cfl_reduced);
+	const Real est_dt_fdm = std::min(est_dt_fdm1 ,est_dt_fdm2);
+	// const Real est_dt_fdm = FDMwkbPC->estTimestep(grav, a, level, particle_cfl);
+	
+	if (est_dt_fdm > 0)
+	  est_dt = std::min(est_dt, est_dt_fdm);
+	
+	if (verbose)
+	  {
+	    if (est_dt_fdm > 0)
+	      {
+		amrex::Print() << "...estdt from FDMwkb at level "
+			       << level << ": " << est_dt_fdm << '\n';
+	      }
+	    else
+	      {
+		amrex::Print() << "...there are no FDMwkb beams at level "
+			       << level << '\n';
+	      }
+	  }
+      }
+    if (FDMPC && particle_move_type == "Gravitational")
+      {
+	const Real est_dt_fdm1 = FDMPC->estTimestep(grav, a, level, particle_cfl);
+	MultiFab& phi = get_new_data(PhiGrav_Type);
+	Real beam_cfl_reduced = beam_cfl*2.0*M_PI*hbaroverm;
+	const Real est_dt_fdm2 = FDMPC->estTimestepFDM(phi, a, level, beam_cfl_reduced);
+	const Real est_dt_fdm = std::min(est_dt_fdm1 ,est_dt_fdm2);
+	// const Real est_dt_fdm = FDMPC->estTimestep(grav, a, level, particle_cfl);
+	
+	if (est_dt_fdm > 0)
+	  est_dt = std::min(est_dt, est_dt_fdm);
+	  
+	if (verbose)
+	  {
+	    if (est_dt_fdm > 0)
+	      {
+		amrex::Print() << "...estdt from FDM at level "
+			       << level << ": " << est_dt_fdm << '\n';
+	      }
+	    else
+	      {
+		amrex::Print() << "...there are no FDM beams at level "
+			       << level << '\n';
+	      }
+	  }
+      }
+#endif
 }
 #endif
 
 void
-Nyx::particle_redistribute (int lbase, bool my_init)
+Nyx::particle_redistribute (int lbase, int iteration, bool my_init)
 {
     BL_PROFILE("Nyx::particle_redistribute()");
+#ifdef FDM
+    if (DMPC || FDMPC || FDMwkbPC)
+#else
     if (DMPC)
+#endif
     {
         //
         // If we are calling with my_init = true, then we want to force the redistribute
@@ -927,7 +1572,16 @@ Nyx::particle_redistribute (int lbase, bool my_init)
         //
         if (my_init)
         {
-            DMPC->Redistribute(lbase);
+#ifdef FDM
+	    if(DMPC)
+	      DMPC->Redistribute(lbase, DMPC->finestLevel(), iteration);
+	    if(FDMPC)
+	      FDMPC->Redistribute(lbase, FDMPC->finestLevel(), iteration);
+	    if(FDMwkbPC)
+	      FDMwkbPC->Redistribute(lbase, FDMwkbPC->finestLevel(), iteration);
+#else
+            DMPC->Redistribute(lbase, DMPC->finestLevel(),iteration);
+#endif
             return;
         }
 
@@ -1002,7 +1656,16 @@ Nyx::particle_redistribute (int lbase, bool my_init)
                    amrex::Print() << "Calling redistribute because DistMap changed " << '\n';
             }
 
+#ifdef FDM
+	    if(DMPC)
+	      DMPC->Redistribute(lbase, -1, parent->levelCount(lbase));
+	    if(FDMPC)
+	      FDMPC->Redistribute(lbase, -1, parent->levelCount(lbase));
+	    if(FDMwkbPC)
+	      FDMwkbPC->Redistribute(lbase, -1, parent->levelCount(lbase));
+#else
             DMPC->Redistribute(lbase, -1, parent->levelCount(lbase));
+#endif
             //
             // Use the new BoxArray and DistMap to define ba and dm for next time.
             //
@@ -1035,19 +1698,47 @@ Nyx::particle_move_random ()
 void
 Nyx::setup_virtual_particles()
 {
-    BL_PROFILE("Nyx::setup_virtual_particles()");
-    if(Nyx::theDMPC() != 0 && !virtual_particles_set)
+  BL_PROFILE("Nyx::setup_virtual_particles()");
+  if(!virtual_particles_set)
     {
+      if(Nyx::theDMPC() != 0){
         DarkMatterParticleContainer::AoS virts;
         if (level < parent->finestLevel())
-        {
+	  {
     	    get_level(level + 1).setup_virtual_particles();
 	    Nyx::theVirtPC()->CreateVirtualParticles(level+1, virts);
 	    Nyx::theVirtPC()->AddParticlesAtLevel(virts, level);
 	    Nyx::theDMPC()->CreateVirtualParticles(level+1, virts);
 	    Nyx::theVirtPC()->AddParticlesAtLevel(virts, level);
-        }
-        virtual_particles_set = true;
+	  }
+      }
+#ifdef FDM
+      if(Nyx::theFDMPC() != 0){
+        FDMParticleContainer::AoS virts;
+        if (level < parent->finestLevel())
+	  {
+	    if(Nyx::theDMPC() == 0)
+	      get_level(level + 1).setup_virtual_particles();
+	    Nyx::theVirtFDMPC()->CreateVirtualParticles(level+1, virts);
+	    Nyx::theVirtFDMPC()->AddParticlesAtLevel(virts, level);
+	    Nyx::theFDMPC()->CreateVirtualParticles(level+1, virts);
+	    Nyx::theVirtFDMPC()->AddParticlesAtLevel(virts, level);
+	  }
+      }
+      if(Nyx::theFDMwkbPC() != 0){
+        FDMwkbParticleContainer::AoS virts;
+        if (level < parent->finestLevel())
+	  {
+	    if(Nyx::theDMPC() == 0 && Nyx::theFDMPC() == 0)
+	      get_level(level + 1).setup_virtual_particles();
+	    Nyx::theVirtFDMwkbPC()->CreateVirtualParticles(level+1, virts);
+	    Nyx::theVirtFDMwkbPC()->AddParticlesAtLevel(virts, level);
+	    Nyx::theFDMwkbPC()->CreateVirtualParticles(level+1, virts);
+	    Nyx::theVirtFDMwkbPC()->AddParticlesAtLevel(virts, level);
+	  }
+      }
+#endif
+      virtual_particles_set = true;
     }
 }
 
@@ -1061,6 +1752,16 @@ Nyx::remove_virtual_particles()
             VirtualParticles[i]->RemoveParticlesAtLevel(level);
         virtual_particles_set = false;
     }
+#ifdef FDM
+    if(theVirtFDMPC()){
+      theVirtFDMPC()->RemoveParticlesAtLevel(level);
+      virtual_particles_set = false;
+    }
+    if(theVirtFDMwkbPC()){
+      theVirtFDMwkbPC()->RemoveParticlesAtLevel(level);
+      virtual_particles_set = false;
+    }
+#endif
 }
 
 void
@@ -1090,6 +1791,45 @@ Nyx::setup_ghost_particles(int ngrow)
         Nyx::theGhostNPC()->AddParticlesAtLevel(ghosts, level+1, ngrow);
     }
 #endif
+#ifdef FDM
+    if(Nyx::theFDMPC() != 0 && levelmethod[level+1]==GBlevel)
+    {
+        FDMParticleContainer::AoS ghosts;
+    	int ng = parent->nCycle(level+1)+ceil(sigma_fdm*theta_fdm/parent->Geom(level+1).CellSize()[0]);
+        Nyx::theFDMPC()->CreateGhostParticles(level, ng, ghosts);
+        Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, level+1, ng);
+    }
+    if(Nyx::theFDMwkbPC() != 0 && levelmethod[level+1]==GBlevel)
+    {
+        FDMwkbParticleContainer::AoS ghosts;
+    	int ng = parent->nCycle(level+1)+ceil(sigma_fdm*theta_fdm/parent->Geom(level+1).CellSize()[0]);
+        Nyx::theFDMwkbPC()->CreateGhostParticles(level, ng, ghosts);
+        Nyx::theGhostFDMwkbPC()->AddParticlesAtLevel(ghosts, level+1, ng);
+    }
+    // if(Nyx::theFDMPC() != 0)
+    //   {
+    // 	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
+    // 	  if(levelmethod[lev]==GBlevel){
+    // 	    FDMParticleContainer::AoS ghosts;
+    // 	    int ng = parent->nCycle(lev)+ceil(sigma_fdm*theta_fdm/parent->Geom(lev).CellSize()[0]);
+    // 	    Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);
+    // 	    Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ng);
+    // 	  }
+    // 	}
+    //   }
+    // if(Nyx::theFDMwkbPC() != 0)
+    //   {
+    // 	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
+    // 	  if(levelmethod[lev]==GBlevel){
+    // 	    FDMwkbParticleContainer::AoS ghosts;
+    // 	    int ng = parent->nCycle(lev)+ceil(sigma_fdm*theta_fdm/parent->Geom(lev).CellSize()[0]);
+    // 	    Nyx::theFDMwkbPC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);
+    // 	    Nyx::theGhostFDMwkbPC()->AddParticlesAtLevel(ghosts, lev, ng);
+    // 	  }
+    // 	}
+    //   }
+#endif
+
 }
 
 void
@@ -1101,6 +1841,12 @@ Nyx::remove_ghost_particles()
         if (GhostParticles[i] != 0)
             GhostParticles[i]->RemoveParticlesAtLevel(level);
     }
+#ifdef FDM
+    if(theGhostFDMPC())
+      theGhostFDMPC()->RemoveParticlesAtLevel(level);
+    if(theGhostFDMwkbPC())
+      theGhostFDMwkbPC()->RemoveParticlesAtLevel(level);
+#endif
 }
 
 //NyxParticleContainerBase::~NyxParticleContainerBase() {}

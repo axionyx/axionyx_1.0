@@ -1,9 +1,9 @@
 # ------------------  INPUTS TO MAIN PROGRAM  -------------------
-max_step = 500
+max_step = 100
 
 nyx.comoving_OmB = 0.0
-nyx.comoving_OmM = 0.3
-nyx.comoving_h = 0.7
+nyx.comoving_OmM = 1.0
+nyx.comoving_h = 0.0
 
 nyx.inhomo_reion = 0
 
@@ -17,7 +17,7 @@ nyx.vonNeumann_dt = 1
 
 #This is how we restart from a checkpoint and write an ascii particle file
 #Leave this commented out in cvs version
-amr.restart = chk00200
+#amr.restart = chk00200
 nyx.dump_old = 1
 #particles.particle_output_file = particle_output
 particles.write_in_plotfile = 0
@@ -45,8 +45,8 @@ geometry.prob_lo     =  -1.0 -1.0 -1.0
 geometry.prob_hi     =  1.0 1.0 1.0
 
 amr.n_cell           = 64 64 64
-amr.max_grid_size    = 64
-amr.blocking_factor  = 64
+amr.max_grid_size    = 32
+amr.blocking_factor  = 32
 nyx.n_particles      = 1  1  1
 
 #amr.n_cell           = 4 4 4
@@ -61,6 +61,10 @@ nyx.n_particles      = 1  1  1
 # >>>>>>>>>>>>>  BC FLAGS <<<<<<<<<<<<<<<<
 nyx.lo_bc       =  0	  0	0
 nyx.hi_bc       =  0	  0	0
+
+# >>>>>>>>> FDM PHYSICS <<<<<<<<<<<
+nyx.levelmethod = 3
+nyx.m_tt = 2.5
 
 # WHICH PHYSICS
 nyx.do_hydro = 0
@@ -122,7 +126,7 @@ amr.check_int       = 5000
 amr.plot_file       = plt_gauss_no_gravity_igp
 #amr.plot_file       = plt_gauss_quadpot
 #amr.plot_per       = 1.e-6
-amr.plot_int	    = 10
+amr.plot_int	    = 100
 
 #LOG FILE nstep | time | dt | redshift | a
 amr.data_log = runlog

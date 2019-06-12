@@ -319,7 +319,7 @@ NyxParticleContainer<NSR,NSI,NAR,NAI>::estTimestep (amrex::MultiFab&       accel
                                                       + aval[1]*aval[1],
                                                       + aval[2]*aval[2]));
             if (mag_accel > 0)
-                dt_part = std::min( dt_part, 1/std::sqrt(mag_accel/dx[0]) );
+                dt_part = std::min( dt_part, a/std::sqrt(mag_accel/dx[0]) );
 
             int tid = 0;
 

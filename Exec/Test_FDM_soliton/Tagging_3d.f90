@@ -61,7 +61,7 @@
                               lo,hi,nc,domlo,domhi,delta,xlo,problo,time,level)
 
       use probdata_module
-      use axion_params_module, only : critvalue
+      use fdm_params_module, only : critvalue
 
       implicit none
 

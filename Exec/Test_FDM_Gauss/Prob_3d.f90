@@ -39,6 +39,14 @@
       do i = 1, 3
          center(i) = (probhi(i) + problo(i)) / 2 !+ problo(i)
       end do
+
+      dcenx = center(1)
+      dceny = center(2)
+      dcenz = center(3)
+      dmconc = 1.0d0
+      dmmass = 1.0d0
+      dmscale = 1.0d0
+
       end
 
 ! ::: -----------------------------------------------------------
@@ -69,71 +77,45 @@
                              ns, state   ,s_l1,s_l2,s_l3,s_h1,s_h2,s_h3, &
                              na, axion,   a_l1,a_l2,a_l3,a_h1,a_h2,a_h3, &
                              nd, diag_eos,d_l1,d_l2,d_l3,d_h1,d_h2,d_h3, &
-                             delta,xlo,xhi,boxsize) bind(C)
+                             delta,xlo,xhi,domlo,domhi) bind(C)
       use probdata_module
       use atomic_rates_module, only : XHYDROGEN
       use meth_params_module, only : URHO, UMX, UMY, UMZ, UEDEN, UEINT,&
                                      UFS, small_dens, TEMP_COMP, &
                                      NE_COMP, UAXDENS, UAXRE, UAXIM
       use amrex_constants_module, only : M_PI
-      use axion_params_module
+      use fdm_params_module
       use comoving_module, only : comoving_h, comoving_OmAx
       use interpolate_module
+      use amrex_parmparse_module
 
       implicit none
 
       integer level, ns, nd, na
-      integer lo(3), hi(3)
+      integer lo(3), hi(3), domlo(3), domhi(3)
       integer s_l1,s_l2,s_l3,s_h1,s_h2,s_h3
       integer d_l1,d_l2,d_l3,d_h1,d_h2,d_h3
       integer a_l1,a_l2,a_l3,a_h1,a_h2,a_h3
-      double precision xlo(3), xhi(3), time, delta(3), boxsize(3)
+      double precision xlo(3), xhi(3), time, delta(3)
       double precision    state(s_l1:s_h1,s_l2:s_h2,s_l3:s_h3,ns)
       double precision diag_eos(d_l1:d_h1,d_l2:d_h2,d_l3:d_h3,nd)
       double precision    axion(a_l1:a_h1,a_l2:a_h2,a_l3:a_h3,na)
 
-      integer i,j,k,h
-      integer un,length
+      integer i,j,k
       double precision hubl
-      double precision r,rc
-      double precision rx,ry,rz,x,y,z
-      double precision d
-      double precision pi, tpi
-      double precision, allocatable :: m(:), pos(:,:)
-      double precision velFac, sigmaR, omega
-      double precision hbaroverm
+      double precision x,y,z
+      double precision omega
 
-
-      un = 20
-      open(un,file='initial.txt',status="old",action="read")
-      read(un,*) length
-      read(un,*)  !Just to skip the second
-      read(un,*)  !and third line
-
-      allocate(m(1:length))
-      allocate(pos(1:length,1:3))
-
-      do i=1,length
-         read(un,*) m(i), pos(i,1), pos(i,2), pos(i,3)
-      end do
-      close(un)
-      !print *,"star is at ", pos
-
-      ! do i=1,3
-      !    pos(1,i)=center(i)
-      ! enddo
-
-      pi = 4.d0 * atan(1.d0)
-      tpi = 2.0d0 * pi
+      type(amrex_parmparse) :: pp
+      
+      call amrex_parmparse_build(pp, "nyx")
+      call pp%query("m_tt", m_tt)
+      hbaroverm = 0.01917152d0 / m_tt
+      call amrex_parmparse_destroy(pp)
 
       hubl = 0.7d0
       meandens = 2.775d11 * hubl**2* comoving_OmAx !background density
 
-      rc = 1.3d0 * 0.012513007848917703d0 / (dsqrt(m_tt * hubl) * comoving_OmAx**(0.25d0))
-
-      hbaroverm = 0.01917152d0 / m_tt
-      velFac = 1.0d0
-      sigmaR = 0.05d0
       omega = 1.0
 
       !$OMP PARALLEL DO PRIVATE(i,j,k)
@@ -158,34 +140,21 @@
                   state(i,j,k,UFS  ) = XHYDROGEN
                   state(i,j,k,UFS+1) = (1.d0 - XHYDROGEN)
                end if
-               axion(i,j,k,UAXDENS) = 0.0d0
-               axion(i,j,k,UAXRE) = 0.0d0
-               axion(i,j,k,UAXIM) = 0.0d0
+               
+               x = xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1)
+               y = xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2)
+               z = xlo(3)+(k-lo(3))*delta(3) + 0.5d0*delta(3)
+               
+               ! GASSIAN DENSITY PROFILE
+               axion(i,j,k,UAXDENS) = axion(i,j,k,UAXDENS) + exp(-(x**2)*omega/hbaroverm)*dsqrt(omega/M_PI/hbaroverm)
+               
+               ! NO INITIAL VELOCITY
+               axion(i,j,k,UAXRE)   = dsqrt(axion(i,j,k,UAXDENS))
+               axion(i,j,k,UAXIM)   = 0.0d0
 
-               do h = 1,length
-
-                    x = xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1)
-                    y = xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2)
-                    z = xlo(3)+(k-lo(3))*delta(3) + 0.5d0*delta(3)
-
-                    rx = x - pos(h,1)
-                    ry = y - pos(h,2)
-                    rz = z - pos(h,3)
-
-                    ! !!!! GASSIAN DENSITY PROFILE
-                    axion(i,j,k,UAXDENS) = axion(i,j,k,UAXDENS) + exp(-(x**2)*omega/hbaroverm)*dsqrt(omega/pi/hbaroverm)/length
-
-                    !!!!! NO INITIAL VELOCITY
-                    axion(i,j,k,UAXRE)   = dsqrt(axion(i,j,k,UAXDENS))
-                    axion(i,j,k,UAXIM)   = 0.0d0
-
-                enddo
             enddo
          enddo
       enddo
       !$OMP END PARALLEL DO
-
-      deallocate(m)
-      deallocate(pos)
 
       end subroutine fort_initdata

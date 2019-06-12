@@ -1,6 +1,6 @@
 ifeq ($(USE_FDM), TRUE)
-CEXE_sources += advance_FDM.cpp
-CEXE_sources += Nyx_FDM.cpp
+CEXE_sources += advance_FDM_FD.cpp
+CEXE_sources += advance_FDM_PS.cpp
 endif
 
 #ifneq ($(USE_HENSON), TRUE)
@@ -27,9 +27,9 @@ CEXE_sources += compute_hydro_sources.cpp
 CEXE_sources += update_state_with_sources.cpp
 CEXE_sources += strang_hydro.cpp
 CEXE_sources += strang_reactions.cpp
+endif
 CEXE_sources += sum_integrated_quantities.cpp
 CEXE_sources += sum_utils.cpp
-endif
 
 ifeq ($(USE_SDC), TRUE)
 CEXE_sources += sdc_hydro.cpp
@@ -54,7 +54,6 @@ f90EXE_sources += prob_params.f90
 f90EXE_sources += comoving_params.f90
 f90EXE_sources += comoving_nd.f90
 f90EXE_sources += agn_params.f90
-f90EXE_sources += axion_params.f90
 #f90EXE_sources += uniform01.f90
 #f90EXE_sources += bl_random_f.f90
 
@@ -99,4 +98,9 @@ ifeq ($(GIMLET), TRUE)
   CEXE_sources += temperature_density_pdf2d.cpp
   CEXE_sources += pdf.cpp
   CEXE_sources += ps3d.cpp
+endif
+
+ifeq ($(USE_FDM_GB), TRUE)
+  CEXE_headers += FDMParticleContainer.H
+  CEXE_sources += FDMParticleContainer.cpp
 endif

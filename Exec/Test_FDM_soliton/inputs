@@ -64,6 +64,10 @@ nyx.n_particles      = 1  1  1
 nyx.lo_bc       =  0	  0	0
 nyx.hi_bc       =  0	  0	0
 
+# >>>>>>>>> FDM PHYSICS <<<<<<<<<<<
+nyx.levelmethod = 3
+nyx.m_tt = 2.5
+
 # WHICH PHYSICS
 nyx.do_hydro = 0
 #nyx.gamma = 1.666

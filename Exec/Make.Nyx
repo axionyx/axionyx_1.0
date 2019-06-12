@@ -64,7 +64,6 @@ ifeq ($(USE_FDM), TRUE)
   DEFINES += -DFDM
 endif
 
-
 DEFINES += -DBL_NOLINEVALUES
 
 GIMLET_DIR ?= /home/vince/Development/gimlet
@@ -126,6 +125,10 @@ ifeq ($(USE_FORCING), TRUE)
 endif
 ifeq ($(USE_AGN), TRUE)
    Bdirs 	+= Source/AGN
+endif
+ifeq ($(USE_FDM), TRUE)
+   Bdirs 	+= Source/FDM
+   Bdirs        += Source/AMReX_axionyx
 endif
 
 Bpack	+= $(foreach dir, $(Bdirs), $(TOP)/$(dir)/Make.package)

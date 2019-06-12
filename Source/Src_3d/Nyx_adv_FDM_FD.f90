@@ -44,9 +44,9 @@
                     uout, uout_l1,uout_l2,uout_l3,uout_h1,uout_h2,uout_h3, &
                     dt_old, dt_new, delta, maxchange, x)
 
-      use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM
+      use meth_params_module, only : UAXRE, UAXIM
       use fundamental_constants_module
-      !use axion_params_module, only: ax_maxchange,ax_x,ax_y,ax_z
+      !use fdm_params_module, only: ax_maxchange,ax_x,ax_y,ax_z
 
       implicit none
 
@@ -59,7 +59,7 @@
       double precision  uin(  uin_l1:uin_h1,   uin_l2:uin_h2,   uin_l3:uin_h3, 1)
       double precision uout( uout_l1:uout_h1, uout_l2:uout_h2, uout_l3:uout_h3, 1)
       double precision dt_old, dt_new
-      double precision ampin, ampout, phasein, phaseout, maxchange_temp, maxchange 
+      double precision ampin, ampout, maxchange_temp, maxchange 
       double precision delta(3), x(3)
 
       dt_new = dt_old
@@ -114,7 +114,7 @@
                              vdx, nvar, delta, ProbLo,ProbHi &
                              )
 
-      use axion_params_module
+      use fdm_params_module, only : hbaroverm
 
       implicit none
 
@@ -125,15 +125,15 @@
 
       double precision uin(   uin_l1:uin_h1,  uin_l2:uin_h2,   uin_l3:uin_h3,  nvar)
       double precision uout(uout_l1:uout_h1, uout_l2:uout_h2, uout_l3:uout_h3, 1) 
-      double precision dx, delvx, delvy, delvz
-      double precision hbaroverm,delta(3), ProbLo(3),ProbHi(3),center(3),r
+      double precision delvx, delvy, delvz
+      double precision delta(3), ProbLo(3),ProbHi(3),center(3)
 
       do i = 1,3
          center(i) = (ProbHi(i)-ProbLo(i))/2.d0
       end do      
 
       !hbar/m expressed in Nyx units [Mpc km/s]
-      hbaroverm = 0.01917152d0 / m_tt
+      ! hbaroverm = 0.01917152d0 / m_tt
 
 
       ! do k = uout_l3, uout_h3
@@ -186,7 +186,7 @@
       use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM
       use comoving_module
       use fundamental_constants_module
-      use axion_params_module
+      use fdm_params_module
 
       implicit none
 
@@ -200,11 +200,11 @@
       double precision state(s_l1:s_h1,s_l2:s_h2,s_l3:s_h3,NAXVAR)
       double precision divvel(d_l1:d_h1,d_l2:d_h2,d_l3:d_h3,1)
       double precision phase(p_l1:p_h1,p_l2:p_h2,p_l3:p_h3,1)
-      integer          i, j, k, n 
+      integer          i, j, k 
       
 
       !double precision mean_ax_dens
-      double precision delta, dx(3), hbaroverm!, maxchange, maxchange_temp
+      double precision delta, dx(3)!, hbaroverm!, maxchange, maxchange_temp
       ! double precision weights(4) 
       ! double precision, allocatable   ::  temp(:,:,:,:)
       ! integer          s
@@ -216,7 +216,7 @@
       !meandens = 2.775d11 * 0.7**2 * comoving_OmAx !background density 
 
       !hbar/m expressed in Nyx units [Mpc km/s]
-      hbaroverm = 0.01917152d0 / m_tt
+      ! hbaroverm = 0.01917152d0 / m_tt
 
       ! weights(:) = (/ 1.0/8.0, 1.0/16.0, 1.0/32.0, 1.0/64.0 /)
       ! s = 1
@@ -308,11 +308,10 @@
            ! grav, g_l1,g_l2,g_l3,g_h1,g_h2,g_h3, &
            phi,  p_l1,p_l2,p_l3,p_h1,p_h2,p_h3, &
            delta,prob_lo,prob_hi,dt, &
-           courno,a_old,a_new,verbose)
+           courno,a_old,a_half,a_new,verbose)
 
       use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM
-      use axion_params_module
-      use comoving_module, only : comoving_h, comoving_OmAx
+      use fdm_params_module, only : hbaroverm, ii
       use fundamental_constants_module
       use probdata_module
 
@@ -329,15 +328,14 @@
       ! double precision grav(   g_l1:g_h1,     g_l2:g_h2,     g_l3:g_h3,   3)
       double precision  phi(   p_l1:p_h1,     p_l2:p_h2,     p_l3:p_h3)
       double precision delta(3),prob_lo(3),prob_hi(3),dt,time,courno
-      double precision a_old, a_new, a_half
-      double precision e_added, ke_added
+      double precision a_old, a_half, a_new
 
       !additional variables
       integer          i,j,k
-      double precision hbaroverm, invdeltasq(3)
+      double precision invdeltasq_old(3), invdeltasq_half(3), invdeltasq_new(3)
       double precision xn,xp,xc,del,Vo,r
 
-      !(complex) axion field
+      !(complex) fdm field
       double complex, allocatable :: psi(:,:,:),k1(:,:,:),k2(:,:,:),k3(:,:,:),k4(:,:,:),V(:,:,:)
 
       allocate( psi(uin_l1:uin_h1,uin_l2:uin_h2,uin_l3:uin_h3) )
@@ -354,33 +352,31 @@
       k4  = 0.d0
       V   = 0.d0
 
-      a_half = (a_new+a_old)/2.d0
+      ! xn  = prob_hi(1)            ! Need that the center of the physical problem is at (0,0,0)!!
+      ! xp  = 7.d0/8.d0*prob_hi(1)  ! Inside this radius the 'sponge' is zero.
+      ! !TODO this effectively disables the sponge
+      ! xp  = 1.0d10*prob_hi(1)  ! Inside this radius the 'sponge' is zero.
+      ! !TODO 
+      ! xc  = (xn+xp)/2.d0
+      ! del = xn-xp
+      ! !Vo  = 0.657d0              ! Corresponding to Vo=1 in arXiv:gr-qc/0404014v2 eq.29 when scaled to halo with rho_max=rho_cr
+      ! Vo  = 0.d0
 
-      xn  = prob_hi(1)            ! Need that the center of the physical problem is at (0,0,0)!!
-      xp  = 7.d0/8.d0*prob_hi(1)  ! Inside this radius the 'sponge' is zero.
-      !TODO this effectively disables the sponge
-      xp  = 1.0d10*prob_hi(1)  ! Inside this radius the 'sponge' is zero.
-      !TODO 
-      xc  = (xn+xp)/2.d0
-      del = xn-xp
-      !Vo  = 0.657d0              ! Corresponding to Vo=1 in arXiv:gr-qc/0404014v2 eq.29 when scaled to halo with rho_max=rho_cr
-      Vo  = 0.d0
-
-      do k = p_l3, p_h3
-         do j = p_l2, p_h2
-            do i = p_l1, p_h1
-               r = dsqrt((i*delta(1)+prob_lo(1))**2.d0 + (j*delta(2)+prob_lo(2))**2.d0 + (k*delta(3)+prob_lo(3))**2.d0) !Distance from the physical problem center
-               if (r .lt. xp) then
-                  V(i,j,k) = 0.d0
-               else if ((r .ge. xp) .and. (r .lt. xc)) then
-!                  V(i,j,k) = ii*Vo/2.d0 * (2.d0 + dtanh((r-xc)/del) - dtanh(xc/del)) ! Cf. arXiv:gr-qc/0404014v2 eq.29 : we changed the sign so it matches the sign of phi.
-                  V(i,j,k) = ii*Vo/2.d0 * (     ((r-xp)/del)**2.d0*2.d0)
-               else
-                  V(i,j,k) = ii*Vo/2.d0 * (1.d0-((r-xn)/del)**2.d0*2.d0)
-               endif
-            enddo
-         enddo
-      enddo
+!       do k = p_l3, p_h3
+!          do j = p_l2, p_h2
+!             do i = p_l1, p_h1
+!                r = dsqrt((i*delta(1)+prob_lo(1))**2.d0 + (j*delta(2)+prob_lo(2))**2.d0 + (k*delta(3)+prob_lo(3))**2.d0) !Distance from the physical problem center
+!                if (r .lt. xp) then
+!                   V(i,j,k) = 0.d0
+!                else if ((r .ge. xp) .and. (r .lt. xc)) then
+! !                  V(i,j,k) = ii*Vo/2.d0 * (2.d0 + dtanh((r-xc)/del) - dtanh(xc/del)) ! Cf. arXiv:gr-qc/0404014v2 eq.29 : we changed the sign so it matches the sign of phi.
+!                   V(i,j,k) = ii*Vo/2.d0 * (     ((r-xp)/del)**2.d0*2.d0)
+!                else
+!                   V(i,j,k) = ii*Vo/2.d0 * (1.d0-((r-xn)/del)**2.d0*2.d0)
+!                endif
+!             enddo
+!          enddo
+!       enddo
 
       !We need this, since single scalars are not saved in checkpoint files and therefore meandens=0 after restart! 
       !if (meandens .eq. 0) then
@@ -388,10 +384,12 @@
       !endif
 
       !hbar/m expressed in Nyx units [Mpc km/s]
-      hbaroverm = 0.01917152d0 / m_tt
+      !hbaroverm = 0.01917152d0 / m_tt
 
       do i = 1, 3
-       invdeltasq(i) = 1.d0 / ( a_half * delta(i) )**2 ! differentiate w.r.t. proper distance
+       invdeltasq_old(i)  = 1.d0 / ( a_old  * delta(i) )**2 ! differentiate w.r.t. proper distance
+       invdeltasq_half(i) = 1.d0 / ( a_half * delta(i) )**2 ! differentiate w.r.t. proper distance
+       invdeltasq_new(i)  = 1.d0 / ( a_new  * delta(i) )**2 ! differentiate w.r.t. proper distance
       enddo
 
       !$OMP PARALLEL DO PRIVATE(i,j,k)
@@ -426,7 +424,7 @@
                                         +2.d0*psi(i-1,j-1,k+1)&
                                         +2.d0*psi(i-1,j-1,k-1)&
                                         -88.d0*(psi(i,j,k)))&
-                   *invdeltasq(1)/52.d0 + ii*(phi(i,j,k)+V(i,j,k))/hbaroverm*(psi(i,j,k))
+                   *invdeltasq_old(1)/52.d0 + ii*(phi(i,j,k)+V(i,j,k))/hbaroverm*(psi(i,j,k))
 
             enddo
          enddo
@@ -465,7 +463,7 @@
                                         +2.d0*(psi(i-1,j-1,k+1)+k1(i-1,j-1,k+1)*dt/2.d0)&
                                         +2.d0*(psi(i-1,j-1,k-1)+k1(i-1,j-1,k-1)*dt/2.d0)&
                                         -88.d0*(psi(i,j,k)+k1(i,j,k)*dt/2.d0))&
-                   *invdeltasq(1)/52.d0 + ii*(phi(i,j,k)+V(i,j,k))/hbaroverm*(psi(i,j,k)+k1(i,j,k)*dt/2.d0)
+                   *invdeltasq_half(1)/52.d0 + ii*(phi(i,j,k)+V(i,j,k))/hbaroverm*(psi(i,j,k)+k1(i,j,k)*dt/2.d0)
                
             enddo
          enddo
@@ -504,7 +502,7 @@
                                         +2.d0*(psi(i-1,j-1,k+1)+k2(i-1,j-1,k+1)*dt/2.d0)&
                                         +2.d0*(psi(i-1,j-1,k-1)+k2(i-1,j-1,k-1)*dt/2.d0)&
                                         -88.d0*(psi(i,j,k)+k2(i,j,k)*dt/2.d0))&
-                   *invdeltasq(1)/52.d0 + ii*(phi(i,j,k)+V(i,j,k))/hbaroverm*(psi(i,j,k)+k2(i,j,k)*dt/2.d0)
+                   *invdeltasq_half(1)/52.d0 + ii*(phi(i,j,k)+V(i,j,k))/hbaroverm*(psi(i,j,k)+k2(i,j,k)*dt/2.d0)
                
             enddo
          enddo
@@ -543,7 +541,7 @@
                                         +2.d0*(psi(i-1,j-1,k+1)+k3(i-1,j-1,k+1)*dt)&
                                         +2.d0*(psi(i-1,j-1,k-1)+k3(i-1,j-1,k-1)*dt)&
                                         -88.d0*(psi(i,j,k)+k3(i,j,k)*dt))&
-                   *invdeltasq(1)/52.d0 + ii*(phi(i,j,k)+V(i,j,k))/hbaroverm*(psi(i,j,k)+k3(i,j,k)*dt)
+                   *invdeltasq_new(1)/52.d0 + ii*(phi(i,j,k)+V(i,j,k))/hbaroverm*(psi(i,j,k)+k3(i,j,k)*dt)
                    
             enddo
          enddo

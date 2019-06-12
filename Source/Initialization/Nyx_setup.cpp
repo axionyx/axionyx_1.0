@@ -198,14 +198,12 @@ Nyx::hydro_setup()
     int use_axions = 0;
 
 #ifdef FDM
-        use_axions = 1;
-            AxDens = 0;
-            AxRe   = 1;
-            AxIm   = 2;
-            NUM_AX = 3;
+    use_axions = 1;
+    AxDens     = 0;
+    AxRe       = 1;
+    AxIm       = 2;
+    NUM_AX     = 3;
 #endif
-
-
 
     // Define NUM_GROW from the f90 module.
     fort_get_method_params(&NUM_GROW);
@@ -745,6 +743,17 @@ Nyx::hydro_setup()
                             Density, 1);
 #endif
 
+#ifdef FDM                                                                                                                                                       
+    derive_lst.add("fdm_particle_count", IndexType::TheCellType(), 1,                                                                                                               
+                   BL_FORT_PROC_CALL(DERNULL, dernull), the_same_box);                                                                                                                  
+    derive_lst.addComponent("fdm_particle_count", desc_lst, State_Type, Density, 1);                                                                                                                  
+                                                                                                                                                                                                                  
+    derive_lst.add("fdm_mass_density", IndexType::TheCellType(), 1,                                                                                                                
+                   BL_FORT_PROC_CALL(DERNULL, dernull), grow_box_by_one);                                                                                                           
+    derive_lst.addComponent("fdm_mass_density", desc_lst, State_Type,                                                                                                                           
+                            Density, 1);                                                                                                                                                         
+#endif
+
     derive_lst.add("total_particle_count", IndexType::TheCellType(), 1,
                    BL_FORT_PROC_CALL(DERNULL, dernull), the_same_box);
     derive_lst.addComponent("total_particle_count", desc_lst, State_Type,
@@ -790,10 +799,10 @@ Nyx::no_hydro_setup()
     int use_axions = 0;
 #ifdef FDM
     use_axions = 1;
-    AxDens = 0;
-    AxRe   = 1;
-    AxIm   = 2;
-    NUM_AX = 3;
+    AxDens     = 0;
+    AxRe       = 1;
+    AxIm       = 2;
+    NUM_AX     = 3;
 #endif
     int NDIAG_C = -1;
 
@@ -1043,6 +1052,16 @@ Nyx::no_hydro_setup()
                    BL_FORT_PROC_CALL(DERNULL, dernull), grow_box_by_one);
     derive_lst.addComponent("neutrino_mass_density", desc_lst, Gravity_Type, 0, 1);
 #endif
+#ifdef FDM                                                                                                                                                       
+    derive_lst.add("fdm_particle_count", IndexType::TheCellType(), 1,                                                                                                               
+                   BL_FORT_PROC_CALL(DERNULL, dernull), the_same_box);                                                                                                                  
+    derive_lst.addComponent("fdm_particle_count", desc_lst, Gravity_Type, 0, 1);                                                                                                                  
+                                                                                                                                                                                                                  
+    derive_lst.add("fdm_mass_density", IndexType::TheCellType(), 1,                                                                                                                
+                   BL_FORT_PROC_CALL(DERNULL, dernull), grow_box_by_one);                                                                                                           
+    derive_lst.addComponent("fdm_mass_density", desc_lst, Gravity_Type, 0, 1);
+#endif
+
 }
 #endif
 

@@ -12,6 +12,10 @@
 #include "Forcing.H"
 #endif
 
+#ifdef FDM
+#include "fdm_F.H"
+#endif
+
 
 using namespace amrex;
 
@@ -259,8 +263,10 @@ Nyx::compute_average_density ()
         average_total_density = average_dm_density + average_neutr_density;
     }
 #ifdef FDM
-                average_ax_density /= geom.ProbSize();
-                average_total_density += average_ax_density;
+    average_ax_density /= crse_geom.ProbSize();
+    average_total_density += average_ax_density;
+    //theDMPC is only used for gravitational potential but is not an actual physical field contributing to average_total_density. 
+    average_total_density -= average_dm_density;
 #endif
 
     if (verbose > 0 && ParallelDescriptor::IOProcessor())
@@ -386,6 +392,7 @@ Nyx::compute_average_species (int          nspec,
     } // end if not use_const_species
 }
 
+#endif
 
 #ifdef FDM
 void
@@ -394,6 +401,8 @@ Nyx::compute_axion_quantities (Real& mass, Real& epot, Real& ekinrho, Real& ekin
     int             finest_level = parent->finestLevel();
     Real            time         = state[Axion_Type].curTime();
     const Geometry& geom         = parent->Geom(0);
+    const Real a                 = get_comoving_a(time);
+    fort_set_a(a);
     
     for (int lev = 0; lev <= finest_level; lev++)
     {
@@ -410,6 +419,4 @@ Nyx::compute_axion_quantities (Real& mass, Real& epot, Real& ekinrho, Real& ekin
     }
     //epot -= grav_pot*mass/2;
 }
-#endif
-
 #endif

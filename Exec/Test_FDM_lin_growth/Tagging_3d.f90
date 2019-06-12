@@ -55,39 +55,6 @@
 
       end subroutine tag_overdensity
 
-      subroutine tag_axvel(tag,tagl1,tagl2,tagl3,tagh1,tagh2,tagh3, &
-                              set,clear, &
-                              vel,vell1,vell2,vell3,velh1,velh2,velh3, &
-                              lo,hi,nc,domlo,domhi,delta,xlo,problo,time,level)
-
-      use probdata_module
-      use axion_params_module, only : critvalue
-
-      implicit none
-
-      integer set, clear, nc, level
-      integer tagl1,tagl2,tagl3,tagh1,tagh2,tagh3
-      integer vell1,vell2,vell3,velh1,velh2,velh3
-      integer lo(3), hi(3), domlo(3), domhi(3)
-      integer tag(tagl1:tagh1,tagl2:tagh2,tagl3:tagh3)
-      double precision vel(vell1:velh1,vell2:velh2,vell3:velh3,nc)
-      double precision delta(3), avg_den
-
-      double precision xlo(3), problo(3),time
-      integer i, j, k
-
-      do k = lo(3), hi(3)
-         do j = lo(2), hi(2)
-            do i = lo(1), hi(1)
-               if ( vel(i,j,k,1) .gt. critvalue ) then
-                  tag(i,j,k) = set
-               endif
-            enddo
-         enddo
-      enddo
-
-      end subroutine tag_axvel
-
       subroutine tag_center(tag,tagl1,tagl2,tagl3,tagh1,tagh2,tagh3, &
                             set,clear, &
                             den,denl1,denl2,denl3,denh1,denh2,denh3, &

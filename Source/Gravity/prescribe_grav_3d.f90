@@ -10,12 +10,12 @@ module ps_grav
   contains
 
       subroutine ps_grav_init()
-        use fundamental_constants_module, only : Gconst,Mpc,M_s
+        use fundamental_constants_module, only : Gconst,L_unit,M_unit
         use probdata_module, only : dcenx,dceny,dcenz,dmconc,dmmass,dmscale
         implicit none
         if(isnt_init) then
-          dm_const = -(dmmass/M_s)*Gconst / (log(1.0d0+dmconc) - dmconc/(1.0d0+dmconc))
-          dm_const2 = dmconc/(dmscale/Mpc)
+          dm_const = -(dmmass/M_unit)*Gconst / (log(1.0d0+dmconc) - dmconc/(1.0d0+dmconc))
+          dm_const2 = dmconc/(dmscale/L_unit)
           isnt_init = .false.
         else
           write(*,*)'ps_grav is already initialized, why are we here?'
@@ -46,6 +46,8 @@ subroutine fort_prescribe_grav (lo,hi,dx, &
      grav,g_l1,g_l2,g_l3,g_h1,g_h2,g_h3,&
      problo,add)
 
+  use amrex_fort_module, only : rt => amrex_real
+
   use probdata_module, only : dcenx,dceny,dcenz
   use amrex_constants_module, only : HALF
   use ps_grav, only : ps_grav_accel
@@ -74,7 +76,7 @@ subroutine fort_prescribe_grav (lo,hi,dx, &
            y2 = y*y
            do i = lo(1), hi(1)
               x = problo(1) + (dble(i)+HALF) * dx(1) - dcenx
-              r1 = dsqrt(x*x+y2+z2)
+              r1 = sqrt(x*x+y2+z2)
               r = max(dxm,r1)
 
               maggrav = ps_grav_accel(r)

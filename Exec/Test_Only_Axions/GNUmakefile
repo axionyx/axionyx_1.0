@@ -16,8 +16,9 @@ USE_OMP = TRUE
 
 # Analysis
 REEBER = FALSE
+TINY_PROFILE = TRUE
 
-USE_HPGMG = FALSE
+#USE_HPGMG = FALSE
 USE_FDM = TRUE
 
 PRECISION = DOUBLE
@@ -26,6 +27,7 @@ DEBUG     = FALSE
 # physics
 DIM      = 3
 USE_GRAV = TRUE
+NO_HYDRO = TRUE
 USE_CGRAV = TRUE
 
 Bpack := ./Make.package
