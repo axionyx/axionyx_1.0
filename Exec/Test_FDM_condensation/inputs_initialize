@@ -11,9 +11,9 @@ nyx.small_dens = 1e-4
 nyx.initial_z = 0.0
 #nyx.final_z = 0.0
 nyx.initial_dt = 0.25
-nyx.fixed_dt = 0.25
+#nyx.fixed_dt = 0.25
 #nyx.max_timestep = 2.e-6
-nyx.vonNeumann_dt = 1000.0
+nyx.vonNeumann_dt = 10.0
 
 #This is how we restart from a checkpoint and write an ascii particle file
 #Leave this commented out in cvs version
@@ -54,8 +54,8 @@ nyx.lo_bc       =  0	  0	0
 nyx.hi_bc       =  0	  0	0
 
 # >>>>>>>>> FDM PHYSICS <<<<<<<<<<<
-nyx.levelmethod = 3
-nyx.m_tt = 2.5
+nyx.levelmethod = 3 0 0
+nyx.m_tt = 0.01917152 # 2.5
 
 # WHICH PHYSICS
 nyx.do_hydro = 0
@@ -90,22 +90,22 @@ nyx.dt_cutoff      = 5.e-20  # level 0 timestep below which we halt
 
 # DIAGNOSTICS & VERBOSITY
 nyx.sum_interval   = 1      # timesteps between computing mass
-nyx.v              = 0       # verbosity in Castro.cpp
-gravity.v             = 0       # verbosity in Gravity.cpp
-amr.v                 = 0       # verbosity in Amr.cpp
-mg.v                  = 0       # verbosity in Amr.cpp
-particles.v           = 0       # verbosity in Particle class
+nyx.v              = 2       # verbosity in Castro.cpp
+gravity.v             = 2       # verbosity in Gravity.cpp
+amr.v                 = 2       # verbosity in Amr.cpp
+mg.v                  = 2       # verbosity in Amr.cpp
+particles.v           = 2       # verbosity in Particle class
 amr.grid_log         = grdlog  # name of grid logging file
 
 # REFINEMENT / REGRIDDING
-amr.max_level       = 0       # maximum level number allowed
+amr.max_level       = 2       # maximum level number allowed
 amr.ref_ratio          = 2 2 2 2 2
-amr.regrid_int         = 400000
+#amr.regrid_int         = 400000
 #amr.n_error_buf        = 0 2
 #amr.refine_grid_layout = 1
 amr.regrid_on_restart  = 1
-amr.subcycling_mode    = Manual
-amr.subcycling_iterations = 4
+#amr.subcycling_mode    = Manual
+#amr.subcycling_iterations = 4
 amr.grid_eff           = 0.7
 
 # CHECKPOINT FILES
@@ -116,7 +116,7 @@ amr.check_int       = 10000
 # PLOTFILES
 amr.plot_file       = plt
 #amr.plot_per       = 1.e-6
-amr.plot_int	    = 2
+amr.plot_int	    = 100
 
 #LOG FILE nstep | time | dt | redshift | a
 amr.data_log = runlog

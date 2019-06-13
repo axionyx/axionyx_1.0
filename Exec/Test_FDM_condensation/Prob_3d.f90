@@ -88,6 +88,7 @@
       use comoving_module, only : comoving_h, comoving_OmAx
       use interpolate_module
       use fundamental_constants_module, only: Gconst, pi
+      use amrex_parmparse_module
 
       implicit none
 
@@ -103,6 +104,13 @@
 
       integer i,j,k, dim, index
       integer un, domsize(3)
+
+      type(amrex_parmparse) :: pp
+
+      call amrex_parmparse_build(pp, "nyx")
+      call pp%query("m_tt", m_tt)
+      hbaroverm = 0.01917152d0 / m_tt
+      call amrex_parmparse_destroy(pp)
 
       do dim = 1, 3
          domsize(dim) = domhi(dim)-domlo(dim)+1
@@ -144,6 +152,8 @@
                end if
 
                read(un,*) axion(i,j,k,UAXRE), axion(i,j,k,UAXIM)
+               axion(i,j,k,UAXRE) = axion(i,j,k,UAXRE)/sqrt(Gconst)
+               axion(i,j,k,UAXIM) = axion(i,j,k,UAXIM)/sqrt(Gconst)
                axion(i,j,k,UAXDENS) = axion(i,j,k,UAXRE)*axion(i,j,k,UAXRE)+axion(i,j,k,UAXIM)*axion(i,j,k,UAXIM)
 
             enddo

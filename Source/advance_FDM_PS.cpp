@@ -348,8 +348,6 @@ void Nyx::advance_FDM_PS(amrex::Real time,
     // *****************************************
     //define constants
     // *****************************************
-    const Real m_tt = 2.5;
-    const Real hbaroverm = 0.01917152 / m_tt;
     const Real h = geom.CellSize(0);
 
     //******************************************
