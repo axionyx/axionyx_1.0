@@ -362,6 +362,7 @@ public:
     amrex::Real advance_FDM(amrex::Real time, amrex::Real dt, int iteration, int ncycle);
     void advance_FDM_FD(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
     void advance_FDM_FFT(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
+    void advance_FDM_FFT_fourth_order(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
 #endif
 
 #ifdef FDM

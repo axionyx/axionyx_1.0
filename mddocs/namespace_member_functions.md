@@ -12,27 +12,6 @@
 
 ## b
 
-* **buildInfoGetAMReXDir** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetAux** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetBuildDate** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetBuildDir** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetBuildGitHash** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetBuildGitName** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetBuildMachine** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetCXXFlags** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetCXXName** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetComp** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetCompVersion** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetFFlags** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetFName** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetFcomp** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetFcompVersion** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetGitHash** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetLibraries** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetLinkFlags** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetModuleName** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetModuleVal** ([**amrex**](namespaceamrex.md))
-* **buildInfoGetNumModules** ([**amrex**](namespaceamrex.md))
 * **burner** ([**nyx\_burner\_module**](namespacenyx__burner__module.md))
 
 

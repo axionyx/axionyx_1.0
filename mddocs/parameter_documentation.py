@@ -3,7 +3,7 @@ import re
 import os
 import numpy as np
 
-BASEPATH = os.path.dirname(__file__)
+BASEPATH = os.path.dirname(os.path.abspath(__file__))
 dirs = [BASEPATH+"/../Source/",BASEPATH+"/../Exec/Test_Only_Axions/"]
 our_dict = {}
 params = []

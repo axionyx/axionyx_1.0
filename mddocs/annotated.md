@@ -15,7 +15,7 @@ Here are the classes, structs, unions and interfaces with brief descriptions:
 * **class** [**StochasticForcing**](classStochasticForcing.md)   
 * **namespace** [**adjust\_heat\_cool\_module**](namespaceadjust__heat__cool__module.md)   
 * **namespace** [**agn\_params\_module**](namespaceagn__params__module.md)   
-* **namespace** [**amrex**](namespaceamrex.md)   
+* **namespace** [**amrex**](namespaceamrex.md) 
 * **namespace** [**amrex\_constants\_module**](namespaceamrex__constants__module.md) 
 * **namespace** [**amrex\_error\_module**](namespaceamrex__error__module.md) 
 * **namespace** [**amrex\_fort\_module**](namespaceamrex__fort__module.md) 

@@ -283,7 +283,7 @@ Nyx::hydro_setup()
 #ifdef FDM
         store_in_checkpoint = true;
         desc_lst.addDescriptor(Axion_Type, IndexType::TheCellType(),
-                               StateDescriptor::Point, 1, NUM_AX, interp,
+                               StateDescriptor::Point, 0, NUM_AX, interp,
                                state_data_extrap, store_in_checkpoint);
 #endif
 
@@ -893,7 +893,7 @@ Nyx::no_hydro_setup()
     Interpolater* interp = &cell_cons_interp;
     store_in_checkpoint = true;
     desc_lst.addDescriptor(Axion_Type, IndexType::TheCellType(),
-                           StateDescriptor::Point, 1, NUM_AX, interp,
+                           StateDescriptor::Point, 0, NUM_AX, interp,
                            state_data_extrap, store_in_checkpoint);
 #endif
 

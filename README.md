@@ -9,6 +9,7 @@
 # Documentation 
 A detailed documentation is not available yet. But you can find an API reference here:  
 [Available input parameters](mddocs/input_parameters.md)  
+[Available test problems](mddocs/test_problems.md)  
 [Classes](mddocs/classes.md)  
 [Functions](mddocs/functions.md)    
 [Files](mddocs/files.md)     

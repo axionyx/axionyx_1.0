@@ -109,12 +109,16 @@ swfft_solver(MultiFab& rhs, MultiFab& soln, Geometry& geom, int verbose)
        // put into C++ ordering (not Fortran)
        // *******************************************
        complex_t zero(0.0, 0.0);
+       Array4<Real> const& arr = rhs[mfi].array();
+       const Box& bx = mfi.validbox();
+       const Dim3 lo = amrex::lbound(bx);
+       const Dim3 hi = amrex::ubound(bx);
        size_t local_indx = 0;
-       for(size_t k=0; k<(size_t)nz; k++) {
+       for(size_t i=0; i<(size_t)nx; i++) {
         for(size_t j=0; j<(size_t)ny; j++) {
-         for(size_t i=0; i<(size_t)nx; i++) {
+         for(size_t k=0; k<(size_t)nz; k++) {
 
-           complex_t temp(rhs[mfi].dataPtr()[local_indx],0.);
+           complex_t temp(arr(i+lo.x,j+lo.y,k+lo.z),0.);
            a[local_indx] = temp;
            local_indx++;
 

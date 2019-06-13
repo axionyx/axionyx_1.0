@@ -6,11 +6,10 @@ Here is a list of all files with brief descriptions:
 
 * **dir** [**Exec**](dir_43a12cefb7942b6f49b5b628aafd3192.md)   
   * **dir** [**Test\_Only\_Axions**](dir_eb24725df855cf6c732a19e4912f662a.md)   
-    * **file** [**AMReX\_buildInfo.cpp**](AMReX__buildInfo_8cpp.md)   
     * **file** [**Dfft.H**](Dfft_8H.md)   
     * **file** [**Nyx.H**](Exec_2Test__Only__Axions_2Nyx_8H.md)   
     * **file** [**Nyx\_FDM.cpp**](Exec_2Test__Only__Axions_2Nyx__FDM_8cpp.md) 
-    * **file** [**Nyx\_error.cpp**](Exec_2Test__Only__Axions_2Nyx__error_8cpp.md) 
+    * **file** [**Nyx\_error.cpp**](Exec_2Test__Only__Axions_2Nyx__error_8cpp.md)   
     * **file** [**Prob\_3d.f90**](Prob__3d_8f90.md)   
     * **file** [**SWFFT\_Test\_F.H**](SWFFT__Test__F_8H.md)   
     * **file** [**Tagging\_3d.f90**](Exec_2Test__Only__Axions_2Tagging__3d_8f90.md)   

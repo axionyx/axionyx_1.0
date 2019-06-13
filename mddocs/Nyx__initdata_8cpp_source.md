@@ -239,7 +239,7 @@ Nyx::initData ()
 #ifdef FDM
                      na, BL_TO_FORTRAN(Ax_new[mfi]),
 #endif
-                     dx, gridloc.lo(), gridloc.hi(), geom.ProbHi());
+                     dx, gridloc.lo(), gridloc.hi(), geom.ProbLo(), geom.ProbHi());
             }
 
             if (inhomo_reion) init_zhi();
@@ -266,7 +266,7 @@ Nyx::initData ()
                      na, BL_TO_FORTRAN(Ax_new[mfi]),
 #endif
                      ns, BL_TO_FORTRAN(S_new[mfi]),
-                     dx, gridloc.lo(), gridloc.hi(), geom.ProbHi());
+                     dx, gridloc.lo(), gridloc.hi(), geom.ProbLo(), geom.ProbHi());
             }
         }
     }

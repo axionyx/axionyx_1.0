@@ -311,7 +311,7 @@
       subroutine fort_advance_fdm_fd(time,lo,hi,&
            uin,  uin_l1,uin_l2,uin_l3,uin_h1,uin_h2,uin_h3, &
            uout, uout_l1,uout_l2,uout_l3,uout_h1,uout_h2,uout_h3, &
-           grav, g_l1,g_l2,g_l3,g_h1,g_h2,g_h3, &
+           ! grav, g_l1,g_l2,g_l3,g_h1,g_h2,g_h3, &
            phi,  p_l1,p_l2,p_l3,p_h1,p_h2,p_h3, &
            delta,prob_lo,prob_hi,dt, &
            courno,a_old,a_new,verbose)
@@ -328,14 +328,14 @@
       integer          lo(3),hi(3),verbose
       integer          uin_l1,uin_l2,uin_l3,uin_h1,uin_h2,uin_h3
       integer          uout_l1,uout_l2,uout_l3,uout_h1,uout_h2,uout_h3
-      integer          g_l1,g_l2,g_l3,g_h1,g_h2,g_h3
+      ! integer          g_l1,g_l2,g_l3,g_h1,g_h2,g_h3
       integer          p_l1,p_l2,p_l3,p_h1,p_h2,p_h3
       double precision  uin(  uin_l1:uin_h1,   uin_l2:uin_h2,   uin_l3:uin_h3,  NAXVAR)
       double precision uout( uout_l1:uout_h1, uout_l2:uout_h2, uout_l3:uout_h3, NAXVAR)
-      double precision grav(   g_l1:g_h1,     g_l2:g_h2,     g_l3:g_h3,   3)
+      ! double precision grav(   g_l1:g_h1,     g_l2:g_h2,     g_l3:g_h3,   3)
       double precision  phi(   p_l1:p_h1,     p_l2:p_h2,     p_l3:p_h3)
       double precision delta(3),prob_lo(3),prob_hi(3),dt,time,courno
-      double precision a_old, a_new
+      double precision a_old, a_new, a_half
       double precision e_added, ke_added
 
       !additional variables
@@ -359,6 +359,8 @@
       k3  = 0.d0
       k4  = 0.d0
       v   = 0.d0
+
+      a_half = (a_new+a_old)/2.d0
 
       xn  = prob_hi(1)            ! Need that the center of the physical problem is at (0,0,0)!!
       xp  = 7.d0/8.d0*prob_hi(1)  ! Inside this radius the 'sponge' is zero.
@@ -395,7 +397,7 @@
       hbaroverm = 0.01917152d0 / m_tt
 
       do i = 1, 3
-       invdeltasq(i) = 1.d0 / ( a_new * delta(i) )**2 ! differentiate w.r.t. proper distance
+       invdeltasq(i) = 1.d0 / ( a_half * delta(i) )**2 ! differentiate w.r.t. proper distance
       enddo
 
       !$OMP PARALLEL DO PRIVATE(i,j,k)

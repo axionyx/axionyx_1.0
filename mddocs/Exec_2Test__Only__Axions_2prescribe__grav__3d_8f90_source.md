@@ -61,7 +61,6 @@ subroutine fort_prescribe_grav (lo,hi,dx, &
 
   !has to be defined here as well otherwise there are errors:
   use amrex_fort_module, only : rt => amrex_real
-   use amrex_error_module, only : amrex_error
   ! use probdata_module, only : dcenx,dceny,dcenz
   use amrex_constants_module, only : half
   use ps_grav, only : ps_grav_accel
@@ -80,11 +79,6 @@ subroutine fort_prescribe_grav (lo,hi,dx, &
   real :: r,maggrav
   real :: dxm,r1
   dxm = min(dx(1),dx(2),dx(3))
-  do while (dxm>0.)
-
-  end do
-
-  call amrex_error("This is not implemented.")
 !
 ! This is an example of how to use the radial profile above.
 !
