@@ -5,8 +5,8 @@
 //#include <AMReX_Particles_F.H>
 #include <AMReX_MultiFab.H>
 #ifdef GRAVITY
-#	include "Gravity.H"
-#	include <Gravity_F.H>
+#include "Gravity.H"
+#include <Gravity_F.H>
 #endif
 
 void

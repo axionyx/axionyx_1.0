@@ -87,6 +87,7 @@ nyx.nu_cfl         = 0.9     # cfl number for hyperbolic system
 nyx.init_shrink    = 1.0     # scale back initial timestep
 nyx.change_max     = 1.05    # scale back initial timestep
 nyx.dt_cutoff      = 5.e-20  # level 0 timestep below which we halt
+amr.compute_new_dt_on_regrid = 1
 
 # DIAGNOSTICS & VERBOSITY
 nyx.sum_interval   = 1      # timesteps between computing mass

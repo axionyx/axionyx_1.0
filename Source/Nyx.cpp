@@ -1004,7 +1004,11 @@ Nyx::est_time_step (Real dt_old)
       const MultiFab& phi = get_new_data(PhiGrav_Type);
       Real phi_max = std::abs(phi.max(0)-phi.min(0));
       const Real* dx = geom.CellSize();
-      Real dt = vonNeumann_dt*std::min(dx[0]*dx[0]*a*a/6/hbaroverm,hbaroverm/phi_max); 
+      Real dt = std::min(dx[0]*dx[0]*a*a/2.0/hbaroverm,hbaroverm/phi_max);
+      if (levelmethod[level]==PSlevel)
+	dt *= vonNeumann_dt;
+      else if (vonNeumann_dt<1.0)
+	dt *= vonNeumann_dt;
       if (verbose && ParallelDescriptor::IOProcessor())
         std::cout << "...estdt from von Neumann stability :  "<< dt << " " <<phi_max<<'\n';
       est_dt = std::min(est_dt, dt);

@@ -39,7 +39,8 @@
 
       integer i, j, k
 
-      over_den = 2.0d0**(3*(level+1)) * avg_den * 10.0d0
+      ! over_den = 2.0d0**(3*(level+1)) * avg_den
+      over_den = avg_den * 30.0d0
       ! critdens = 2.775d11 * 0.7d0**2 * comoving_OmAx !3 * (100)**2 *0.7d0**2 *  comoving_OmAx / ( 8 * PI * Gconst)                                                                                                                                                          
       ! over_den = 2.0d0**(3*(level+1))*critdens
 !     Tag on regions of overdensity
