@@ -453,6 +453,7 @@ ParticleContainer<NStructReal, NStructInt, NArrayReal, NArrayInt>::ByteSpread ()
     ParallelDescriptor::ReduceLongMax(mx, IOProc);
     ParallelDescriptor::ReduceLongSum(cnt,IOProc);
 
+    if(particle_verbose)
     amrex::Print() << "ParticleContainer byte spread across MPI nodes: ["
                    << mn*sz
                    << " (" << mn << ")"

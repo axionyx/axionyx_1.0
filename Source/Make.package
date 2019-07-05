@@ -99,8 +99,3 @@ ifeq ($(GIMLET), TRUE)
   CEXE_sources += pdf.cpp
   CEXE_sources += ps3d.cpp
 endif
-
-ifeq ($(USE_FDM_GB), TRUE)
-  CEXE_headers += FDMParticleContainer.H
-  CEXE_sources += FDMParticleContainer.cpp
-endif

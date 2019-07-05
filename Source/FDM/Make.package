@@ -9,4 +9,6 @@ f90EXE_sources += fdm_3d.f90
 f90EXE_sources += Derive_fdm_3d.f90
 f90EXE_sources += fdm_params.f90
 f90EXE_sources += update_fdm_particles_3d.f90
+CEXE_headers   += fdm.H
+CEXE_sources   += fdm.cpp
 endif

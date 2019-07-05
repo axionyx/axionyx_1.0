@@ -30,6 +30,8 @@ extern "C"
 				   const amrex::Real* dx, const amrex::Real& dt, 
 				   const amrex::Real& a_prev, const amrex::Real& a_cur, const int* do_move);
 
+  void divergence( const amrex::Real* div, const amrex::Real* vel, const int* vel_lo, const int* vel_hi, const amrex::Real* dx);
+
   void initpart(const int* level, const double* time,
 		const int* lo, const int* hi,
 		const int* nd, BL_FORT_FAB_ARG(dat),

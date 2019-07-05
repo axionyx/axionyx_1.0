@@ -796,7 +796,7 @@ Nyx::setTimeLevel (Real time,
                    Real dt_old,
                    Real dt_new)
 {
-    if (ParallelDescriptor::IOProcessor()) {
+    if (verbose && ParallelDescriptor::IOProcessor()) {
        std::cout << "Setting the current time in the state data to "
                  << parent->cumTime() << std::endl;
     }

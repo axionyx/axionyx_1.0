@@ -49,8 +49,13 @@ public:
     void InitCosmo  (amrex::MultiFab& mf, const amrex::Real vel_fac[], const amrex::Vector<int> n_part,
                      const amrex::Real particleMass, const amrex::Real shift[]);
     void InitCosmo1ppc (amrex::MultiFab& mf, const amrex::Real vel_fac[], const amrex::Real particleMass);
-  void InitCosmo1ppcMultiLevel(amrex::Vector<std::unique_ptr<amrex::MultiFab> >&  mf, const amrex::Real gamma_fdm, const amrex::Real particleMass, 
-                                 amrex::BoxArray &baWhereNot, int lev, int nlevs);
+  // void InitCosmo1ppcMultiLevel(amrex::Vector<std::unique_ptr<amrex::MultiFab> >&  mf,  amrex::Vector<amrex::MultiFab*>& phase,
+  // 			       const amrex::Real gamma_fdm, const amrex::Real particleMass, 
+  // 			       amrex::BoxArray &baWhereNot, int lev, int nlevs);
+
+  void InitCosmo1ppcMultiLevel(amrex::MultiFab& vel, amrex::MultiFab& phase, amrex::MultiFab& dens,
+			       const amrex::Real gamma_fdm, const amrex::Real particleMass, 
+			       amrex::BoxArray &baWhereNot, int lev, int nlevs);
 
     void CreateGhostParticlesFDM (int level, int lev, int nGrow, AoS& ghosts) const;
 
