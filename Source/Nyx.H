@@ -461,6 +461,9 @@ public:
                          amrex::Real dt, amrex::Real a_old, amrex::Real a_new, 
                          int sdc_iter);
 #endif
+
+  int integrate_state_exact(amrex::MultiFab &state,   amrex::MultiFab &diag_eos, const amrex::Real& a, const amrex::Real& delta_time);
+  int integrate_state_grownexact(amrex::MultiFab &state,   amrex::MultiFab &diag_eos, const amrex::Real& a, const amrex::Real& delta_time);
   
    int integrate_state_box(amrex::MultiFab &state,   amrex::MultiFab &diag_eos, const amrex::Real& a, const amrex::Real& delta_time);
    int integrate_state_grownbox(amrex::MultiFab &state,   amrex::MultiFab &diag_eos, const amrex::Real& a, const amrex::Real& delta_time);
@@ -611,9 +614,15 @@ public:
 #endif
 
 #ifdef NEUTRINO_PARTICLES
+  #ifdef NEUTRINO_DARK_PARTICLES
+    static DarkMatterParticleContainer* theNPC();
+    static DarkMatterParticleContainer* theVirtNPC();
+    static DarkMatterParticleContainer* theGhostNPC();
+  #else
     static NeutrinoParticleContainer* theNPC();
     static NeutrinoParticleContainer* theVirtNPC();
     static NeutrinoParticleContainer* theGhostNPC();
+  #endif
 #endif
 
 #ifdef FDM

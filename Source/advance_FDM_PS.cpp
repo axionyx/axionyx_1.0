@@ -1,5 +1,6 @@
 #ifdef FDM
 
+#include <AMReX_BLProfiler.H>
 #include "Nyx.H"
 #include "Nyx_F.H"
 //#include <AMReX_Particles_F.H>
@@ -345,6 +346,9 @@ void Nyx::advance_FDM_PS(amrex::Real time,
 			 amrex::Real a_old,
 			 amrex::Real a_new)
 {
+
+  BL_PROFILE("Nyx::advance_FDM_PS()");
+
     // *****************************************
     //define constants
     // *****************************************

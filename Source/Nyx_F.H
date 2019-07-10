@@ -321,6 +321,7 @@ BL_FORT_PROC_DECL(FORT_ADVANCE_FDM_FD, fort_advance_fdm_fd)
      const int* min_iter, const int* max_iter);
 
   void RhsFnReal(double t, double* u, double* udot, double* rpar, int neq);
+  void fort_update_eos(double dt, double* u, double* uout, double* rpar);
   void fort_ode_eos_finalize(double* e_out, double* rpar, int neq);
   void fort_ode_eos_setup(const amrex::Real& a,const amrex::Real& half_dt);
 

@@ -548,13 +548,13 @@ FDMParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_imag, 
 			    lo_real, hi_real, data_ptr_imag, lo_imag, 
 			    hi_imag, plo, dx, a);
 
-#ifdef _OPENMP
-    amrex::Print() << "amrex_atomic_accumulate_fab \n";
-      amrex_atomic_accumulate_fab(BL_TO_FORTRAN_3D(local_real),
-				  BL_TO_FORTRAN_3D(fab_real), 1);
-      amrex_atomic_accumulate_fab(BL_TO_FORTRAN_3D(local_imag),
-				  BL_TO_FORTRAN_3D(fab_imag), 1);
-#endif
+// #ifdef _OPENMP
+//     amrex::Print() << "amrex_atomic_accumulate_fab \n";
+//       amrex_atomic_accumulate_fab(BL_TO_FORTRAN_3D(local_real),
+// 				  BL_TO_FORTRAN_3D(fab_real), 1);
+//       amrex_atomic_accumulate_fab(BL_TO_FORTRAN_3D(local_imag),
+// 				  BL_TO_FORTRAN_3D(fab_imag), 1);
+// #endif
     }
   }
 

@@ -19,7 +19,6 @@ using std::string;
 #include <Derive_F.H>
 #include <AMReX_VisMF.H>
 #include <AMReX_TagBox.H>
-//#include <AMReX_Particles_F.H>
 #include <AMReX_Utility.H>
 #include <AMReX_Print.H>
 
@@ -345,14 +344,14 @@ Nyx::read_params ()
     // Check phys_bc against possible periodic geometry
     // if periodic, must have internal BC marked.
     //
-    if (Geometry::isAnyPeriodic())
+    if (DefaultGeometry().isAnyPeriodic())
     {
         //
         // Do idiot check.  Periodic means interior in those directions.
         //
         for (int dir = 0; dir < BL_SPACEDIM; dir++)
         {
-            if (Geometry::isPeriodic(dir))
+            if (DefaultGeometry().isPeriodic(dir))
             {
                 if (lo_bc[dir] != Interior)
                 {
@@ -491,23 +490,36 @@ Nyx::read_params ()
     }
 
 #ifdef HEATCOOL
-    if (heat_cool_type != 3 && heat_cool_type != 5 && heat_cool_type != 7 && heat_cool_type != 9 && heat_cool_type != 10 && heat_cool_type != 11)
+    if (heat_cool_type != 3 && heat_cool_type !=4 && heat_cool_type != 5 && heat_cool_type != 7 && heat_cool_type != 9 && heat_cool_type != 10 && heat_cool_type != 11)
        amrex::Error("Nyx:: nonzero heat_cool_type must equal 3 or 5 or 7 or 9 or 10 or 11");
     if (heat_cool_type == 0)
        amrex::Error("Nyx::contradiction -- HEATCOOL is defined but heat_cool_type == 0");
 
     if (ParallelDescriptor::IOProcessor()) {
       std::cout << "Integrating heating/cooling method with the following method: ";
-      switch (heat_cool_type) {
-        case 3:
-          std::cout << "VODE";
-          break;
-        case 5:
-          std::cout << "CVODE";
-          break;
-        case 7:
-          std::cout << "SIMD CVODE";
-          break;
+      switch (heat_cool_type)
+	{
+	case 3:
+	  std::cout << "VODE";
+	  break;
+	case 4:
+	  std::cout << "Exact";
+	  break;
+	case 5:
+	  std::cout << "CVODE";
+	  break;
+	case 7:
+	  std::cout << "SIMD CVODE";
+	break;
+	case 9:
+	  std::cout << "ARKODE";
+	break;
+	case 10:
+	  std::cout << "Vectorized copytomem CVODE";
+	  break;
+	case 11:
+	  std::cout << "Vectorized CVODE";
+	  break;
       }
       std::cout << std::endl;
     }
@@ -714,7 +726,7 @@ Nyx::Nyx (Amr&            papa,
 
 #ifdef HEATCOOL
      // Initialize "this_z" in the atomic_rates_module
-    if (heat_cool_type == 3 || heat_cool_type == 5 || heat_cool_type == 7 || heat_cool_type == 9 || heat_cool_type == 10 || heat_cool_type == 11)
+    if (heat_cool_type == 3 || heat_cool_type == 4 || heat_cool_type == 5 || heat_cool_type == 7 || heat_cool_type == 9 || heat_cool_type == 10 || heat_cool_type == 11)
          fort_interp_to_this_z(&initial_z);
 #endif
 }
@@ -2365,7 +2377,7 @@ Nyx::compute_new_temp (MultiFab& S_new, MultiFab& D_new)
     Real a        = get_comoving_a(cur_time);
 
 #ifdef HEATCOOL 
-    if (heat_cool_type == 3 || heat_cool_type == 5 || heat_cool_type == 7 || heat_cool_type == 9 || heat_cool_type == 10 || heat_cool_type == 11)
+    if (heat_cool_type == 3 || heat_cool_type == 4 || heat_cool_type == 5 || heat_cool_type == 7 || heat_cool_type == 9 || heat_cool_type == 10 || heat_cool_type == 11)
     {
        const Real z = 1.0/a - 1.0;
        fort_interp_to_this_z(&z);
