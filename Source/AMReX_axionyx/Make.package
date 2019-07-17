@@ -1,8 +1,0 @@
-ifeq ($(USE_FDM), TRUE)
-CEXE_headers   += AMReX_AmrCore.H
-CEXE_sources   += AMReX_AmrCore.cpp
-CEXE_headers   += AMReX_Amr.H
-CEXE_sources   += AMReX_Amr.cpp
-CEXE_headers   += AMReX_AmrLevel.H
-CEXE_headers   += AMReX_ParticleContainerI.H
-endif
