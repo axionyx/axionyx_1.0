@@ -644,7 +644,8 @@ FDMwkbParticleContainer::estTimestepFDM(amrex::MultiFab&       phi,
       const amrex::Real pot = phifab(cell,0);
       if (pot > 0)
 	dt_part = std::min( dt_part, cfl / pot );
-
+      if(p.rdata(0))
+	dt_part = std::min( dt_part, p.rdata(0) );
       int tid = 0;
 
 #ifdef _OPENMP
@@ -916,7 +917,7 @@ FDMwkbParticleContainer::InitCosmo1ppcMultiLevel(MultiFab& vel, MultiFab& phase,
 		  //                                                                                                                                                                                             
 		  // Set the mass of the particle from the input value.                                                                                                                                          
 		  //                                                                                                                                                                                             
-		  p.rdata(0)  = particleMass;
+		  p.rdata(0)  = 0.0;//particleMass;
 		  p.id()      = ParticleType::NextID();
 		  p.cpu()     = MyProc;
 

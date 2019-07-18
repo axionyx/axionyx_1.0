@@ -448,7 +448,7 @@ void Nyx::initcosmo()
 					    GetVecOfPtrs(grad_phase)[1],
 					    GetVecOfPtrs(grad_phase)[2])});
       const MultiFab* crse_bcdata = nullptr;
-      Real rel_eps = 1.e-12;
+      Real rel_eps = 1.e-8;
       Real abs_eps = 0.;
       gravity->solve_with_MLMG(level, level, {&phase}, {&div},
     		      grad_phase_aa, crse_bcdata, rel_eps, abs_eps);
