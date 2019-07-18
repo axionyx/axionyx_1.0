@@ -122,7 +122,7 @@
       do index = 1,lo(3)*domsize(2)*domsize(1)
          read(un,*)
       enddo
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
+      
       do k = lo(3), hi(3)
          do index = 1,lo(2)*domsize(1)
             read(un,*)
@@ -165,7 +165,6 @@
             read(un,*)
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       close(un)
 

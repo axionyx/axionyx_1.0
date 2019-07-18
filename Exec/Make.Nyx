@@ -132,7 +132,6 @@ ifeq ($(USE_AGN), TRUE)
 endif
 ifeq ($(USE_FDM), TRUE)
    Bdirs 	+= Source/FDM
-   Bdirs        += Source/AMReX_axionyx
 endif
 
 Bpack	+= $(foreach dir, $(Bdirs), $(TOP)/$(dir)/Make.package)
