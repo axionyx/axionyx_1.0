@@ -791,7 +791,7 @@ Nyx::init_particles ()
 
 	  Vector<std::unique_ptr<MultiFab> > particle_mf;//(new MultiFab(grids,dmap,1,1));
 	    
-	    DMPC->AssignDensity(particle_mf,0,1,0,0);
+	    DMPC->AssignDensity(particle_mf,0,1,0,4);
 
             writeMultiFabAsPlotFile("ParticleDensity", *particle_mf[0], "density");
 
@@ -1880,42 +1880,42 @@ Nyx::setup_ghost_particles(int ngrow)
     }
 #endif
 #ifdef FDM
-    // if(Nyx::theFDMPC() != 0 && levelmethod[level+1]==GBlevel)
-    // {
-    //     FDMParticleContainer::AoS ghosts;
-    // 	int ng = parent->nCycle(level+1)+ceil(sigma_fdm*theta_fdm/parent->Geom(level+1).CellSize()[0]);
-    //     Nyx::theFDMPC()->CreateGhostParticles(level, ng, ghosts);
-    //     Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, level+1, ng);
-    // }
-    // if(Nyx::theFDMwkbPC() != 0 && levelmethod[level+1]==GBlevel)
-    // {
-    //     FDMwkbParticleContainer::AoS ghosts;
-    // 	int ng = parent->nCycle(level+1)+ceil(sigma_fdm*theta_fdm/parent->Geom(level+1).CellSize()[0]);
-    //     Nyx::theFDMwkbPC()->CreateGhostParticles(level, ng, ghosts);
-    //     Nyx::theGhostFDMwkbPC()->AddParticlesAtLevel(ghosts, level+1, ng);
-    // }
-    if(Nyx::theFDMPC() != 0)
-      {
-    	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
-    	  if(levelmethod[lev]==GBlevel){
-    	    FDMParticleContainer::AoS ghosts;
-    	    int ng = parent->nCycle(lev)+ceil(sigma_fdm*theta_fdm/parent->Geom(lev).CellSize()[0]);
-    	    Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);
-    	    Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ng);
-    	  }
-    	}
-      }
-    if(Nyx::theFDMwkbPC() != 0)
-      {
-    	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
-    	  if(levelmethod[lev]==GBlevel){
-    	    FDMwkbParticleContainer::AoS ghosts;
-    	    int ng = parent->nCycle(lev)+ceil(sigma_fdm*theta_fdm/parent->Geom(lev).CellSize()[0]);
-    	    Nyx::theFDMwkbPC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);
-    	    Nyx::theGhostFDMwkbPC()->AddParticlesAtLevel(ghosts, lev, ng);
-    	  }
-    	}
-      }
+    if(Nyx::theFDMPC() != 0 && levelmethod[level+1]==GBlevel)
+    {
+        FDMParticleContainer::AoS ghosts;
+    	int ng = parent->nCycle(level+1)+ceil(sigma_fdm*theta_fdm/parent->Geom(level+1).CellSize()[0]);
+        Nyx::theFDMPC()->CreateGhostParticles(level, ng, ghosts);
+        Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, level+1, ng);
+    }
+    if(Nyx::theFDMwkbPC() != 0 && levelmethod[level+1]==GBlevel)
+    {
+        FDMwkbParticleContainer::AoS ghosts;
+    	int ng = parent->nCycle(level+1)+ceil(sigma_fdm*theta_fdm/parent->Geom(level+1).CellSize()[0]);
+        Nyx::theFDMwkbPC()->CreateGhostParticles(level, ng, ghosts);
+        Nyx::theGhostFDMwkbPC()->AddParticlesAtLevel(ghosts, level+1, ng);
+    }
+    // if(Nyx::theFDMPC() != 0)
+    //   {
+    // 	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
+    // 	  if(levelmethod[lev]==GBlevel){
+    // 	    FDMParticleContainer::AoS ghosts;
+    // 	    int ng = parent->nCycle(lev)+ceil(sigma_fdm*theta_fdm/parent->Geom(lev).CellSize()[0]);
+    // 	    Nyx::theFDMPC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);
+    // 	    Nyx::theGhostFDMPC()->AddParticlesAtLevel(ghosts, lev, ng);
+    // 	  }
+    // 	}
+    //   }
+    // if(Nyx::theFDMwkbPC() != 0)
+    //   {
+    // 	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
+    // 	  if(levelmethod[lev]==GBlevel){
+    // 	    FDMwkbParticleContainer::AoS ghosts;
+    // 	    int ng = parent->nCycle(lev)+ceil(sigma_fdm*theta_fdm/parent->Geom(lev).CellSize()[0]);
+    // 	    Nyx::theFDMwkbPC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);
+    // 	    Nyx::theGhostFDMwkbPC()->AddParticlesAtLevel(ghosts, lev, ng);
+    // 	  }
+    // 	}
+    //   }
 #endif
 
 }

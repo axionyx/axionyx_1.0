@@ -1,8 +1,3 @@
-ifeq ($(USE_FDM), TRUE)
-CEXE_sources += advance_FDM_FD.cpp
-CEXE_sources += advance_FDM_PS.cpp
-endif
-
 #ifneq ($(USE_HENSON), TRUE)
 CEXE_sources += main.cpp
 #endif
@@ -98,4 +93,9 @@ ifeq ($(GIMLET), TRUE)
   CEXE_sources += temperature_density_pdf2d.cpp
   CEXE_sources += pdf.cpp
   CEXE_sources += ps3d.cpp
+endif
+
+ifeq ($(USE_FDM), TRUE)
+CEXE_sources += advance_FDM_FD.cpp
+CEXE_sources += advance_FDM_PS.cpp
 endif

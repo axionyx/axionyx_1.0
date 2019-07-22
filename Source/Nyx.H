@@ -663,6 +663,7 @@ public:
     static amrex::Real beam_cfl;
     //! missing doc
     static amrex::Real vonNeumann_dt;
+    static int stencil_deposition_width;
 #endif
 
     static int Temp_comp, Ne_comp, Zhi_comp;

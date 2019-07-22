@@ -122,7 +122,8 @@ Real Nyx::gamma_fdm = 1.0;
 Real Nyx::alpha_fdm = 1.0;
 int  Nyx::wkb_approx = 1;
 Real Nyx::beam_cfl = 0.2;
-Real Nyx::vonNeumann_dt = 0;
+Real Nyx::vonNeumann_dt = 0.0;
+int  Nyx::stencil_deposition_width = 1;
 #endif
 
 int Nyx::Temp_comp = -1;
@@ -300,6 +301,10 @@ Nyx::read_params ()
     pp_nyx.query("alpha_fdm", alpha_fdm);
     pp_nyx.query("wkb_approx", wkb_approx);
     pp_nyx.query("beam_cfl", beam_cfl);
+    ParmParse ppp("particles");
+    amrex::Real part_size = 1.0;
+    ppp.query("part_size",part_size);
+    stencil_deposition_width = floor(part_size/2.0)+1;
     if (pp_nyx.contains("levelmethod"))
       {
 	int nlevs = pp_nyx.countval("levelmethod");
@@ -1648,7 +1653,7 @@ Nyx::post_restart ()
             {
                 // Do multilevel solve here.  We now store phi in the checkpoint file so we can use it
                 //  at restart.
-                int ngrow_for_solve = 1;
+                int ngrow_for_solve = stencil_deposition_width;
                 int use_previous_phi_as_guess = 1;
                 gravity->multilevel_solve_for_new_phi(0,parent->finestLevel(),ngrow_for_solve,use_previous_phi_as_guess);
 
@@ -1906,7 +1911,7 @@ Nyx::post_regrid (int lbase,
         if (gravity->get_gravity_type() == "PoissonGrav")
 #endif
         {
-            int ngrow_for_solve = parent->levelCount(level) + 1;
+            int ngrow_for_solve = parent->levelCount(level) + stencil_deposition_width;
             int use_previous_phi_as_guess = 1;
             gravity->multilevel_solve_for_new_phi(level, new_finest, ngrow_for_solve, use_previous_phi_as_guess);
         }
@@ -1958,7 +1963,7 @@ Nyx::post_init (Real stop_time)
             //
             // Solve on full multilevel hierarchy
             //
-            int ngrow_for_solve = 1;
+            int ngrow_for_solve = stencil_deposition_width;
             gravity->multilevel_solve_for_new_phi(0, finest_level, ngrow_for_solve);
         }
 
