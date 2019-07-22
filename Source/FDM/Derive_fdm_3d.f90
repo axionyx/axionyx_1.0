@@ -21,7 +21,6 @@
 
 !       n = 0
 
-!       !$OMP PARALLEL DO PRIVATE(i,j,k)
 !       do k = lo(3), hi(3)                                                                                                                                                          
 !          do j = lo(2), hi(2)                                                                                                                                                       
 !             do i = lo(1), hi(1)
@@ -31,9 +30,7 @@
 !             enddo
 !          enddo
 !       enddo
-!       !$OMP END PARALLEL DO
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -45,7 +42,6 @@
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 end subroutine ca_axphase
 
 
@@ -70,7 +66,6 @@ end subroutine ca_axphase
 
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -78,7 +73,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_axepot
 
@@ -104,7 +98,6 @@ end subroutine ca_axphase
 
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -134,7 +127,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_axekin
 
@@ -163,7 +155,6 @@ end subroutine ca_axphase
       !Unfortunately, the interpolation argorithm sometimes yields a small negative density
       !if the density is close to zero in a specific area. We can't allow that and set it to zero. 
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3)-2, hi(3)+2                                                                                                                                                          
          do j = lo(2)-2, hi(2)+2                                                                                                                                                       
             do i = lo(1)-2, hi(1)+2
@@ -173,9 +164,7 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -186,7 +175,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_axekinrho
 
@@ -209,14 +197,14 @@ end subroutine ca_axphase
       double precision delta(3), xlo(3), time, dt, diff(3)
       double precision ekinv(ekinv_l1:ekinv_h1,ekinv_l2:ekinv_h2,ekinv_l3:ekinv_h3,nk)
       double precision dat(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3,nc)
-      double precision phase(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3)
+      !double precision phase(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3)
+      double precision phase(lo(1)-1:hi(1)+1,lo(2)-1:hi(2)+1,lo(3)-1:hi(3)+1)
       integer    level, grid_no
 
       integer i, j, k
 
       if (nc .eq. 3) then !We solve AxDens,AxIm,AxRe 
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3)-1, hi(3)+1                                                                                                                                                          
          do j = lo(2)-1, hi(2)+1                                                                                                                                                       
             do i = lo(1)-1, hi(1)+1
@@ -228,9 +216,7 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -257,11 +243,9 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       else !We solve UAXDENS, UAXMOMX, UAXMOMY, UAXMOMZ
          
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -275,7 +259,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
                   
       endif
 
@@ -306,7 +289,6 @@ end subroutine ca_axphase
 
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3)-1, hi(3)+1                                                                                                                                                          
          do j = lo(2)-1, hi(2)+1                                                                                                                                                       
             do i = lo(1)-1, hi(1)+1
@@ -318,9 +300,7 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -338,7 +318,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_axvel
 
@@ -367,7 +346,6 @@ end subroutine ca_axphase
 
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -380,7 +358,6 @@ end subroutine ca_axphase
             enddo 
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_axangmom_x
 
@@ -408,7 +385,6 @@ end subroutine ca_axphase
 
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -421,7 +397,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_axangmom_y
 
@@ -449,7 +424,6 @@ end subroutine ca_axphase
 
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -462,7 +436,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_axangmom_z
 
@@ -494,7 +467,6 @@ end subroutine ca_axphase
       double precision secondder, firstder, meanvalue
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                      
          do j = lo(2), hi(2)                                                                                                                                              
             do i = lo(1), hi(1)
@@ -511,7 +483,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_dererrx
 
@@ -542,7 +513,6 @@ end subroutine ca_axphase
       double precision secondder, firstder, meanvalue
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -559,7 +529,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_dererry
 
@@ -590,7 +559,6 @@ end subroutine ca_axphase
       double precision secondder, firstder, meanvalue
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -607,6 +575,5 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_dererrz
