@@ -1469,7 +1469,7 @@ Gravity::AddVirtualParticlesToRhs (int               level,
         for (int i = 0; i < Nyx::theVirtualParticles().size(); i++)
         {
             particle_mf.setVal(0.);
-            Nyx::theVirtualParticles()[i]->AssignDensitySingleLevel(particle_mf, level, 1, 0);
+            Nyx::theVirtualParticles()[i]->AssignDensitySingleLevel(particle_mf, level, 1, 1);
             MultiFab::Add(Rhs, particle_mf, 0, 0, 1, 0);
         }
     }
@@ -1488,7 +1488,7 @@ Gravity::AddVirtualParticlesToRhs(int finest_level, const Vector<MultiFab*>& Rhs
 
         for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
         {
-            Nyx::theVirtualParticles()[i]->AssignDensitySingleLevel(VirtPartMF, finest_level, 1, 0);
+            Nyx::theVirtualParticles()[i]->AssignDensitySingleLevel(VirtPartMF, finest_level, 1, 1);
             MultiFab::Add(*Rhs_particles[finest_level], VirtPartMF, 0, 0, 1, 0);
         }
     }
@@ -1508,7 +1508,7 @@ Gravity::AddGhostParticlesToRhs (int               level,
         for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
         {
             ghost_mf.setVal(0.);
-            Nyx::theGhostParticles()[i]->AssignDensitySingleLevel(ghost_mf, level, 1, 0);
+            Nyx::theGhostParticles()[i]->AssignDensitySingleLevel(ghost_mf, level, 1, -1);
             MultiFab::Add(Rhs, ghost_mf, 0, 0, 1, 0);
         }
     }
@@ -1532,7 +1532,7 @@ Gravity::AddGhostParticlesToRhs(int level, const Vector<MultiFab*>& Rhs_particle
         // of the coarse, not fine, dx.
         for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
         {
-            Nyx::theGhostParticles()[i]->AssignDensitySingleLevel(GhostPartMF, level, 1, 0);
+            Nyx::theGhostParticles()[i]->AssignDensitySingleLevel(GhostPartMF, level, 1, -1);
             MultiFab::Add(*Rhs_particles[0], GhostPartMF, 0, 0, 1, 0);
         }
     }

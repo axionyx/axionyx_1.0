@@ -847,6 +847,10 @@ FDMwkbParticleContainer::InitCosmo1ppcMultiLevel(MultiFab& vel, MultiFab& phase,
 						 const Real gamma_ax, const Real particleMass,
 						 BoxArray &baWhereNot, int lev, int nlevs)
 {
+  /*Only initialize Gauss beams on finest initial level*/
+  if( lev != (nlevs-1) )
+    return;
+
   BL_PROFILE("FDMParticleContainer::InitCosmo1ppcMultiLevel()");
   const int       MyProc   = ParallelDescriptor::MyProc();
   const Geometry& geom     = m_gdb->Geom(lev);

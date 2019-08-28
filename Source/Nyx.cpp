@@ -123,8 +123,8 @@ Real Nyx::alpha_fdm = 1.0;
 int  Nyx::wkb_approx = 1;
 Real Nyx::beam_cfl = 0.2;
 Real Nyx::vonNeumann_dt = 0.0;
-int  Nyx::stencil_deposition_width = 1;
 #endif
+int  Nyx::stencil_deposition_width = 1;
 
 int Nyx::Temp_comp = -1;
 int Nyx::  Ne_comp = -1;
