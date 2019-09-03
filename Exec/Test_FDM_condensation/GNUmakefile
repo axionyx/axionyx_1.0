@@ -31,8 +31,9 @@ USE_GRAV = TRUE
 Bpack := ./Make.package
 Blocs := .
 
-#some stuff for using fftw3
+-include Make.local
 
+#some stuff for using fftw3
 LIBRARIES += -L$(FFTW_DIR) -lfftw3_mpi -lfftw3_omp -lfftw3
 INCLUDE_LOCATIONS       += $(FFTW_DIR)/../include
 
