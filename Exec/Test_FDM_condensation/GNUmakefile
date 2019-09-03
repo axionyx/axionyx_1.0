@@ -12,7 +12,7 @@ TOP = ../..
 COMP    = intel #gnu  # intel
 
 USE_MPI = TRUE
-USE_OMP = FALSE
+USE_OMP = TRUE
 
 # Analysis
 REEBER = FALSE

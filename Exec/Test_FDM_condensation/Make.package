@@ -1,1 +1,2 @@
-f90EXE_sources += Prob_3d.f90	probdata.f90
+f90EXE_sources += Prob_3d.f90	probdata.f90 
+CEXE_sources += Stopwatch.cpp advance_FDM_PS.cpp nyx_main.cpp
