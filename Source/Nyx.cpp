@@ -123,6 +123,7 @@ Real Nyx::alpha_fdm = 1.0;
 int  Nyx::wkb_approx = 1;
 Real Nyx::beam_cfl = 0.2;
 Real Nyx::vonNeumann_dt = 0.0;
+int  Nyx::order = 6;
 #endif
 int  Nyx::stencil_deposition_width = 1;
 
@@ -300,6 +301,7 @@ Nyx::read_params ()
     fort_set_gamma(gamma_fdm);
     pp_nyx.query("alpha_fdm", alpha_fdm);
     pp_nyx.query("wkb_approx", wkb_approx);
+    pp_nyx.query("order", order);
     pp_nyx.query("beam_cfl", beam_cfl);
     ParmParse ppp("particles");
     amrex::Real part_size = 1.0;

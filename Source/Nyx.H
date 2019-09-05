@@ -663,6 +663,7 @@ public:
     static amrex::Real beam_cfl;
     //! missing doc
     static amrex::Real vonNeumann_dt;
+    static int order;
 #endif
     static int stencil_deposition_width;
 
