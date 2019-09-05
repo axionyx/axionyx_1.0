@@ -355,65 +355,95 @@ void Nyx::advance_FDM_PS(amrex::Real time,
     // *****************************************
     const Real h = geom.CellSize(0);
 
+    Real w0,w1,w2,w3;
+    Real c1,c2,c3,c4,c5,c6,c7,c8;
+    Real d1,d2,d3,d4,d5,d6,d7,d8;
+    Real a_c1,a_c2,a_c3,a_c4,a_c5,a_c6,a_c7,a_c8;
+    Real a_d1,a_d2,a_d3,a_d4,a_d5,a_d6,a_d7,a_d8;
+    Real a_time;
+
     //******************************************
     //define weights for time steps (see Levkov et. al. 2018)
     //******************************************
-    const Real w1 = -1.17767998417887;
-    const Real w2 = 0.235573213359359;
-    const Real w3 = 0.784513610477560;
-    const Real w0 = 1.0-2.0*(w1+w2+w3);
 
-    const Real c1 = w3/2.0*dt;
-    const Real c2 = (w2+w3)/2.0*dt;
-    const Real c3 = (w1+w2)/2.0*dt;
-    const Real c4 = (w0+w1)/2.0*dt;
-    const Real c5 = (w0+w1)/2.0*dt;
-    const Real c6 = (w1+w2)/2.0*dt;
-    const Real c7 = (w2+w3)/2.0*dt;
-    const Real c8 = w3/2.0*dt;
+    if(order==6){
+      w1 = -1.17767998417887;
+      w2 = 0.235573213359359;
+      w3 = 0.784513610477560;
+      w0 = 1.0-2.0*(w1+w2+w3);
 
-    const Real d1 = w3*dt;
-    const Real d2 = w2*dt;
-    const Real d3 = w1*dt;
-    const Real d4 = w0*dt;
-    const Real d5 = w1*dt;
-    const Real d6 = w2*dt;
-    const Real d7 = w3*dt;
-    const Real d8 = 0.0;
+      c1 = w3/2.0*dt;
+      c2 = (w2+w3)/2.0*dt;
+      c3 = (w1+w2)/2.0*dt;
+      c4 = (w0+w1)/2.0*dt;
+      c5 = (w0+w1)/2.0*dt;
+      c6 = (w1+w2)/2.0*dt;
+      c7 = (w2+w3)/2.0*dt;
+      c8 = w3/2.0*dt;
 
-    Real a_time = state[Axion_Type].prevTime()+0.5*c1;
-    const Real a_c1 = get_comoving_a(a_time);
+      d1 = w3*dt;
+      d2 = w2*dt;
+      d3 = w1*dt;
+      d4 = w0*dt;
+      d5 = w1*dt;
+      d6 = w2*dt;
+      d7 = w3*dt;
+      d8 = 0.0;
+
+      a_time = state[Axion_Type].prevTime()+0.5*c1;
+      a_c1 = get_comoving_a(a_time);
+      a_time += 0.5*(c1+c2);
+      a_c2 = get_comoving_a(a_time);
+      a_time += 0.5*(c2+c3);
+      a_c3 = get_comoving_a(a_time);
+      a_time += 0.5*(c3+c4);
+      a_c4 = get_comoving_a(a_time);
+      a_time += 0.5*(c4+c5);
+      a_c5 = get_comoving_a(a_time);
+      a_time += 0.5*(c5+c6);
+      a_c6 = get_comoving_a(a_time);
+      a_time += 0.5*(c6+c7);
+      a_c7 = get_comoving_a(a_time);
+      a_time += 0.5*(c7+c8);
+      a_c8 = get_comoving_a(a_time);
+
+      a_time = state[Axion_Type].prevTime()+0.5*d1;
+      a_d1 = get_comoving_a(a_time);
+      a_time += 0.5*(d1+d2);
+      a_d2 = get_comoving_a(a_time);
+      a_time += 0.5*(d2+d3);
+      a_d3 = get_comoving_a(a_time);
+      a_time += 0.5*(d3+d4);
+      a_d4 = get_comoving_a(a_time);
+      a_time += 0.5*(d4+d5);
+      a_d5 = get_comoving_a(a_time);
+      a_time += 0.5*(d5+d6);
+      a_d6 = get_comoving_a(a_time);
+      a_time += 0.5*(d6+d7);
+      a_d7 = get_comoving_a(a_time);
+      a_time += 0.5*(d7+d8);
+      a_d8 = get_comoving_a(a_time);
+
+    }else if(order==2){
+
+    c1 = 0.5*dt;
+    c2 = 0.5*dt;
+
+    d1 = dt;
+    d2 = 0.0;
+
+    a_time = state[Axion_Type].prevTime()+0.5*c1;
+    a_c1 = get_comoving_a(a_time);
     a_time += 0.5*(c1+c2);
-    const Real a_c2 = get_comoving_a(a_time);
-    a_time += 0.5*(c2+c3);
-    const Real a_c3 = get_comoving_a(a_time);
-    a_time += 0.5*(c3+c4);
-    const Real a_c4 = get_comoving_a(a_time);
-    a_time += 0.5*(c4+c5);
-    const Real a_c5 = get_comoving_a(a_time);
-    a_time += 0.5*(c5+c6);
-    const Real a_c6 = get_comoving_a(a_time);
-    a_time += 0.5*(c6+c7);
-    const Real a_c7 = get_comoving_a(a_time);
-    a_time += 0.5*(c7+c8);
-    const Real a_c8 = get_comoving_a(a_time);
+    a_c2 = get_comoving_a(a_time);
 
     a_time = state[Axion_Type].prevTime()+0.5*d1;
-    const Real a_d1 = get_comoving_a(a_time);
+    a_d1 = get_comoving_a(a_time);
     a_time += 0.5*(d1+d2);
-    const Real a_d2 = get_comoving_a(a_time);
-    a_time += 0.5*(d2+d3);
-    const Real a_d3 = get_comoving_a(a_time);
-    a_time += 0.5*(d3+d4);
-    const Real a_d4 = get_comoving_a(a_time);
-    a_time += 0.5*(d4+d5);
-    const Real a_d5 = get_comoving_a(a_time);
-    a_time += 0.5*(d5+d6);
-    const Real a_d6 = get_comoving_a(a_time);
-    a_time += 0.5*(d6+d7);
-    const Real a_d7 = get_comoving_a(a_time);
-    a_time += 0.5*(d7+d8);
-    const Real a_d8 = get_comoving_a(a_time);
+    a_d2 = get_comoving_a(a_time);
+
+    }else
+      amrex::Error("Order of algorithm not implemented!");
 
     // *****************************************
     // Defining through Axion_Type
@@ -543,6 +573,7 @@ void Nyx::advance_FDM_PS(amrex::Real time,
     //  higher order time steps
     //  *******************************************
   Stopwatch::startlap("steps");
+  if(order==6){
     fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c1, a_c1, d1, a_d1, a_new, hbaroverm, &a, &b);
     fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c2, a_c2, d2, a_d2, a_new, hbaroverm, &a, &b);
     fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c3, a_c3, d3, a_d3, a_new, hbaroverm, &a, &b);
@@ -551,6 +582,11 @@ void Nyx::advance_FDM_PS(amrex::Real time,
     fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c6, a_c6, d6, a_d6, a_new, hbaroverm, &a, &b);
     fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c7, a_c7, d7, a_d7, a_new, hbaroverm, &a, &b);
     fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c8, a_c8, d8, a_d8, a_new, hbaroverm, &a, &b);
+  }else if(order==2){
+    fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c1, a_c1, d1, a_d1, a_new, hbaroverm, &a, &b);
+    fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c2, a_c2, d2, a_d2, a_new, hbaroverm, &a, &b);
+  }
+
   Stopwatch::stoplap();
 
     //  *******************************************
