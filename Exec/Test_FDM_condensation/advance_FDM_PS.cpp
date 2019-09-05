@@ -34,12 +34,10 @@ void copy_c2fortran(std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALI
 void copy_fortran2c(std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >& a, 
 		    MultiFab &refab, MultiFab &imfab, MFIter& mfi);
 
-void drift(hacc::Dfft &dfft, MultiFab &real, MultiFab &imag, MultiFab &dens, 
-	   int const gridsize, Real const dt, Real const h, Real const a_half, 
+void drift(hacc::Dfft &dfft, MultiFab &Ax_new, int const gridsize, Real const dt, Real const h, Real const a_half, 
 	   Real const hbaroverm, std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >* a,std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >* b);
 
-void fdm_timestep(hacc::Dfft &dfft, MultiFab &real, MultiFab &imag, MultiFab &dens, 
-		  MultiFab &Ax_new, MultiFab &phi,  Gravity::Gravity *gravity, Geometry &geom,
+void fdm_timestep(hacc::Dfft &dfft, MultiFab &Ax_new, MultiFab &phi,  Gravity::Gravity *gravity, Geometry &geom,
 		  int const level, int const gridsize, Real const h, Real const dt_c,  
 		  Real const a_c, Real const dt_d, Real const a_d, Real const a_new, 
 		  Real const hbaroverm,std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >* a,std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >* b);
@@ -424,19 +422,13 @@ void Nyx::advance_FDM_PS(amrex::Real time,
     MultiFab& Ax_new = get_new_data(Axion_Type);
     const BoxArray& ba = Ax_old.boxArray();
     const DistributionMapping& dm = Ax_old.DistributionMap();
-    MultiFab real(ba, dm, 1, 0);
-    MultiFab imag(ba, dm, 1, 0);
-    MultiFab dens(ba, dm, 1, 0);
-    MultiFab::Copy(real, Ax_old, Nyx::AxRe, 0, 1, 0);
-    MultiFab::Copy(imag, Ax_old, Nyx::AxIm, 0, 1, 0);
-    dens.setVal(0.0);
 
 #ifndef NDEBUG
-    if (Ax_old.contains_nan(0, Ax_old.nComp(), 0))
+    if (Ax_old.contains_nan(0, Ax_old.nComp(), Ax_old.nGrow()))
     {
         for (int i = 0; i < Ax_old.nComp(); i++)
         {
-            if (Ax_old.contains_nan(i,1,0))
+	  if (Ax_old.contains_nan(i,1,Ax_old.nGrow()))
             {
                 std::cout << "Testing component i for NaNs: " << i << std::endl;
                 amrex::Abort("Ax_old has NaNs in this component::advance_FDM_FFT_fourth_order()");
@@ -453,11 +445,11 @@ void Nyx::advance_FDM_PS(amrex::Real time,
     MultiFab::Copy(phi, grav_phi, 0, 0, 1, grav_phi.nGrow());
 
 #ifndef NDEBUG
-    if (phi.contains_nan(0, phi.nComp(), 0))
+    if (phi.contains_nan(0, phi.nComp(), phi.nGrow()))
     {
         for (int i = 0; i < phi.nComp(); i++)
         {
-            if (phi.contains_nan(i,1,0))
+	  if (phi.contains_nan(i,1,phi.nGrow()))
             {
                 std::cout << "Testing component phi for NaNs: " << i << std::endl;
                 amrex::Abort("phi has NaNs in this component::advance_FDM_FFT_fourth_order()");
@@ -518,43 +510,84 @@ void Nyx::advance_FDM_PS(amrex::Real time,
     hacc::Dfft dfft(d);
 
     //  *******************************************
-    //  higher order time steps
+    //  prepare fft
     //  *******************************************
 
     std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> > a;
     std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> > b;
     a.resize(gridsize);
     b.resize(gridsize);
-    
     dfft.makePlans(&a[0],&b[0],&a[0],&b[0]);
 
+    for (MFIter mfi(Ax_old,false); mfi.isValid(); ++mfi){
+      const Array4<Real> const& arr = Ax_old.array(mfi);
+      const Box& bx = mfi.validbox();
+      const Dim3 lo = amrex::lbound(bx);
+      const Dim3 hi = amrex::ubound(bx);
+      const Dim3 w ={hi.x-lo.x,hi.y-lo.y,hi.z-lo.z};
+#ifdef _OPENMP
+#pragma omp parallel for       
+#endif
+      for(size_t i=0; i<=(size_t)w.x; i++) {
+	for(size_t j=0; j<=(size_t)w.y; j++) {
+	  AMREX_PRAGMA_SIMD	  
+	  for(size_t k=0; k<=(size_t)w.z; k++) {
+	    size_t local_indx_threaded = (size_t)w.y*(size_t)w.z*i+(size_t)w.z*j+k;
+	    complex_t temp(arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxRe),arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxIm));
+	    a[local_indx_threaded] = temp;
+	  }}}
+    }
+
     Stopwatch::stoplap();
+    //  *******************************************
+    //  higher order time steps
+    //  *******************************************
   Stopwatch::startlap("steps");
-    fdm_timestep(dfft, real, imag, dens, Ax_new, phi, gravity, geom, level, gridsize, h, c1, a_c1, d1, a_d1, a_new, hbaroverm, &a, &b);
-    fdm_timestep(dfft, real, imag, dens, Ax_new, phi, gravity, geom, level, gridsize, h, c2, a_c2, d2, a_d2, a_new, hbaroverm, &a, &b);
-    fdm_timestep(dfft, real, imag, dens, Ax_new, phi, gravity, geom, level, gridsize, h, c3, a_c3, d3, a_d3, a_new, hbaroverm, &a, &b);
-    fdm_timestep(dfft, real, imag, dens, Ax_new, phi, gravity, geom, level, gridsize, h, c4, a_c4, d4, a_d4, a_new, hbaroverm, &a, &b);
-    fdm_timestep(dfft, real, imag, dens, Ax_new, phi, gravity, geom, level, gridsize, h, c5, a_c5, d5, a_d5, a_new, hbaroverm, &a, &b);
-    fdm_timestep(dfft, real, imag, dens, Ax_new, phi, gravity, geom, level, gridsize, h, c6, a_c6, d6, a_d6, a_new, hbaroverm, &a, &b);
-    fdm_timestep(dfft, real, imag, dens, Ax_new, phi, gravity, geom, level, gridsize, h, c7, a_c7, d7, a_d7, a_new, hbaroverm, &a, &b);
-    fdm_timestep(dfft, real, imag, dens, Ax_new, phi, gravity, geom, level, gridsize, h, c8, a_c8, d8, a_d8, a_new, hbaroverm, &a, &b);
+    fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c1, a_c1, d1, a_d1, a_new, hbaroverm, &a, &b);
+    fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c2, a_c2, d2, a_d2, a_new, hbaroverm, &a, &b);
+    fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c3, a_c3, d3, a_d3, a_new, hbaroverm, &a, &b);
+    fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c4, a_c4, d4, a_d4, a_new, hbaroverm, &a, &b);
+    fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c5, a_c5, d5, a_d5, a_new, hbaroverm, &a, &b);
+    fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c6, a_c6, d6, a_d6, a_new, hbaroverm, &a, &b);
+    fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c7, a_c7, d7, a_d7, a_new, hbaroverm, &a, &b);
+    fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c8, a_c8, d8, a_d8, a_new, hbaroverm, &a, &b);
   Stopwatch::stoplap();
 
     //  *******************************************
     //  copy everything back to Axion_State
     //  *******************************************
     Stopwatch::startlap("finalize");
-    MultiFab::Copy(Ax_new, real, 0, Nyx::AxRe, 1, 0);
-    MultiFab::Copy(Ax_new, imag, 0, Nyx::AxIm, 1, 0);
-    MultiFab::Copy(Ax_new, dens, 0, Nyx::AxDens, 1, 0);
-    Ax_new.FillBoundary(geom.periodicity());
+
+  for (MFIter mfi(Ax_new,false); mfi.isValid(); ++mfi){
+    Array4<Real> const& arr = Ax_new[mfi].array();
+    const Box& bx = mfi.validbox();
+    const Dim3 lo = amrex::lbound(bx);
+    const Dim3 hi = amrex::ubound(bx);
+    const Dim3 w ={hi.x-lo.x,hi.y-lo.y,hi.z-lo.z};
+#ifdef _OPENMP
+#pragma omp parallel for       
+#endif
+    for(size_t i=0; i<=(size_t)w.x; i++) {
+      for(size_t j=0; j<=(size_t)w.y; j++) {
+        AMREX_PRAGMA_SIMD	  
+	for(size_t k=0; k<=(size_t)w.z; k++) {
+	  size_t local_indx_threaded = (size_t)w.y*(size_t)w.z*i+(size_t)w.z*j+k;
+	  complex_t temp = a[local_indx_threaded];
+	  arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxRe)=std::real(temp);
+	  arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxIm)=std::imag(temp);
+	  arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxDens)=std::real(temp)*std::real(temp)+std::imag(temp)*std::imag(temp);
+        }}}
+  }
+
+  Ax_new.FillBoundary(geom.periodicity());
+
     
 #ifndef NDEBUG
-    if (Ax_new.contains_nan(0, Ax_new.nComp(), 0))
+  if (Ax_new.contains_nan(0, Ax_new.nComp(), Ax_new.nGrow()))
       {
         for (int i = 0; i < Ax_new.nComp(); i++)
 	  {
-            if (Ax_new.contains_nan(i,1,0))
+            if (Ax_new.contains_nan(i,1,Ax_new.nGrow()))
 	      {
                 std::cout << "Testing component i for NaNs: " << i << std::endl;
                 amrex::Abort("Ax_new has NaNs in this component::advance_FDM_FFT_fourth_order()");
@@ -562,13 +595,11 @@ void Nyx::advance_FDM_PS(amrex::Real time,
 	  }
       }
 #endif
-Stopwatch::stoplap();    
 Stopwatch::stoplap();
 Stopwatch::stoplap();
 }
 
-inline void fdm_timestep(hacc::Dfft &dfft, MultiFab &real, MultiFab &imag, MultiFab &dens, 
-			 MultiFab &Ax_new, MultiFab &phi,  Gravity::Gravity *gravity, Geometry &geom,
+inline void fdm_timestep(hacc::Dfft &dfft, MultiFab &Ax_new, MultiFab &phi,  Gravity::Gravity *gravity, Geometry &geom,
 			 int const level, int const gridsize, Real const h, Real const dt_c,  
 			 Real const a_c, Real const dt_d, Real const a_d, Real const a_new, 
 			 Real const hbaroverm,std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >* a,std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >* b)
@@ -578,7 +609,17 @@ inline void fdm_timestep(hacc::Dfft &dfft, MultiFab &real, MultiFab &imag, Multi
   //  *******************************************
   Stopwatch::startlap("fdm_timestep",1);
   Stopwatch::startlap("drift",1);
-  drift(dfft, real, imag, dens, gridsize, dt_c, h, a_c, hbaroverm, a, b);
+  drift(dfft, Ax_new, gridsize, dt_c, h, a_c, hbaroverm, a, b);
+  Ax_new.FillBoundary(geom.periodicity());
+
+#ifndef NDEBUG
+  if (Ax_new.contains_nan(Nyx::AxDens,1,Ax_new.nGrow()))
+    {
+      std::cout << "Testing component i for NaNs: " << Nyx::AxDens << std::endl;
+      amrex::Abort("Ax_new has NaNs in this component::fdm_timestep()");
+    }
+#endif
+
   Stopwatch::stoplap();
   if(!dt_d) return;
 
@@ -587,8 +628,6 @@ inline void fdm_timestep(hacc::Dfft &dfft, MultiFab &real, MultiFab &imag, Multi
   //  *******************************************
 
   Stopwatch::startlap("potential",1);
-  Ax_new.ParallelCopy(dens, 0, Nyx::AxDens, 1, dens.nGrow(), 
-		      Ax_new.nGrow(), geom.periodicity(),FabArrayBase::COPY);
   int fill_interior = 0;
   int grav_n_grow = 0;
   gravity->solve_for_new_phi(level,phi,
@@ -599,27 +638,31 @@ inline void fdm_timestep(hacc::Dfft &dfft, MultiFab &real, MultiFab &imag, Multi
   //  kick by dt_d 
   //  *******************************************
   Stopwatch::startlap("kick",1);
-  MultiFab phi_temp(phi.boxArray(), phi.DistributionMap(), 1, 0);
-  MultiFab::Copy(phi_temp, phi, 0, 0, 1, 0);
   const std::complex<double> imagi(0.0,1.0);
   
-  for (MFIter mfi(dens,false); mfi.isValid(); ++mfi){
-    std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> > a;
-    a.resize(gridsize);
-    for(size_t i=0; i<(size_t)gridsize; i++){
-      a[i] = complex_t(real[mfi].dataPtr()[i],imag[mfi].dataPtr()[i]);
-      a[i] = std::exp( imagi * phi_temp[mfi].dataPtr()[i] * a_new / a_d / hbaroverm  * dt_d ) * a[i];
-      real[mfi].dataPtr()[i] = std::real(a[i]);
-      imag[mfi].dataPtr()[i] = std::imag(a[i]);
-      dens[mfi].dataPtr()[i] = std::real(a[i])*std::real(a[i])+std::imag(a[i])*std::imag(a[i]);
-    }
-  }
+  for (MFIter mfi(phi,false); mfi.isValid(); ++mfi){
+    Array4<Real> const& arr = phi[mfi].array();
+    const Box& bx = mfi.validbox();
+    const Dim3 lo = amrex::lbound(bx);
+    const Dim3 hi = amrex::ubound(bx);
+    const Dim3 w ={hi.x-lo.x,hi.y-lo.y,hi.z-lo.z};
+#ifdef _OPENMP
+#pragma omp parallel for       
+#endif
+    for(size_t i=0; i<=(size_t)w.x; i++) {
+      for(size_t j=0; j<=(size_t)w.y; j++) {
+        AMREX_PRAGMA_SIMD	  
+	for(size_t k=0; k<=(size_t)w.z; k++) {
+	  size_t local_indx_threaded = (size_t)w.y*(size_t)w.z*i+(size_t)w.z*j+k;
+	  (*a)[local_indx_threaded] = std::exp( imagi * arr(i+lo.x,j+lo.y,k+lo.z) * a_new / a_d / hbaroverm  * dt_d ) * (*a)[local_indx_threaded];
+        }}}
+  }    
 
   Stopwatch::stoplap();
   Stopwatch::stoplap();
 }
 
-inline void drift(hacc::Dfft &dfft, MultiFab &real, MultiFab &imag, MultiFab &dens, 
+inline void drift(hacc::Dfft &dfft, MultiFab &Ax_new, 
 		  int const gridsize, Real const dt, Real const h, Real const a_half, 
 		  Real const hbaroverm,std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >* a,std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >* b)
 {
@@ -633,16 +676,6 @@ inline void drift(hacc::Dfft &dfft, MultiFab &real, MultiFab &imag, MultiFab &de
   const int *local_ng = dfft.local_ng_kspace();
   const int *global_ng = dfft.global_ng();
   size_t local_indx = 0;
-
-  for (MFIter mfi(dens,false); mfi.isValid(); ++mfi){
-     
-  Stopwatch::startlap("init");
-    
-   copy_fortran2c(*a,real,imag,mfi);
-  Stopwatch::stoplap();
-   // for(size_t i=0; i<(size_t)gridsize; i++){
-   //   a[i] = complex_t(real[mfi].dataPtr()[i],imag[mfi].dataPtr()[i]);
-   // }
 
     Stopwatch::startlap("fft");
     dfft.forward(&((*a)[0]));    
@@ -689,14 +722,25 @@ inline void drift(hacc::Dfft &dfft, MultiFab &real, MultiFab &imag, MultiFab &de
   
   Stopwatch::stoplap();
   Stopwatch::startlap("finalize");
-    copy_c2fortran(*a,real,imag,mfi);
-    //for(size_t i=0; i<(size_t)gridsize; i++) {
-    //          real[mfi].dataPtr()[i] = std::real(a[i]);
-    //          imag[mfi].dataPtr()[i] = std::imag(a[i]);
-    //}
-    for(size_t i=0; i<(size_t)gridsize; i++) {
-      dens[mfi].dataPtr()[i] = real[mfi].dataPtr()[i]*real[mfi].dataPtr()[i]+imag[mfi].dataPtr()[i]*imag[mfi].dataPtr()[i];
-    }
+
+  for (MFIter mfi(Ax_new,false); mfi.isValid(); ++mfi){
+    Array4<Real> const& arr = Ax_new[mfi].array();
+    const Box& bx = mfi.validbox();
+    const Dim3 lo = amrex::lbound(bx);
+    const Dim3 hi = amrex::ubound(bx);
+    const Dim3 w ={hi.x-lo.x,hi.y-lo.y,hi.z-lo.z};
+#ifdef _OPENMP
+#pragma omp parallel for       
+#endif
+    for(size_t i=0; i<=(size_t)w.x; i++) {
+      for(size_t j=0; j<=(size_t)w.y; j++) {
+        AMREX_PRAGMA_SIMD	  
+	for(size_t k=0; k<=(size_t)w.z; k++) {
+	  size_t local_indx_threaded = (size_t)w.y*(size_t)w.z*i+(size_t)w.z*j+k;
+	  complex_t temp = (*a)[local_indx_threaded];
+	  arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxDens)=std::real(temp)*real(temp)+std::imag(temp)*std::imag(temp);
+        }}}
+
   }  
   Stopwatch::stoplap();
 }
