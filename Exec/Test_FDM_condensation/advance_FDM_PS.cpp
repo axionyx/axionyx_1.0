@@ -554,14 +554,13 @@ void Nyx::advance_FDM_PS(amrex::Real time,
       const Box& bx = mfi.validbox();
       const Dim3 lo = amrex::lbound(bx);
       const Dim3 hi = amrex::ubound(bx);
-      const Dim3 w ={hi.x-lo.x,hi.y-lo.y,hi.z-lo.z};
+      const Dim3 w ={hi.x-lo.x+1,hi.y-lo.y+1,hi.z-lo.z+1};
 #ifdef _OPENMP
 #pragma omp parallel for       
 #endif
-      for(size_t i=0; i<=(size_t)w.x; i++) {
-	for(size_t j=0; j<=(size_t)w.y; j++) {
-	  AMREX_PRAGMA_SIMD	  
-	  for(size_t k=0; k<=(size_t)w.z; k++) {
+      for(size_t i=0; i<(size_t)w.x; i++) {
+	for(size_t j=0; j<(size_t)w.y; j++) {
+	  for(size_t k=0; k<(size_t)w.z; k++) {
 	    size_t local_indx_threaded = (size_t)w.y*(size_t)w.z*i+(size_t)w.z*j+k;
 	    complex_t temp(arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxRe),arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxIm));
 	    a[local_indx_threaded] = temp;
@@ -599,14 +598,13 @@ void Nyx::advance_FDM_PS(amrex::Real time,
     const Box& bx = mfi.validbox();
     const Dim3 lo = amrex::lbound(bx);
     const Dim3 hi = amrex::ubound(bx);
-    const Dim3 w ={hi.x-lo.x,hi.y-lo.y,hi.z-lo.z};
+    const Dim3 w ={hi.x-lo.x+1,hi.y-lo.y+1,hi.z-lo.z+1};
 #ifdef _OPENMP
 #pragma omp parallel for       
 #endif
-    for(size_t i=0; i<=(size_t)w.x; i++) {
-      for(size_t j=0; j<=(size_t)w.y; j++) {
-        AMREX_PRAGMA_SIMD	  
-	for(size_t k=0; k<=(size_t)w.z; k++) {
+    for(size_t i=0; i<(size_t)w.x; i++) {
+      for(size_t j=0; j<(size_t)w.y; j++) {
+	for(size_t k=0; k<(size_t)w.z; k++) {
 	  size_t local_indx_threaded = (size_t)w.y*(size_t)w.z*i+(size_t)w.z*j+k;
 	  complex_t temp = a[local_indx_threaded];
 	  arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxRe)=std::real(temp);
@@ -681,14 +679,14 @@ inline void fdm_timestep(hacc::Dfft &dfft, MultiFab &Ax_new, MultiFab &phi,  Gra
     const Box& bx = mfi.validbox();
     const Dim3 lo = amrex::lbound(bx);
     const Dim3 hi = amrex::ubound(bx);
-    const Dim3 w ={hi.x-lo.x,hi.y-lo.y,hi.z-lo.z};
+    const Dim3 w ={hi.x-lo.x+1,hi.y-lo.y+1,hi.z-lo.z+1};
 #ifdef _OPENMP
 #pragma omp parallel for       
 #endif
-    for(size_t i=0; i<=(size_t)w.x; i++) {
-      for(size_t j=0; j<=(size_t)w.y; j++) {
+    for(size_t i=0; i<(size_t)w.x; i++) {
+      for(size_t j=0; j<(size_t)w.y; j++) {
         AMREX_PRAGMA_SIMD	  
-	for(size_t k=0; k<=(size_t)w.z; k++) {
+	for(size_t k=0; k<(size_t)w.z; k++) {
 	  size_t local_indx_threaded = (size_t)w.y*(size_t)w.z*i+(size_t)w.z*j+k;
 	  (*a)[local_indx_threaded] = std::exp( imagi * arr(i+lo.x,j+lo.y,k+lo.z) * a_new / a_d / hbaroverm  * dt_d ) * (*a)[local_indx_threaded];
         }}}
@@ -764,14 +762,14 @@ inline void drift(hacc::Dfft &dfft, MultiFab &Ax_new,
     const Box& bx = mfi.validbox();
     const Dim3 lo = amrex::lbound(bx);
     const Dim3 hi = amrex::ubound(bx);
-    const Dim3 w ={hi.x-lo.x,hi.y-lo.y,hi.z-lo.z};
+    const Dim3 w ={hi.x-lo.x+1,hi.y-lo.y+1,hi.z-lo.z+1};
 #ifdef _OPENMP
 #pragma omp parallel for       
 #endif
-    for(size_t i=0; i<=(size_t)w.x; i++) {
-      for(size_t j=0; j<=(size_t)w.y; j++) {
+    for(size_t i=0; i<(size_t)w.x; i++) {
+      for(size_t j=0; j<(size_t)w.y; j++) {
         AMREX_PRAGMA_SIMD	  
-	for(size_t k=0; k<=(size_t)w.z; k++) {
+	for(size_t k=0; k<(size_t)w.z; k++) {
 	  size_t local_indx_threaded = (size_t)w.y*(size_t)w.z*i+(size_t)w.z*j+k;
 	  complex_t temp = (*a)[local_indx_threaded];
 	  arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxDens)=std::real(temp)*real(temp)+std::imag(temp)*std::imag(temp);
