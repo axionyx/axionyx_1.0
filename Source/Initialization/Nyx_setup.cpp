@@ -477,6 +477,12 @@ Nyx::hydro_setup()
     //
 //Six components (AxRe_err_x,AxRe_err_y,AxRe_err_z,AxIm_err_x,AxIm_err_y,AxIm_err_z)
     //
+    derive_lst.add("LohnerError", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_LOHNERERROR, ca_lohnererror), grow_box_by_one);
+    derive_lst.addComponent("LohnerError", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("LohnerError", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("LohnerError", desc_lst, Axion_Type, AxIm,1);
+
     derive_lst.add("AxRe_err_x", IndexType::TheCellType(), 1,
                    BL_FORT_PROC_CALL(CA_DERERRX, ca_dererrx), grow_box_by_one);
     derive_lst.addComponent("AxRe_err_x", desc_lst, Axion_Type, AxRe,1);
@@ -992,6 +998,12 @@ Nyx::no_hydro_setup()
     //
     //Six components (AxRe_err_x,AxRe_err_y,AxRe_err_z,AxIm_err_x,AxIm_err_y,AxIm_err_z)
     //
+    derive_lst.add("LohnerError", IndexType::TheCellType(), 1,
+                   BL_FORT_PROC_CALL(CA_LOHNERERROR, ca_lohnererror), grow_box_by_one);
+    derive_lst.addComponent("LohnerError", desc_lst, Axion_Type, AxDens,1);
+    derive_lst.addComponent("LohnerError", desc_lst, Axion_Type, AxRe,1);
+    derive_lst.addComponent("LohnerError", desc_lst, Axion_Type, AxIm,1);
+
     derive_lst.add("AxRe_err_x", IndexType::TheCellType(), 1,
                    BL_FORT_PROC_CALL(CA_DERERRX, ca_dererrx), grow_box_by_one);
     derive_lst.addComponent("AxRe_err_x", desc_lst, Axion_Type, AxRe,1);

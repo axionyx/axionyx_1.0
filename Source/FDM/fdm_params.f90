@@ -14,7 +14,7 @@ module fdm_params_module
   double complex, parameter :: ii = (0., 1.)   
 
   real(rt), save :: epsilon_L = 0.3d0  ! needed for vel. tagging (cf. Loehner 1987)
-  real(rt), save :: mindens   = 1.0d+3  ! velocity tagging only in regions where (density > mindens)
+  real(rt), save :: mindens   = 1.0d-2  ! velocity tagging only in regions where (density > mindens)
   real(rt), save :: critvalue = 0.3d0  ! tagging regions where error indicator 0<=err_ind<1 (cf. Loehner 1987 eq.4) is larger then critvalue
 
 end module fdm_params_module

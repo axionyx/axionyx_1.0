@@ -128,4 +128,24 @@ BL_FORT_PROC_DECL(TAG_CENTER, tag_center)
            const amrex::Real dx[], const int* level,
             const amrex::Real* avg);
 
+// BL_FORT_PROC_DECL(TAG_LOHNER, tag_lohner)
+//     (int* tag, ARLIM_P(tag_lo), ARLIM_P(tag_hi),
+//      const int* tagval, const int* clearval,
+//      BL_FORT_FAB_ARG(axions),
+//      const int lo[], const int hi[],
+//      const int* ncomp,
+//      const int domlo[], const int domhi[],
+//      const amrex::Real dx[], const int* level,
+//      const amrex::Real* avg);
+
+BL_FORT_PROC_DECL(TAG_LOHNER, tag_lohner)
+    (int* tag, ARLIM_P(tag_lo), ARLIM_P(tag_hi),
+     const int* tagval, const int* clearval,
+     BL_FORT_FAB_ARG(axions),
+     const int lo[], const int hi[],
+     const int* ncomp,
+     const int domlo[], const int domhi[],
+     const amrex::Real dx[], const amrex::Real xlo[], const amrex::Real problo[],
+     const amrex::Real* time, const int* level);
+
 #endif

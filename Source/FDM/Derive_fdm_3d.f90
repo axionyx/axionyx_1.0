@@ -442,6 +442,115 @@ end subroutine ca_axphase
 !-----------------------------------------------------------------------
 
 
+      subroutine ca_lohnererror(err,err_l1,err_l2,err_l3,err_h1,err_h2,err_h3,nk, &
+                                dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
+                                lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
+      !
+      ! This routine calculates the error estimator for the fdm velocity (AxRe,AxIm) 
+      ! according to R. Loehner (1987) eq.4
+      !
+
+      use fdm_params_module, only : epsilon_L, mindens
+
+      implicit none
+
+      integer          lo(3), hi(3)
+      integer          err_l1,err_l2,err_l3,err_h1,err_h2,err_h3,nk
+      integer          dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc
+      integer          domlo(3), domhi(3)
+      integer          bc(3,2,nc)
+      double precision delta(3), xlo(3), time, dt
+      double precision err(err_l1:err_h1,err_l2:err_h2,err_l3:err_h3,nk)
+      double precision    dat(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3,nc)
+      integer    level, grid_no
+
+      double precision top, bottom, eps
+      integer i, j, k
+
+      eps = 0.2
+
+      do k = lo(3), hi(3)                                                                                                                                      
+         do j = lo(2), hi(2)                                                                                                                                              
+            do i = lo(1), hi(1)
+               
+               err(i,j,k,1) = 0.0
+              
+               ! print *, "dat",dat(i,j,k,1),dat(i,j,k,2)
+
+               if ( (dat(i,j,k,1).ge.mindens) .and. (dat(i,j,k,2).ne.0.0) ) then
+
+               top =       (dat(i+1,j  ,k  ,2)-dat(i  ,j  ,k  ,2)-dat(i  ,j  ,k  ,2)+dat(i-1,j  ,k  ,2))**2 + &
+                           (dat(i  ,j+1,k  ,2)-dat(i  ,j  ,k  ,2)-dat(i  ,j  ,k  ,2)+dat(i  ,j-1,k  ,2))**2 + &
+                           (dat(i  ,j  ,k+1,2)-dat(i  ,j  ,k  ,2)-dat(i  ,j  ,k  ,2)+dat(i  ,j  ,k-1,2))**2 + &
+                     0.125*(dat(i+1,j+1,k  ,2)-dat(i+1,j-1,k  ,2)-dat(i-1,j+1,k  ,2)+dat(i-1,j-1,k  ,2))**2 + &
+                     0.125*(dat(i+1,j  ,k+1,2)-dat(i+1,j  ,k-1,2)-dat(i-1,j  ,k+1,2)+dat(i-1,j  ,k-1,2))**2 + &
+                     0.125*(dat(i  ,j+1,k+1,2)-dat(i  ,j+1,k-1,2)-dat(i  ,j-1,k+1,2)+dat(i  ,j-1,k-1,2))**2
+
+               bottom =      (abs(dat(i+1,j  ,k  ,2) -    dat(i  ,j  ,k  ,2))+abs(dat(i  ,j  ,k  ,2) -    dat(i-1,j  ,k  ,2))      + &
+                         eps*(abs(dat(i+1,j  ,k  ,2))+abs(dat(i  ,j  ,k  ,2))+abs(dat(i  ,j  ,k  ,2))+abs(dat(i-1,j  ,k  ,2))))**2 + &
+                             (abs(dat(i  ,j+1,k  ,2) -    dat(i  ,j  ,k  ,2))+abs(dat(i  ,j  ,k  ,2) -    dat(i  ,j-1,k  ,2))      + &
+                         eps*(abs(dat(i  ,j+1,k  ,2))+abs(dat(i  ,j  ,k  ,2))+abs(dat(i  ,j  ,k  ,2))+abs(dat(i  ,j-1,k  ,2))))**2 + &
+                             (abs(dat(i  ,j  ,k+1,2) -    dat(i  ,j  ,k  ,2))+abs(dat(i  ,j  ,k  ,2) -    dat(i  ,j  ,k-1,2))      + &
+                         eps*(abs(dat(i  ,j  ,k+1,2))+abs(dat(i  ,j  ,k  ,2))+abs(dat(i  ,j  ,k  ,2))+abs(dat(i  ,j  ,k-1,2))))**2 + &
+                        (0.5*(abs(dat(i+1,j+1,k  ,2) -    dat(i-1,j+1,k  ,2))+abs(dat(i+1,j-1,k  ,2) -    dat(i-1,j-1,k  ,2)))     + &
+                         eps*(abs(dat(i+1,j+1,k  ,2))+abs(dat(i-1,j+1,k  ,2))+abs(dat(i+1,j-1,k  ,2))+abs(dat(i-1,j-1,k  ,2))))**2 + &
+                        (0.5*(abs(dat(i+1,j+1,k  ,2) -    dat(i+1,j-1,k  ,2))+abs(dat(i-1,j+1,k  ,2) -    dat(i-1,j-1,k  ,2)))     + &
+                         eps*(abs(dat(i+1,j+1,k  ,2))+abs(dat(i+1,j-1,k  ,2))+abs(dat(i-1,j+1,k  ,2))+abs(dat(i-1,j-1,k  ,2))))**2 + &
+                        (0.5*(abs(dat(i+1,j  ,k+1,2) -    dat(i-1,j  ,k+1,2))+abs(dat(i+1,j  ,k-1,2) -    dat(i-1,j  ,k-1,2)))     + &
+                         eps*(abs(dat(i+1,j  ,k+1,2))+abs(dat(i-1,j  ,k+1,2))+abs(dat(i+1,j  ,k-1,2))+abs(dat(i-1,j  ,k-1,2))))**2 + &
+                        (0.5*(abs(dat(i+1,j  ,k+1,2) -    dat(i+1,j  ,k-1,2))+abs(dat(i-1,j  ,k+1,2) -    dat(i-1,j  ,k-1,2)))     + &
+                         eps*(abs(dat(i+1,j  ,k+1,2))+abs(dat(i+1,j  ,k-1,2))+abs(dat(i-1,j  ,k+1,2))+abs(dat(i-1,j  ,k-1,2))))**2 + &
+                        (0.5*(abs(dat(i  ,j+1,k+1,2) -    dat(i  ,j-1,k+1,2))+abs(dat(i  ,j+1,k-1,2) -    dat(i  ,j-1,k-1,2)))     + &
+                         eps*(abs(dat(i  ,j+1,k+1,2))+abs(dat(i  ,j-1,k+1,2))+abs(dat(i  ,j+1,k-1,2))+abs(dat(i  ,j-1,k-1,2))))**2 + &
+                        (0.5*(abs(dat(i  ,j+1,k+1,2) -    dat(i  ,j+1,k-1,2))+abs(dat(i  ,j-1,k+1,2) -    dat(i  ,j-1,k-1,2)))     + &
+                         eps*(abs(dat(i  ,j+1,k+1,2))+abs(dat(i  ,j+1,k-1,2))+abs(dat(i  ,j-1,k+1,2))+abs(dat(i  ,j-1,k-1,2))))**2
+
+               err(i,j,k,1) = sqrt(top/bottom)
+               endif
+
+               if ( (dat(i,j,k,1).ge.mindens) .and. (dat(i,j,k,3).ne.0.0) ) then
+
+               top =       (dat(i+1,j  ,k  ,3)-dat(i  ,j  ,k  ,3)-dat(i  ,j  ,k  ,3)+dat(i-1,j  ,k  ,3))**2 + &
+                           (dat(i  ,j+1,k  ,3)-dat(i  ,j  ,k  ,3)-dat(i  ,j  ,k  ,3)+dat(i  ,j-1,k  ,3))**2 + &
+                           (dat(i  ,j  ,k+1,3)-dat(i  ,j  ,k  ,3)-dat(i  ,j  ,k  ,3)+dat(i  ,j  ,k-1,3))**2 + &
+                     0.125*(dat(i+1,j+1,k  ,3)-dat(i+1,j-1,k  ,3)-dat(i-1,j+1,k  ,3)+dat(i-1,j-1,k  ,3))**2 + &
+                     0.125*(dat(i+1,j  ,k+1,3)-dat(i+1,j  ,k-1,3)-dat(i-1,j  ,k+1,3)+dat(i-1,j  ,k-1,3))**2 + &
+                     0.125*(dat(i  ,j+1,k+1,3)-dat(i  ,j+1,k-1,3)-dat(i  ,j-1,k+1,3)+dat(i  ,j-1,k-1,3))**2
+
+               bottom =      (abs(dat(i+1,j  ,k  ,3) -    dat(i  ,j  ,k  ,3))+abs(dat(i  ,j  ,k  ,3) -    dat(i-1,j  ,k  ,3))      + &
+                         eps*(abs(dat(i+1,j  ,k  ,3))+abs(dat(i  ,j  ,k  ,3))+abs(dat(i  ,j  ,k  ,3))+abs(dat(i-1,j  ,k  ,3))))**2 + &
+                             (abs(dat(i  ,j+1,k  ,3) -    dat(i  ,j  ,k  ,3))+abs(dat(i  ,j  ,k  ,3) -    dat(i  ,j-1,k  ,3))      + &
+                         eps*(abs(dat(i  ,j+1,k  ,3))+abs(dat(i  ,j  ,k  ,3))+abs(dat(i  ,j  ,k  ,3))+abs(dat(i  ,j-1,k  ,3))))**2 + &
+                             (abs(dat(i  ,j  ,k+1,3) -    dat(i  ,j  ,k  ,3))+abs(dat(i  ,j  ,k  ,3) -    dat(i  ,j  ,k-1,3))      + &
+                         eps*(abs(dat(i  ,j  ,k+1,3))+abs(dat(i  ,j  ,k  ,3))+abs(dat(i  ,j  ,k  ,3))+abs(dat(i  ,j  ,k-1,3))))**2 + &
+                        (0.5*(abs(dat(i+1,j+1,k  ,3) -    dat(i-1,j+1,k  ,3))+abs(dat(i+1,j-1,k  ,3) -    dat(i-1,j-1,k  ,3)))     + &
+                         eps*(abs(dat(i+1,j+1,k  ,3))+abs(dat(i-1,j+1,k  ,3))+abs(dat(i+1,j-1,k  ,3))+abs(dat(i-1,j-1,k  ,3))))**2 + &
+                        (0.5*(abs(dat(i+1,j+1,k  ,3) -    dat(i+1,j-1,k  ,3))+abs(dat(i-1,j+1,k  ,3) -    dat(i-1,j-1,k  ,3)))     + &
+                         eps*(abs(dat(i+1,j+1,k  ,3))+abs(dat(i+1,j-1,k  ,3))+abs(dat(i-1,j+1,k  ,3))+abs(dat(i-1,j-1,k  ,3))))**2 + &
+                        (0.5*(abs(dat(i+1,j  ,k+1,3) -    dat(i-1,j  ,k+1,3))+abs(dat(i+1,j  ,k-1,3) -    dat(i-1,j  ,k-1,3)))     + &
+                         eps*(abs(dat(i+1,j  ,k+1,3))+abs(dat(i-1,j  ,k+1,3))+abs(dat(i+1,j  ,k-1,3))+abs(dat(i-1,j  ,k-1,3))))**2 + &
+                        (0.5*(abs(dat(i+1,j  ,k+1,3) -    dat(i+1,j  ,k-1,3))+abs(dat(i-1,j  ,k+1,3) -    dat(i-1,j  ,k-1,3)))     + &
+                         eps*(abs(dat(i+1,j  ,k+1,3))+abs(dat(i+1,j  ,k-1,3))+abs(dat(i-1,j  ,k+1,3))+abs(dat(i-1,j  ,k-1,3))))**2 + &
+                        (0.5*(abs(dat(i  ,j+1,k+1,3) -    dat(i  ,j-1,k+1,3))+abs(dat(i  ,j+1,k-1,3) -    dat(i  ,j-1,k-1,3)))     + &
+                         eps*(abs(dat(i  ,j+1,k+1,3))+abs(dat(i  ,j-1,k+1,3))+abs(dat(i  ,j+1,k-1,3))+abs(dat(i  ,j-1,k-1,3))))**2 + &
+                        (0.5*(abs(dat(i  ,j+1,k+1,3) -    dat(i  ,j+1,k-1,3))+abs(dat(i  ,j-1,k+1,3) -    dat(i  ,j-1,k-1,3)))     + &
+                         eps*(abs(dat(i  ,j+1,k+1,3))+abs(dat(i  ,j+1,k-1,3))+abs(dat(i  ,j-1,k+1,3))+abs(dat(i  ,j-1,k-1,3))))**2
+
+                  err(i,j,k,1) = max(err(i,j,k,1),sqrt(top/bottom))
+
+                  endif
+
+                  ! print *, 'err',err(i,j,k,1)
+
+            enddo
+         enddo
+      enddo
+
+      end subroutine ca_lohnererror
+
+!-----------------------------------------------------------------------
+
+
       subroutine ca_dererrx(err,err_l1,err_l2,err_l3,err_h1,err_h2,err_h3,nk, &
                             dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
                              lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
