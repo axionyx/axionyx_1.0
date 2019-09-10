@@ -15,6 +15,7 @@ CEXE_sources += ParticleDerive.cpp
 CEXE_sources += DarkMatterParticleContainer.cpp
 CEXE_sources += comoving.cpp
 CEXE_sources += write_info.cpp
+CEXE_sources += Stopwatch.cpp
 #CEXE_sources += bl_random_c.cpp
 
 ifneq ($(NO_HYDRO), TRUE)
@@ -32,6 +33,7 @@ CEXE_sources += sdc_reactions.cpp
 endif
 
 CEXE_headers += Nyx.H
+CEXE_headers += Stopwatch.H
 CEXE_headers += Nyx_output.H
 CEXE_headers += NyxParticleContainer.H
 CEXE_headers += DarkMatterParticleContainer.H

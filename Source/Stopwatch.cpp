@@ -51,12 +51,16 @@ void Stopwatch::startlap(std::string msg, int level, bool do_print)
         print(startlaptime.back(),-1,"starting lap",level);
     }
 }
-void Stopwatch::stoplap()
+void Stopwatch::stoplap(std::string msg)
 {
     double stoplaptime = ParallelDescriptor::second();
     
     write(stoplaptime,stoplaptime-startlaptime.back(),"finished in",levels.back());
     print(stoplaptime,stoplaptime-startlaptime.back(),"finished in",levels.back());
+#ifdef DEBUG_STOPWATCH_STOPLAP
+    if(msg!="" && msg!=msgs.back() && ParallelDescriptor::IOProcessor())
+        std::cout << "Stopwatch::stoplap(): WARNING; should be stopping " << msg << " but found " << msgs.back() << std::endl;
+#endif        
     startlaptime.pop_back();
     levels.pop_back();
     msgs.pop_back();
