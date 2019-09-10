@@ -348,7 +348,7 @@ void Nyx::advance_FDM_PS(amrex::Real time,
 
   BL_PROFILE("Nyx::advance_FDM_PS()");
   Stopwatch::startlap("advance_FDM_PS",1);
-  Stopwatch::startlap("init",1);
+  Stopwatch::startlap("init",2);
 
     // *****************************************
     //define constants
@@ -530,7 +530,7 @@ void Nyx::advance_FDM_PS(amrex::Real time,
                  << " WHICH IS LOCAL NUMBER " << local_index << std::endl;
     }
     Stopwatch::stoplap();
-    Stopwatch::startlap("dfft prep",1);
+    Stopwatch::startlap("dfft prep",2);
     // *****************************************
     // Assume for now that nx = ny = nz
     // *****************************************
@@ -571,7 +571,7 @@ void Nyx::advance_FDM_PS(amrex::Real time,
     //  *******************************************
     //  higher order time steps
     //  *******************************************
-  Stopwatch::startlap("steps");
+  Stopwatch::startlap("steps",2);
   if(order==6){
     fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c1, a_c1, d1, a_d1, a_new, hbaroverm, &a, &b);
     fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c2, a_c2, d2, a_d2, a_new, hbaroverm, &a, &b);
@@ -586,12 +586,12 @@ void Nyx::advance_FDM_PS(amrex::Real time,
     fdm_timestep(dfft, Ax_new, phi, gravity, geom, level, gridsize, h, c2, a_c2, d2, a_d2, a_new, hbaroverm, &a, &b);
   }
 
-  Stopwatch::stoplap();
+  Stopwatch::stoplap("steps");
 
     //  *******************************************
     //  copy everything back to Axion_State
     //  *******************************************
-    Stopwatch::startlap("finalize");
+    Stopwatch::startlap("finalize",2);
 
   for (MFIter mfi(Ax_new,false); mfi.isValid(); ++mfi){
     Array4<Real> const& arr = Ax_new[mfi].array();
@@ -630,7 +630,7 @@ void Nyx::advance_FDM_PS(amrex::Real time,
       }
 #endif
 Stopwatch::stoplap();
-Stopwatch::stoplap();
+Stopwatch::stoplap("advance_FDM_PS");
 }
 
 inline void fdm_timestep(hacc::Dfft &dfft, MultiFab &Ax_new, MultiFab &phi,  Gravity::Gravity *gravity, Geometry &geom,
@@ -641,8 +641,8 @@ inline void fdm_timestep(hacc::Dfft &dfft, MultiFab &Ax_new, MultiFab &phi,  Gra
   //  *******************************************
   //  drift by dt_c
   //  *******************************************
-  Stopwatch::startlap("fdm_timestep",1);
-  Stopwatch::startlap("drift",1);
+  Stopwatch::startlap("fdm_timestep",2);
+  Stopwatch::startlap("drift",3);
   drift(dfft, Ax_new, gridsize, dt_c, h, a_c, hbaroverm, a, b);
   Ax_new.FillBoundary(geom.periodicity());
 
@@ -655,13 +655,17 @@ inline void fdm_timestep(hacc::Dfft &dfft, MultiFab &Ax_new, MultiFab &phi,  Gra
 #endif
 
   Stopwatch::stoplap();
-  if(!dt_d) return;
+  if(!dt_d) 
+  {
+      Stopwatch::stoplap("fdm_timestep");
+      return;
+  }
 
   //  *******************************************
   //  re-calculate potential
   //  *******************************************
 
-  Stopwatch::startlap("potential",1);
+  Stopwatch::startlap("potential",3);
   int fill_interior = 0;
   int grav_n_grow = 0;
   gravity->solve_for_new_phi(level,phi,
@@ -671,7 +675,7 @@ inline void fdm_timestep(hacc::Dfft &dfft, MultiFab &Ax_new, MultiFab &phi,  Gra
   //  *******************************************
   //  kick by dt_d 
   //  *******************************************
-  Stopwatch::startlap("kick",1);
+  Stopwatch::startlap("kick",3);
   const std::complex<double> imagi(0.0,1.0);
   
   for (MFIter mfi(phi,false); mfi.isValid(); ++mfi){
@@ -693,7 +697,7 @@ inline void fdm_timestep(hacc::Dfft &dfft, MultiFab &Ax_new, MultiFab &phi,  Gra
   }    
 
   Stopwatch::stoplap();
-  Stopwatch::stoplap();
+  Stopwatch::stoplap("fdm_timestep");
 }
 
 inline void drift(hacc::Dfft &dfft, MultiFab &Ax_new, 
@@ -711,10 +715,10 @@ inline void drift(hacc::Dfft &dfft, MultiFab &Ax_new,
   const int *global_ng = dfft.global_ng();
   size_t local_indx = 0;
 
-    Stopwatch::startlap("fft");
+    Stopwatch::startlap("fft",4);
     dfft.forward(&((*a)[0]));    
     Stopwatch::stoplap();
-    Stopwatch::startlap("k space operation");
+    Stopwatch::startlap("k space operation",4);
 #ifdef _OPENMP
 #pragma omp parallel for       
 #endif
@@ -751,11 +755,11 @@ inline void drift(hacc::Dfft &dfft, MultiFab &Ax_new,
     }
   Stopwatch::stoplap();
     
-  Stopwatch::startlap("fft backwards");
+  Stopwatch::startlap("fft backwards",4);
     dfft.backward(&((*a)[0]));
   
   Stopwatch::stoplap();
-  Stopwatch::startlap("finalize");
+  Stopwatch::startlap("finalize",4);
 
   for (MFIter mfi(Ax_new,false); mfi.isValid(); ++mfi){
     Array4<Real> const& arr = Ax_new[mfi].array();
@@ -775,8 +779,8 @@ inline void drift(hacc::Dfft &dfft, MultiFab &Ax_new,
 	  arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxDens)=std::real(temp)*real(temp)+std::imag(temp)*std::imag(temp);
         }}}
 
-  }  
-  Stopwatch::stoplap();
+  }
+  Stopwatch::stoplap("finalize");
 }
 
 inline void copy_fortran2c(std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >& a, 

@@ -3,7 +3,8 @@
 
 //! undef to disable logging.
 #define USE_STOPWATCH
-
+//! def for debugging missing stoplap calls. 
+//#define DEBUG_STOPWATCH_STOPLAP
 #include "AMReX_ParallelDescriptor.H"
 #include <fstream>
 //! this is a little helper class that implements some profiling capabilities. The main useful routines are start/stoplap. They can be used to track the amount of time spent in a subroutine/code block, and the output also comes with a traceback of the laps already running.
@@ -12,15 +13,15 @@
 class Stopwatch{
 public:
     //! initialize object, store start time and verbosity level. plevel is the level of a lap to be mentioned when printing on the screen. wlevel is the same, but for writing the logfile. logname is the name of file in which to store the output.
-    static void init(int plevel=0,int wlevel=0,std::string logname="log.dat");
+    static void init(int plevel=0,int wlevel=0,std::string logname="stopwatch_log.dat");
     //! start the clock
     static void start(int level=0);
     //! stop the clock
     static void stop(std::string msg,int level=0);
     //! start a new lap with name msg; level sets the level of importance of the message.
     static void startlap(std::string msg="", int level=0, bool do_print=false);
-    //! stop a running lap
-    static void stoplap();
+    //! stop a running lap - msg is not used unless you define DEBUG_STOPWATCH_STOPLAP above for debugging purposes.
+    static void stoplap(std::string msg="");
     //! turn off all messages
     static void off() {all_off=true;}
     //! turn on messages
