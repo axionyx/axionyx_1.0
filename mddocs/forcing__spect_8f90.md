@@ -39,4 +39,4 @@
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Forcing/forcing_spect.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/Forcing/forcing_spect.f90`

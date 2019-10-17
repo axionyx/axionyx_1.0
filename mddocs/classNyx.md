@@ -12,27 +12,13 @@ _AmrLevel-derived class for hyperbolic conservation equations for stellar media.
 
 
 
-Inherits the following classes: [amrex::AmrLevel](classamrex_1_1AmrLevel.md),  [amrex::AmrLevel](classamrex_1_1AmrLevel.md)
+Inherits the following classes: AmrLevel,  AmrLevel
 
 
 
 
 
 
-
-
-
-## Public Types inherited from [amrex::AmrLevel](classamrex_1_1AmrLevel.md)
-
-| Type | Name |
-| ---: | :--- |
-| enum  | [**TimeLevel**](classamrex_1_1AmrLevel.md#enum-timelevel)  <br>_What time are we at?_  |
-
-## Public Types inherited from [amrex::AmrLevel](classamrex_1_1AmrLevel.md)
-
-| Type | Name |
-| ---: | :--- |
-| enum  | [**TimeLevel**](classamrex_1_1AmrLevel.md#enum-timelevel)  <br>_What time are we at?_  |
 
 
 
@@ -42,8 +28,6 @@ Inherits the following classes: [amrex::AmrLevel](classamrex_1_1AmrLevel.md),  [
 | Type | Name |
 | ---: | :--- |
 |  amrex::MultiFab \* | [**fine\_mask**](classNyx.md#variable-fine-mask)  <br> |
-
-
 
 ## Public Static Attributes
 
@@ -85,12 +69,11 @@ Inherits the following classes: [amrex::AmrLevel](classamrex_1_1AmrLevel.md),  [
 |  int | [**particle\_verbose**](classNyx.md#variable-particle-verbose)   = = 1<br>_Default verbosity of Particle class._  |
 |  int | [**print\_fortran\_warnings**](classNyx.md#variable-print-fortran-warnings)   = = true<br>_If true then print the warnings from the Fortran routines._  |
 |  amrex::Real | [**relative\_max\_change\_a**](classNyx.md#variable-relative-max-change-a)   = =  0.01<br>_Relative change in a allowed in one timestep._  |
+|  int | [**stencil\_deposition\_width**](classNyx.md#variable-stencil-deposition-width)   = = 1<br> |
 |  int | [**strict\_subcycling**](classNyx.md#variable-strict-subcycling)   = = 0<br> |
 |  int | [**write\_coarsened\_particles**](classNyx.md#variable-write-coarsened-particles)   = = 0<br> |
 |  int | [**write\_parameters\_in\_plotfile**](classNyx.md#variable-write-parameters-in-plotfile)   = = true<br>_Write all parameters into specified directory._  |
 |  int | [**write\_particle\_density\_at\_init**](classNyx.md#variable-write-particle-density-at-init)   = = 0<br> |
-
-
 
 ## Public Functions
 
@@ -103,9 +86,9 @@ Inherits the following classes: [amrex::AmrLevel](classamrex_1_1AmrLevel.md),  [
 |  void | [**Lya\_statistics**](classNyx.md#function-lya-statistics-1-2) () <br> |
 |  void | [**Lya\_statistics**](classNyx.md#function-lya-statistics-1-2) () <br> |
 |   | [**Nyx**](classNyx.md#function-nyx-1-4) () <br>_Default constructor. Builds invalid object._  |
-|   | [**Nyx**](classNyx.md#function-nyx-2-4) ([**amrex::Amr**](classamrex_1_1Amr.md) & papa, int lev, const amrex::Geometry & level\_geom, const amrex::BoxArray & bl, const amrex::DistributionMapping & dm, amrex::Real time) <br>_The basic constructor._  |
+|   | [**Nyx**](classNyx.md#function-nyx-2-4) (amrex::Amr & papa, int lev, const amrex::Geometry & level\_geom, const amrex::BoxArray & bl, const amrex::DistributionMapping & dm, amrex::Real time) <br>_The basic constructor._  |
 |   | [**Nyx**](classNyx.md#function-nyx-1-4) () <br>_Default constructor. Builds invalid object._  |
-|   | [**Nyx**](classNyx.md#function-nyx-2-4) ([**amrex::Amr**](classamrex_1_1Amr.md) & papa, int lev, const amrex::Geometry & level\_geom, const amrex::BoxArray & bl, const amrex::DistributionMapping & dm, amrex::Real time) <br>_The basic constructor._  |
+|   | [**Nyx**](classNyx.md#function-nyx-2-4) (amrex::Amr & papa, int lev, const amrex::Geometry & level\_geom, const amrex::BoxArray & bl, const amrex::DistributionMapping & dm, amrex::Real time) <br>_The basic constructor._  |
 |  void | [**ReadPlotFile**](classNyx.md#function-readplotfile-1-2) (bool first, const std::string & plot\_file\_name, bool & rhoe\_infile) <br>_Initialize grid data from a plotfile at problem start-up._  |
 |  void | [**ReadPlotFile**](classNyx.md#function-readplotfile-1-2) (bool first, const std::string & plot\_file\_name, bool & rhoe\_infile) <br>_Initialize grid data from a plotfile at problem start-up._  |
 | virtual amrex::Real | [**advance**](classNyx.md#function-advance-1-2) (amrex::Real time, amrex::Real dt, int iteration, int ncycle) <br>_Advance grids at this level in time._  |
@@ -122,12 +105,12 @@ Inherits the following classes: [amrex::AmrLevel](classamrex_1_1AmrLevel.md),  [
 |  void | [**analysis\_z\_est\_time\_step**](classNyx.md#function-analysis-z-est-time-step-1-2) (amrex::Real & est\_dt, bool & dt\_changed) <br>_Time step control based on "z" not passing one of the specified analysis\_z\_values._  |
 |  amrex::MultiFab \* | [**build\_fine\_mask**](classNyx.md#function-build-fine-mask-1-2) () <br> |
 |  amrex::MultiFab \* | [**build\_fine\_mask**](classNyx.md#function-build-fine-mask-2-2) () <br> |
-| virtual void | [**checkPoint**](classNyx.md#function-checkpoint-1-2) (const std::string & dir, std::ostream & os, amrex::VisMF::How how, bool dump\_old) <br>_Call_ [_**amrex::AmrLevel::checkPoint**_](classamrex_1_1AmrLevel.md#function-checkpoint) _and then add radiation info._ |
-| virtual void | [**checkPoint**](classNyx.md#function-checkpoint-1-2) (const std::string & dir, std::ostream & os, amrex::VisMF::How how, bool dump\_old) <br>_Call_ [_**amrex::AmrLevel::checkPoint**_](classamrex_1_1AmrLevel.md#function-checkpoint) _and then add radiation info._ |
-| virtual void | [**checkPointPost**](classNyx.md#function-checkpointpost-1-2) (const std::string & dir, std::ostream & os) <br>_Do post-checkpoint work to avoid synchronizations while writing the amr hierarchy._  |
-| virtual void | [**checkPointPost**](classNyx.md#function-checkpointpost-2-2) (const std::string & dir, std::ostream & os) <br>_Do post-checkpoint work to avoid synchronizations while writing the amr hierarchy._  |
-| virtual void | [**checkPointPre**](classNyx.md#function-checkpointpre-1-2) (const std::string & dir, std::ostream & os) <br>_Do pre-checkpoint work to avoid synchronizations while writing the amr hierarchy._  |
-| virtual void | [**checkPointPre**](classNyx.md#function-checkpointpre-2-2) (const std::string & dir, std::ostream & os) <br>_Do pre-checkpoint work to avoid synchronizations while writing the amr hierarchy._  |
+| virtual void | [**checkPoint**](classNyx.md#function-checkpoint-1-2) (const std::string & dir, std::ostream & os, amrex::VisMF::How how, bool dump\_old) <br>_Call amrex::AmrLevel::checkPoint and then add radiation info._  |
+| virtual void | [**checkPoint**](classNyx.md#function-checkpoint-1-2) (const std::string & dir, std::ostream & os, amrex::VisMF::How how, bool dump\_old) <br>_Call amrex::AmrLevel::checkPoint and then add radiation info._  |
+| virtual void | [**checkPointPost**](classNyx.md#function-checkpointpost-1-2) (const std::string & dir, std::ostream & os) <br> |
+| virtual void | [**checkPointPost**](classNyx.md#function-checkpointpost-2-2) (const std::string & dir, std::ostream & os) <br> |
+| virtual void | [**checkPointPre**](classNyx.md#function-checkpointpre-1-2) (const std::string & dir, std::ostream & os) <br> |
+| virtual void | [**checkPointPre**](classNyx.md#function-checkpointpre-2-2) (const std::string & dir, std::ostream & os) <br> |
 |  void | [**comoving\_a\_post\_restart**](classNyx.md#function-comoving-a-post-restart-1-2) (const std::string & restart\_file) <br>_How to initialize "a" at restart (from checkpoint or plotfile)_  |
 |  void | [**comoving\_a\_post\_restart**](classNyx.md#function-comoving-a-post-restart-1-2) (const std::string & restart\_file) <br>_How to initialize "a" at restart (from checkpoint or plotfile)_  |
 |  void | [**comoving\_est\_time\_step**](classNyx.md#function-comoving-est-time-step-1-2) (amrex::Real & cur\_time, amrex::Real & est\_dt) <br>_Time step control based on "a" not growing too fast._  |
@@ -170,9 +153,9 @@ Inherits the following classes: [amrex::AmrLevel](classamrex_1_1AmrLevel.md),  [
 |  void | [**halo\_find**](classNyx.md#function-halo-find-1-2) (amrex::Real dt) <br> |
 |  void | [**halo\_merge**](classNyx.md#function-halo-merge-1-2) () <br> |
 |  void | [**halo\_merge**](classNyx.md#function-halo-merge-1-2) () <br> |
-| virtual void | [**init**](classNyx.md#function-init-1-4) ([**amrex::AmrLevel**](classamrex_1_1AmrLevel.md) & old) <br>_Initialize data on this level from another_ [_**Nyx**_](classNyx.md) _(during regrid)._ |
+| virtual void | [**init**](classNyx.md#function-init-1-4) (amrex::AmrLevel & old) <br>_Initialize data on this level from another_ [_**Nyx**_](classNyx.md) _(during regrid)._ |
 | virtual void | [**init**](classNyx.md#function-init-2-4) () <br>_Initialize data on this level after regridding if old level did not._  |
-| virtual void | [**init**](classNyx.md#function-init-3-4) ([**amrex::AmrLevel**](classamrex_1_1AmrLevel.md) & old) <br>_Initialize data on this level from another_ [_**Nyx**_](classNyx.md) _(during regrid)._ |
+| virtual void | [**init**](classNyx.md#function-init-3-4) (amrex::AmrLevel & old) <br>_Initialize data on this level from another_ [_**Nyx**_](classNyx.md) _(during regrid)._ |
 | virtual void | [**init**](classNyx.md#function-init-4-4) () <br>_Initialize data on this level after regridding if old level did not._  |
 | virtual void | [**initData**](classNyx.md#function-initdata-1-2) () <br>_Initialize grid data at problem start-up._  |
 | virtual void | [**initData**](classNyx.md#function-initdata-2-2) () <br>_Initialize grid data at problem start-up._  |
@@ -190,8 +173,10 @@ Inherits the following classes: [amrex::AmrLevel](classamrex_1_1AmrLevel.md),  [
 |  void | [**integrate\_comoving\_a**](classNyx.md#function-integrate-comoving-a-1-2) (amrex::Real time, amrex::Real dt) <br> |
 |  int | [**integrate\_state\_box**](classNyx.md#function-integrate-state-box-1-2) (amrex::MultiFab & state, amrex::MultiFab & diag\_eos, const amrex::Real & a, const amrex::Real & delta\_time) <br> |
 |  int | [**integrate\_state\_box**](classNyx.md#function-integrate-state-box-1-2) (amrex::MultiFab & state, amrex::MultiFab & diag\_eos, const amrex::Real & a, const amrex::Real & delta\_time) <br> |
+|  int | [**integrate\_state\_exact**](classNyx.md#function-integrate-state-exact) (amrex::MultiFab & state, amrex::MultiFab & diag\_eos, const amrex::Real & a, const amrex::Real & delta\_time) <br> |
 |  int | [**integrate\_state\_grownbox**](classNyx.md#function-integrate-state-grownbox-1-2) (amrex::MultiFab & state, amrex::MultiFab & diag\_eos, const amrex::Real & a, const amrex::Real & delta\_time) <br> |
 |  int | [**integrate\_state\_grownbox**](classNyx.md#function-integrate-state-grownbox-1-2) (amrex::MultiFab & state, amrex::MultiFab & diag\_eos, const amrex::Real & a, const amrex::Real & delta\_time) <br> |
+|  int | [**integrate\_state\_grownexact**](classNyx.md#function-integrate-state-grownexact) (amrex::MultiFab & state, amrex::MultiFab & diag\_eos, const amrex::Real & a, const amrex::Real & delta\_time) <br> |
 |  int | [**integrate\_state\_grownvec**](classNyx.md#function-integrate-state-grownvec-1-2) (amrex::MultiFab & state, amrex::MultiFab & diag\_eos, const amrex::Real & a, const amrex::Real & delta\_time) <br> |
 |  int | [**integrate\_state\_grownvec**](classNyx.md#function-integrate-state-grownvec-1-2) (amrex::MultiFab & state, amrex::MultiFab & diag\_eos, const amrex::Real & a, const amrex::Real & delta\_time) <br> |
 |  int | [**integrate\_state\_vec**](classNyx.md#function-integrate-state-vec-1-2) (amrex::MultiFab & state, amrex::MultiFab & diag\_eos, const amrex::Real & a, const amrex::Real & delta\_time) <br> |
@@ -238,10 +223,10 @@ Inherits the following classes: [amrex::AmrLevel](classamrex_1_1AmrLevel.md),  [
 |  void | [**remove\_virtual\_particles**](classNyx.md#function-remove-virtual-particles-1-2) () <br>_Remove virtual particles if necessary._  |
 |  void | [**reset\_internal\_energy**](classNyx.md#function-reset-internal-energy-1-2) (amrex::MultiFab & State, amrex::MultiFab & DiagEOS, amrex::MultiFab & reset\_e\_src) <br>_Synchronize (rho e) and (rho E) so they are consistent with each other._  |
 |  void | [**reset\_internal\_energy**](classNyx.md#function-reset-internal-energy-1-2) (amrex::MultiFab & State, amrex::MultiFab & DiagEOS, amrex::MultiFab & reset\_e\_src) <br>_Synchronize (rho e) and (rho E) so they are consistent with each other._  |
-| virtual void | [**restart**](classNyx.md#function-restart-1-2) ([**amrex::Amr**](classamrex_1_1Amr.md) & papa, istream & is, bool b\_read\_special=false) <br>_Restart from a checkpoint file._  |
-| virtual void | [**restart**](classNyx.md#function-restart-2-2) ([**amrex::Amr**](classamrex_1_1Amr.md) & papa, istream & is, bool b\_read\_special=false) <br>_Restart from a checkpoint file._  |
-| virtual void | [**setPlotVariables**](classNyx.md#function-setplotvariables-1-2) () <br>_Modify list of variables to be plotted._  |
-| virtual void | [**setPlotVariables**](classNyx.md#function-setplotvariables-2-2) () <br>_Modify list of variables to be plotted._  |
+| virtual void | [**restart**](classNyx.md#function-restart-1-2) (amrex::Amr & papa, istream & is, bool b\_read\_special=false) <br>_Restart from a checkpoint file._  |
+| virtual void | [**restart**](classNyx.md#function-restart-1-2) (amrex::Amr & papa, istream & is, bool b\_read\_special=false) <br>_Restart from a checkpoint file._  |
+| virtual void | [**setPlotVariables**](classNyx.md#function-setplotvariables-1-2) () <br> |
+| virtual void | [**setPlotVariables**](classNyx.md#function-setplotvariables-2-2) () <br> |
 | virtual void | [**setTimeLevel**](classNyx.md#function-settimelevel-1-2) (amrex::Real time, amrex::Real dt\_old, amrex::Real dt\_new) <br>_Set time levels of state data._  |
 | virtual void | [**setTimeLevel**](classNyx.md#function-settimelevel-1-2) (amrex::Real time, amrex::Real dt\_old, amrex::Real dt\_new) <br>_Set time levels of state data._  |
 |  void | [**setup\_ghost\_particles**](classNyx.md#function-setup-ghost-particles-1-2) (int ngrow) <br>_Setup ghost particles (for finer levels) if necessary._  |
@@ -278,166 +263,12 @@ Inherits the following classes: [amrex::AmrLevel](classamrex_1_1AmrLevel.md),  [
 | virtual void | [**writePlotFilePost**](classNyx.md#function-writeplotfilepost-2-2) (const std::string & dir, ostream & os) <br> |
 | virtual void | [**writePlotFilePre**](classNyx.md#function-writeplotfilepre-1-2) (const std::string & dir, ostream & os) <br> |
 | virtual void | [**writePlotFilePre**](classNyx.md#function-writeplotfilepre-2-2) (const std::string & dir, ostream & os) <br> |
-| virtual bool | [**writePlotNow**](classNyx.md#function-writeplotnow-1-2) () <br>_Tell_ [_**amrex::Amr**_](classamrex_1_1Amr.md) _to write a plotfile now._ |
-| virtual bool | [**writePlotNow**](classNyx.md#function-writeplotnow-1-2) () <br>_Tell_ [_**amrex::Amr**_](classamrex_1_1Amr.md) _to write a plotfile now._ |
+|  bool | [**writePlotNow**](classNyx.md#function-writeplotnow-1-2) () <br>_Tell amrex::Amr to write a plotfile now._  |
+|  bool | [**writePlotNow**](classNyx.md#function-writeplotnow-1-2) () <br>_Tell amrex::Amr to write a plotfile now._  |
 | virtual void | [**write\_parameter\_file**](classNyx.md#function-write-parameter-file-1-2) (const std::string & dir) <br> |
 | virtual void | [**write\_parameter\_file**](classNyx.md#function-write-parameter-file-2-2) (const std::string & dir) <br> |
 | virtual  | [**~Nyx**](classNyx.md#function-nyx-1-2) () <br>_The destructor._  |
 | virtual  | [**~Nyx**](classNyx.md#function-nyx-2-2) () <br>_The destructor._  |
-
-## Public Functions inherited from [amrex::AmrLevel](classamrex_1_1AmrLevel.md)
-
-| Type | Name |
-| ---: | :--- |
-| virtual void | [**CreateLevelDirectory**](classamrex_1_1AmrLevel.md#function-createleveldirectory) (const std::string & dir) <br>_Create the Level\_ directory for checkpoint and plot files._  |
-|  const DistributionMapping & | [**DistributionMap**](classamrex_1_1AmrLevel.md#function-distributionmap) () noexcept const<br> |
-|  const Box & | [**Domain**](classamrex_1_1AmrLevel.md#function-domain) () noexcept const<br>_Returns the indices defining physical domain._  |
-|  const FabFactory&lt; FArrayBox &gt; & | [**Factory**](classamrex_1_1AmrLevel.md#function-factory) () noexcept const<br> |
-|  void | [**FillCoarsePatch**](classamrex_1_1AmrLevel.md#function-fillcoarsepatch) (MultiFab & dest, int dcomp, Real time, int state\_idx, int scomp, int ncomp, int nghost=0) <br>_Interpolate from coarse level to the valid area in dest._  |
-|  const Geometry & | [**Geom**](classamrex_1_1AmrLevel.md#function-geom) () noexcept const<br>_Returns the geometry object._  |
-|  int | [**Level**](classamrex_1_1AmrLevel.md#function-level) () noexcept const<br>_Returns this_ [_**AmrLevel**_](classamrex_1_1AmrLevel.md) _._ |
-|  void | [**LevelDirectoryNames**](classamrex_1_1AmrLevel.md#function-leveldirectorynames) (const std::string & dir, std::string & LevelDir, std::string & FullPath) <br>_Get the level directory names._  |
-|  void | [**SetLevelDirectoryCreated**](classamrex_1_1AmrLevel.md#function-setleveldirectorycreated) (bool ldc) noexcept<br>_Set if the Level\_ directory was created or to clear the value. CreateLevelDirectory sets levelDirectoryCreated = true._  |
-|  void | [**UpdateDistributionMaps**](classamrex_1_1AmrLevel.md#function-updatedistributionmaps) (DistributionMapping & dmap) <br>_Update the distribution maps in StateData based on the size of the map._  |
-| virtual int | [**WorkEstType**](classamrex_1_1AmrLevel.md#function-workesttype) () <br>_Which state data type is for work estimates? -1 means none._  |
-| virtual Real | [**advance**](classamrex_1_1AmrLevel.md#function-advance) (Real time, Real dt, int iteration, int ncycle) = 0<br>_Do an integration step on this level. Returns maximum safe time step. This is a pure virtual function and hence MUST be implemented by derived classes._  |
-| virtual void | [**allocOldData**](classamrex_1_1AmrLevel.md#function-allocolddata) () <br>_Alloc space for old time data._  |
-|  const BoxArray & | [**boxArray**](classamrex_1_1AmrLevel.md#function-boxarray) () noexcept const<br>_List of grids at this level._  |
-| virtual void | [**checkPoint**](classamrex_1_1AmrLevel.md#function-checkpoint) (const std::string & dir, std::ostream & os, VisMF::How how=VisMF::NFiles, bool dump\_old=true) <br>_Write current state to checkpoint file._  |
-| virtual void | [**checkPointPost**](classamrex_1_1AmrLevel.md#function-checkpointpost) (const std::string & dir, std::ostream & os) <br>_Do post-checkpoint work to avoid synchronizations while writing the amr hierarchy._  |
-| virtual void | [**checkPointPre**](classamrex_1_1AmrLevel.md#function-checkpointpre) (const std::string & dir, std::ostream & os) <br>_Do pre-checkpoint work to avoid synchronizations while writing the amr hierarchy._  |
-| virtual void | [**computeInitialDt**](classamrex_1_1AmrLevel.md#function-computeinitialdt) (int finest\_level, int sub\_cycle, Vector&lt; int &gt; & n\_cycle, const Vector&lt; IntVect &gt; & ref\_ratio, Vector&lt; Real &gt; & dt\_level, Real stop\_time) = 0<br>_Compute the initial time step. This is a pure virtual function and hence MUST be implemented by derived classes._  |
-| virtual void | [**computeNewDt**](classamrex_1_1AmrLevel.md#function-computenewdt) (int finest\_level, int sub\_cycle, Vector&lt; int &gt; & n\_cycle, const Vector&lt; IntVect &gt; & ref\_ratio, Vector&lt; Real &gt; & dt\_min, Vector&lt; Real &gt; & dt\_level, Real stop\_time, int post\_regrid\_flag) = 0<br>_Compute the next time step. This is a pure virtual function and hence MUST be implemented by derived classes._  |
-|  void | [**constructAreaNotToTag**](classamrex_1_1AmrLevel.md#function-constructareanottotag) () <br>_Constuct the area not to tag._  |
-|  long | [**countCells**](classamrex_1_1AmrLevel.md#function-countcells) () noexcept const<br>_Returns number of cells on level._  |
-| virtual std::unique\_ptr&lt; MultiFab &gt; | [**derive**](classamrex_1_1AmrLevel.md#function-derive-1-2) (const std::string & name, Real time, int ngrow) <br>_Returns a MultiFab containing the derived data for this level. The user is responsible for deleting this pointer when done with it. If ngrow&gt;0 the MultiFab is built on the appropriately grown BoxArray._  |
-| virtual void | [**derive**](classamrex_1_1AmrLevel.md#function-derive-2-2) (const std::string & name, Real time, MultiFab & mf, int dcomp) <br>_This version of_ [_**derive()**_](classamrex_1_1AmrLevel.md#function-derive-1-2) _fills the dcomp'th component of mf with the derived quantity._ |
-| virtual void | [**errorEst**](classamrex_1_1AmrLevel.md#function-errorest) (TagBoxArray & tb, int clearval, int tagval, Real time, int n\_error\_buf=0, int ngrow=0) = 0<br>_Error estimation for regridding. This is a pure virtual function and hence MUST be implemented by derived classes._  |
-| virtual Real | [**estimateWork**](classamrex_1_1AmrLevel.md#function-estimatework) () <br>_Estimate the amount of work required to advance Just this level based on the number of cells. This estimate can be overwritten with different methods._  |
-|  const IntVect & | [**fineRatio**](classamrex_1_1AmrLevel.md#function-fineratio) () noexcept const<br> |
-|  const BoxArray & | [**getAreaNotToTag**](classamrex_1_1AmrLevel.md#function-getareanottotag) () noexcept<br>_Get the area not to tag._  |
-|  const Box & | [**getAreaToTag**](classamrex_1_1AmrLevel.md#function-getareatotag) () noexcept<br> |
-|  Vector&lt; int &gt; | [**getBCArray**](classamrex_1_1AmrLevel.md#function-getbcarray) (int State\_Type, int gridno, int scomp, int ncomp) <br>_Boundary condition access function._  |
-|  const BoxArray & | [**getEdgeBoxArray**](classamrex_1_1AmrLevel.md#function-getedgeboxarray) (int dir) noexcept const<br> |
-|  const BoxArray & | [**getNodalBoxArray**](classamrex_1_1AmrLevel.md#function-getnodalboxarray) () noexcept const<br> |
-|  MultiFab & | [**get\_data**](classamrex_1_1AmrLevel.md#function-get-data) (int state\_indx, Real time) noexcept<br>_Get state data at specified index and time._  |
-|  MultiFab & | [**get\_new\_data**](classamrex_1_1AmrLevel.md#function-get-new-data-1-2) (int state\_indx) noexcept<br>_State data at new time._  |
-|  const MultiFab & | [**get\_new\_data**](classamrex_1_1AmrLevel.md#function-get-new-data-2-2) (int state\_indx) noexcept const<br>_State data at new time._  |
-|  MultiFab & | [**get\_old\_data**](classamrex_1_1AmrLevel.md#function-get-old-data-1-2) (int state\_indx) noexcept<br>_State data at old time._  |
-|  const MultiFab & | [**get\_old\_data**](classamrex_1_1AmrLevel.md#function-get-old-data-2-2) (int state\_indx) noexcept const<br>_State data at old time._  |
-|  StateData & | [**get\_state\_data**](classamrex_1_1AmrLevel.md#function-get-state-data) (int state\_indx) noexcept<br>_State data object._  |
-| virtual void | [**init**](classamrex_1_1AmrLevel.md#function-init-1-2) ([**AmrLevel**](classamrex_1_1AmrLevel.md) & old) = 0<br>_Init data on this level from another_ [_**AmrLevel**_](classamrex_1_1AmrLevel.md) _(during regrid). This is a pure virtual function and hence MUST be implemented by derived classes._ |
-| virtual void | [**init**](classamrex_1_1AmrLevel.md#function-init-2-2) () = 0<br> |
-| virtual void | [**initData**](classamrex_1_1AmrLevel.md#function-initdata) () = 0<br>_Init grid data at problem start-up. This is a pure virtual function and hence MUST be implemented by derived classes._  |
-| virtual void | [**manual\_tags\_placement**](classamrex_1_1AmrLevel.md#function-manual-tags-placement) (TagBoxArray & tags, const Vector&lt; IntVect &gt; & bf\_lev) <br>_Called in grid\_places after other tagging routines to modify the list of tagged points. Default implementation does nothing._  |
-|  int | [**nStep**](classamrex_1_1AmrLevel.md#function-nstep) () noexcept const<br>_Timestep n at this level._  |
-|  int | [**numGrids**](classamrex_1_1AmrLevel.md#function-numgrids) () noexcept const<br>_Number of grids at this level._  |
-|  int | [**numStates**](classamrex_1_1AmrLevel.md#function-numstates) () noexcept const<br>_Number of states at this level._  |
-| virtual int | [**okToContinue**](classamrex_1_1AmrLevel.md#function-oktocontinue) () <br>_Is it ok to continue the calculation?_  |
-| virtual int | [**okToRegrid**](classamrex_1_1AmrLevel.md#function-oktoregrid) () <br>_Should I regrid with this level as base level? This test is only evaluated if regrid\_int &gt; 0 and level\_count &gt;= regrid\_int as well. Defaults to true._  |
-| virtual void | [**postCoarseTimeStep**](classamrex_1_1AmrLevel.md#function-postcoarsetimestep) (Real time) <br>_Contains operations to be done only after a full coarse timestep. The default implementation does nothing._  |
-|  int | [**postStepRegrid**](classamrex_1_1AmrLevel.md#function-poststepregrid) () noexcept<br>_Returns whether or not we want a post-timestep regrid._  |
-| virtual void | [**post\_init**](classamrex_1_1AmrLevel.md#function-post-init) (Real stop\_time) = 0<br>_Operations to be done after initialization. This is a pure virtual function and hence MUST be implemented by derived classes._  |
-| virtual void | [**post\_regrid**](classamrex_1_1AmrLevel.md#function-post-regrid) (int lbase, int iteration, int new\_finest) = 0<br>_Operations to be done after regridding This is a pure virtual function and hence MUST be implemented by derived classes._  |
-| virtual void | [**post\_restart**](classamrex_1_1AmrLevel.md#function-post-restart) () <br>_Operations to be done after restart._  |
-| virtual void | [**post\_timestep**](classamrex_1_1AmrLevel.md#function-post-timestep) (int iteration) = 0<br>_Contains operations to be done after a timestep. This is a pure virtual function and hence MUST be implemented by derived classes._  |
-| virtual void | [**removeOldData**](classamrex_1_1AmrLevel.md#function-removeolddata) () <br>_Delete old-time data._  |
-|  void | [**reset**](classamrex_1_1AmrLevel.md#function-reset) () <br>_Reset data to initial time by swapping new and old time data._  |
-| virtual void | [**restart**](classamrex_1_1AmrLevel.md#function-restart) ([**Amr**](classamrex_1_1Amr.md) & papa, std::istream & is, bool bReadSpecial=false) <br>_Restart from a checkpoint file._  |
-|  void | [**setAreaNotToTag**](classamrex_1_1AmrLevel.md#function-setareanottotag) (BoxArray & ba) noexcept<br>_Set the area not to tag._  |
-| virtual void | [**setPhysBoundaryValues**](classamrex_1_1AmrLevel.md#function-setphysboundaryvalues) (FArrayBox & dest, int state\_indx, Real time, int dest\_comp, int src\_comp, int num\_comp) <br>_Function to set physical boundary conditions._  |
-| virtual void | [**setPlotVariables**](classamrex_1_1AmrLevel.md#function-setplotvariables) () <br>_Modify list of variables to be plotted._  |
-|  void | [**setPostStepRegrid**](classamrex_1_1AmrLevel.md#function-setpoststepregrid) (int new\_val) noexcept<br>_Sets a new value for the post-timestep regrid trigger._  |
-| virtual void | [**setSmallPlotVariables**](classamrex_1_1AmrLevel.md#function-setsmallplotvariables) () <br>_Modify list of variables to be plotted._  |
-| virtual void | [**setTimeLevel**](classamrex_1_1AmrLevel.md#function-settimelevel) (Real time, Real dt\_old, Real dt\_new) <br>_Set the time levels of state data._  |
-| virtual void | [**set\_preferred\_boundary\_values**](classamrex_1_1AmrLevel.md#function-set-preferred-boundary-values) (MultiFab & S, int state\_index, int scomp, int dcomp, int ncomp, Real time) const<br>_Hack to allow override of (non-fine-fine) fillpatched boundary data._  |
-| virtual void | [**set\_state\_in\_checkpoint**](classamrex_1_1AmrLevel.md#function-set-state-in-checkpoint) (Vector&lt; int &gt; & state\_in\_checkpoint) <br>_Old checkpoint may have different number of states than the new source code._  |
-| virtual std::string | [**thePlotFileType**](classamrex_1_1AmrLevel.md#function-theplotfiletype) () const<br>_A string written as the first item in_ [_**writePlotFile()**_](classamrex_1_1AmrLevel.md#function-writeplotfile) _at level zero. It is so we can distinguish between different types of plot files. This default "HyperCLaw-V1.1" is for VisIt software and some of our internal postprocessing routines._ |
-|  [**TimeLevel**](classamrex_1_1AmrLevel.md#enum-timelevel) | [**which\_time**](classamrex_1_1AmrLevel.md#function-which-time) (int state\_indx, Real time) noexcept const<br>_Returns one the TimeLevel enums. Asserts that time is between AmrOldTime and AmrNewTime._  |
-| virtual void | [**writePlotFile**](classamrex_1_1AmrLevel.md#function-writeplotfile) (const std::string & dir, std::ostream & os, VisMF::How how=VisMF::NFiles) <br>_Write plot file stuff to specified directory. This is a pure virtual function and hence MUST be implemented by derived classes._  |
-| virtual void | [**writePlotFilePost**](classamrex_1_1AmrLevel.md#function-writeplotfilepost) (const std::string & dir, std::ostream & os) <br>_Do post-plotfile work to avoid synchronizations while writing the amr hierarchy._  |
-| virtual void | [**writePlotFilePre**](classamrex_1_1AmrLevel.md#function-writeplotfilepre) (const std::string & dir, std::ostream & os) <br>_Do pre-plotfile work to avoid synchronizations while writing the amr hierarchy._  |
-| virtual bool | [**writePlotNow**](classamrex_1_1AmrLevel.md#function-writeplotnow) () <br>_Does the_ [_**AmrLevel**_](classamrex_1_1AmrLevel.md) _want_[_**Amr**_](classamrex_1_1Amr.md) _to write a plotfile now?_ |
-| virtual void | [**writeSmallPlotFile**](classamrex_1_1AmrLevel.md#function-writesmallplotfile) (const std::string & dir, std::ostream & os, VisMF::How how=VisMF::NFiles) <br>_Write small plot file stuff to specified directory._  |
-| virtual bool | [**writeSmallPlotNow**](classamrex_1_1AmrLevel.md#function-writesmallplotnow) () <br>_Does the_ [_**AmrLevel**_](classamrex_1_1AmrLevel.md) _want_[_**Amr**_](classamrex_1_1Amr.md) _to write a small plotfile now?_ |
-| virtual  | [**~AmrLevel**](classamrex_1_1AmrLevel.md#function-amrlevel) () <br>_The destructor._  |
-
-## Public Functions inherited from [amrex::AmrLevel](classamrex_1_1AmrLevel.md)
-
-| Type | Name |
-| ---: | :--- |
-| virtual void | [**CreateLevelDirectory**](classamrex_1_1AmrLevel.md#function-createleveldirectory) (const std::string & dir) <br>_Create the Level\_ directory for checkpoint and plot files._  |
-|  const DistributionMapping & | [**DistributionMap**](classamrex_1_1AmrLevel.md#function-distributionmap) () noexcept const<br> |
-|  const Box & | [**Domain**](classamrex_1_1AmrLevel.md#function-domain) () noexcept const<br>_Returns the indices defining physical domain._  |
-|  const FabFactory&lt; FArrayBox &gt; & | [**Factory**](classamrex_1_1AmrLevel.md#function-factory) () noexcept const<br> |
-|  void | [**FillCoarsePatch**](classamrex_1_1AmrLevel.md#function-fillcoarsepatch) (MultiFab & dest, int dcomp, Real time, int state\_idx, int scomp, int ncomp, int nghost=0) <br>_Interpolate from coarse level to the valid area in dest._  |
-|  const Geometry & | [**Geom**](classamrex_1_1AmrLevel.md#function-geom) () noexcept const<br>_Returns the geometry object._  |
-|  int | [**Level**](classamrex_1_1AmrLevel.md#function-level) () noexcept const<br>_Returns this_ [_**AmrLevel**_](classamrex_1_1AmrLevel.md) _._ |
-|  void | [**LevelDirectoryNames**](classamrex_1_1AmrLevel.md#function-leveldirectorynames) (const std::string & dir, std::string & LevelDir, std::string & FullPath) <br>_Get the level directory names._  |
-|  void | [**SetLevelDirectoryCreated**](classamrex_1_1AmrLevel.md#function-setleveldirectorycreated) (bool ldc) noexcept<br>_Set if the Level\_ directory was created or to clear the value. CreateLevelDirectory sets levelDirectoryCreated = true._  |
-|  void | [**UpdateDistributionMaps**](classamrex_1_1AmrLevel.md#function-updatedistributionmaps) (DistributionMapping & dmap) <br>_Update the distribution maps in StateData based on the size of the map._  |
-| virtual int | [**WorkEstType**](classamrex_1_1AmrLevel.md#function-workesttype) () <br>_Which state data type is for work estimates? -1 means none._  |
-| virtual Real | [**advance**](classamrex_1_1AmrLevel.md#function-advance) (Real time, Real dt, int iteration, int ncycle) = 0<br>_Do an integration step on this level. Returns maximum safe time step. This is a pure virtual function and hence MUST be implemented by derived classes._  |
-| virtual void | [**allocOldData**](classamrex_1_1AmrLevel.md#function-allocolddata) () <br>_Alloc space for old time data._  |
-|  const BoxArray & | [**boxArray**](classamrex_1_1AmrLevel.md#function-boxarray) () noexcept const<br>_List of grids at this level._  |
-| virtual void | [**checkPoint**](classamrex_1_1AmrLevel.md#function-checkpoint) (const std::string & dir, std::ostream & os, VisMF::How how=VisMF::NFiles, bool dump\_old=true) <br>_Write current state to checkpoint file._  |
-| virtual void | [**checkPointPost**](classamrex_1_1AmrLevel.md#function-checkpointpost) (const std::string & dir, std::ostream & os) <br>_Do post-checkpoint work to avoid synchronizations while writing the amr hierarchy._  |
-| virtual void | [**checkPointPre**](classamrex_1_1AmrLevel.md#function-checkpointpre) (const std::string & dir, std::ostream & os) <br>_Do pre-checkpoint work to avoid synchronizations while writing the amr hierarchy._  |
-| virtual void | [**computeInitialDt**](classamrex_1_1AmrLevel.md#function-computeinitialdt) (int finest\_level, int sub\_cycle, Vector&lt; int &gt; & n\_cycle, const Vector&lt; IntVect &gt; & ref\_ratio, Vector&lt; Real &gt; & dt\_level, Real stop\_time) = 0<br>_Compute the initial time step. This is a pure virtual function and hence MUST be implemented by derived classes._  |
-| virtual void | [**computeNewDt**](classamrex_1_1AmrLevel.md#function-computenewdt) (int finest\_level, int sub\_cycle, Vector&lt; int &gt; & n\_cycle, const Vector&lt; IntVect &gt; & ref\_ratio, Vector&lt; Real &gt; & dt\_min, Vector&lt; Real &gt; & dt\_level, Real stop\_time, int post\_regrid\_flag) = 0<br>_Compute the next time step. This is a pure virtual function and hence MUST be implemented by derived classes._  |
-|  void | [**constructAreaNotToTag**](classamrex_1_1AmrLevel.md#function-constructareanottotag) () <br>_Constuct the area not to tag._  |
-|  long | [**countCells**](classamrex_1_1AmrLevel.md#function-countcells) () noexcept const<br>_Returns number of cells on level._  |
-| virtual std::unique\_ptr&lt; MultiFab &gt; | [**derive**](classamrex_1_1AmrLevel.md#function-derive-1-2) (const std::string & name, Real time, int ngrow) <br>_Returns a MultiFab containing the derived data for this level. The user is responsible for deleting this pointer when done with it. If ngrow&gt;0 the MultiFab is built on the appropriately grown BoxArray._  |
-| virtual void | [**derive**](classamrex_1_1AmrLevel.md#function-derive-2-2) (const std::string & name, Real time, MultiFab & mf, int dcomp) <br>_This version of_ [_**derive()**_](classamrex_1_1AmrLevel.md#function-derive-1-2) _fills the dcomp'th component of mf with the derived quantity._ |
-| virtual void | [**errorEst**](classamrex_1_1AmrLevel.md#function-errorest) (TagBoxArray & tb, int clearval, int tagval, Real time, int n\_error\_buf=0, int ngrow=0) = 0<br>_Error estimation for regridding. This is a pure virtual function and hence MUST be implemented by derived classes._  |
-| virtual Real | [**estimateWork**](classamrex_1_1AmrLevel.md#function-estimatework) () <br>_Estimate the amount of work required to advance Just this level based on the number of cells. This estimate can be overwritten with different methods._  |
-|  const IntVect & | [**fineRatio**](classamrex_1_1AmrLevel.md#function-fineratio) () noexcept const<br> |
-|  const BoxArray & | [**getAreaNotToTag**](classamrex_1_1AmrLevel.md#function-getareanottotag) () noexcept<br>_Get the area not to tag._  |
-|  const Box & | [**getAreaToTag**](classamrex_1_1AmrLevel.md#function-getareatotag) () noexcept<br> |
-|  Vector&lt; int &gt; | [**getBCArray**](classamrex_1_1AmrLevel.md#function-getbcarray) (int State\_Type, int gridno, int scomp, int ncomp) <br>_Boundary condition access function._  |
-|  const BoxArray & | [**getEdgeBoxArray**](classamrex_1_1AmrLevel.md#function-getedgeboxarray) (int dir) noexcept const<br> |
-|  const BoxArray & | [**getNodalBoxArray**](classamrex_1_1AmrLevel.md#function-getnodalboxarray) () noexcept const<br> |
-|  MultiFab & | [**get\_data**](classamrex_1_1AmrLevel.md#function-get-data) (int state\_indx, Real time) noexcept<br>_Get state data at specified index and time._  |
-|  MultiFab & | [**get\_new\_data**](classamrex_1_1AmrLevel.md#function-get-new-data-1-2) (int state\_indx) noexcept<br>_State data at new time._  |
-|  const MultiFab & | [**get\_new\_data**](classamrex_1_1AmrLevel.md#function-get-new-data-2-2) (int state\_indx) noexcept const<br>_State data at new time._  |
-|  MultiFab & | [**get\_old\_data**](classamrex_1_1AmrLevel.md#function-get-old-data-1-2) (int state\_indx) noexcept<br>_State data at old time._  |
-|  const MultiFab & | [**get\_old\_data**](classamrex_1_1AmrLevel.md#function-get-old-data-2-2) (int state\_indx) noexcept const<br>_State data at old time._  |
-|  StateData & | [**get\_state\_data**](classamrex_1_1AmrLevel.md#function-get-state-data) (int state\_indx) noexcept<br>_State data object._  |
-| virtual void | [**init**](classamrex_1_1AmrLevel.md#function-init-1-2) ([**AmrLevel**](classamrex_1_1AmrLevel.md) & old) = 0<br>_Init data on this level from another_ [_**AmrLevel**_](classamrex_1_1AmrLevel.md) _(during regrid). This is a pure virtual function and hence MUST be implemented by derived classes._ |
-| virtual void | [**init**](classamrex_1_1AmrLevel.md#function-init-2-2) () = 0<br> |
-| virtual void | [**initData**](classamrex_1_1AmrLevel.md#function-initdata) () = 0<br>_Init grid data at problem start-up. This is a pure virtual function and hence MUST be implemented by derived classes._  |
-| virtual void | [**manual\_tags\_placement**](classamrex_1_1AmrLevel.md#function-manual-tags-placement) (TagBoxArray & tags, const Vector&lt; IntVect &gt; & bf\_lev) <br>_Called in grid\_places after other tagging routines to modify the list of tagged points. Default implementation does nothing._  |
-|  int | [**nStep**](classamrex_1_1AmrLevel.md#function-nstep) () noexcept const<br>_Timestep n at this level._  |
-|  int | [**numGrids**](classamrex_1_1AmrLevel.md#function-numgrids) () noexcept const<br>_Number of grids at this level._  |
-|  int | [**numStates**](classamrex_1_1AmrLevel.md#function-numstates) () noexcept const<br>_Number of states at this level._  |
-| virtual int | [**okToContinue**](classamrex_1_1AmrLevel.md#function-oktocontinue) () <br>_Is it ok to continue the calculation?_  |
-| virtual int | [**okToRegrid**](classamrex_1_1AmrLevel.md#function-oktoregrid) () <br>_Should I regrid with this level as base level? This test is only evaluated if regrid\_int &gt; 0 and level\_count &gt;= regrid\_int as well. Defaults to true._  |
-| virtual void | [**postCoarseTimeStep**](classamrex_1_1AmrLevel.md#function-postcoarsetimestep) (Real time) <br>_Contains operations to be done only after a full coarse timestep. The default implementation does nothing._  |
-|  int | [**postStepRegrid**](classamrex_1_1AmrLevel.md#function-poststepregrid) () noexcept<br>_Returns whether or not we want a post-timestep regrid._  |
-| virtual void | [**post\_init**](classamrex_1_1AmrLevel.md#function-post-init) (Real stop\_time) = 0<br>_Operations to be done after initialization. This is a pure virtual function and hence MUST be implemented by derived classes._  |
-| virtual void | [**post\_regrid**](classamrex_1_1AmrLevel.md#function-post-regrid) (int lbase, int iteration, int new\_finest) = 0<br>_Operations to be done after regridding This is a pure virtual function and hence MUST be implemented by derived classes._  |
-| virtual void | [**post\_restart**](classamrex_1_1AmrLevel.md#function-post-restart) () <br>_Operations to be done after restart._  |
-| virtual void | [**post\_timestep**](classamrex_1_1AmrLevel.md#function-post-timestep) (int iteration) = 0<br>_Contains operations to be done after a timestep. This is a pure virtual function and hence MUST be implemented by derived classes._  |
-| virtual void | [**removeOldData**](classamrex_1_1AmrLevel.md#function-removeolddata) () <br>_Delete old-time data._  |
-|  void | [**reset**](classamrex_1_1AmrLevel.md#function-reset) () <br>_Reset data to initial time by swapping new and old time data._  |
-| virtual void | [**restart**](classamrex_1_1AmrLevel.md#function-restart) ([**Amr**](classamrex_1_1Amr.md) & papa, std::istream & is, bool bReadSpecial=false) <br>_Restart from a checkpoint file._  |
-|  void | [**setAreaNotToTag**](classamrex_1_1AmrLevel.md#function-setareanottotag) (BoxArray & ba) noexcept<br>_Set the area not to tag._  |
-| virtual void | [**setPhysBoundaryValues**](classamrex_1_1AmrLevel.md#function-setphysboundaryvalues) (FArrayBox & dest, int state\_indx, Real time, int dest\_comp, int src\_comp, int num\_comp) <br>_Function to set physical boundary conditions._  |
-| virtual void | [**setPlotVariables**](classamrex_1_1AmrLevel.md#function-setplotvariables) () <br>_Modify list of variables to be plotted._  |
-|  void | [**setPostStepRegrid**](classamrex_1_1AmrLevel.md#function-setpoststepregrid) (int new\_val) noexcept<br>_Sets a new value for the post-timestep regrid trigger._  |
-| virtual void | [**setSmallPlotVariables**](classamrex_1_1AmrLevel.md#function-setsmallplotvariables) () <br>_Modify list of variables to be plotted._  |
-| virtual void | [**setTimeLevel**](classamrex_1_1AmrLevel.md#function-settimelevel) (Real time, Real dt\_old, Real dt\_new) <br>_Set the time levels of state data._  |
-| virtual void | [**set\_preferred\_boundary\_values**](classamrex_1_1AmrLevel.md#function-set-preferred-boundary-values) (MultiFab & S, int state\_index, int scomp, int dcomp, int ncomp, Real time) const<br>_Hack to allow override of (non-fine-fine) fillpatched boundary data._  |
-| virtual void | [**set\_state\_in\_checkpoint**](classamrex_1_1AmrLevel.md#function-set-state-in-checkpoint) (Vector&lt; int &gt; & state\_in\_checkpoint) <br>_Old checkpoint may have different number of states than the new source code._  |
-| virtual std::string | [**thePlotFileType**](classamrex_1_1AmrLevel.md#function-theplotfiletype) () const<br>_A string written as the first item in_ [_**writePlotFile()**_](classamrex_1_1AmrLevel.md#function-writeplotfile) _at level zero. It is so we can distinguish between different types of plot files. This default "HyperCLaw-V1.1" is for VisIt software and some of our internal postprocessing routines._ |
-|  [**TimeLevel**](classamrex_1_1AmrLevel.md#enum-timelevel) | [**which\_time**](classamrex_1_1AmrLevel.md#function-which-time) (int state\_indx, Real time) noexcept const<br>_Returns one the TimeLevel enums. Asserts that time is between AmrOldTime and AmrNewTime._  |
-| virtual void | [**writePlotFile**](classamrex_1_1AmrLevel.md#function-writeplotfile) (const std::string & dir, std::ostream & os, VisMF::How how=VisMF::NFiles) <br>_Write plot file stuff to specified directory. This is a pure virtual function and hence MUST be implemented by derived classes._  |
-| virtual void | [**writePlotFilePost**](classamrex_1_1AmrLevel.md#function-writeplotfilepost) (const std::string & dir, std::ostream & os) <br>_Do post-plotfile work to avoid synchronizations while writing the amr hierarchy._  |
-| virtual void | [**writePlotFilePre**](classamrex_1_1AmrLevel.md#function-writeplotfilepre) (const std::string & dir, std::ostream & os) <br>_Do pre-plotfile work to avoid synchronizations while writing the amr hierarchy._  |
-| virtual bool | [**writePlotNow**](classamrex_1_1AmrLevel.md#function-writeplotnow) () <br>_Does the_ [_**AmrLevel**_](classamrex_1_1AmrLevel.md) _want_[_**Amr**_](classamrex_1_1Amr.md) _to write a plotfile now?_ |
-| virtual void | [**writeSmallPlotFile**](classamrex_1_1AmrLevel.md#function-writesmallplotfile) (const std::string & dir, std::ostream & os, VisMF::How how=VisMF::NFiles) <br>_Write small plot file stuff to specified directory._  |
-| virtual bool | [**writeSmallPlotNow**](classamrex_1_1AmrLevel.md#function-writesmallplotnow) () <br>_Does the_ [_**AmrLevel**_](classamrex_1_1AmrLevel.md) _want_[_**Amr**_](classamrex_1_1Amr.md) _to write a small plotfile now?_ |
-| virtual  | [**~AmrLevel**](classamrex_1_1AmrLevel.md#function-amrlevel) () <br>_The destructor._  |
 
 ## Public Static Functions
 
@@ -492,32 +323,6 @@ Inherits the following classes: [amrex::AmrLevel](classamrex_1_1AmrLevel.md),  [
 |  void | [**variable\_setup**](classNyx.md#function-variable-setup-1-2) () <br>_Define data descriptors._  |
 |  void | [**variable\_setup**](classNyx.md#function-variable-setup-2-2) () <br>_Define data descriptors._  |
 
-## Public Static Functions inherited from [amrex::AmrLevel](classamrex_1_1AmrLevel.md)
-
-| Type | Name |
-| ---: | :--- |
-|  void | [**FillPatch**](classamrex_1_1AmrLevel.md#function-fillpatch) ([**AmrLevel**](classamrex_1_1AmrLevel.md) & amrlevel, MultiFab & leveldata, int boxGrow, Real time, int index, int scomp, int ncomp, int dcomp=0) <br> |
-|  void | [**FillPatchAdd**](classamrex_1_1AmrLevel.md#function-fillpatchadd) ([**AmrLevel**](classamrex_1_1AmrLevel.md) & amrlevel, MultiFab & leveldata, int boxGrow, Real time, int index, int scomp, int ncomp, int dcomp=0) <br> |
-|  void | [**FlushFPICache**](classamrex_1_1AmrLevel.md#function-flushfpicache) () <br> |
-|  DeriveList & | [**get\_derive\_lst**](classamrex_1_1AmrLevel.md#function-get-derive-lst) () noexcept<br>_Returns list of derived variables._  |
-|  const DescriptorList & | [**get\_desc\_lst**](classamrex_1_1AmrLevel.md#function-get-desc-lst) () noexcept<br>_Returns list of Descriptors._  |
-|  bool | [**isStateVariable**](classamrex_1_1AmrLevel.md#function-isstatevariable) (const std::string & name, int & state\_indx, int & ncomp) <br>_Is name a state variable?_  |
-
-## Public Static Functions inherited from [amrex::AmrLevel](classamrex_1_1AmrLevel.md)
-
-| Type | Name |
-| ---: | :--- |
-|  void | [**FillPatch**](classamrex_1_1AmrLevel.md#function-fillpatch) ([**AmrLevel**](classamrex_1_1AmrLevel.md) & amrlevel, MultiFab & leveldata, int boxGrow, Real time, int index, int scomp, int ncomp, int dcomp=0) <br> |
-|  void | [**FillPatchAdd**](classamrex_1_1AmrLevel.md#function-fillpatchadd) ([**AmrLevel**](classamrex_1_1AmrLevel.md) & amrlevel, MultiFab & leveldata, int boxGrow, Real time, int index, int scomp, int ncomp, int dcomp=0) <br> |
-|  void | [**FlushFPICache**](classamrex_1_1AmrLevel.md#function-flushfpicache) () <br> |
-|  DeriveList & | [**get\_derive\_lst**](classamrex_1_1AmrLevel.md#function-get-derive-lst) () noexcept<br>_Returns list of derived variables._  |
-|  const DescriptorList & | [**get\_desc\_lst**](classamrex_1_1AmrLevel.md#function-get-desc-lst) () noexcept<br>_Returns list of Descriptors._  |
-|  bool | [**isStateVariable**](classamrex_1_1AmrLevel.md#function-isstatevariable) (const std::string & name, int & state\_indx, int & ncomp) <br>_Is name a state variable?_  |
-
-
-
-
-
 
 
 ## Protected Attributes
@@ -526,42 +331,6 @@ Inherits the following classes: [amrex::AmrLevel](classamrex_1_1AmrLevel.md),  [
 | ---: | :--- |
 |  bool | [**FillPatchedOldState\_ok**](classNyx.md#variable-fillpatchedoldstate-ok)  <br>_These are the value of "z" at which to perform analysis._  |
 |  amrex::FluxRegister \* | [**flux\_reg**](classNyx.md#variable-flux-reg)  <br> |
-
-## Protected Attributes inherited from [amrex::AmrLevel](classamrex_1_1AmrLevel.md)
-
-| Type | Name |
-| ---: | :--- |
-|  IntVect | [**crse\_ratio**](classamrex_1_1AmrLevel.md#variable-crse-ratio)  <br> |
-|  DistributionMapping | [**dmap**](classamrex_1_1AmrLevel.md#variable-dmap)  <br> |
-|  IntVect | [**fine\_ratio**](classamrex_1_1AmrLevel.md#variable-fine-ratio)  <br> |
-|  Geometry | [**geom**](classamrex_1_1AmrLevel.md#variable-geom)  <br> |
-|  BoxArray | [**grids**](classamrex_1_1AmrLevel.md#variable-grids)  <br> |
-|  int | [**level**](classamrex_1_1AmrLevel.md#variable-level)  <br> |
-|  bool | [**levelDirectoryCreated**](classamrex_1_1AmrLevel.md#variable-leveldirectorycreated)  <br> |
-|  BoxArray | [**m\_AreaNotToTag**](classamrex_1_1AmrLevel.md#variable-m-areanottotag)  <br> |
-|  Box | [**m\_AreaToTag**](classamrex_1_1AmrLevel.md#variable-m-areatotag)  <br> |
-|  std::unique\_ptr&lt; FabFactory&lt; FArrayBox &gt; &gt; | [**m\_factory**](classamrex_1_1AmrLevel.md#variable-m-factory)  <br> |
-|  [**Amr**](classamrex_1_1Amr.md) \* | [**parent**](classamrex_1_1AmrLevel.md#variable-parent)  <br> |
-|  int | [**post\_step\_regrid**](classamrex_1_1AmrLevel.md#variable-post-step-regrid)  <br> |
-|  Vector&lt; StateData &gt; | [**state**](classamrex_1_1AmrLevel.md#variable-state)  <br> |
-
-## Protected Attributes inherited from [amrex::AmrLevel](classamrex_1_1AmrLevel.md)
-
-| Type | Name |
-| ---: | :--- |
-|  IntVect | [**crse\_ratio**](classamrex_1_1AmrLevel.md#variable-crse-ratio)  <br> |
-|  DistributionMapping | [**dmap**](classamrex_1_1AmrLevel.md#variable-dmap)  <br> |
-|  IntVect | [**fine\_ratio**](classamrex_1_1AmrLevel.md#variable-fine-ratio)  <br> |
-|  Geometry | [**geom**](classamrex_1_1AmrLevel.md#variable-geom)  <br> |
-|  BoxArray | [**grids**](classamrex_1_1AmrLevel.md#variable-grids)  <br> |
-|  int | [**level**](classamrex_1_1AmrLevel.md#variable-level)  <br> |
-|  bool | [**levelDirectoryCreated**](classamrex_1_1AmrLevel.md#variable-leveldirectorycreated)  <br> |
-|  BoxArray | [**m\_AreaNotToTag**](classamrex_1_1AmrLevel.md#variable-m-areanottotag)  <br> |
-|  Box | [**m\_AreaToTag**](classamrex_1_1AmrLevel.md#variable-m-areatotag)  <br> |
-|  std::unique\_ptr&lt; FabFactory&lt; FArrayBox &gt; &gt; | [**m\_factory**](classamrex_1_1AmrLevel.md#variable-m-factory)  <br> |
-|  [**Amr**](classamrex_1_1Amr.md) \* | [**parent**](classamrex_1_1AmrLevel.md#variable-parent)  <br> |
-|  int | [**post\_step\_regrid**](classamrex_1_1AmrLevel.md#variable-post-step-regrid)  <br> |
-|  Vector&lt; StateData &gt; | [**state**](classamrex_1_1AmrLevel.md#variable-state)  <br> |
 
 ## Protected Static Attributes
 
@@ -623,20 +392,6 @@ Inherits the following classes: [amrex::AmrLevel](classamrex_1_1AmrLevel.md),  [
 |  int | [**verbose**](classNyx.md#variable-verbose)   = = 0<br> |
 |  int | [**version\_2**](classNyx.md#variable-version-2)   = = 0<br> |
 
-## Protected Static Attributes inherited from [amrex::AmrLevel](classamrex_1_1AmrLevel.md)
-
-| Type | Name |
-| ---: | :--- |
-|  DeriveList | [**derive\_lst**](classamrex_1_1AmrLevel.md#variable-derive-lst)  <br> |
-|  DescriptorList | [**desc\_lst**](classamrex_1_1AmrLevel.md#variable-desc-lst)  <br> |
-
-## Protected Static Attributes inherited from [amrex::AmrLevel](classamrex_1_1AmrLevel.md)
-
-| Type | Name |
-| ---: | :--- |
-|  DeriveList | [**derive\_lst**](classamrex_1_1AmrLevel.md#variable-derive-lst)  <br> |
-|  DescriptorList | [**desc\_lst**](classamrex_1_1AmrLevel.md#variable-desc-lst)  <br> |
-
 ## Protected Functions
 
 | Type | Name |
@@ -674,26 +429,6 @@ Inherits the following classes: [amrex::AmrLevel](classamrex_1_1AmrLevel.md),  [
 |  void | [**write\_info**](classNyx.md#function-write-info-1-2) () <br> |
 |  void | [**write\_info**](classNyx.md#function-write-info-1-2) () <br> |
 
-## Protected Functions inherited from [amrex::AmrLevel](classamrex_1_1AmrLevel.md)
-
-| Type | Name |
-| ---: | :--- |
-|   | [**AmrLevel**](classamrex_1_1AmrLevel.md#function-amrlevel-1-3) () noexcept<br>_The constructors_  _for derived classes._ |
-|   | [**AmrLevel**](classamrex_1_1AmrLevel.md#function-amrlevel-2-3) ([**Amr**](classamrex_1_1Amr.md) & papa, int lev, const Geometry & level\_geom, const BoxArray & bl, const DistributionMapping & dm, Real time) <br> |
-|   | [**AmrLevel**](classamrex_1_1AmrLevel.md#function-amrlevel-3-3) (const [**AmrLevel**](classamrex_1_1AmrLevel.md) &) = delete<br> |
-|  void | [**finishConstructor**](classamrex_1_1AmrLevel.md#function-finishconstructor) () <br>_Common code used by all constructors._  |
-|  [**AmrLevel**](classamrex_1_1AmrLevel.md) & | [**operator=**](classamrex_1_1AmrLevel.md#function-operator) (const [**AmrLevel**](classamrex_1_1AmrLevel.md) &) = delete<br> |
-
-## Protected Functions inherited from [amrex::AmrLevel](classamrex_1_1AmrLevel.md)
-
-| Type | Name |
-| ---: | :--- |
-|   | [**AmrLevel**](classamrex_1_1AmrLevel.md#function-amrlevel-1-3) () noexcept<br>_The constructors_  _for derived classes._ |
-|   | [**AmrLevel**](classamrex_1_1AmrLevel.md#function-amrlevel-2-3) ([**Amr**](classamrex_1_1Amr.md) & papa, int lev, const Geometry & level\_geom, const BoxArray & bl, const DistributionMapping & dm, Real time) <br> |
-|   | [**AmrLevel**](classamrex_1_1AmrLevel.md#function-amrlevel-3-3) (const [**AmrLevel**](classamrex_1_1AmrLevel.md) &) = delete<br> |
-|  void | [**finishConstructor**](classamrex_1_1AmrLevel.md#function-finishconstructor) () <br>_Common code used by all constructors._  |
-|  [**AmrLevel**](classamrex_1_1AmrLevel.md) & | [**operator=**](classamrex_1_1AmrLevel.md#function-operator) (const [**AmrLevel**](classamrex_1_1AmrLevel.md) &) = delete<br> |
-
 ## Protected Static Functions
 
 | Type | Name |
@@ -704,8 +439,6 @@ Inherits the following classes: [amrex::AmrLevel](classamrex_1_1AmrLevel.md),  [
 |  void | [**network\_init**](classNyx.md#function-network-init-2-2) () <br> |
 |  void | [**read\_params**](classNyx.md#function-read-params-1-2) () <br> |
 |  void | [**read\_params**](classNyx.md#function-read-params-2-2) () <br> |
-
-
 
 ## Public Attributes Documentation
 
@@ -1045,6 +778,15 @@ static amrex::Real Nyx::relative_max_change_a;
 
 
 
+### <a href="#variable-stencil-deposition-width" id="variable-stencil-deposition-width">variable stencil\_deposition\_width </a>
+
+
+```cpp
+int Nyx::stencil_deposition_width;
+```
+
+
+
 ### <a href="#variable-strict-subcycling" id="variable-strict-subcycling">variable strict\_subcycling </a>
 
 
@@ -1101,8 +843,6 @@ virtual void Nyx::CreateLevelDirectory (
 ```
 
 
-Implements [*amrex::AmrLevel::CreateLevelDirectory*](classamrex_1_1AmrLevel.md#function-createleveldirectory)
-
 
 ### <a href="#function-createleveldirectory-2-2" id="function-createleveldirectory-2-2">function CreateLevelDirectory [2/2]</a>
 
@@ -1113,8 +853,6 @@ virtual void Nyx::CreateLevelDirectory (
 ) 
 ```
 
-
-Implements [*amrex::AmrLevel::CreateLevelDirectory*](classamrex_1_1AmrLevel.md#function-createleveldirectory)
 
 
 ### <a href="#function-leveldirectorynames-1-2" id="function-leveldirectorynames-1-2">function LevelDirectoryNames [1/2]</a>
@@ -1460,8 +1198,6 @@ virtual void Nyx::checkPointPost (
 ```
 
 
-Implements [*amrex::AmrLevel::checkPointPost*](classamrex_1_1AmrLevel.md#function-checkpointpost)
-
 
 ### <a href="#function-checkpointpost-2-2" id="function-checkpointpost-2-2">function checkPointPost [2/2]</a>
 
@@ -1473,8 +1209,6 @@ virtual void Nyx::checkPointPost (
 ) 
 ```
 
-
-Implements [*amrex::AmrLevel::checkPointPost*](classamrex_1_1AmrLevel.md#function-checkpointpost)
 
 
 ### <a href="#function-checkpointpre-1-2" id="function-checkpointpre-1-2">function checkPointPre [1/2]</a>
@@ -1488,8 +1222,6 @@ virtual void Nyx::checkPointPre (
 ```
 
 
-Implements [*amrex::AmrLevel::checkPointPre*](classamrex_1_1AmrLevel.md#function-checkpointpre)
-
 
 ### <a href="#function-checkpointpre-2-2" id="function-checkpointpre-2-2">function checkPointPre [2/2]</a>
 
@@ -1501,8 +1233,6 @@ virtual void Nyx::checkPointPre (
 ) 
 ```
 
-
-Implements [*amrex::AmrLevel::checkPointPre*](classamrex_1_1AmrLevel.md#function-checkpointpre)
 
 
 ### <a href="#function-comoving-a-post-restart-1-2" id="function-comoving-a-post-restart-1-2">function comoving\_a\_post\_restart [1/2]</a>
@@ -2081,8 +1811,6 @@ virtual void Nyx::init (
 ```
 
 
-Implements [*amrex::AmrLevel::init*](classamrex_1_1AmrLevel.md#function-init-1-2)
-
 
 ### <a href="#function-init-2-4" id="function-init-2-4">function init [2/4]</a>
 
@@ -2091,8 +1819,6 @@ Implements [*amrex::AmrLevel::init*](classamrex_1_1AmrLevel.md#function-init-1-2
 virtual void Nyx::init () 
 ```
 
-
-Implements [*amrex::AmrLevel::init*](classamrex_1_1AmrLevel.md#function-init-2-2)
 
 
 ### <a href="#function-init-3-4" id="function-init-3-4">function init [3/4]</a>
@@ -2105,8 +1831,6 @@ virtual void Nyx::init (
 ```
 
 
-Implements [*amrex::AmrLevel::init*](classamrex_1_1AmrLevel.md#function-init-1-2)
-
 
 ### <a href="#function-init-4-4" id="function-init-4-4">function init [4/4]</a>
 
@@ -2115,8 +1839,6 @@ Implements [*amrex::AmrLevel::init*](classamrex_1_1AmrLevel.md#function-init-1-2
 virtual void Nyx::init () 
 ```
 
-
-Implements [*amrex::AmrLevel::init*](classamrex_1_1AmrLevel.md#function-init-2-2)
 
 
 ### <a href="#function-initdata-1-2" id="function-initdata-1-2">function initData [1/2]</a>
@@ -2127,8 +1849,6 @@ virtual void Nyx::initData ()
 ```
 
 
-Implements [*amrex::AmrLevel::initData*](classamrex_1_1AmrLevel.md#function-initdata)
-
 
 ### <a href="#function-initdata-2-2" id="function-initdata-2-2">function initData [2/2]</a>
 
@@ -2137,8 +1857,6 @@ Implements [*amrex::AmrLevel::initData*](classamrex_1_1AmrLevel.md#function-init
 virtual void Nyx::initData () 
 ```
 
-
-Implements [*amrex::AmrLevel::initData*](classamrex_1_1AmrLevel.md#function-initdata)
 
 
 ### <a href="#function-init-from-plotfile-1-2" id="function-init-from-plotfile-1-2">function init\_from\_plotfile [1/2]</a>
@@ -2283,6 +2001,20 @@ int Nyx::integrate_state_box (
 
 
 
+### <a href="#function-integrate-state-exact" id="function-integrate-state-exact">function integrate\_state\_exact </a>
+
+
+```cpp
+int Nyx::integrate_state_exact (
+    amrex::MultiFab & state,
+    amrex::MultiFab & diag_eos,
+    const amrex::Real & a,
+    const amrex::Real & delta_time
+) 
+```
+
+
+
 ### <a href="#function-integrate-state-grownbox-1-2" id="function-integrate-state-grownbox-1-2">function integrate\_state\_grownbox [1/2]</a>
 
 
@@ -2302,6 +2034,20 @@ int Nyx::integrate_state_grownbox (
 
 ```cpp
 int Nyx::integrate_state_grownbox (
+    amrex::MultiFab & state,
+    amrex::MultiFab & diag_eos,
+    const amrex::Real & a,
+    const amrex::Real & delta_time
+) 
+```
+
+
+
+### <a href="#function-integrate-state-grownexact" id="function-integrate-state-grownexact">function integrate\_state\_grownexact </a>
+
+
+```cpp
+int Nyx::integrate_state_grownexact (
     amrex::MultiFab & state,
     amrex::MultiFab & diag_eos,
     const amrex::Real & a,
@@ -2451,8 +2197,6 @@ virtual int Nyx::okToContinue ()
 ```
 
 
-Implements [*amrex::AmrLevel::okToContinue*](classamrex_1_1AmrLevel.md#function-oktocontinue)
-
 
 ### <a href="#function-oktocontinue-2-2" id="function-oktocontinue-2-2">function okToContinue [2/2]</a>
 
@@ -2461,8 +2205,6 @@ Implements [*amrex::AmrLevel::okToContinue*](classamrex_1_1AmrLevel.md#function-
 virtual int Nyx::okToContinue () 
 ```
 
-
-Implements [*amrex::AmrLevel::okToContinue*](classamrex_1_1AmrLevel.md#function-oktocontinue)
 
 
 ### <a href="#function-particle-check-point-1-2" id="function-particle-check-point-1-2">function particle\_check\_point [1/2]</a>
@@ -2716,8 +2458,6 @@ virtual void Nyx::post_regrid (
 ```
 
 
-Implements [*amrex::AmrLevel::post\_regrid*](classamrex_1_1AmrLevel.md#function-post-regrid)
-
 
 ### <a href="#function-post-restart-1-2" id="function-post-restart-1-2">function post\_restart [1/2]</a>
 
@@ -2727,8 +2467,6 @@ virtual void Nyx::post_restart ()
 ```
 
 
-Implements [*amrex::AmrLevel::post\_restart*](classamrex_1_1AmrLevel.md#function-post-restart)
-
 
 ### <a href="#function-post-restart-2-2" id="function-post-restart-2-2">function post\_restart [2/2]</a>
 
@@ -2737,8 +2475,6 @@ Implements [*amrex::AmrLevel::post\_restart*](classamrex_1_1AmrLevel.md#function
 virtual void Nyx::post_restart () 
 ```
 
-
-Implements [*amrex::AmrLevel::post\_restart*](classamrex_1_1AmrLevel.md#function-post-restart)
 
 
 ### <a href="#function-post-timestep-1-2" id="function-post-timestep-1-2">function post\_timestep [1/2]</a>
@@ -2751,8 +2487,6 @@ virtual void Nyx::post_timestep (
 ```
 
 
-Implements [*amrex::AmrLevel::post\_timestep*](classamrex_1_1AmrLevel.md#function-post-timestep)
-
 
 ### <a href="#function-post-timestep-2-2" id="function-post-timestep-2-2">function post\_timestep [2/2]</a>
 
@@ -2763,8 +2497,6 @@ virtual void Nyx::post_timestep (
 ) 
 ```
 
-
-Implements [*amrex::AmrLevel::post\_timestep*](classamrex_1_1AmrLevel.md#function-post-timestep)
 
 
 ### <a href="#function-primitive-to-conserved-1-2" id="function-primitive-to-conserved-1-2">function primitive\_to\_conserved [1/2]</a>
@@ -2864,7 +2596,7 @@ virtual void Nyx::restart (
 
 
 
-### <a href="#function-restart-2-2" id="function-restart-2-2">function restart [2/2]</a>
+### <a href="#function-restart-1-2" id="function-restart-1-2">function restart [1/2]</a>
 
 
 ```cpp
@@ -2885,8 +2617,6 @@ virtual void Nyx::setPlotVariables ()
 ```
 
 
-Implements [*amrex::AmrLevel::setPlotVariables*](classamrex_1_1AmrLevel.md#function-setplotvariables)
-
 
 ### <a href="#function-setplotvariables-2-2" id="function-setplotvariables-2-2">function setPlotVariables [2/2]</a>
 
@@ -2895,8 +2625,6 @@ Implements [*amrex::AmrLevel::setPlotVariables*](classamrex_1_1AmrLevel.md#funct
 virtual void Nyx::setPlotVariables () 
 ```
 
-
-Implements [*amrex::AmrLevel::setPlotVariables*](classamrex_1_1AmrLevel.md#function-setplotvariables)
 
 
 ### <a href="#function-settimelevel-1-2" id="function-settimelevel-1-2">function setTimeLevel [1/2]</a>
@@ -3061,8 +2789,6 @@ A string written as the first item in `write_plot_file()` at level zero. It is s
 
 
         
-Implements [*amrex::AmrLevel::thePlotFileType*](classamrex_1_1AmrLevel.md#function-theplotfiletype)
-
 
 ### <a href="#function-theplotfiletype-2-2" id="function-theplotfiletype-2-2">function thePlotFileType [2/2]</a>
 
@@ -3076,8 +2802,6 @@ A string written as the first item in `write_plot_file()` at level zero. It is s
 
 
         
-Implements [*amrex::AmrLevel::thePlotFileType*](classamrex_1_1AmrLevel.md#function-theplotfiletype)
-
 
 ### <a href="#function-time-center-source-terms-1-2" id="function-time-center-source-terms-1-2">function time\_center\_source\_terms [1/2]</a>
 
@@ -3369,22 +3093,18 @@ virtual void Nyx::writePlotFilePre (
 
 
 ```cpp
-virtual bool Nyx::writePlotNow () 
+bool Nyx::writePlotNow () 
 ```
 
-
-Implements [*amrex::AmrLevel::writePlotNow*](classamrex_1_1AmrLevel.md#function-writeplotnow)
 
 
 ### <a href="#function-writeplotnow-1-2" id="function-writeplotnow-1-2">function writePlotNow [1/2]</a>
 
 
 ```cpp
-virtual bool Nyx::writePlotNow () 
+bool Nyx::writePlotNow () 
 ```
 
-
-Implements [*amrex::AmrLevel::writePlotNow*](classamrex_1_1AmrLevel.md#function-writeplotnow)
 
 
 ### <a href="#function-write-parameter-file-1-2" id="function-write-parameter-file-1-2">function write\_parameter\_file [1/2]</a>
@@ -4773,4 +4493,4 @@ static void Nyx::read_params ()
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Exec/Test_Only_Axions/Nyx.H`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Exec/Test_Only_Axions/Nyx.H`

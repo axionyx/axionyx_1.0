@@ -38,8 +38,6 @@
 
 ## c
 
-* **CheckPointVersion** ([**amrex::anonymous\_namespace{AMReX\_Amr.cpp}**](namespaceamrex_1_1anonymous__namespace_02AMReX__Amr_8cpp_03.md))
-* **checkpoint\_headerversion** ([**amrex**](namespaceamrex.md))
 * **checkisnanmult** ([**ct\_upwind**](namespacect__upwind.md))
 * **checkisnans** ([**ct\_upwind**](namespacect__upwind.md))
 * **checknegdens** ([**ct\_upwind**](namespacect__upwind.md))
@@ -150,7 +148,6 @@
 
 ## p
 
-* **plot\_headerversion** ([**amrex**](namespaceamrex.md))
 * **prim\_half** ([**ct\_upwind**](namespacect__upwind.md))
 * **primtocons** ([**ct\_upwind**](namespacect__upwind.md))
 * **plm** ([**mhd\_plm\_module**](namespacemhd__plm__module.md))

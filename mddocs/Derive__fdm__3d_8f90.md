@@ -39,6 +39,7 @@
 |  subroutine | [**ca\_dererrx**](Derive__fdm__3d_8f90.md#function-ca-dererrx) (err err, err\_l1 err\_l1, err\_l2 err\_l2, err\_l3 err\_l3, err\_h1 err\_h1, err\_h2 err\_h2) <br> |
 |  subroutine | [**ca\_dererry**](Derive__fdm__3d_8f90.md#function-ca-dererry) (err err, err\_l1 err\_l1, err\_l2 err\_l2, err\_l3 err\_l3, err\_h1 err\_h1, err\_h2 err\_h2) <br> |
 |  subroutine | [**ca\_dererrz**](Derive__fdm__3d_8f90.md#function-ca-dererrz) (err err, err\_l1 err\_l1, err\_l2 err\_l2, err\_l3 err\_l3, err\_h1 err\_h1, err\_h2 err\_h2) <br> |
+|  subroutine | [**ca\_lohnererror**](Derive__fdm__3d_8f90.md#function-ca-lohnererror) (err err, err\_l1 err\_l1, err\_l2 err\_l2, err\_l3 err\_l3, err\_h1 err\_h1, err\_h2 err\_h2) <br> |
 
 
 
@@ -228,5 +229,21 @@ subroutine ca_dererrz (
 
 
 
+### <a href="#function-ca-lohnererror" id="function-ca-lohnererror">function ca\_lohnererror </a>
+
+
+```cpp
+subroutine ca_lohnererror (
+    err err,
+    err_l1 err_l1,
+    err_l2 err_l2,
+    err_l3 err_l3,
+    err_h1 err_h1,
+    err_h2 err_h2
+) 
+```
+
+
+
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/FDM/Derive_fdm_3d.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/FDM/Derive_fdm_3d.f90`

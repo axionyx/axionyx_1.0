@@ -109,4 +109,4 @@ integer, save comoving_module::comoving_type;
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/comoving_params.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/comoving_params.f90`

@@ -12,19 +12,19 @@ namespace amrex {
 
 const char* buildInfoGetBuildDate() {
 
-  static const char BUILD_DATE[] = "2019-05-15 15:55:05.938319";
+  static const char BUILD_DATE[] = "2019-07-16 13:48:54.980096";
   return BUILD_DATE;
 }
 
 const char* buildInfoGetBuildDir() {
 
-  static const char BUILD_DIR[] = "/home/uni06/cosmo/cbehren2/Nyx/axionyx/Exec/Test_Only_Axions";
+  static const char BUILD_DIR[] = "/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Exec/Test_Only_Axions";
   return BUILD_DIR;
 }
 
 const char* buildInfoGetBuildMachine() {
 
-  static const char BUILD_MACHINE[] = "Linux dmp008 3.10.0-693.11.6.el7.x86_64 #1 SMP Wed Jan 3 18:09:42 CST 2018 x86_64 x86_64 x86_64 GNU/Linux";
+  static const char BUILD_MACHINE[] = "Linux gwdu101 3.10.0-693.11.6.el7.x86_64 #1 SMP Wed Jan 3 18:09:42 CST 2018 x86_64 x86_64 x86_64 GNU/Linux";
   return BUILD_MACHINE;
 }
 
@@ -36,7 +36,7 @@ const char* buildInfoGetAMReXDir() {
 
 const char* buildInfoGetComp() {
 
-  static const char COMP[] = "gnu";
+  static const char COMP[] = "intel";
   return COMP;
 }
 
@@ -74,13 +74,13 @@ const char* buildInfoGetFName() {
 
 const char* buildInfoGetCXXFlags() {
 
-  static const char CXX_flags[] = " -Werror=return-type -g -O3 -std=c++11  -fopenmp -DNDEBUG -DBL_TINY_PROFILING -DAMREX_TINY_PROFILING -DBL_USE_MPI -DAMREX_USE_MPI -DBL_USE_OMP -DAMREX_USE_OMP -DAMREX_GIT_VERSION=\"19.05-2-gdf41312c9566-dirty\" -DBL_GCC_VERSION=17.0.2 -DBL_GCC_MAJOR_VERSION=17 -DBL_GCC_MINOR_VERSION=0 -DAMREX_LAUNCH= -DAMREX_DEVICE= -DAMREX_CUDA_FORT_GLOBAL= -DAMREX_CUDA_FORT_DEVICE= -DAMREX_CUDA_FORT_HOST= -DBL_SPACEDIM=3 -DAMREX_SPACEDIM=3 -DBL_FORT_USE_UNDERSCORE -DAMREX_FORT_USE_UNDERSCORE -DBL_Linux -DAMREX_Linux -DAMREX_PARTICLES -DCRSEGRNDOMP -DGRAVITY -DNO_HYDRO -DFDM -DBL_NOLINEVALUES -I. -I. -I../../Source -I../../Source/Src_3d -I../../Source/HydroFortran -I../../Source/Tagging -I../../Source/Initialization -I../../Source/EOS -I../../Source/Network -I../../Source/HeatCool -I../../Source/SourceTerms -I../../Source/DerivedQuantities -I../../Source/Monitors -I../../Source/Gravity -I../../Source/FDM -I../../../amrex/Src/Base -I../../../amrex/Src/AmrCore -I../../../amrex/Src/Amr -I../../../amrex/Src/Boundary -I../../../amrex/Src/Particle -I../../../amrex/Src/Extern/amrdata -I../../../amrex/Src/Base -I../../../amrex/Src/AmrCore -I../../../amrex/Src/Amr -I../../../amrex/Src/Boundary -I../../../amrex/Src/Particle -I../../../amrex/Src/Extern/amrdata -I../../Source/Constants -I../../../amrex/Src/LinearSolvers/C_CellMG -I../../../amrex/Src/LinearSolvers/C_CellMG -I../../../amrex/Src/LinearSolvers/MLMG -I../../../amrex/Src/LinearSolvers/MLMG -I../../Util/VODE -I../../Util/BLAS -I../../../amrex/Tools/C_scripts";
+  static const char CXX_flags[] = " -g -O2 -ip -qopt-report=5 -qopt-report-phase=vec -std=c++14  -qopenmp -pthread -DNDEBUG -DBL_USE_MPI -DAMREX_USE_MPI -DBL_USE_OMP -DAMREX_USE_OMP -DAMREX_GIT_VERSION=\"19.07-153-g69a0b11aef66-dirty\" -DAMREX_LAUNCH= -DAMREX_DEVICE= -DAMREX_CUDA_FORT_GLOBAL= -DAMREX_CUDA_FORT_DEVICE= -DAMREX_CUDA_FORT_HOST= -DBL_SPACEDIM=3 -DAMREX_SPACEDIM=3 -DBL_FORT_USE_UNDERSCORE -DAMREX_FORT_USE_UNDERSCORE -DBL_Linux -DAMREX_Linux -DAMREX_PARTICLES -DCRSEGRNDOMP -DGRAVITY -DCGRAV -DNO_HYDRO -DFDM -DBL_NOLINEVALUES -I. -I/usr/users/cbehren2/local/include -I../../../amrex/Src/Extern/SWFFT -I/usr/users/cbehren2/local_libs/lib/../include -I. -I../../Source -I../../Source/Src_3d -I../../Source/HydroFortran -I../../Source/Tagging -I../../Source/Initialization -I../../Source/EOS -I../../Source/Network -I../../Source/HeatCool -I../../Source/SourceTerms -I../../Source/DerivedQuantities -I../../Source/Monitors -I../../Source/Gravity -I../../Source/FDM -I../../Source/AMReX_axionyx -I../../../amrex/Src/Base -I../../../amrex/Src/AmrCore -I../../../amrex/Src/Amr -I../../../amrex/Src/Boundary -I../../../amrex/Src/Particle -I../../../amrex/Src/Extern/amrdata -I../../../amrex/Src/Base -I../../../amrex/Src/AmrCore -I../../../amrex/Src/Amr -I../../../amrex/Src/Boundary -I../../../amrex/Src/Particle -I../../../amrex/Src/Extern/amrdata -I../../Source/Constants -I../../../amrex/Src/LinearSolvers/C_CellMG -I../../../amrex/Src/LinearSolvers/C_CellMG -I../../../amrex/Src/LinearSolvers/MLMG -I../../../amrex/Src/LinearSolvers/MLMG -I../../Util/VODE -I../../Util/BLAS -I../../../amrex/Tools/C_scripts";
   return CXX_flags;
 }
 
 const char* buildInfoGetFFlags() {
 
-  static const char F_flags[] = " -g -O3 -ffree-line-length-none -fno-range-check -fno-second-underscore -fimplicit-none  -fopenmp";
+  static const char F_flags[] = " -g -O2 -ip -qopt-report=5 -qopt-report-phase=vec -implicitnone  -qopenmp";
   return F_flags;
 }
 
@@ -92,7 +92,7 @@ const char* buildInfoGetLinkFlags() {
 
 const char* buildInfoGetLibraries() {
 
-  static const char libraries[] = " -lgfortran -lquadmath";
+  static const char libraries[] = "-L/usr/users/cbehren2/local/lib -lfftw3_mpi -lfftw3 -lfftw3_omp -L/usr/users/cbehren2/local_libs/lib  -lifcore -lifcoremt";
   return libraries;
 }
 
@@ -145,8 +145,8 @@ const char* buildInfoGetModuleVal(int i) {
 const char* buildInfoGetGitHash(int i) {
 
   //static const char HASH1[] = "${GIT[1]}";
-  static const char HASH1[] = "18.05-226-g1bf5556-dirty";
-  static const char HASH2[] = "19.05-2-gdf41312-dirty";
+  static const char HASH1[] = "18.05-325-g1014029-dirty";
+  static const char HASH2[] = "19.07-153-g69a0b11-dirty";
 
   static const char EMPT[] = "";
 

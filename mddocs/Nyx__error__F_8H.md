@@ -136,7 +136,7 @@ int const int const int const int const int hi[];
 
 
 ```cpp
-int const int const int const int const int const int const int const int const amrex::Real const int* level;
+int const int const int const int const int const int const int const int const amrex::Real const amrex::Real const amrex::Real const amrex::Real const int* level;
 ```
 
 
@@ -163,7 +163,7 @@ int const int const int const int const int const int* ncomp;
 
 
 ```cpp
-const int const int const int const int const amrex::Real const amrex::Real const amrex::Real problo;
+int const int const int const int const int const int const int const int const amrex::Real const amrex::Real const amrex::Real problo;
 ```
 
 
@@ -208,7 +208,7 @@ const int const int const int const int const amrex::Real const amrex::Real cons
 
 
 ```cpp
-const int const int const int const int const amrex::Real const amrex::Real xlo[];
+int const int const int const int const int const int const int const int const amrex::Real const amrex::Real xlo[];
 ```
 
 
@@ -326,4 +326,4 @@ int const int const int BL_FORT_FAB_ARG (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Tagging/Nyx_error_F.H`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/Tagging/Nyx_error_F.H`

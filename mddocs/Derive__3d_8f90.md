@@ -429,4 +429,4 @@ subroutine dervel (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/DerivedQuantities/Derive_3d.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/DerivedQuantities/Derive_3d.f90`

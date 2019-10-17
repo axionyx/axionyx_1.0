@@ -18,7 +18,9 @@ extern "C"
 #include <Nyx.H>
 #include <Nyx_F.H>
 #include <NyxParticleContainer.H>
-//#include <AMReX_Particles_F.H>
+#ifdef FDM
+#include "fdm.H"
+#endif
 
 using namespace amrex;
 
@@ -274,6 +276,14 @@ void Nyx::initcosmo()
           nu_vx = -1;
 #endif
        }
+
+#ifdef FDM
+       baryon_den = 0;
+       baryon_vx = 1;
+       part_dx = 4;
+       part_vx = 7;
+#endif
+
        for (int n=0; n < BL_SPACEDIM; n++)
        {
           //vel_fac[n] = comoving_a * len[n]/comoving_h;
@@ -351,30 +361,128 @@ void Nyx::initcosmo()
     //Nyx::theDMPC()->InitCosmo(mf, vel_fac, n_part, particleMass, part_dx, part_vx);
 
 #ifdef FDM
-    std::cout<<"parent->initialBaLevels() = "<<level<<" "<<partlevel<<" "<<parent->initialBaLevels()<<std::endl; 
-    if(partlevel && level==(parent->initialBaLevels())){                                                                                                                                          
-      Vector<std::unique_ptr<MultiFab> > particle_mf;
-      Nyx::theDMPC()->AssignDensity(particle_mf);
+    // if(partlevel && level==(parent->initialBaLevels())){                                                                                                                                          
+      
+    //   Vector<std::unique_ptr<MultiFab> > particle_mf;
+    //   Vector<std::unique_ptr<MultiFab> > div(parent->initialBaLevels()+1);
+    //   Vector<MultiFab*> phase(parent->initialBaLevels()+1);
+    //   Vector<Vector<std::unique_ptr<MultiFab> > > grad_phase(parent->initialBaLevels()+1);
+    //   Vector<std::array<MultiFab*,AMREX_SPACEDIM> > grad_phase_aa;
 
-      for(int lev=0;lev<=parent->initialBaLevels();lev++){
-    BoxArray baWhereNotfdm;
-    if (lev < parent->initialBaLevels())
-      baWhereNotfdm = parent->initialBa(lev+1);
-    BoxArray myBaWhereNotfdm(baWhereNotfdm.size());
-    for (int i=0; i < baWhereNotfdm.size(); i++)
-      myBaWhereNotfdm.set(i, baWhereNotfdm[i]);
-    if (lev < parent->initialBaLevels())
-      myBaWhereNotfdm.coarsen(parent->refRatio(lev));
+    //   Nyx::theDMPC()->AssignDensityAndVels(particle_mf);
 
-    if(wkb_approx)
-      Nyx::theFDMwkbPC()->InitCosmo1ppcMultiLevel(particle_mf, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
-    else
-      Nyx::theFDMPC()->InitCosmo1ppcMultiLevel(particle_mf, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
-      }
+    //   for(int lev=0;lev<=parent->initialBaLevels();lev++){
+
+    //  const BoxArray& ba = parent->boxArray()[lev];
+    //  const DistributionMapping& dmap = parent->DistributionMap()[lev]; 
+    //  div[lev].reset(new MultiFab(ba, dmap, 1, 0));
+    //  div[lev]->setVal(0.0);
+    //  phase[lev] = new MultiFab(ba, dmap, 1, 1);
+    //  phase[lev]->setVal(0.0);
+
+    //  for (MFIter mfi(*(particle_mf[lev])); mfi.isValid(); ++mfi){
+    //    FArrayBox&  vel  = (*(particle_mf[lev]))[mfi];
+    //    const Box& box = mfi.tilebox();
+    //    const int* lo = box.loVect();
+    //    const int* hi = box.hiVect();
+    //    Array4<Real> const& div_array = (*(div[lev]))[mfi].array();
+    //    Array4<Real const> const& vel_array = vel.array();
+    //    divergence(box,div_array,vel_array,dx,comoving_a,1);
+    //  }
+
+    //  grad_phase[lev].resize(BL_SPACEDIM);
+    //  for (int n = 0; n < BL_SPACEDIM; ++n)
+    //    grad_phase[lev][n].reset(new MultiFab(BoxArray(ba).surroundingNodes(n), dmap, 1, 1));
+    //     grad_phase_aa.push_back({AMREX_D_DECL(GetVecOfVecOfPtrs(grad_phase)[lev][0],
+    //                        GetVecOfVecOfPtrs(grad_phase)[lev][1],
+    //                        GetVecOfVecOfPtrs(grad_phase)[lev][2])});
+    //   }
+
+    //   const MultiFab* crse_bcdata = nullptr;
+    //   Real rel_eps = 1.e-12;
+    //   Real abs_eps = 0.;
+    //   gravity->solve_with_MLMG(0, parent->initialBaLevels(), phase, amrex::GetVecOfConstPtrs(div),
+    //            grad_phase_aa, crse_bcdata, rel_eps, abs_eps);
+
+    //   for(int lev=0;lev<=parent->initialBaLevels();lev++){
+    //  BoxArray baWhereNotfdm;
+    //  if (lev < parent->initialBaLevels())
+    //    baWhereNotfdm = parent->initialBa(lev+1);
+    //  BoxArray myBaWhereNotfdm(baWhereNotfdm.size());
+    //  for (int i=0; i < baWhereNotfdm.size(); i++)
+    //    myBaWhereNotfdm.set(i, baWhereNotfdm[i]);
+    //  if (lev < parent->initialBaLevels())
+    //    myBaWhereNotfdm.coarsen(parent->refRatio(lev));
+
+    //  if(wkb_approx)
+    //    Nyx::theFDMwkbPC()->InitCosmo1ppcMultiLevel(particle_mf, phase, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
+    //  else
+    //    Nyx::theFDMPC()->InitCosmo1ppcMultiLevel(particle_mf, phase, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
+    //   }
+    // }
+
+    // MultiFab& Ax_new = get_new_data(Axion_Type);
+    // Ax_new.setVal(0.);
+
+
+    if(partlevel){
+      
+      /*Construct velocity from baryon velocity*/
+      const BoxArray& ba = parent->boxArray(level);
+      const DistributionMapping& dmap = parent->DistributionMap(level); 
+      MultiFab vel(ba, dmap, AMREX_SPACEDIM, 1);
+      vel.ParallelCopy(mf, baryon_vx, 0, AMREX_SPACEDIM, mf.nGrow(), vel.nGrow(), 
+               parent->Geom(level).periodicity(), FabArrayBase::COPY);
+      vel.mult(vel_fac[0], 0, 1, vel.nGrow());
+      vel.mult(vel_fac[1], 1, 1, vel.nGrow());
+      vel.mult(vel_fac[2], 2, 1, vel.nGrow());
+
+      /*Construct density from baryon density*/
+      MultiFab dens(ba, dmap, 1, 0);
+      MultiFab::Copy(dens, mf, baryon_den, 0, 1, dens.nGrow());
+      dens.plus(1, 0, 1, dens.nGrow());
+      dens.mult(rhoD, 0, 1, dens.nGrow());
+      
+      /*Calculate phase from velocity divergence*/
+      MultiFab div(ba, dmap, 1, 0);
+      for (MFIter mfi(vel); mfi.isValid(); ++mfi)
+    divergence(mfi.validbox(),div.array(mfi),vel.array(mfi),dx,comoving_a);
+      MultiFab phase(ba, dmap, 1, 1);
+      Vector<std::unique_ptr<MultiFab> > grad_phase;
+      Vector<std::array<MultiFab*,AMREX_SPACEDIM> > grad_phase_aa;
+      grad_phase.resize(BL_SPACEDIM);
+      for (int n = 0; n < BL_SPACEDIM; ++n)
+    grad_phase[n].reset(new MultiFab(BoxArray(ba).surroundingNodes(n), dmap, 1, 1));
+      grad_phase_aa.push_back({AMREX_D_DECL(GetVecOfPtrs(grad_phase)[0],
+                        GetVecOfPtrs(grad_phase)[1],
+                        GetVecOfPtrs(grad_phase)[2])});
+      const MultiFab* crse_bcdata = nullptr;
+      Real rel_eps = 1.e-8;
+      Real abs_eps = 0.;
+      gravity->solve_with_MLMG(level, level, {&phase}, {&div},
+                  grad_phase_aa, crse_bcdata, rel_eps, abs_eps);
+      
+      /*Construct cosmological initial condition for wkb approximated Gaussian beams*/
+      BoxArray baWhereNotfdm;
+      if (level < parent->initialBaLevels())
+    baWhereNotfdm = parent->initialBa(level+1);
+      BoxArray myBaWhereNotfdm(baWhereNotfdm.size());
+      for (int i=0; i < baWhereNotfdm.size(); i++)
+    myBaWhereNotfdm.set(i, baWhereNotfdm[i]);
+      if (level < parent->initialBaLevels())
+    myBaWhereNotfdm.coarsen(parent->refRatio(level));
+      if(wkb_approx)
+    Nyx::theFDMwkbPC()->InitCosmo1ppcMultiLevel(vel, phase, dens, gamma_fdm, particleMass, myBaWhereNotfdm, 
+                            level, parent->initialBaLevels()+1);
+      else
+    amrex::Abort("FDM cosmology only works with wkb_approx=1!");
     }
-    MultiFab& Ax_new = get_level(level).get_new_data(Axion_Type);
+    
+    MultiFab& Ax_new = get_new_data(Axion_Type);
     Ax_new.setVal(0.);
+
 #endif
+
 #ifndef NO_HYDRO
     MultiFab& S_new = get_level(level).get_new_data(State_Type);
     MultiFab& D_new = get_level(level).get_new_data(DiagEOS_Type);

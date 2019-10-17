@@ -59,4 +59,4 @@ subroutine fort_enforce_consistent_e (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Src_3d/enforce_consistent_e_3d.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/Src_3d/enforce_consistent_e_3d.f90`

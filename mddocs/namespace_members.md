@@ -56,12 +56,6 @@
 ## c
 
 * **cutoff\_vel** ([**agn\_params\_module**](namespaceagn__params__module.md))
-* **CheckPointVersion** ([**amrex::anonymous\_namespace{AMReX\_Amr.cpp}**](namespaceamrex_1_1anonymous__namespace_02AMReX__Amr_8cpp_03.md))
-* **checkpoint\_files\_output** ([**amrex**](namespaceamrex.md))
-* **checkpoint\_headerversion** ([**amrex**](namespaceamrex.md))
-* **checkpoint\_nfiles** ([**amrex**](namespaceamrex.md))
-* **checkpoint\_on\_restart** ([**amrex**](namespaceamrex.md))
-* **compute\_new\_dt\_on\_regrid** ([**amrex**](namespaceamrex.md))
 * **critvalue** ([**axion\_params\_module**](namespaceaxion__params__module.md), [**fdm\_params\_module**](namespacefdm__params__module.md))
 * **comoving\_h** ([**comoving\_module**](namespacecomoving__module.md))
 * **comoving\_omax** ([**comoving\_module**](namespacecomoving__module.md))
@@ -193,8 +187,6 @@
 
 ## i
 
-* **initialized** ([**amrex::anonymous\_namespace{AMReX\_Amr.cpp}**](namespaceamrex_1_1anonymous__namespace_02AMReX__Amr_8cpp_03.md), [**amrex::anonymous\_namespace{AMReX\_AmrCore.cpp}**](namespaceamrex_1_1anonymous__namespace_02AMReX__AmrCore_8cpp_03.md))
-* **insitu\_on\_restart** ([**amrex**](namespaceamrex.md))
 * **ii** ([**axion\_params\_module**](namespaceaxion__params__module.md), [**fdm\_params\_module**](namespacefdm__params__module.md))
 * **invez** ([**comoving\_nd\_module**](namespacecomoving__nd__module.md))
 * **ion\_n** ([**eos\_module**](namespaceeos__module.md))
@@ -240,7 +232,6 @@
 ## m
 
 * **max\_frac\_removed** ([**agn\_params\_module**](namespaceagn__params__module.md))
-* **mffile\_nstreams** ([**amrex**](namespaceamrex.md))
 * **mean\_rhob** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **mproton** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **m\_tt** ([**axion\_params\_module**](namespaceaxion__params__module.md), [**fdm\_params\_module**](namespacefdm__params__module.md))
@@ -301,13 +292,6 @@
 
 ## p
 
-* **plot\_files\_output** ([**amrex**](namespaceamrex.md))
-* **plot\_headerversion** ([**amrex**](namespaceamrex.md))
-* **plot\_nfiles** ([**amrex**](namespaceamrex.md))
-* **plotfile\_on\_restart** ([**amrex**](namespaceamrex.md))
-* **precreateDirectories** ([**amrex**](namespaceamrex.md))
-* **prereadFAHeaders** ([**amrex**](namespaceamrex.md))
-* **probinit\_natonce** ([**amrex**](namespaceamrex.md))
 * **prim\_half** ([**ct\_upwind**](namespacect__upwind.md))
 * **primtocons** ([**ct\_upwind**](namespacect__upwind.md))
 * **pi** ([**fundamental\_constants\_module**](namespacefundamental__constants__module.md))
@@ -344,7 +328,6 @@
 
 ## r
 
-* **regrid\_on\_restart** ([**amrex**](namespaceamrex.md))
 * **ReadHeader** ([**anonymous\_namespace{DarkMatterParticleContainer.cpp}**](namespaceanonymous__namespace_02DarkMatterParticleContainer_8cpp_03.md))
 * **RemoveParticlesOnExit** ([**anonymous\_namespace{NyxParticles.cpp}**](namespaceanonymous__namespace_02NyxParticles_8cpp_03.md))
 * **rechep** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
@@ -424,7 +407,6 @@
 
 ## u
 
-* **use\_efficient\_regrid** ([**amrex**](namespaceamrex.md))
 * **uvb\_density\_a** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **uvb\_density\_b** ([**atomic\_rates\_module**](namespaceatomic__rates__module.md))
 * **uflaten** ([**flatten\_module**](namespaceflatten__module.md))

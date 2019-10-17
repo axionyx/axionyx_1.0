@@ -25,6 +25,7 @@
 * `#include <AMReX_MultiFab.H>`
 * `#include <Nyx.H>`
 * `#include "Nyx_output.H"`
+* `#include "Stopwatch.H"`
 
 
 
@@ -133,4 +134,4 @@ const int resizeSignal (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/nyx_main.cpp`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/nyx_main.cpp`

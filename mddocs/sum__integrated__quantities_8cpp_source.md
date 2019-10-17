@@ -405,7 +405,8 @@ Nyx::compute_average_species (int          nspec,
 
 #ifdef FDM
 void
-Nyx::compute_axion_quantities (Real& mass, Real& epot, Real& ekinrho, Real& ekinv, Real& angmom_x, Real& angmom_y, Real& angmom_z, Real& grav_pot, Real& phase)
+Nyx::compute_axion_quantities (Real& mass, Real& epot, Real& ekinrho, Real& ekinv, Real& ekin, Real& angmom_x, 
+                   Real& angmom_y, Real& angmom_z, Real& grav_pot, Real& phase)
 {
     int             finest_level = parent->finestLevel();
     Real            time         = state[Axion_Type].curTime();
@@ -420,6 +421,7 @@ Nyx::compute_axion_quantities (Real& mass, Real& epot, Real& ekinrho, Real& ekin
         epot += nyx_lev.vol_weight_sum("AxEpot", time,true);
         ekinrho += nyx_lev.vol_weight_sum("AxEkinrho", time,true);
         ekinv += nyx_lev.vol_weight_sum("AxEkinv", time,true);
+        ekin += nyx_lev.vol_weight_sum("AxEkin", time,true);
         angmom_x += nyx_lev.vol_weight_sum("AxAngMomx", time,true);
         angmom_y += nyx_lev.vol_weight_sum("AxAngMomy", time,true);
         angmom_z += nyx_lev.vol_weight_sum("AxAngMomz", time,true);

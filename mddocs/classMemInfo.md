@@ -116,4 +116,4 @@ static inline MemInfo * MemInfo::GetInstance ()
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Monitors/MemInfo.H`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/Monitors/MemInfo.H`

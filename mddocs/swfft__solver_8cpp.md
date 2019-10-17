@@ -77,4 +77,4 @@ void swfft_solver (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Exec/Test_Only_Axions/swfft_solver.cpp`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Exec/Test_Only_Axions/swfft_solver.cpp`

@@ -21,11 +21,6 @@
 
 ## c
 
-* **Coord\_cube** ([**distribution.c**](distribution_8c.md))
-* **Coord\_x\_pencils** ([**distribution.c**](distribution_8c.md))
-* **Coord\_y\_pencils** ([**distribution.c**](distribution_8c.md))
-* **Coord\_z\_pencils** ([**distribution.c**](distribution_8c.md))
-* **Custom3D\_Dims\_create** ([**distribution.c**](distribution_8c.md))
 * **ca\_axangmom\_x** ([**Derive\_fdm\_3d.f90**](Derive__fdm__3d_8f90.md))
 * **ca\_axangmom\_y** ([**Derive\_fdm\_3d.f90**](Derive__fdm__3d_8f90.md))
 * **ca\_axangmom\_z** ([**Derive\_fdm\_3d.f90**](Derive__fdm__3d_8f90.md))
@@ -38,7 +33,8 @@
 * **ca\_dererrx** ([**Derive\_fdm\_3d.f90**](Derive__fdm__3d_8f90.md))
 * **ca\_dererry** ([**Derive\_fdm\_3d.f90**](Derive__fdm__3d_8f90.md))
 * **ca\_dererrz** ([**Derive\_fdm\_3d.f90**](Derive__fdm__3d_8f90.md))
-* **check\_retval** ([**integrate\_state\_box\_3d.cpp**](integrate__state__box__3d_8cpp.md), [**integrate\_state\_box\_3d\_stubs.cpp**](integrate__state__box__3d__stubs_8cpp.md), [**integrate\_state\_vec\_3d.cpp**](integrate__state__vec__3d_8cpp.md))
+* **ca\_lohnererror** ([**Derive\_fdm\_3d.f90**](Derive__fdm__3d_8f90.md))
+* **check\_retval** ([**integrate\_state\_box\_3d.cpp**](integrate__state__box__3d_8cpp.md), [**integrate\_state\_box\_3d\_stubs.cpp**](integrate__state__box__3d__stubs_8cpp.md), [**integrate\_state\_exact\_3d\_stubs.cpp**](integrate__state__exact__3d__stubs_8cpp.md), [**integrate\_state\_vec\_3d.cpp**](integrate__state__vec__3d_8cpp.md))
 * **cmpflx** ([**Nyx\_advection\_3d.f90**](Nyx__advection__3d_8f90.md))
 * **consup** ([**Nyx\_advection\_3d.f90**](Nyx__advection__3d_8f90.md), [**Nyx\_advection\_mhd\_3d.f90**](Nyx__advection__mhd__3d_8f90.md))
 * **ctoprim** ([**Nyx\_advection\_3d.f90**](Nyx__advection__3d_8f90.md), [**Nyx\_advection\_mhd\_3d.f90**](Nyx__advection__mhd__3d_8f90.md))
@@ -46,14 +42,6 @@
 
 ## d
 
-* **distribution\_1\_to\_3** ([**distribution.c**](distribution_8c.md))
-* **distribution\_2\_to\_3** ([**distribution.c**](distribution_8c.md))
-* **distribution\_3\_to\_1** ([**distribution.c**](distribution_8c.md))
-* **distribution\_3\_to\_2** ([**distribution.c**](distribution_8c.md))
-* **distribution\_assert\_commensurate** ([**distribution.c**](distribution_8c.md))
-* **distribution\_fini** ([**distribution.c**](distribution_8c.md))
-* **distribution\_init** ([**distribution.c**](distribution_8c.md))
-* **distribution\_init\_explicit** ([**distribution.c**](distribution_8c.md))
 * **derdivu** ([**Derive\_3d.f90**](Derive__3d_8f90.md))
 * **dereint1** ([**Derive\_3d.f90**](Derive__3d_8f90.md))
 * **dereint2** ([**Derive\_3d.f90**](Derive__3d_8f90.md))
@@ -72,6 +60,7 @@
 * **derspec** ([**Derive\_3d.f90**](Derive__3d_8f90.md))
 * **derstate** ([**Derive\_3d.f90**](Derive__3d_8f90.md))
 * **dervel** ([**Derive\_3d.f90**](Derive__3d_8f90.md))
+* **divergence** ([**fdm.H**](fdm_8H.md), [**fdm.cpp**](fdm_8cpp.md), [**fdm\_F.H**](fdm__F_8H.md))
 * **deposit\_fdm\_particles** ([**fdm\_3d.f90**](fdm__3d_8f90.md), [**fdm\_F.H**](fdm__F_8H.md))
 * **deposit\_fdm\_particles\_wkb** ([**fdm\_3d.f90**](fdm__3d_8f90.md), [**fdm\_F.H**](fdm__F_8H.md))
 * **denfill** ([**bc\_fill\_3d.f90**](bc__fill__3d_8f90.md), [**Nyx\_F.H**](Nyx__F_8H.md))
@@ -163,6 +152,7 @@
 * **fort\_set\_xhydrogen** ([**Nyx\_F.H**](Nyx__F_8H.md), [**Nyx\_nd.f90**](Nyx__nd_8f90.md))
 * **fort\_setup\_eos\_params** ([**Nyx\_F.H**](Nyx__F_8H.md))
 * **fort\_tabulate\_rates** ([**Nyx\_F.H**](Nyx__F_8H.md))
+* **fort\_update\_eos** ([**Nyx\_F.H**](Nyx__F_8H.md))
 * **fort\_update\_state** ([**Nyx\_F.H**](Nyx__F_8H.md))
 
 
@@ -243,13 +233,6 @@
 
 ## r
 
-* **Rank\_cube** ([**distribution.c**](distribution_8c.md))
-* **Rank\_x\_pencils** ([**distribution.c**](distribution_8c.md))
-* **Rank\_y\_pencils** ([**distribution.c**](distribution_8c.md))
-* **Rank\_z\_pencils** ([**distribution.c**](distribution_8c.md))
-* **redistribute** ([**distribution.c**](distribution_8c.md))
-* **redistribute\_2\_and\_3** ([**distribution.c**](distribution_8c.md))
-* **redistribute\_slab** ([**distribution.c**](distribution_8c.md))
 * **riemannus** ([**Nyx\_advection\_3d.f90**](Nyx__advection__3d_8f90.md))
 * **reset\_internal\_e** ([**reset\_internal\_energy\_3d.f90**](reset__internal__energy__3d_8f90.md), [**Nyx\_F.H**](Nyx__F_8H.md))
 * **reeber\_int** ([**Nyx.cpp**](Nyx_8cpp.md))
@@ -259,7 +242,6 @@
 
 ## s
 
-* **separator** ([**distribution.c**](distribution_8c.md))
 * **swfft\_solver** ([**swfft\_solver.cpp**](swfft__solver_8cpp.md))
 * **set\_scalar\_bc** ([**Nyx\_setup.cpp**](Nyx__setup_8cpp.md))
 * **set\_x\_vel\_bc** ([**Nyx\_setup.cpp**](Nyx__setup_8cpp.md))
@@ -299,6 +281,7 @@
 * **update\_fdm\_particles\_wkb** ([**fdm\_F.H**](fdm__F_8H.md), [**update\_fdm\_particles\_3d.f90**](update__fdm__particles__3d_8f90.md))
 * **update\_gaussian\_beams** ([**fdm\_F.H**](fdm__F_8H.md), [**update\_fdm\_particles\_3d.f90**](update__fdm__particles__3d_8f90.md))
 * **update\_gaussian\_beams\_wkb** ([**fdm\_F.H**](fdm__F_8H.md), [**update\_fdm\_particles\_3d.f90**](update__fdm__particles__3d_8f90.md))
+* **update** ([**update.f90**](update_8f90.md))
 * **umeth3d** ([**Nyx\_advection\_3d.f90**](Nyx__advection__3d_8f90.md))
 * **update\_dm\_particles** ([**update\_particles\_3d.f90**](update__particles__3d_8f90.md), [**dm\_F.H**](dm__F_8H.md))
 

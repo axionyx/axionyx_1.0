@@ -369,7 +369,10 @@ public:
 #endif
 
 #ifdef FDM
-    void compute_axion_quantities(amrex::Real& mass, amrex::Real& axepot, amrex::Real& axekinrho, amrex::Real& axekinv, amrex::Real& angmom_x, amrex::Real& angmom_y, amrex::Real& angmom_z,amrex::Real& grav_pot, amrex::Real& phase);
+    void compute_axion_quantities(amrex::Real& mass, amrex::Real& axepot, amrex::Real& axekinrho, 
+                  amrex::Real& axekinv, amrex::Real& axekin, amrex::Real& angmom_x,
+                  amrex::Real& angmom_y, amrex::Real& angmom_z,amrex::Real& grav_pot,
+                  amrex::Real& phase);
 #endif
 
     void strang_hydro(amrex::Real time, amrex::Real dt, amrex::Real a_old, amrex::Real a_new);
@@ -397,6 +400,9 @@ public:
                          amrex::Real dt, amrex::Real a_old, amrex::Real a_new, 
                          int sdc_iter);
 #endif
+
+  int integrate_state_exact(amrex::MultiFab &state,   amrex::MultiFab &diag_eos, const amrex::Real& a, const amrex::Real& delta_time);
+  int integrate_state_grownexact(amrex::MultiFab &state,   amrex::MultiFab &diag_eos, const amrex::Real& a, const amrex::Real& delta_time);
   
    int integrate_state_box(amrex::MultiFab &state,   amrex::MultiFab &diag_eos, const amrex::Real& a, const amrex::Real& delta_time);
    int integrate_state_grownbox(amrex::MultiFab &state,   amrex::MultiFab &diag_eos, const amrex::Real& a, const amrex::Real& delta_time);
@@ -527,9 +533,15 @@ public:
 #endif
 
 #ifdef NEUTRINO_PARTICLES
+  #ifdef NEUTRINO_DARK_PARTICLES
+    static DarkMatterParticleContainer* theNPC();
+    static DarkMatterParticleContainer* theVirtNPC();
+    static DarkMatterParticleContainer* theGhostNPC();
+  #else
     static NeutrinoParticleContainer* theNPC();
     static NeutrinoParticleContainer* theVirtNPC();
     static NeutrinoParticleContainer* theGhostNPC();
+  #endif
 #endif
 
 #ifdef FDM
@@ -565,7 +577,9 @@ public:
     static int wkb_approx;
     static amrex::Real beam_cfl;
     static amrex::Real vonNeumann_dt;
+    static int order;
 #endif
+    static int stencil_deposition_width;
 
     static int Temp_comp, Ne_comp, Zhi_comp;
 

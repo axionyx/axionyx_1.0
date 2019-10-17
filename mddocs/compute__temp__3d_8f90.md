@@ -134,4 +134,4 @@ subroutine fort_compute_temp_vec (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Src_3d/compute_temp_3d.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/Src_3d/compute_temp_3d.f90`

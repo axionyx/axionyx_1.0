@@ -175,4 +175,4 @@ subroutine ppm_module::ppm_type2 (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/HydroFortran/ppm_3d.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/HydroFortran/ppm_3d.f90`

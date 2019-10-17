@@ -33,4 +33,4 @@
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/NeutrinoParticleContainer.cpp`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/NeutrinoParticleContainer.cpp`

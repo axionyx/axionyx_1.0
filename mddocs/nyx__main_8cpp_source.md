@@ -50,7 +50,10 @@ std::string inputs_name = "";
 #ifdef HENSON
 #include <henson/context.h>
 #include <henson/data.h>
+
 #endif
+
+#include "Stopwatch.H"
 
 using namespace amrex;
 
@@ -97,6 +100,12 @@ nyx_main (int argc, char* argv[])
     pp.query("max_step",  max_step);
     pp.query("strt_time", strt_time);
     pp.query("stop_time", stop_time);
+    
+    
+    int stopwatch_level=3;
+    pp.query("stopwatch.level",stopwatch_level);
+    
+
 
     int how(-1);
     pp.query("how",how);
@@ -132,7 +141,9 @@ nyx_main (int argc, char* argv[])
 #endif
 
     bool finished(false);
-
+    Stopwatch::init(stopwatch_level,stopwatch_level);
+    Stopwatch::start();
+//    Stopwatch::starts_on();
     while ( ! finished)
     {
         // If we set the regrid_on_restart flag and if we are *not* going to take
@@ -150,7 +161,9 @@ nyx_main (int argc, char* argv[])
         if (amrptr->okToContinue()
                 && (amrptr->levelSteps(0) < max_step || max_step < 0)
                     && (amrptr->cumTime() < stop_time || stop_time < 0.0)){
+            Stopwatch::startlap("coarseTimeStep",0);
             amrptr->coarseTimeStep(stop_time);          // ---- Do a timestep.
+            Stopwatch::stoplap();
 #ifdef HENSON
             henson_save_pointer("amr",  amrptr);        // redundant to do every timesetp, but negligible overhead
             henson_save_pointer("dmpc", Nyx::theDMPC());
@@ -159,7 +172,6 @@ nyx_main (int argc, char* argv[])
         } else {
             finished = true;
         }
-
     }  // ---- end while( ! finished)
 
 #ifdef AMREX_USE_CVODE
@@ -197,6 +209,8 @@ nyx_main (int argc, char* argv[])
     BL_PROFILE_REGION_STOP("main()");
     BL_PROFILE_SET_RUN_TIME(dRunTime2);
     }
+
+    Stopwatch::stop("finishing.");
     amrex::Finalize();
 }
 ````

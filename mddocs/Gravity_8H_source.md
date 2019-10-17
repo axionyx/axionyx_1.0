@@ -159,12 +159,12 @@ protected:
                       const amrex::Vector<amrex::MultiFab*>& ecC) const;
 
     void AddParticlesToRhs(int level, amrex::MultiFab& Rhs, int ngrow);
-    void AddGhostParticlesToRhs(int level, amrex::MultiFab& Rhs);
+  void AddGhostParticlesToRhs(int level, amrex::MultiFab& Rhs, int ngrow);
     void AddVirtualParticlesToRhs(int level, amrex::MultiFab& Rhs, int ngrow);
 
     void AddParticlesToRhs(int base_level, int finest_level, int ngrow, const amrex::Vector<amrex::MultiFab*>& Rhs_particles);
-    void AddGhostParticlesToRhs(int level, const amrex::Vector<amrex::MultiFab*>& Rhs_particles);
-    void AddVirtualParticlesToRhs(int finest_level, const amrex::Vector<amrex::MultiFab*>& Rhs_particles);
+  void AddGhostParticlesToRhs(int level, const amrex::Vector<amrex::MultiFab*>& Rhs_particles, int ngrow);
+    void AddVirtualParticlesToRhs(int finest_level, const amrex::Vector<amrex::MultiFab*>& Rhs_particles, int ngrow);
 
     void CorrectRhsUsingOffset(int level, amrex::MultiFab& Rhs);
 };

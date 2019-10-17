@@ -555,13 +555,13 @@ FDMParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_imag, 
                 lo_real, hi_real, data_ptr_imag, lo_imag, 
                 hi_imag, plo, dx, a);
 
-#ifdef _OPENMP
-    amrex::Print() << "amrex_atomic_accumulate_fab \n";
-      amrex_atomic_accumulate_fab(BL_TO_FORTRAN_3D(local_real),
-                  BL_TO_FORTRAN_3D(fab_real), 1);
-      amrex_atomic_accumulate_fab(BL_TO_FORTRAN_3D(local_imag),
-                  BL_TO_FORTRAN_3D(fab_imag), 1);
-#endif
+// #ifdef _OPENMP
+//     amrex::Print() << "amrex_atomic_accumulate_fab \n";
+//       amrex_atomic_accumulate_fab(BL_TO_FORTRAN_3D(local_real),
+//                BL_TO_FORTRAN_3D(fab_real), 1);
+//       amrex_atomic_accumulate_fab(BL_TO_FORTRAN_3D(local_imag),
+//                BL_TO_FORTRAN_3D(fab_imag), 1);
+// #endif
     }
   }
 
@@ -690,7 +690,9 @@ FDMParticleContainer::estTimestepFDM(amrex::MultiFab&       phi,
 
 
 void
-FDMParticleContainer::InitCosmo1ppcMultiLevel(amrex::Vector<std::unique_ptr<amrex::MultiFab> >& mf, const Real gamma_ax, const Real particleMass, 
+FDMParticleContainer::InitCosmo1ppcMultiLevel(amrex::Vector<std::unique_ptr<amrex::MultiFab> >& mf,
+                          amrex::Vector<amrex::MultiFab*>& phase,
+                          const Real gamma_ax, const Real particleMass, 
                           BoxArray &baWhereNot, int lev, int nlevs)
 {
     BL_PROFILE("FDMParticleContainer::InitCosmo1ppcMultiLevel()");
@@ -727,13 +729,14 @@ FDMParticleContainer::InitCosmo1ppcMultiLevel(amrex::Vector<std::unique_ptr<amre
     for (MFIter mfi(*(mf[lev])); mfi.isValid(); ++mfi)
     {
       FArrayBox&  myFab  = (*(mf[lev]))[mfi];
-    const Box&  vbx    = mfi.validbox();
-        const int  *fab_lo = vbx.loVect();
-        const int  *fab_hi = vbx.hiVect();
-        ParticleLocData pld;
-        for (int kx = fab_lo[2]; kx <= fab_hi[2]; kx++)
+      FArrayBox&  phaseFab  = (*(phase[lev]))[mfi];
+      const Box&  vbx    = mfi.validbox();
+      const int  *fab_lo = vbx.loVect();
+      const int  *fab_hi = vbx.hiVect();
+      ParticleLocData pld;
+      for (int kx = fab_lo[2]; kx <= fab_hi[2]; kx++)
         {
-            for (int jx = fab_lo[1]; jx <= fab_hi[1]; jx++)
+      for (int jx = fab_lo[1]; jx <= fab_hi[1]; jx++)
             {
                 for (int ix = fab_lo[0]; ix <= fab_hi[0]; ix++)
                 {
@@ -754,7 +757,7 @@ FDMParticleContainer::InitCosmo1ppcMultiLevel(amrex::Vector<std::unique_ptr<amre
               //
               // Set velocities
               //
-              p.rdata(n+1) = 0.0;
+              p.rdata(n+1) = myFab(indices,n+1);
                 }
                     //
             // Set the mass of the particle from the input value.
@@ -763,10 +766,10 @@ FDMParticleContainer::InitCosmo1ppcMultiLevel(amrex::Vector<std::unique_ptr<amre
                 p.id()      = ParticleType::NextID();
                 p.cpu()     = MyProc;
 
-            Amp = std::sqrt(myFab(indices));
+            Amp = std::sqrt(myFab(indices,0));
 
             //set phase
-            p.rdata( 4) = 0.0;
+            p.rdata( 4) = phaseFab(indices,0);
             //set amplitude
             p.rdata( 5) = pow(2.0*gamma_ax*Amp,1.5);
             p.rdata( 6) = 0.0;

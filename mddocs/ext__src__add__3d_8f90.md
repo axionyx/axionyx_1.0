@@ -55,4 +55,4 @@ subroutine ext_src_add (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/SourceTerms/ext_src_add_3d.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/SourceTerms/ext_src_add_3d.f90`

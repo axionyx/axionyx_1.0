@@ -83,4 +83,4 @@ subroutine adjust_heat_cool_module::adjust_heat_cool (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/HeatCool/heat_cool_stubs.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/HeatCool/heat_cool_stubs.f90`

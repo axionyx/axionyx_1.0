@@ -62,4 +62,4 @@ subroutine fort_estdt (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Src_3d/EstDt_3d.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/Src_3d/EstDt_3d.f90`

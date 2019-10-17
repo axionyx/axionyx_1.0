@@ -120,4 +120,4 @@ subroutine fort_pc_edge_interp (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Gravity/Gravity_3d.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/Gravity/Gravity_3d.f90`

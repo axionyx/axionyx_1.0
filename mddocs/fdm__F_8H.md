@@ -30,6 +30,7 @@
 | ---: | :--- |
 |  void | [**deposit\_fdm\_particles**](fdm__F_8H.md#function-deposit-fdm-particles) (const void \* particles, const long \* np, const amrex::Real \* state\_real, const int \* lo\_real, const int \* hi\_real, const amrex::Real \* state\_imag, const int \* lo\_imag, const int \* hi\_imag, const amrex::Real \* prob\_lo, const amrex::Real \* dx, const amrex::Real & a) <br> |
 |  void | [**deposit\_fdm\_particles\_wkb**](fdm__F_8H.md#function-deposit-fdm-particles-wkb) (const void \* particles, const long \* np, const amrex::Real \* state\_real, const int \* lo\_real, const int \* hi\_real, const amrex::Real \* state\_imag, const int \* lo\_imag, const int \* hi\_imag, const amrex::Real \* prob\_lo, const amrex::Real \* dx, const amrex::Real & a) <br> |
+|  void | [**divergence**](fdm__F_8H.md#function-divergence) (const amrex::Real \* div, const amrex::Real \* vel, const int \* vel\_lo, const int \* vel\_hi, const amrex::Real \* dx) <br> |
 |  void | [**fort\_set\_a**](fdm__F_8H.md#function-fort-set-a) (const amrex::Real & a) <br> |
 |  void | [**fort\_set\_gamma**](fdm__F_8H.md#function-fort-set-gamma) (const amrex::Real & gamma\_fdm) <br> |
 |  void | [**fort\_set\_hbaroverm**](fdm__F_8H.md#function-fort-set-hbaroverm) (const amrex::Real & hbaroverm) <br> |
@@ -90,6 +91,21 @@ void deposit_fdm_particles_wkb (
     const amrex::Real * prob_lo,
     const amrex::Real * dx,
     const amrex::Real & a
+) 
+```
+
+
+
+### <a href="#function-divergence" id="function-divergence">function divergence </a>
+
+
+```cpp
+void divergence (
+    const amrex::Real * div,
+    const amrex::Real * vel,
+    const int * vel_lo,
+    const int * vel_hi,
+    const amrex::Real * dx
 ) 
 ```
 
@@ -282,4 +298,4 @@ void update_gaussian_beams_wkb (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/FDM/fdm_F.H`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/FDM/fdm_F.H`

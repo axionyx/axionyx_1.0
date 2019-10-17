@@ -51,7 +51,7 @@ Inherits the following classes: [NyxParticleContainer](classNyxParticleContainer
 
 | Type | Name |
 | ---: | :--- |
-|   | [**AGNParticleContainer**](classAGNParticleContainer.md#function-agnparticlecontainer) ([**amrex::Amr**](classamrex_1_1Amr.md) \* amr, int nghost) <br> |
+|   | [**AGNParticleContainer**](classAGNParticleContainer.md#function-agnparticlecontainer) (amrex::Amr \* amr, int nghost) <br> |
 |  void | [**AccreteMass**](classAGNParticleContainer.md#function-accretemass) (int lev, amrex::MultiFab & state, amrex::MultiFab & density\_lost, amrex::Real dt) <br> |
 |  void | [**AddOneParticle**](classAGNParticleContainer.md#function-addoneparticle-1-2) (int lev, int grid, int tile, amrex::Real mass, amrex::Real x, amrex::Real y, amrex::Real z) <br> |
 |  void | [**AddOneParticle**](classAGNParticleContainer.md#function-addoneparticle-2-2) (ParticleTileType & particle\_tile, amrex::Real mass, amrex::Real x, amrex::Real y, amrex::Real z) <br> |
@@ -74,7 +74,7 @@ Inherits the following classes: [NyxParticleContainer](classNyxParticleContainer
 |  void | [**GetParticleVelocities**](classNyxParticleContainer.md#function-getparticlevelocities) (amrex::Vector&lt; amrex::Real &gt; & part\_vels) <br> |
 |  void | [**MultiplyParticleMass**](classNyxParticleContainer.md#function-multiplyparticlemass) (int lev, amrex::Real mult) <br> |
 | virtual void | [**NyxCheckpoint**](classNyxParticleContainer.md#function-nyxcheckpoint) (const std::string & dir, const std::string & name) const<br> |
-|   | [**NyxParticleContainer**](classNyxParticleContainer.md#function-nyxparticlecontainer) ([**amrex::Amr**](classamrex_1_1Amr.md) \* amr, int nghost=0) <br> |
+|   | [**NyxParticleContainer**](classNyxParticleContainer.md#function-nyxparticlecontainer) (amrex::Amr \* amr, int nghost=0) <br> |
 | virtual void | [**Redistribute**](classNyxParticleContainer.md#function-redistribute) (int lev\_min=0, int lev\_max=-1, int nGrow=0) override<br> |
 | virtual void | [**RemoveParticlesAtLevel**](classNyxParticleContainer.md#function-removeparticlesatlevel) (int level) override<br> |
 |  void | [**SetParticleVelocities**](classNyxParticleContainer.md#function-setparticlevelocities) (amrex::Vector&lt; amrex::Real &gt; & part\_data) <br> |
@@ -366,4 +366,4 @@ bool AGNParticleContainer::sub_cycle;
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/AGNParticleContainer.H`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/AGNParticleContainer.H`

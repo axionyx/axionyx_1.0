@@ -13,7 +13,6 @@
 #include "Nyx.H"
 #include "Nyx_F.H"
 #include "Gravity.H"
-//#include <AMReX_Particles_F.H>
 #include <Gravity_F.H>
 
 using namespace amrex;
@@ -40,7 +39,8 @@ Nyx::advance_particles_only (Real time,
      BL_PROFILE("Nyx::advance_particles_only()");
 
     // A particle in cell (i) can affect cell values in (i-1) to (i+1)
-    int stencil_deposition_width = 1;
+    // ! Now in Nyx.H
+    // int stencil_deposition_width = 1;
 
 // #ifdef FDM
 //     // For FDM Gaussian kernels this is increased to                                                                                                                                                          
@@ -216,7 +216,7 @@ Nyx::advance_particles_only (Real time,
 
 
 #else
-        gravity->multilevel_solve_for_old_phi(level, finest_level,
+        gravity->multilevel_solve_for_old_phi(level, finest_level, grav_n_grow,
                                               use_previous_phi_as_guess);
 #endif
     }
@@ -311,7 +311,7 @@ Nyx::advance_particles_only (Real time,
     int use_previous_phi_as_guess = 1;
     if (finest_level_to_advance > level)
     {
-        gravity->multilevel_solve_for_new_phi(level, finest_level_to_advance, 
+      gravity->multilevel_solve_for_new_phi(level, finest_level_to_advance, grav_n_grow,
                                               use_previous_phi_as_guess);
     }
     else

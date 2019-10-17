@@ -49,4 +49,4 @@ real(rt) function, public uniform01_module::get_uniform01 ()
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/uniform01.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/uniform01.f90`

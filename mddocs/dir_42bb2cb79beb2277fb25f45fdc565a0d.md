@@ -1,5 +1,5 @@
 
-# Dir /home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Network
+# Dir /home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/Network
 
 
 [**File List**](files.md) **>** [**Network**](dir_42bb2cb79beb2277fb25f45fdc565a0d.md)
@@ -39,4 +39,4 @@
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Network/`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/Network/`

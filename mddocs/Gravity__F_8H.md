@@ -314,4 +314,4 @@ const int const int const int const int BL_FORT_FAB_ARG (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Gravity/Gravity_F.H`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/Gravity/Gravity_F.H`
