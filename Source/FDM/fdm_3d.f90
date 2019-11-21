@@ -222,3 +222,15 @@ subroutine fort_set_a(scalefactor) &
   a = scalefactor
   
 end subroutine fort_set_a
+
+subroutine fort_set_ratio(ratio) &
+     bind(C, name="fort_set_ratio")
+  
+  use amrex_fort_module, only : rt => amrex_real
+  use fdm_params_module, only: ratio_fdm
+  
+  real(rt), intent(in) :: ratio
+  
+  ratio_fdm = ratio
+  
+end subroutine fort_set_ratio

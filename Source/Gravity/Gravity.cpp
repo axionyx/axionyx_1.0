@@ -287,7 +287,7 @@ Gravity::solve_for_old_phi (int               level,
         MultiFab& Ax_old = LevelData[level]->get_old_data(Axion_Type);
         MultiFab::Add(Rhs, Ax_old, Nyx::AxDens, 0, 1, 0);
     }
-    else
+    // else
 #endif
 
     // We shouldn't need to use virtual or ghost particles for old phi solves.
@@ -331,7 +331,7 @@ Gravity::solve_for_new_phi (int               level,
 	MultiFab& Ax_new = LevelData[level]->get_new_data(Axion_Type);
 	MultiFab::Add(Rhs, Ax_new, Nyx::AxDens, 0, 1, 0);
       }
-    else
+    // else
 #endif
       {
         AddParticlesToRhs(level,Rhs,ngrow_for_solve);
@@ -795,7 +795,7 @@ Gravity::actual_multilevel_solve (int                       level,
 	      MultiFab::Add(*(Rhs_p[lev]), LevelData[level+lev]->get_old_data(Axion_Type), Nyx::AxDens, 0, 1, 0);
 	    }
 	}
-	else
+	// else
 #endif
 
         MultiFab::Add(*Rhs_p[lev], *Rhs_particles[lev], 0, 0, 1, 0);

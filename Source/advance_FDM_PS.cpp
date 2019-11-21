@@ -667,7 +667,7 @@ inline void fdm_timestep(hacc::Dfft &dfft, MultiFab &Ax_new, MultiFab &phi,  Gra
 
   Stopwatch::startlap("potential",3);
   int fill_interior = 0;
-  int grav_n_grow = 0;
+  int grav_n_grow = 1;
   gravity->solve_for_new_phi(level,phi,
 			     gravity->get_grad_phi_curr(level),
 			     fill_interior, grav_n_grow);

@@ -120,6 +120,7 @@ Real Nyx::theta_fdm = 1.0;
 Real Nyx::sigma_fdm = 1.0;
 Real Nyx::gamma_fdm = 1.0;
 Real Nyx::alpha_fdm = 1.0;
+Real Nyx::ratio_fdm = 1.0;
 int  Nyx::wkb_approx = 1;
 Real Nyx::beam_cfl = 0.2;
 Real Nyx::vonNeumann_dt = 0.0;
@@ -300,6 +301,8 @@ Nyx::read_params ()
     gamma_fdm = 0.5/sigma_fdm/sigma_fdm;
     fort_set_gamma(gamma_fdm);
     pp_nyx.query("alpha_fdm", alpha_fdm);
+    pp_nyx.query("ratio_fdm", ratio_fdm);
+    fort_set_ratio(ratio_fdm);
     pp_nyx.query("wkb_approx", wkb_approx);
     pp_nyx.query("order", order);
     pp_nyx.query("beam_cfl", beam_cfl);

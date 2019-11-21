@@ -77,7 +77,7 @@ Nyx::advance_FDM_FD (amrex::Real time,
       //       fpi.isValid() && pfpi.isValid();
       //       ++fpi,++pfpi)
       for (amrex::FillPatchIterator 
-	     fpi(*this,  Ax_new, 4, time, Axion_Type,   0, Nyx::NUM_AX),
+	     fpi(*this, Ax_old, 4, time, Axion_Type,   0, Nyx::NUM_AX),
 	     pfpi(*this, Phi_old, 4, time, PhiGrav_Type, 0, 1);
 	     fpi.isValid() && pfpi.isValid();
 	     ++fpi,++pfpi)
