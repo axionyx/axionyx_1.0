@@ -20,7 +20,7 @@ Nyx::advance_FDM_FD (amrex::Real time,
     // const amrex::Real cur_time     = state[State_Type].curTime();
     // const int  finest_level = parent->finestLevel();
 
-    const amrex::Real a_half = 0.5 * (a_old + a_new);
+    const amrex::Real a_half = get_comoving_a(time);//0.5 * (a_old + a_new);
 
     amrex::MultiFab&  Ax_old = get_old_data(Axion_Type);
     amrex::MultiFab&  Ax_new = get_new_data(Axion_Type);
@@ -77,7 +77,7 @@ Nyx::advance_FDM_FD (amrex::Real time,
       //       fpi.isValid() && pfpi.isValid();
       //       ++fpi,++pfpi)
       for (amrex::FillPatchIterator 
-	     fpi(*this,  Ax_new, 4, time, Axion_Type,   0, Nyx::NUM_AX),
+	     fpi(*this, Ax_old, 4, time, Axion_Type,   0, Nyx::NUM_AX),
 	     pfpi(*this, Phi_old, 4, time, PhiGrav_Type, 0, 1);
 	     fpi.isValid() && pfpi.isValid();
 	     ++fpi,++pfpi)

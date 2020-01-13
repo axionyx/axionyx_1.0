@@ -310,7 +310,7 @@
            delta,prob_lo,prob_hi,dt, &
            courno,a_old,a_half,a_new,verbose)
 
-      use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM
+      use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM, UAXPHAS
       use fdm_params_module, only : hbaroverm, ii
       use fundamental_constants_module
       use probdata_module
@@ -328,7 +328,7 @@
       ! double precision grav(   g_l1:g_h1,     g_l2:g_h2,     g_l3:g_h3,   3)
       double precision  phi(   p_l1:p_h1,     p_l2:p_h2,     p_l3:p_h3)
       double precision delta(3),prob_lo(3),prob_hi(3),dt,time,courno
-      double precision a_old, a_half, a_new
+      double precision a_old, a_half, a_new, temp
 
       !additional variables
       integer          i,j,k
@@ -336,7 +336,7 @@
       double precision xn,xp,xc,del,Vo,r
 
       !(complex) fdm field
-      double complex, allocatable :: psi(:,:,:),k1(:,:,:),k2(:,:,:),k3(:,:,:),k4(:,:,:),V(:,:,:)
+      complex, allocatable :: psi(:,:,:),k1(:,:,:),k2(:,:,:),k3(:,:,:),k4(:,:,:),V(:,:,:)
 
       allocate( psi(uin_l1:uin_h1,uin_l2:uin_h2,uin_l3:uin_h3) )
       allocate(  k1(uin_l1:uin_h1,uin_l2:uin_h2,uin_l3:uin_h3) )
@@ -345,7 +345,21 @@
       allocate(  k4(uin_l1:uin_h1,uin_l2:uin_h2,uin_l3:uin_h3) )
       allocate(   V(  p_l1:p_h1  ,  p_l2:p_h2  ,  p_l3:p_h3  ) )
 
-      psi = dcmplx(uin(:,:,:,UAXRE),uin(:,:,:,UAXIM))
+      psi = cmplx(uin(:,:,:,UAXRE),uin(:,:,:,UAXIM))
+      ! psi = sqrt(uin(:,:,:,UAXDENS))/abs(psi)*psi
+      ! do k = uin_l3, uin_h3
+      !    do j = uin_l2, uin_h2
+      !       do i = uin_l1, uin_h1
+      !          if(abs(psi(i,j,k)) .gt. 0.0) then
+      !             psi = sqrt(uin(i,j,k,UAXDENS))/abs(psi(i,j,k))*psi
+      !          else
+      !             print *, 'psi = 0!',i,j,k
+      !          endif
+      !       enddo
+      !    enddo
+      ! enddo
+
+      ! psi = sqrt(uin(:,:,:,UAXDENS))*cmplx(cos(uin(:,:,:,UAXPHAS)),sin(uin(:,:,:,UAXPHAS)))
       k1  = 0.d0
       k2  = 0.d0
       k3  = 0.d0
@@ -565,10 +579,28 @@
         do j = uout_l2, uout_h2
           do i = uout_l1, uout_h1
 
-             uout(i,j,k, UAXRE)   = dreal(  psi(i,j,k) )  
-             uout(i,j,k, UAXIM)   = dimag( psi(i,j,k) )  
+             uout(i,j,k, UAXRE)   = real(  psi(i,j,k) )
+             uout(i,j,k, UAXIM)   = aimag( psi(i,j,k) )
              !uout(i,j,k, UAXDENS) = meandens * cdabs( psi(i,j,k) )**2 !density in Nyx units
-             uout(i,j,k, UAXDENS) = cdabs( psi(i,j,k) )**2 !density in Nyx units
+             uout(i,j,k, UAXDENS) = abs( psi(i,j,k) )**2
+             uout(i,j,k, UAXPHAS) = atan2( uout(i,j,k, UAXIM) , uout(i,j,k, UAXRE) )
+
+             ! temp = uin(i,j,k, UAXPHAS)+mod((atan2(uout(i,j,k, UAXIM),uout(i,j,k, UAXRE))-uin(i,j,k, UAXPHAS)),2.0*PI)
+             ! temp = atan2(uout(i,j,k, UAXIM),uout(i,j,k, UAXRE)) !+int(uin(i,j,k, UAXPHAS)/2.0/PI)*2.0*PI
+             ! do while ( (temp-uin(i,j,k, UAXPHAS)) .gt. 1.8*PI)
+             !    temp = temp-2.0*PI
+             ! end do
+             ! do while ( (uin(i,j,k, UAXPHAS)-temp) .gt. 1.8*PI)
+             !    temp = temp+2.0*PI
+             ! end do
+             ! uout(i,j,k, UAXPHAS) = temp
+
+             ! temp = min(mod(abs(uout(i,j,k, UAXPHAS)-uin(i,j,k, UAXPHAS)),M_PI),M_PI-mod(abs(uout(i,j,k, UAXPHAS)-uin(i,j,k, UAXPHAS)),M_PI))
+             ! if ( mod(abs(uout(i,j,k, UAXPHAS)-uin(i,j,k, UAXPHAS)),M_PI) .gt. 4.0) then
+             !    uout(i,j,k, UAXPHAS) = uout(i,j,k, UAXPHAS)-2.0*M_PI
+             ! else if ((uin(i,j,k, UAXPHAS)-uout(i,j,k, UAXPHAS)) .gt. 4.0) then
+             !    uout(i,j,k, UAXPHAS) = uout(i,j,k, UAXPHAS)+2.0*M_PI
+             ! endif
 
           enddo
         enddo

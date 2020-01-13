@@ -645,6 +645,8 @@ public:
     //! missing doc
     static int AxIm;
     //! missing doc
+    static int AxPhas;
+    //! missing doc
     static int NUM_AX;
     static amrex::Real m_tt;
     static amrex::Real hbaroverm;
@@ -659,6 +661,7 @@ public:
     static amrex::Real sigma_fdm;
     static amrex::Real gamma_fdm;
     static amrex::Real alpha_fdm;
+    static amrex::Real ratio_fdm;
     static int wkb_approx;
     static amrex::Real beam_cfl;
     //! missing doc

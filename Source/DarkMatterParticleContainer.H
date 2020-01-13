@@ -43,6 +43,8 @@ public:
 #ifdef FDM
     void InitGaussianBeams (long num_particle_dm, int lev, int nlevs, const amrex::Real amp, const amrex::Real alpha, const amrex::Real a);
 
+    void InitSphericalCollapse (amrex::MultiFab& mf, int lev, int nlevs, int comp, const amrex::Real ratio);
+
     amrex::Real generateGaussianNoise(const amrex::Real &mean, const amrex::Real &stdDev);
 #endif
 };

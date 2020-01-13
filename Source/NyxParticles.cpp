@@ -430,10 +430,11 @@ Nyx::read_particle_params ()
 #endif
 
 #ifdef FDM
-    if(partlevel){
-      pp.get("num_particle_fdm", num_particle_fdm);
-      pp.get("num_particle_dm", num_particle_dm);
-    }
+    pp.get("num_particle_dm", num_particle_dm);
+    // if(partlevel){
+    //   pp.get("num_particle_fdm", num_particle_fdm);
+    //   pp.get("num_particle_dm", num_particle_dm);
+    // }
 #endif
 
     pp.query("write_particle_density_at_init", write_particle_density_at_init);
@@ -630,7 +631,7 @@ Nyx::init_particles ()
 	    // moved to Nyx_initcosmo.cpp                                                                                                                                                                            
 	  }
 #ifdef FDM
-	else if (particle_init_type == "GaussianBeams" && partlevel)
+	else if (particle_init_type == "GaussianBeams")// && partlevel)
 	  {
 	    if (verbose)
 	      {
@@ -642,6 +643,16 @@ Nyx::init_particles ()
 	      DMPC->InitGaussianBeams(num_particle_dm, level, parent->initialBaLevels()+1, meandens, alpha_fdm, a);
 	    else
 	      amrex::Error("\nNeed num_particle_dm > 0 for DM InitGaussianBeams!\n\n");
+	  }
+	else if (particle_init_type == "SphericalCollapse")// && partlevel)
+	  {
+	    if (verbose)
+	      {
+		amrex::Print() << "\nInitializing DM particles for mixed FDM/CDM spherical collaps...\n\n";
+		if (init_with_sph_particles == 1)
+		  amrex::Error("FDM computations are not supported for sph particles.");
+	      }
+	    DMPC->InitSphericalCollapse(get_level(level).get_new_data(Axion_Type), level, parent->initialBaLevels()+1,Nyx::AxDens,ratio_fdm);
 	  }
 #endif
         else
@@ -940,8 +951,8 @@ Nyx::init_particles ()
 	    amrex::Print() << "\n DM particles are needed for the construction of the gravitational potential!!\n\n";
 	  if(num_particle_fdm > 0)
 	    FDMwkbPC->InitGaussianBeams(num_particle_fdm, level, parent->initialBaLevels()+1, hbaroverm, sigma_fdm, gamma_fdm, meandens, alpha_fdm, a);
-	  else
-	    amrex::Error("\nNeed num_particle_fdm > 0 for InitGaussianBeams!\n\n");
+	  // else
+	  //   amrex::Error("\nNeed num_particle_fdm > 0 for InitGaussianBeams!\n\n");
 
 	  MultiFab& Ax_new = get_level(level).get_new_data(Axion_Type);
 	  Ax_new.setVal(0.);
@@ -1128,8 +1139,8 @@ Nyx::init_particles ()
 	    amrex::Print() << "\n DM particles are needed for the construction of the gravitational potential!!\n\n";
 	  if(num_particle_fdm > 0)
 	    FDMPC->InitGaussianBeams(num_particle_fdm, level, parent->initialBaLevels()+1, hbaroverm, sigma_fdm, gamma_fdm, meandens, alpha_fdm, a);
-	  else
-	    amrex::Error("\nNeed num_particle_fdm > 0 for InitGaussianBeams!\n\n");
+	  // else
+	  //   amrex::Error("\nNeed num_particle_fdm > 0 for InitGaussianBeams!\n\n");
 
 	  MultiFab& Ax_new = get_level(level).get_new_data(Axion_Type);
 	  Ax_new.setVal(0.);

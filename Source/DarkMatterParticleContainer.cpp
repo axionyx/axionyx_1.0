@@ -266,7 +266,7 @@ DarkMatterParticleContainer::InitCosmo1ppcMultiLevel(
     for (MFIter mfi(mf); mfi.isValid(); ++mfi)
     {
         FArrayBox&  myFab  = mf[mfi];
-	const Box&  vbx    = mfi.validbox();
+    	const Box&  vbx    = mfi.validbox();
         const int  *fab_lo = vbx.loVect();
         const int  *fab_hi = vbx.hiVect();
         ParticleLocData pld;
@@ -277,44 +277,44 @@ DarkMatterParticleContainer::InitCosmo1ppcMultiLevel(
                 for (int ix = fab_lo[0]; ix <= fab_hi[0]; ix++)
                 {
             	    IntVect indices(D_DECL(ix, jx, kx));
-		    totalcount++;
-		    if (baWhereNot.contains(indices)) 
-		    {
+    		    totalcount++;
+    		    if (baWhereNot.contains(indices)) 
+    		    {
                        continue;
-		    }
+    		    }
 
-	            for (int n = 0; n < BL_SPACEDIM; n++)
-	            {
+    	            for (int n = 0; n < BL_SPACEDIM; n++)
+    	            {
                         disp[n] = myFab(indices,disp_idx+n);
                         //
-			// Start with homogeneous distribution (for 1 p per cell in the center of the cell),
-			//
-	                p.pos(n) = geom.ProbLo(n) + 
+    			// Start with homogeneous distribution (for 1 p per cell in the center of the cell),
+    			//
+    	                p.pos(n) = geom.ProbLo(n) + 
                             (indices[n]+Real(0.5))*dx[n];
-			if(disp[n]*disp_fac[n]>dx[n]/2.0)
-			  outcount[n]++;
-			if(disp[n]*disp_fac[n]<-dx[n]/2.0)
-			  outcountminus[n]++;
-			mean_disp[n]+=fabs(disp[n]);
-			//
+    			if(disp[n]*disp_fac[n]>dx[n]/2.0)
+    			  outcount[n]++;
+    			if(disp[n]*disp_fac[n]<-dx[n]/2.0)
+    			  outcountminus[n]++;
+    			mean_disp[n]+=fabs(disp[n]);
+    			//
                         // then add the displacement (input values weighted by domain length).
                         //
-	                p.pos(n) += disp[n] * disp_fac[n];
+    	                p.pos(n) += disp[n] * disp_fac[n];
 
                         //
-			// Set the velocities.
+    			// Set the velocities.
                         //
                         vel[n] = myFab(indices,vel_idx+n);
-	                p.rdata(n+1) = vel[n] * vel_fac[n];
-	            }
+    	                p.rdata(n+1) = vel[n] * vel_fac[n];
+    	            }
                     //
-		    // Set the mass of the particle from the input value.
+    		    // Set the mass of the particle from the input value.
                     //
-	            p.rdata(0)  = particleMass;
-	            p.id()      = ParticleType::NextID();
-	            p.cpu()     = MyProc;
+    	            p.rdata(0)  = particleMass;
+    	            p.id()      = ParticleType::NextID();
+    	            p.cpu()     = MyProc;
 	
-	            if (!this->Where(p, pld))
+    	            if (!this->Where(p, pld))
                     {
       		        this->PeriodicShift(p);
 
@@ -396,7 +396,7 @@ DarkMatterParticleContainer::InitCosmo1ppc(MultiFab& mf, const Real vel_fac[], c
     for (MFIter mfi(mf); mfi.isValid(); ++mfi)
     {
         FArrayBox&  myFab  = mf[mfi];
-	const Box&  vbx    = mfi.validbox();
+    	const Box&  vbx    = mfi.validbox();
         const int  *fab_lo = vbx.loVect();
         const int  *fab_hi = vbx.hiVect();
 
@@ -408,41 +408,41 @@ DarkMatterParticleContainer::InitCosmo1ppc(MultiFab& mf, const Real vel_fac[], c
                 {
             	    IntVect indices(D_DECL(ix, jx, kx));
 
-	            for (int n = 0; n < BL_SPACEDIM; n++)
-	            {
+    	            for (int n = 0; n < BL_SPACEDIM; n++)
+    	            {
                         disp[n] = myFab(indices,n);
                         //
-			// Start with homogeneous distribution (for 1 p per cell in the center of the cell),
+    			// Start with homogeneous distribution (for 1 p per cell in the center of the cell),
                         // then add the displacement (input values weighted by domain length).
                         //
-	                p.pos(n) = geom.ProbLo(n) + 
+    	                p.pos(n) = geom.ProbLo(n) + 
                             (indices[n]+Real(0.5))*dx[n] +
                             disp[n] * len[n];
                         //
-			// Set the velocities.
+    			// Set the velocities.
                         //
-	                p.rdata(n+1) = disp[n] * vel_fac[n];
-	            }
+    	                p.rdata(n+1) = disp[n] * vel_fac[n];
+    	            }
                     //
-		    // Set the mass of the particle from the input value.
+    		    // Set the mass of the particle from the input value.
                     //
-	            p.rdata(0)  = particleMass;
-	            p.id()      = ParticleType::NextID();
-	            p.cpu()     = MyProc;
+    	            p.rdata(0)  = particleMass;
+    	            p.id()      = ParticleType::NextID();
+    	            p.cpu()     = MyProc;
 	
-	            if (!this->Where(p, pld))
+    	            if (!this->Where(p, pld))
                     {
       		        this->PeriodicShift(p);
                         
                         if (!this->Where(p, pld))
                             amrex::Abort("DarkMatterParticleContainer::InitCosmo1ppc(): invalid particle");
-		    }
+    		    }
 
-	            BL_ASSERT(pld.m_lev >= 0 && pld.m_lev <= this->finestLevel());
-	            //
-	            // Add it to the appropriate PBox at the appropriate level.
-	            //
-	            particles[pld.m_lev][std::make_pair(pld.m_grid, pld.m_tile)].push_back(p);
+    	            BL_ASSERT(pld.m_lev >= 0 && pld.m_lev <= this->finestLevel());
+    	            //
+    	            // Add it to the appropriate PBox at the appropriate level.
+    	            //
+    	            particles[pld.m_lev][std::make_pair(pld.m_grid, pld.m_tile)].push_back(p);
                 }
             }
         }
@@ -807,12 +807,21 @@ DarkMatterParticleContainer::InitGaussianBeams (long num_particle_dm, int lev, i
   Real q0[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
   Real q[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
   Real p0[] = {0.0,0.0,0.0};
-  Real sigma = 0.5/sqrt(alpha);/*remember that we square amplitude alpha->2*alpha*/
+  // Real sigma = 0.5/sqrt(alpha);/*remember that we square amplitude alpha->2*alpha*/
+  Real sigma = (geom.ProbHi(0)+geom.ProbLo(0))/16.0;
 
   //calculate dm particle mass
   Real mass = 1.0/npart_tot;
-  mass *= pow(2.0*alpha/M_PI,-1.5);
-  mass *= 100.0*fact;
+  // mass *= pow(2.0*alpha/M_PI,-1.5);
+  mass *= pow(1.0/sigma/sigma/2.0/M_PI,-1.5);
+  mass *= 0.1*fact;
+
+  // std::cout<<"meandens cdm = "<<fact<<std::endl;
+
+  Real mass2 = fact*pow(geom.CellSize(1),3);
+
+  mass*=0.5;
+  mass2*=0.5;
 
   particles.reserve(15);  // So we don't ever have to do any copying on a resize.                                                                                                                                  
   particles.resize(nlevs);
@@ -840,7 +849,7 @@ DarkMatterParticleContainer::InitGaussianBeams (long num_particle_dm, int lev, i
       
       //set position
       for (int n = 0; n < BL_SPACEDIM; n++)
-	part.pos( n) = q[n];
+  	part.pos( n) = q[n];
       //set mass
       part.rdata( 0) =  mass;
       //set velocity
@@ -849,7 +858,7 @@ DarkMatterParticleContainer::InitGaussianBeams (long num_particle_dm, int lev, i
       part.rdata( 3) = p0[2]/a;
       
       if (!this->Where(part,pld))
-	amrex::Abort("ParticleContainer<N>::InitGaussianBeams(): invalid particle");
+  	amrex::Abort("ParticleContainer<N>::InitGaussianBeams(): invalid particle");
       
       //add particle                                                                                                                                                                                            
       particles[pld.m_lev][std::make_pair(pld.m_grid, pld.m_tile)].push_back(part);
@@ -857,6 +866,96 @@ DarkMatterParticleContainer::InitGaussianBeams (long num_particle_dm, int lev, i
     else
       index--;
   }
+
+
+    // for (MFIter mfi(mf); mfi.isValid(); ++mfi)
+    // {
+    //     FArrayBox&  myFab  = mf[mfi];
+    // 	const Box&  vbx    = mfi.validbox();
+    //     const int  *fab_lo = vbx.loVect();
+    //     const int  *fab_hi = vbx.hiVect();
+
+    //     for (int kx = fab_lo[2]; kx <= fab_hi[2]; kx++)
+    //     {
+    //         for (int jx = fab_lo[1]; jx <= fab_hi[1]; jx++)
+    //         {
+    //             for (int ix = fab_lo[0]; ix <= fab_hi[0]; ix++)
+    //             {
+    //         	    IntVect indices(D_DECL(ix, jx, kx));
+
+    // 	            for (int n = 0; n < BL_SPACEDIM; n++)
+    // 	            {
+    //                     // disp[n] = myFab(indices,n);
+    //                     //
+    // 			// Start with homogeneous distribution (for 1 p per cell in the center of the cell),
+    //                     // then add the displacement (input values weighted by domain length).
+    //                     //
+    // 	                part.pos(n) = geom.ProbLo(n) + 
+    // 			  (indices[n]+Real(0.5))*dx[n];// +
+    // 			//                            disp[n] * len[n];
+    //                     //
+    // 			// Set the velocities.
+    //                     //
+    // 	                part.rdata(n+1) = 0.0;//disp[n] * vel_fac[n];
+    // 	            }
+    //                 //
+    // 		    // Set the mass of the particle from the input value.
+    //                 //
+    // 	            part.rdata(0)  = mass2;
+    // 	            part.id()      = ParticleType::NextID();
+    // 	            part.cpu()     = MyProc;
+	
+    // 	            if (!this->Where(part, pld))
+    //                 {
+    //   		        this->PeriodicShift(part);
+                        
+    //                     if (!this->Where(part, pld))
+    //                         amrex::Abort("DarkMatterParticleContainer::InitCosmo1ppc(): invalid particle");
+    // 		    }
+
+    // 	            BL_ASSERT(pld.m_lev >= 0 && pld.m_lev <= this->finestLevel());
+    // 	            //
+    // 	            // Add it to the appropriate PBox at the appropriate level.
+    // 	            //
+    // 	            particles[pld.m_lev][std::make_pair(pld.m_grid, pld.m_tile)].push_back(part);
+    //             }
+    //         }
+    //     }
+    // }
+
+
+
+
+  const Box& box = geom.Domain();
+  for (int kx = box.smallEnd(2); kx <= box.bigEnd(2); kx++)
+    for (int jx = box.smallEnd(1); jx <= box.bigEnd(1); jx++)
+      for (int ix = box.smallEnd(0); ix <= box.bigEnd(0); ix++)
+  	{
+  	  IntVect indices(D_DECL(ix, jx, kx));
+  	  // Real r[] = {(geom.ProbHi(0)-geom.ProbLo(0))/2.0-(geom.ProbLo(0) + (indices[0]+Real(0.5))*geom.CellSize(0)),
+  	  // 	      (geom.ProbHi(1)-geom.ProbLo(1))/2.0-(geom.ProbLo(1) + (indices[1]+Real(0.5))*geom.CellSize(1)),
+  	  // 	      (geom.ProbHi(2)-geom.ProbLo(2))/2.0-(geom.ProbLo(2) + (indices[2]+Real(0.5))*geom.CellSize(2))};
+  	  // Real rsq = r[0]*r[0]+r[1]*r[1]+r[2]*r[2];
+
+  	  for (int n = 0; n < BL_SPACEDIM; n++)
+  	    {
+	      
+  	      part.pos(n) = geom.ProbLo(n) + (indices[n]+Real(0.5))*geom.CellSize(n);
+  	      // part.pos(n) += 0.5*r[n]*rsq*std::exp(-rsq/0.1); 
+  	      part.rdata(n+1) = 0.0;
+  	    }
+  	  part.rdata(0)  = mass2;
+  	  part.id()      = ParticleType::NextID();
+  	  part.cpu()     = MyProc;
+
+  	  if (!this->Where(part,pld))
+  	    amrex::Abort("ParticleContainer<N>::InitGaussianBeams(): invalid particle");
+	  
+  	  //add particle                                                                                                                                                                                       
+  	  particles[pld.m_lev][std::make_pair(pld.m_grid, pld.m_tile)].push_back(part);
+
+  	}
+
   if (ParallelDescriptor::IOProcessor() && m_verbose)
     {
       std::cout << "Done DM particle initilization for Gaussian Beam potential.\n";
@@ -896,4 +995,135 @@ DarkMatterParticleContainer::generateGaussianNoise(const amrex::Real &mean, cons
   spare = v * s;
   return mean + stdDev * u * s;
 }
+
+
+void
+DarkMatterParticleContainer::InitSphericalCollapse (amrex::MultiFab& mf, int lev, int nlevs, int comp, Real ratio)
+{
+
+  /*Pure FDM, so no nbody particles needed*/
+  if(ratio==1.0) return;
+
+  const int       MyProc      = ParallelDescriptor::MyProc();
+  const int       nprocs      = ParallelDescriptor::NProcs();
+  const Geometry& geom        = m_gdb->Geom(lev);
+
+  static Vector<int> calls;
+  calls.resize(nlevs);
+  calls[lev]++;
+  if (calls[lev] > 1) return;
+  Vector<ParticleLevel>& particles = this->GetParticles();
+
+  const Real* dx = geom.CellSize();
+
+  particles.reserve(15);  // So we don't ever have to do any copying on a resize.                                                                                                                           
+  particles.resize(nlevs);
+
+  for (int i = 0; i < particles.size(); i++)
+    {
+      BL_ASSERT(particles[i].empty());
+    }
+
+  const Real rc = pow(0.125*(geom.ProbHi(0)-geom.ProbLo(0)),2)/2.0;
+  const Real center = 0.5*(geom.ProbHi(0)+geom.ProbLo(0));
+
+  // Real comoving_OmM,comoving_OmB,comoving_h,Gconst;
+  // fort_get_omm(&comoving_OmM );                                                                                                                                                                               
+  // fort_get_omb(&comoving_OmB );                                                                                                                                                                               
+  // fort_get_hubble(&comoving_h);                                                                                                                                                                               
+  // fort_get_grav_const(&Gconst); 
+  // const Real meandens = 3*comoving_h*100*comoving_h*100*comoving_OmM / (8*M_PI*Gconst);
+
+  const Real meandens = 2.775e+11*0.674*0.674*0.315;
+  // Real r[] = {0.0,0.0,0.0};
+  // Real rsq,disp;
+  Real r;
+  ParticleType part;
+  ParticleLocData pld;
+
+    for (MFIter mfi(mf); mfi.isValid(); ++mfi)
+    {
+        FArrayBox&  myFab  = mf[mfi];
+    	const Box&  vbx    = mfi.validbox();
+        const int  *fab_lo = vbx.loVect();
+        const int  *fab_hi = vbx.hiVect();
+
+        for (int kx = fab_lo[2]; kx <= fab_hi[2]; kx++)
+	  for (int jx = fab_lo[1]; jx <= fab_hi[1]; jx++)
+	    for (int ix = fab_lo[0]; ix <= fab_hi[0]; ix++)
+	      {
+		IntVect indices(D_DECL(ix, jx, kx));
+
+		// rsq = 0.0;
+		// for (int n = 0; n < BL_SPACEDIM; n++)
+		//   {
+		//     r[n]= (indices[n]+0.5)*dx[n]-0.5*(geom.ProbHi(n)+geom.ProbLo(n));
+		//     rsq += r[n]*r[n];
+		//   }
+		// // disp = 0.1*(0.25*sqrt(M_PI*rc/rsq)*erf(sqrt(rsq/rc))-0.5*exp(-rsq/rc));
+		// disp = 0.1*0.5*sqrt(M_PI*rc/rsq)*erf(sqrt(rsq/rc));
+
+		for (int n = 0; n < BL_SPACEDIM; n++)
+		  {
+		    part.pos(n) = geom.ProbLo(n) + (indices[n]+Real(0.5))*dx[n];//-disp*r[n];
+ 		    // part.pos(n)+= (rand() / ((amrex::Real) RAND_MAX) - 0.5)*dx[n]/10000.0;
+		    part.rdata(n+1) = 0.0;
+		  }
+                    //
+    		    // Set the mass of the particle from the input value.
+                    //
+		if(ratio>=0.0 && ratio <=1.0){
+
+		  // part.rdata(0)  = 0.0;
+		  // for(int i=0;i<10;i++)
+		  //   for(int j=0;j<10;j++)
+		  //     for(int k=0;k<10;k++){
+			// r = pow((indices[0]+Real(i)/100.0)*dx[0]-center,2)+pow((indices[1]+Real(j)/100.0)*dx[1]-center,2)+pow((indices[2]+Real(k)/100.0)*dx[2]-center,2);
+		  r = pow((indices[0]+0.5)*dx[0]-center,2)+pow((indices[1]+0.5)*dx[1]-center,2)+pow((indices[2]+0.5)*dx[2]-center,2);
+		  // r = pow((indices[0]+0.0+(rand() / ((amrex::Real) RAND_MAX)/1.0))*dx[0]-center,2)
+		  //    +pow((indices[1]+0.0+(rand() / ((amrex::Real) RAND_MAX)/1.0))*dx[1]-center,2)
+		  //    +pow((indices[2]+0.0+(rand() / ((amrex::Real) RAND_MAX)/1.0))*dx[2]-center,2);
+		  // r = pow((indices[0]+0.0)*dx[0]-center,2)+pow((indices[1]+0.0)*dx[1]-center,2)+pow((indices[2]+0.0)*dx[2]-center,2);
+			// part.rdata(0)  += (1.0-ratio)*(0.001*meandens*exp(-r/rc)+meandens)*dx[0]*dx[1]*dx[2]/pow(10.0,3);
+		  part.rdata(0)  = (1.0-ratio)*(0.1*meandens*exp(-r/rc)+meandens)*dx[0]*dx[1]*dx[2];
+		  // }
+		  // part.rdata(0)  = (1-ratio)/ratio*myFab(indices,comp)*dx[0]*dx[1]*dx[2];
+		  // part.rdata(0)  = (1.0-ratio)*meandens*dx[0]*dx[1]*dx[2];
+		}else
+		  amrex::Abort("ParticleContainer<N>::InitSphericalCollapse(): ratio needs to be between 0 and 1.");
+		part.id()      = ParticleType::NextID();
+		part.cpu()     = MyProc;
+		
+		if (!this->Where(part, pld))
+		  {
+		    this->PeriodicShift(part);
+                    
+		    if (!this->Where(part, pld))
+		      amrex::Abort("DarkMatterParticleContainer::InitCosmo1ppc(): invalid particle");
+		  }
+		
+		BL_ASSERT(pld.m_lev >= 0 && pld.m_lev <= this->finestLevel());
+		//
+		// Add it to the appropriate PBox at the appropriate level.
+		//
+		particles[pld.m_lev][std::make_pair(pld.m_grid, pld.m_tile)].push_back(part);
+	      }
+    }
+    
+    if (ParallelDescriptor::IOProcessor() && m_verbose)
+    {
+      std::cout << "Done DM particle initilization for Gaussian Beam potential.\n";
+    }
+    //                                                                                                                                                                                                            
+    // Let Redistribute() sort out where the particles belong.                                                                                                                                                    
+    //                                                                                                                                                                                                            
+    Redistribute();
+  
+    if (ParallelDescriptor::IOProcessor() && m_verbose)
+      {
+	std::cout << "Redistribute done" << '\n';
+      }
+}
+
+
 #endif
