@@ -1026,11 +1026,18 @@ DarkMatterParticleContainer::InitSphericalCollapse (amrex::MultiFab& mf, int lev
 
   const Real rc = pow(0.125*(geom.ProbHi(0)-geom.ProbLo(0)),2)/2.0;
   const Real center = 0.5*(geom.ProbHi(0)+geom.ProbLo(0));
-  const Real meandens = 2.775e+11*0.7*0.7;
+
+  // Real comoving_OmM,comoving_OmB,comoving_h,Gconst;
+  // fort_get_omm(&comoving_OmM );                                                                                                                                                                               
+  // fort_get_omb(&comoving_OmB );                                                                                                                                                                               
+  // fort_get_hubble(&comoving_h);                                                                                                                                                                               
+  // fort_get_grav_const(&Gconst); 
+  // const Real meandens = 3*comoving_h*100*comoving_h*100*comoving_OmM / (8*M_PI*Gconst);
+
+  const Real meandens = 2.775e+11*0.674*0.674*0.315;
   // Real r[] = {0.0,0.0,0.0};
   // Real rsq,disp;
   Real r;
-
   ParticleType part;
   ParticleLocData pld;
 
@@ -1059,14 +1066,27 @@ DarkMatterParticleContainer::InitSphericalCollapse (amrex::MultiFab& mf, int lev
 		for (int n = 0; n < BL_SPACEDIM; n++)
 		  {
 		    part.pos(n) = geom.ProbLo(n) + (indices[n]+Real(0.5))*dx[n];//-disp*r[n];
+ 		    // part.pos(n)+= (rand() / ((amrex::Real) RAND_MAX) - 0.5)*dx[n]/10000.0;
 		    part.rdata(n+1) = 0.0;
 		  }
                     //
     		    // Set the mass of the particle from the input value.
                     //
 		if(ratio>=0.0 && ratio <=1.0){
+
+		  // part.rdata(0)  = 0.0;
+		  // for(int i=0;i<10;i++)
+		  //   for(int j=0;j<10;j++)
+		  //     for(int k=0;k<10;k++){
+			// r = pow((indices[0]+Real(i)/100.0)*dx[0]-center,2)+pow((indices[1]+Real(j)/100.0)*dx[1]-center,2)+pow((indices[2]+Real(k)/100.0)*dx[2]-center,2);
 		  r = pow((indices[0]+0.5)*dx[0]-center,2)+pow((indices[1]+0.5)*dx[1]-center,2)+pow((indices[2]+0.5)*dx[2]-center,2);
+		  // r = pow((indices[0]+0.0+(rand() / ((amrex::Real) RAND_MAX)/1.0))*dx[0]-center,2)
+		  //    +pow((indices[1]+0.0+(rand() / ((amrex::Real) RAND_MAX)/1.0))*dx[1]-center,2)
+		  //    +pow((indices[2]+0.0+(rand() / ((amrex::Real) RAND_MAX)/1.0))*dx[2]-center,2);
+		  // r = pow((indices[0]+0.0)*dx[0]-center,2)+pow((indices[1]+0.0)*dx[1]-center,2)+pow((indices[2]+0.0)*dx[2]-center,2);
+			// part.rdata(0)  += (1.0-ratio)*(0.001*meandens*exp(-r/rc)+meandens)*dx[0]*dx[1]*dx[2]/pow(10.0,3);
 		  part.rdata(0)  = (1.0-ratio)*(0.1*meandens*exp(-r/rc)+meandens)*dx[0]*dx[1]*dx[2];
+		  // }
 		  // part.rdata(0)  = (1-ratio)/ratio*myFab(indices,comp)*dx[0]*dx[1]*dx[2];
 		  // part.rdata(0)  = (1.0-ratio)*meandens*dx[0]*dx[1]*dx[2];
 		}else

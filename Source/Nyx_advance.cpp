@@ -134,7 +134,7 @@ Nyx::advance_hydro_plus_particles (Real time,
     //      level which means in iteration 2 the ghost particles may have moved 1 additional cell along
  
     int grav_n_grow = ghost_width + (1-iteration) + (iteration-1) +
-                      stencil_interpolation_width ;
+                      stencil_interpolation_width +1;
 
 #ifdef FDM
     // Plus one since we need to take the derivative of grav_vector 

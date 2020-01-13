@@ -46,7 +46,7 @@
        if (i-1 .lt. accel_lo(1) .or. i .gt. accel_hi(1) .or. &
            j-1 .lt. accel_lo(2) .or. j .gt. accel_hi(2) .or. &
            k-1 .lt. accel_lo(3) .or. k .gt. accel_hi(3)) then
-          print *,'PARTICLE ID ', particles(n)%id,' REACHING OUT OF BOUNDS AT (I,J,K) = ',i,j,k
+          print *,'PARTICLE ID ', particles(n)%id,' REACHING OUT OF BOUNDS AT (I,J,K) = ',i,j,k,accel_lo(1),accel_lo(2),accel_lo(3),accel_hi(1),accel_hi(2),accel_hi(3)
           call amrex_error('Aborting in move_kick_drift')
        end if
 

@@ -106,6 +106,7 @@ int Nyx::Zmom = -1;
 int Nyx::AxDens = -1;
 int Nyx::AxRe   = -1;
 int Nyx::AxIm   = -1;
+int Nyx::AxPhas = -1;
 int Nyx::NUM_AX = -1;
 Real Nyx::m_tt = 2.5;
 Real Nyx::hbaroverm = 0.01917152 / m_tt;

@@ -510,8 +510,10 @@ void Nyx::advance_FDM_PS(amrex::Real time,
     // *****************************************
     // This unfortunately seems neccessary (cf. amrex/Src/Extern/SWFFT/README)
     // *****************************************
-    if(ParallelDescriptor::NProcs() != nboxes)
-        amrex::Error("Number of MPI ranks has to equal number of root level grids!");
+    // if(ParallelDescriptor::NProcs() != nboxes)
+    //     amrex::Error("Number of MPI ranks has to equal number of root level grids!");
+    if(ParallelDescriptor::NProcs() < nboxes)
+        amrex::Error("Number of MPI ranks has to be larger or equal to the number of root level grids!");
 
     Vector<int> rank_mapping;
     rank_mapping.resize(nboxes);
@@ -595,6 +597,7 @@ void Nyx::advance_FDM_PS(amrex::Real time,
 
   for (MFIter mfi(Ax_new,false); mfi.isValid(); ++mfi){
     Array4<Real> const& arr = Ax_new[mfi].array();
+    Array4<Real> const& axold = Ax_old[mfi].array();
     const Box& bx = mfi.validbox();
     const Dim3 lo = amrex::lbound(bx);
     const Dim3 hi = amrex::ubound(bx);
@@ -610,6 +613,19 @@ void Nyx::advance_FDM_PS(amrex::Real time,
 	  arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxRe)=std::real(temp);
 	  arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxIm)=std::imag(temp);
 	  arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxDens)=std::real(temp)*std::real(temp)+std::imag(temp)*std::imag(temp);
+	  arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas) = std::arg(temp);
+	  // while((arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas)-axold(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas))>M_PI)
+	  //   arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas)-=2.0*M_PI;
+	  // while((arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas)-axold(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas))<(-M_PI))
+	  //   arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas)+=2.0*M_PI;
+	  // Real phas = axold(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas)+fmod(std::arg(temp)-axold(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas),2.0*M_PI);
+	  // if( (phas-axold(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas)) > M_PI)
+	  //   phas = phas-2.0*M_PI;
+	  // else if ( (axold(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas)-phas) > M_PI)
+	  //   phas = phas+2.0*M_PI;
+	  // arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas) = phas;
+	  // arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas)=std::arg(temp);
+
         }}}
   }
 
@@ -669,8 +685,8 @@ inline void fdm_timestep(hacc::Dfft &dfft, MultiFab &Ax_new, MultiFab &phi,  Gra
   int fill_interior = 0;
   int grav_n_grow = 1;
   gravity->solve_for_new_phi(level,phi,
-			     gravity->get_grad_phi_curr(level),
-			     fill_interior, grav_n_grow);
+  			     gravity->get_grad_phi_curr(level),
+  			     fill_interior, grav_n_grow);
   Stopwatch::stoplap();
   //  *******************************************
   //  kick by dt_d 

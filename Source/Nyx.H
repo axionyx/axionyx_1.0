@@ -645,6 +645,8 @@ public:
     //! missing doc
     static int AxIm;
     //! missing doc
+    static int AxPhas;
+    //! missing doc
     static int NUM_AX;
     static amrex::Real m_tt;
     static amrex::Real hbaroverm;
