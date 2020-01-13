@@ -14,8 +14,8 @@
 //#include <AMReX_Particles_F.H>
 #include <AMReX_MultiFab.H>
 #ifdef GRAVITY
-#   include "Gravity.H"
-#   include <Gravity_F.H>
+#include "Gravity.H"
+#include <Gravity_F.H>
 #endif
 
 void
@@ -36,7 +36,7 @@ Nyx::advance_FDM_FD (amrex::Real time,
     amrex::MultiFab& Phi_old = get_old_data(PhiGrav_Type);
     amrex::MultiFab& Phi_new = get_new_data(PhiGrav_Type);
 
-    if ( amrex::ParallelDescriptor::IOProcessor() ){
+    if (verbose && amrex::ParallelDescriptor::IOProcessor() ){
     std::cout << "Advancing the axions at level " << level <<  "...\n";
     }
 #ifndef NDEBUG

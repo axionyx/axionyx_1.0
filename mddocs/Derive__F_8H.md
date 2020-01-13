@@ -125,7 +125,7 @@ int const int const int const int const int hi;
 
 
 ```cpp
-int const int const int const int const int const int const int const int const amrex::Real const int * level;
+int const int const int const int const int const int const int const int const amrex::Real const amrex::Real const amrex::Real const amrex::Real const int * level;
 ```
 
 
@@ -170,7 +170,7 @@ int const int const int const int const int const int const int const int const 
 
 
 ```cpp
-const int const int const int const int const amrex::Real const amrex::Real xlo;
+int const int const int const int const int const int const int const int const amrex::Real const amrex::Real xlo;
 ```
 
 
@@ -200,4 +200,4 @@ const int const BL_FORT_FAB_ARG (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/DerivedQuantities/Derive_F.H`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/DerivedQuantities/Derive_F.H`

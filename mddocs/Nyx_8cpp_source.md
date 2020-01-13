@@ -28,7 +28,6 @@ using std::string;
 #include <Derive_F.H>
 #include <AMReX_VisMF.H>
 #include <AMReX_TagBox.H>
-//#include <AMReX_Particles_F.H>
 #include <AMReX_Utility.H>
 #include <AMReX_Print.H>
 
@@ -132,8 +131,10 @@ Real Nyx::gamma_fdm = 1.0;
 Real Nyx::alpha_fdm = 1.0;
 int  Nyx::wkb_approx = 1;
 Real Nyx::beam_cfl = 0.2;
-Real Nyx::vonNeumann_dt = 0;
+Real Nyx::vonNeumann_dt = 0.0;
+int  Nyx::order = 6;
 #endif
+int  Nyx::stencil_deposition_width = 1;
 
 int Nyx::Temp_comp = -1;
 int Nyx::  Ne_comp = -1;
@@ -309,7 +310,12 @@ Nyx::read_params ()
     fort_set_gamma(gamma_fdm);
     pp_nyx.query("alpha_fdm", alpha_fdm);
     pp_nyx.query("wkb_approx", wkb_approx);
+    pp_nyx.query("order", order);
     pp_nyx.query("beam_cfl", beam_cfl);
+    ParmParse ppp("particles");
+    amrex::Real part_size = 1.0;
+    ppp.query("part_size",part_size);
+    stencil_deposition_width = floor(part_size/2.0)+1;
     if (pp_nyx.contains("levelmethod"))
       {
     int nlevs = pp_nyx.countval("levelmethod");
@@ -354,14 +360,14 @@ Nyx::read_params ()
     // Check phys_bc against possible periodic geometry
     // if periodic, must have internal BC marked.
     //
-    if (Geometry::isAnyPeriodic())
+    if (DefaultGeometry().isAnyPeriodic())
     {
         //
         // Do idiot check.  Periodic means interior in those directions.
         //
         for (int dir = 0; dir < BL_SPACEDIM; dir++)
         {
-            if (Geometry::isPeriodic(dir))
+            if (DefaultGeometry().isPeriodic(dir))
             {
                 if (lo_bc[dir] != Interior)
                 {
@@ -500,23 +506,36 @@ Nyx::read_params ()
     }
 
 #ifdef HEATCOOL
-    if (heat_cool_type != 3 && heat_cool_type != 5 && heat_cool_type != 7 && heat_cool_type != 9 && heat_cool_type != 10 && heat_cool_type != 11)
+    if (heat_cool_type != 3 && heat_cool_type !=4 && heat_cool_type != 5 && heat_cool_type != 7 && heat_cool_type != 9 && heat_cool_type != 10 && heat_cool_type != 11)
        amrex::Error("Nyx:: nonzero heat_cool_type must equal 3 or 5 or 7 or 9 or 10 or 11");
     if (heat_cool_type == 0)
        amrex::Error("Nyx::contradiction -- HEATCOOL is defined but heat_cool_type == 0");
 
     if (ParallelDescriptor::IOProcessor()) {
       std::cout << "Integrating heating/cooling method with the following method: ";
-      switch (heat_cool_type) {
-        case 3:
-          std::cout << "VODE";
-          break;
-        case 5:
-          std::cout << "CVODE";
-          break;
-        case 7:
-          std::cout << "SIMD CVODE";
-          break;
+      switch (heat_cool_type)
+    {
+    case 3:
+      std::cout << "VODE";
+      break;
+    case 4:
+      std::cout << "Exact";
+      break;
+    case 5:
+      std::cout << "CVODE";
+      break;
+    case 7:
+      std::cout << "SIMD CVODE";
+    break;
+    case 9:
+      std::cout << "ARKODE";
+    break;
+    case 10:
+      std::cout << "Vectorized copytomem CVODE";
+      break;
+    case 11:
+      std::cout << "Vectorized CVODE";
+      break;
       }
       std::cout << std::endl;
     }
@@ -723,7 +742,7 @@ Nyx::Nyx (Amr&            papa,
 
 #ifdef HEATCOOL
      // Initialize "this_z" in the atomic_rates_module
-    if (heat_cool_type == 3 || heat_cool_type == 5 || heat_cool_type == 7 || heat_cool_type == 9 || heat_cool_type == 10 || heat_cool_type == 11)
+    if (heat_cool_type == 3 || heat_cool_type == 4 || heat_cool_type == 5 || heat_cool_type == 7 || heat_cool_type == 9 || heat_cool_type == 10 || heat_cool_type == 11)
          fort_interp_to_this_z(&initial_z);
 #endif
 }
@@ -805,7 +824,7 @@ Nyx::setTimeLevel (Real time,
                    Real dt_old,
                    Real dt_new)
 {
-    if (ParallelDescriptor::IOProcessor()) {
+    if (verbose && ParallelDescriptor::IOProcessor()) {
        std::cout << "Setting the current time in the state data to "
                  << parent->cumTime() << std::endl;
     }
@@ -1013,10 +1032,14 @@ Nyx::est_time_step (Real dt_old)
       const MultiFab& phi = get_new_data(PhiGrav_Type);
       Real phi_max = std::abs(phi.max(0)-phi.min(0));
       const Real* dx = geom.CellSize();
-      Real time_step = vonNeumann_dt*std::min(dx[0]*dx[0]*a*a/6/hbaroverm,hbaroverm/phi_max); 
+      Real dt = std::min(dx[0]*dx[0]*a*a/2.0/hbaroverm,hbaroverm/phi_max);
+      if (levelmethod[level]==PSlevel)
+    dt *= vonNeumann_dt;
+      else if (vonNeumann_dt<1.0)
+    dt *= vonNeumann_dt;
       if (verbose && ParallelDescriptor::IOProcessor())
-        std::cout << "...estdt from von Neumann stability :  "<< time_step << " " <<phi_max<<'\n';
-      return time_step;
+        std::cout << "...estdt from von Neumann stability :  "<< dt << " " <<phi_max<<'\n';
+      est_dt = std::min(est_dt, dt);
     }
 #endif
 
@@ -1641,7 +1664,7 @@ Nyx::post_restart ()
             {
                 // Do multilevel solve here.  We now store phi in the checkpoint file so we can use it
                 //  at restart.
-                int ngrow_for_solve = 1;
+                int ngrow_for_solve = stencil_deposition_width;
                 int use_previous_phi_as_guess = 1;
                 gravity->multilevel_solve_for_new_phi(0,parent->finestLevel(),ngrow_for_solve,use_previous_phi_as_guess);
 
@@ -1899,7 +1922,7 @@ Nyx::post_regrid (int lbase,
         if (gravity->get_gravity_type() == "PoissonGrav")
 #endif
         {
-            int ngrow_for_solve = parent->levelCount(level) + 1;
+            int ngrow_for_solve = parent->levelCount(level) + stencil_deposition_width;
             int use_previous_phi_as_guess = 1;
             gravity->multilevel_solve_for_new_phi(level, new_finest, ngrow_for_solve, use_previous_phi_as_guess);
         }
@@ -1951,7 +1974,7 @@ Nyx::post_init (Real stop_time)
             //
             // Solve on full multilevel hierarchy
             //
-            int ngrow_for_solve = 1;
+            int ngrow_for_solve = stencil_deposition_width;
             gravity->multilevel_solve_for_new_phi(0, finest_level, ngrow_for_solve);
         }
 
@@ -2370,7 +2393,7 @@ Nyx::compute_new_temp (MultiFab& S_new, MultiFab& D_new)
     Real a        = get_comoving_a(cur_time);
 
 #ifdef HEATCOOL 
-    if (heat_cool_type == 3 || heat_cool_type == 5 || heat_cool_type == 7 || heat_cool_type == 9 || heat_cool_type == 10 || heat_cool_type == 11)
+    if (heat_cool_type == 3 || heat_cool_type == 4 || heat_cool_type == 5 || heat_cool_type == 7 || heat_cool_type == 9 || heat_cool_type == 10 || heat_cool_type == 11)
     {
        const Real z = 1.0/a - 1.0;
        fort_interp_to_this_z(&z);

@@ -10,7 +10,6 @@
 
 #include "Nyx.H"
 #include "Nyx_F.H"
-//#include <AMReX_Particles_F.H>
 
 #ifdef GRAVITY
 #include "Gravity.H"
@@ -94,7 +93,8 @@ Nyx::advance_hydro_plus_particles (Real time,
 {
 
     // A particle in cell (i) can affect cell values in (i-1) to (i+1)
-    int stencil_deposition_width = 1;
+  // ! Now in Nyx.H 
+    // int stencil_deposition_width = 1;
 
 #ifdef FDM
     // For FDM Gaussian kernels this is increased to

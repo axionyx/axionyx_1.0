@@ -66,4 +66,4 @@ subroutine fort_make_hydro_sources (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/HydroFortran/make_hydro_sources_3d.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/HydroFortran/make_hydro_sources_3d.f90`

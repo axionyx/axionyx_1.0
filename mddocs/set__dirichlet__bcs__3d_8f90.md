@@ -62,4 +62,4 @@ subroutine fort_set_homog_bcs (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Gravity/set_dirichlet_bcs_3d.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/Gravity/set_dirichlet_bcs_3d.f90`

@@ -17,14 +17,12 @@
 * **AmpltThresh** ([**StochasticForcing**](classStochasticForcing.md))
 * **AutoCorrlTime** ([**StochasticForcing**](classStochasticForcing.md))
 * **alpha** ([**StochasticForcing**](classStochasticForcing.md))
-* **abort\_on\_stream\_retry\_failure** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **amr\_level** ([**amrex::Amr**](classamrex_1_1Amr.md))
+* **all\_off** ([**Stopwatch**](classStopwatch.md))
 
 
 ## b
 
 * **BandWidth** ([**StochasticForcing**](classStochasticForcing.md))
-* **bUserStopRequest** ([**amrex::Amr**](classamrex_1_1Amr.md))
 * **box\_id** ([**anonymous\_namespace{DarkMatterParticleContainer.cpp}::BoxMortonKey**](structanonymous__namespace_02DarkMatterParticleContainer_8cpp_03_1_1BoxMortonKey.md))
 
 
@@ -38,11 +36,6 @@
 * **comoving\_OmM** ([**Nyx**](classNyx.md))
 * **comoving\_h** ([**Nyx**](classNyx.md))
 * **corner\_coupling** ([**Nyx**](classNyx.md))
-* **check\_file\_root** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **check\_int** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **check\_per** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **cumtime** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **crse\_ratio** ([**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
 
 
 ## d
@@ -51,7 +44,7 @@
 * **delta\_tol** ([**Gravity**](classGravity.md))
 * **density** ([**Gravity**](classGravity.md))
 * **dirichlet\_bcs** ([**Gravity**](classGravity.md))
-* **dmap** ([**Gravity**](classGravity.md), [**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
+* **dmap** ([**Gravity**](classGravity.md))
 * **default\_fname\_** ([**MemInfo**](classMemInfo.md))
 * **Density** ([**Nyx**](classNyx.md))
 * **do\_dm\_particles** ([**Nyx**](classNyx.md))
@@ -64,16 +57,7 @@
 * **dump\_old** ([**Nyx**](classNyx.md))
 * **DecayInitTime** ([**StochasticForcing**](classStochasticForcing.md))
 * **decay** ([**StochasticForcing**](classStochasticForcing.md))
-* **datalog** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **datalogname** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **derive\_plot\_vars** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **derive\_small\_plot\_vars** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **dt\_level** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **dt\_min** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **derive\_lst** ([**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
-* **desc\_lst** ([**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
 * **DM** ([**anonymous\_namespace{DarkMatterParticleContainer.cpp}::ParticleMortonFileHeader**](structanonymous__namespace_02DarkMatterParticleContainer_8cpp_03_1_1ParticleMortonFileHeader.md))
-* **d** ([**hacc::Dfft**](classhacc_1_1Dfft.md))
 
 
 ## e
@@ -81,7 +65,6 @@
 * **Eden** ([**Nyx**](classNyx.md))
 * **Eint** ([**Nyx**](classNyx.md))
 * **err\_list** ([**Nyx**](classNyx.md))
-* **edge\_grids** ([**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
 
 
 ## f
@@ -97,10 +80,6 @@
 * **final\_z** ([**Nyx**](classNyx.md))
 * **fine\_mask** ([**Nyx**](classNyx.md))
 * **flux\_reg** ([**Nyx**](classNyx.md))
-* **file\_name\_digits** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **first\_plotfile** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **first\_smallplotfile** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **fine\_ratio** ([**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
 
 
 ## g
@@ -108,12 +87,10 @@
 * **grad\_phi\_curr** ([**Gravity**](classGravity.md))
 * **grad\_phi\_prev** ([**Gravity**](classGravity.md))
 * **gravity\_type** ([**Gravity**](classGravity.md))
-* **grids** ([**Gravity**](classGravity.md), [**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
+* **grids** ([**Gravity**](classGravity.md))
 * **global\_max\_** ([**MemInfo**](classMemInfo.md))
 * **global\_min\_** ([**MemInfo**](classMemInfo.md))
 * **gamma** ([**Nyx**](classNyx.md))
-* **gridlog** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **geom** ([**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
 
 
 ## h
@@ -141,15 +118,6 @@
 * **IntgrVelocity** ([**StochasticForcing**](classStochasticForcing.md))
 * **i1** ([**StochasticForcing**](classStochasticForcing.md))
 * **i2** ([**StochasticForcing**](classStochasticForcing.md))
-* **initial\_ba** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **initial\_grids\_file** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **intersect\_hix** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **intersect\_hiy** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **intersect\_hiz** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **intersect\_lox** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **intersect\_loy** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **intersect\_loz** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **isPeriodic** ([**amrex::Amr**](classamrex_1_1Amr.md))
 
 
 ## j
@@ -173,17 +141,7 @@
 * **LevelData** ([**Gravity**](classGravity.md))
 * **level\_solver\_resnorm** ([**Gravity**](classGravity.md))
 * **logfile\_** ([**MemInfo**](classMemInfo.md))
-* **last\_checkpoint** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **last\_plotfile** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **last\_smallplotfile** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **level\_count** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **level\_steps** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **levelbld** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **loadbalance\_level0\_int** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **loadbalance\_max\_fac** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **loadbalance\_with\_workestimates** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **level** ([**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
-* **levelDirectoryCreated** ([**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
+* **levels** ([**Stopwatch**](classStopwatch.md))
 
 
 ## m
@@ -202,38 +160,8 @@
 * **mpi\_v\_** ([**MemInfo**](classMemInfo.md))
 * **my\_rank\_** ([**MemInfo**](classMemInfo.md))
 * **mask** ([**StochasticForcing**](classStochasticForcing.md))
-* **message\_int** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **m\_AreaNotToTag** ([**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
-* **m\_AreaToTag** ([**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
-* **m\_factory** ([**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
-* **m\_amrlevel** ([**amrex::FillPatchIterator**](classamrex_1_1FillPatchIterator.md), [**amrex::FillPatchIteratorHelper**](classamrex_1_1FillPatchIteratorHelper.md))
-* **m\_fabs** ([**amrex::FillPatchIterator**](classamrex_1_1FillPatchIterator.md))
-* **m\_leveldata** ([**amrex::FillPatchIterator**](classamrex_1_1FillPatchIterator.md), [**amrex::FillPatchIteratorHelper**](classamrex_1_1FillPatchIteratorHelper.md))
-* **m\_ncomp** ([**amrex::FillPatchIterator**](classamrex_1_1FillPatchIterator.md), [**amrex::FillPatchIteratorHelper**](classamrex_1_1FillPatchIteratorHelper.md))
-* **m\_range** ([**amrex::FillPatchIterator**](classamrex_1_1FillPatchIterator.md))
-* **m\_FixUpCorners** ([**amrex::FillPatchIteratorHelper**](classamrex_1_1FillPatchIteratorHelper.md))
-* **m\_ba** ([**amrex::FillPatchIteratorHelper**](classamrex_1_1FillPatchIteratorHelper.md))
-* **m\_cbox** ([**amrex::FillPatchIteratorHelper**](classamrex_1_1FillPatchIteratorHelper.md))
-* **m\_fbid** ([**amrex::FillPatchIteratorHelper**](classamrex_1_1FillPatchIteratorHelper.md))
-* **m\_fbox** ([**amrex::FillPatchIteratorHelper**](classamrex_1_1FillPatchIteratorHelper.md))
-* **m\_growsize** ([**amrex::FillPatchIteratorHelper**](classamrex_1_1FillPatchIteratorHelper.md))
-* **m\_index** ([**amrex::FillPatchIteratorHelper**](classamrex_1_1FillPatchIteratorHelper.md))
-* **m\_map** ([**amrex::FillPatchIteratorHelper**](classamrex_1_1FillPatchIteratorHelper.md))
-* **m\_mfcd** ([**amrex::FillPatchIteratorHelper**](classamrex_1_1FillPatchIteratorHelper.md))
-* **m\_mfid** ([**amrex::FillPatchIteratorHelper**](classamrex_1_1FillPatchIteratorHelper.md))
-* **m\_scomp** ([**amrex::FillPatchIteratorHelper**](classamrex_1_1FillPatchIteratorHelper.md))
-* **m\_time** ([**amrex::FillPatchIteratorHelper**](classamrex_1_1FillPatchIteratorHelper.md))
+* **msgs** ([**Stopwatch**](classStopwatch.md))
 * **morton\_id** ([**anonymous\_namespace{DarkMatterParticleContainer.cpp}::BoxMortonKey**](structanonymous__namespace_02DarkMatterParticleContainer_8cpp_03_1_1BoxMortonKey.md))
-* **m\_bi** ([**hacc::Dfft**](classhacc_1_1Dfft.md))
-* **m\_bs** ([**hacc::Dfft**](classhacc_1_1Dfft.md))
-* **m\_fo** ([**hacc::Dfft**](classhacc_1_1Dfft.md))
-* **m\_fs** ([**hacc::Dfft**](classhacc_1_1Dfft.md))
-* **m\_plan\_b\_x** ([**hacc::Dfft**](classhacc_1_1Dfft.md))
-* **m\_plan\_b\_y** ([**hacc::Dfft**](classhacc_1_1Dfft.md))
-* **m\_plan\_b\_z** ([**hacc::Dfft**](classhacc_1_1Dfft.md))
-* **m\_plan\_f\_x** ([**hacc::Dfft**](classhacc_1_1Dfft.md))
-* **m\_plan\_f\_y** ([**hacc::Dfft**](classhacc_1_1Dfft.md))
-* **m\_plan\_f\_z** ([**hacc::Dfft**](classhacc_1_1Dfft.md))
 
 
 ## n
@@ -256,8 +184,6 @@
 * **num\_particle\_ghosts** ([**Nyx**](classNyx.md))
 * **NumModes** ([**StochasticForcing**](classStochasticForcing.md))
 * **NumNonZeroModes** ([**StochasticForcing**](classStochasticForcing.md))
-* **n\_cycle** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **nodal\_grids** ([**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
 * **NF** ([**anonymous\_namespace{DarkMatterParticleContainer.cpp}::ParticleMortonFileHeader**](structanonymous__namespace_02DarkMatterParticleContainer_8cpp_03_1_1ParticleMortonFileHeader.md))
 * **NP** ([**anonymous\_namespace{DarkMatterParticleContainer.cpp}::ParticleMortonFileHeader**](structanonymous__namespace_02DarkMatterParticleContainer_8cpp_03_1_1ParticleMortonFileHeader.md))
 * **NX** ([**anonymous\_namespace{DarkMatterParticleContainer.cpp}::ParticleMortonFileHeader**](structanonymous__namespace_02DarkMatterParticleContainer_8cpp_03_1_1ParticleMortonFileHeader.md))
@@ -267,12 +193,13 @@
 
 * **old\_a** ([**Nyx**](classNyx.md))
 * **old\_a\_time** ([**Nyx**](classNyx.md))
+* **of** ([**Stopwatch**](classStopwatch.md))
 
 
 ## p
 
 * **particles\_moved** ([**AxionParticleContainer**](classAxionParticleContainer.md))
-* **parent** ([**Gravity**](classGravity.md), [**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
+* **parent** ([**Gravity**](classGravity.md))
 * **phi\_flux\_reg** ([**Gravity**](classGravity.md))
 * **phys\_bc** ([**Gravity**](classGravity.md), [**Nyx**](classNyx.md))
 * **page\_size\_** ([**MemInfo**](classMemInfo.md))
@@ -294,39 +221,25 @@
 * **ppm\_type** ([**Nyx**](classNyx.md))
 * **previousCPUTimeUsed** ([**Nyx**](classNyx.md))
 * **print\_fortran\_warnings** ([**Nyx**](classNyx.md))
-* **plot\_file\_root** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **plot\_int** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **plot\_log\_per** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **plot\_per** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **probin\_file** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **post\_step\_regrid** ([**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
-* **PlansMade** ([**hacc::Dfft**](classhacc_1_1Dfft.md))
+* **print\_starts** ([**Stopwatch**](classStopwatch.md))
+* **printlevel** ([**Stopwatch**](classStopwatch.md))
 
 
 ## r
 
 * **real\_comp\_names** ([**AGNParticleContainer**](classAGNParticleContainer.md), [**NyxParticleContainer**](classNyxParticleContainer.md))
 * **relative\_max\_change\_a** ([**Nyx**](classNyx.md))
-* **record\_grid\_info** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **record\_run\_info** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **record\_run\_info\_terse** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **regrid\_ba** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **regrid\_grids\_file** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **regrid\_int** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **restart\_chkfile** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **restart\_pltfile** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **runlog** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **runlog\_terse** ([**amrex::Amr**](classamrex_1_1Amr.md))
 
 
 ## s
 
-* **sub\_cycle** ([**AGNParticleContainer**](classAGNParticleContainer.md), [**NyxParticleContainer**](classNyxParticleContainer.md), [**amrex::Amr**](classamrex_1_1Amr.md))
+* **sub\_cycle** ([**AGNParticleContainer**](classAGNParticleContainer.md), [**NyxParticleContainer**](classNyxParticleContainer.md))
 * **smoothing\_length** ([**AxionParticleContainer**](classAxionParticleContainer.md))
 * **sl\_tol** ([**Gravity**](classGravity.md))
 * **small\_dens** ([**Nyx**](classNyx.md))
 * **small\_temp** ([**Nyx**](classNyx.md))
 * **startCPUTime** ([**Nyx**](classNyx.md))
+* **stencil\_deposition\_width** ([**Nyx**](classNyx.md))
 * **strang\_split** ([**Nyx**](classNyx.md))
 * **strict\_subcycling** ([**Nyx**](classNyx.md))
 * **SolenoidalWeight** ([**StochasticForcing**](classStochasticForcing.md))
@@ -335,16 +248,8 @@
 * **SpectrumEven** ([**StochasticForcing**](classStochasticForcing.md))
 * **SpectrumOdd** ([**StochasticForcing**](classStochasticForcing.md))
 * **seed** ([**StochasticForcing**](classStochasticForcing.md))
-* **small\_plot\_file\_root** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **small\_plot\_int** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **small\_plot\_log\_per** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **small\_plot\_per** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **start\_time** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **state\_plot\_vars** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **state\_small\_plot\_vars** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **stream\_max\_tries** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **subcycling\_mode** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **state** ([**amrex::AmrLevel**](classamrex_1_1AmrLevel.md))
+* **startlaptime** ([**Stopwatch**](classStopwatch.md))
+* **starttime** ([**Stopwatch**](classStopwatch.md))
 * **SZ** ([**anonymous\_namespace{DarkMatterParticleContainer.cpp}::ParticleMortonFileHeader**](structanonymous__namespace_02DarkMatterParticleContainer_8cpp_03_1_1ParticleMortonFileHeader.md))
 
 
@@ -364,7 +269,7 @@
 
 ## v
 
-* **verbose** ([**Gravity**](classGravity.md), [**Nyx**](classNyx.md), [**StochasticForcing**](classStochasticForcing.md), [**amrex::AmrCore**](classamrex_1_1AmrCore.md))
+* **verbose** ([**Gravity**](classGravity.md), [**Nyx**](classNyx.md), [**StochasticForcing**](classStochasticForcing.md))
 * **version\_2** ([**Nyx**](classNyx.md))
 
 
@@ -374,8 +279,7 @@
 * **write\_parameters\_in\_plotfile** ([**Nyx**](classNyx.md))
 * **write\_particle\_density\_at\_init** ([**Nyx**](classNyx.md))
 * **WaveNumber** ([**StochasticForcing**](classStochasticForcing.md))
-* **which\_level\_being\_advanced** ([**amrex::Amr**](classamrex_1_1Amr.md))
-* **write\_plotfile\_with\_checkpoint** ([**amrex::Amr**](classamrex_1_1Amr.md))
+* **writelevel** ([**Stopwatch**](classStopwatch.md))
 
 
 ## x

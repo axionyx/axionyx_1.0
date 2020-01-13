@@ -7,11 +7,6 @@
 * **AoS** ([**NyxParticleContainer**](classNyxParticleContainer.md))
 
 
-## b
-
-* **BoundaryPointList** ([**amrex::Amr**](classamrex_1_1Amr.md))
-
-
 ## m
 
 * **MyParIter** ([**AGNParticleContainer**](classAGNParticleContainer.md), [**DarkMatterParticleContainer**](classDarkMatterParticleContainer.md), [**NyxParticleContainer**](classNyxParticleContainer.md))

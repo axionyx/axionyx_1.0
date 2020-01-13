@@ -79,6 +79,7 @@
 |  void | [**fort\_setup\_eos\_params**](Nyx__F_8H.md#function-fort-setup-eos-params) (amrex::Real \* eos\_nr\_eps, amrex::Real \* vode\_rtol, amrex::Real \* vode\_atol\_scaled) <br> |
 |  void | [**fort\_syncgsrc**](Nyx__F_8H.md#function-fort-syncgsrc) (const int lo, const int hi, const  BL\_FORT\_FAB\_ARG, const  BL\_FORT\_FAB\_ARG, const  BL\_FORT\_FAB\_ARG, const  BL\_FORT\_FAB\_ARG, BL\_FORT\_FAB\_ARG(src), const amrex::Real \* a\_new, const amrex::Real & dt) <br> |
 |  void | [**fort\_tabulate\_rates**](Nyx__F_8H.md#function-fort-tabulate-rates) () <br> |
+|  void | [**fort\_update\_eos**](Nyx__F_8H.md#function-fort-update-eos) (double dt, double \* u, double \* uout, double \* rpar) <br> |
 |  void | [**fort\_update\_state**](Nyx__F_8H.md#function-fort-update-state) (const int lo, const int hi, const  BL\_FORT\_FAB\_ARG, BL\_FORT\_FAB\_ARG(u\_out), const  BL\_FORT\_FAB\_ARG, const  BL\_FORT\_FAB\_ARG, const  BL\_FORT\_FAB\_ARG, const amrex::Real \* dt, const amrex::Real \* a\_old, const amrex::Real \* a\_new, const int \* print\_fortran\_warnings) <br> |
 |  void | [**generic\_fill**](Nyx__F_8H.md#function-generic-fill) (BL\_FORT\_FAB\_ARG(state), const int dlo, const int dhi, const amrex::Real dx, const amrex::Real glo, const amrex::Real \* time, const int bc) <br> |
 |  void | [**get\_rhoe**](Nyx__F_8H.md#function-get-rhoe) (const int lo, const int hi, const  BL\_FORT\_FAB\_ARG, const  BL\_FORT\_FAB\_ARG, const  BL\_FORT\_FAB\_ARG, const  BL\_FORT\_FAB\_ARG) <br> |
@@ -859,6 +860,20 @@ void fort_tabulate_rates ()
 
 
 
+### <a href="#function-fort-update-eos" id="function-fort-update-eos">function fort\_update\_eos </a>
+
+
+```cpp
+void fort_update_eos (
+    double dt,
+    double * u,
+    double * uout,
+    double * rpar
+) 
+```
+
+
+
 ### <a href="#function-fort-update-state" id="function-fort-update-state">function fort\_update\_state </a>
 
 
@@ -1088,4 +1103,4 @@ void time_center_sources (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Nyx_F.H`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/Nyx_F.H`

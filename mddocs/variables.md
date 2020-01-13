@@ -135,8 +135,3 @@
 
 * **xlo** ([**Derive\_F.H**](Derive__F_8H.md), [**Nyx\_error\_F.H**](Nyx__error__F_8H.md))
 
-
-## @
-
-* **@0** ([**distribution.c**](distribution_8c.md))
-

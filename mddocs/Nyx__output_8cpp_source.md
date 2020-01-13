@@ -153,7 +153,10 @@ Nyx::writePlotFile (const std::string& dir,
             if (it->name() == "particle_count" ||
                 it->name() == "total_particle_count" ||
                 it->name() == "particle_mass_density" ||
-                it->name() == "total_density")
+                it->name() == "total_density" || 
+                it->name() == "particle_x_velocity" ||
+                it->name() == "particle_y_velocity" ||
+                it->name() == "particle_z_velocity" )
             {
                 if (Nyx::theDMPC())
                 {
@@ -172,7 +175,10 @@ Nyx::writePlotFile (const std::string& dir,
 #endif
 #ifdef NEUTRINO_PARTICLES
             } else if (it->name() == "neutrino_particle_count" ||
-                       it->name() == "neutrino_mass_density")
+                       it->name() == "neutrino_mass_density" ||
+               it->name() == "neutrino_x_velocity" ||
+               it->name() == "neutrino_y_velocity" ||
+               it->name() == "neutrino_z_velocity" )
             {
                 if (Nyx::theNPC())
                 {
@@ -247,10 +253,10 @@ Nyx::writePlotFile (const std::string& dir,
         int f_lev = parent->finestLevel();
         os << f_lev << '\n';
         for (i = 0; i < BL_SPACEDIM; i++)
-            os << Geometry::ProbLo(i) << ' ';
+            os << Geom().ProbLo(i) << ' ';
         os << '\n';
         for (i = 0; i < BL_SPACEDIM; i++)
-            os << Geometry::ProbHi(i) << ' ';
+            os << Geom().ProbHi(i) << ' ';
         os << '\n';
         for (i = 0; i < f_lev; i++)
             os << parent->refRatio(i)[0] << ' ';
@@ -267,7 +273,7 @@ Nyx::writePlotFile (const std::string& dir,
                 os << parent->Geom(i).CellSize()[k] << ' ';
             os << '\n';
         }
-        os << (int) Geometry::Coord() << '\n';
+        os << (int) Geom().Coord() << '\n';
         os << "0\n"; // Write bndry data.
 
         writeJobInfo(dir);
@@ -797,10 +803,10 @@ Nyx::writeMultiFabAsPlotFile(const std::string& pltfile,
         // One level
         os << "0\n";
         for (int i = 0; i < BL_SPACEDIM; i++)
-            os << Geometry::ProbLo(i) << ' ';
+            os << Geom().ProbLo(i) << ' ';
         os << '\n';
         for (int i = 0; i < BL_SPACEDIM; i++)
-            os << Geometry::ProbHi(i) << ' ';
+            os << Geom().ProbHi(i) << ' ';
         os << '\n';
         // Only one level -> no refinement ratios
         os << '\n';
@@ -812,7 +818,7 @@ Nyx::writeMultiFabAsPlotFile(const std::string& pltfile,
         for (int k = 0; k < BL_SPACEDIM; k++)
             os << parent->Geom(0).CellSize()[k] << ' ';
         os << '\n';
-        os << (int) Geometry::Coord() << '\n';
+        os << (int) Geom().Coord() << '\n';
         os << "0\n"; // Write bndry data.
     }
     // Build the directory to hold the MultiFab at this level.

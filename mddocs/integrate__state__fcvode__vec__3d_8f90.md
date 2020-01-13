@@ -70,4 +70,4 @@ subroutine integrate_state_fcvode_vec (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/HeatCool/integrate_state_fcvode_vec_3d.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/HeatCool/integrate_state_fcvode_vec_3d.f90`

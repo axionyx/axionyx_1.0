@@ -69,4 +69,4 @@ std::string anonymous_namespace{Nyx_initdata.cpp}::sph_particle_file;
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Initialization/Nyx_initdata.cpp`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/Initialization/Nyx_initdata.cpp`

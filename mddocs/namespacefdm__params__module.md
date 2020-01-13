@@ -33,7 +33,7 @@
 |  double complex, parameter | [**ii**](namespacefdm__params__module.md#variable-ii)   = = (0., 1.)<br> |
 |  real(rt), save | [**m\_tt**](namespacefdm__params__module.md#variable-m-tt)  <br> |
 |  real(rt), save | [**meandens**](namespacefdm__params__module.md#variable-meandens)  <br> |
-|  real(rt), save | [**mindens**](namespacefdm__params__module.md#variable-mindens)   = = 1.0d+3<br> |
+|  real(rt), save | [**mindens**](namespacefdm__params__module.md#variable-mindens)   = = 1.0d-2<br> |
 |  real(rt), save | [**sigma\_fdm**](namespacefdm__params__module.md#variable-sigma-fdm)  <br> |
 |  real(rt), save | [**theta\_fdm**](namespacefdm__params__module.md#variable-theta-fdm)  <br> |
 
@@ -149,4 +149,4 @@ real(rt), save fdm_params_module::theta_fdm;
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/FDM/fdm_params.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/FDM/fdm_params.f90`

@@ -30,7 +30,6 @@
 
 !       n = 0
 
-!       !$OMP PARALLEL DO PRIVATE(i,j,k)
 !       do k = lo(3), hi(3)                                                                                                                                                          
 !          do j = lo(2), hi(2)                                                                                                                                                       
 !             do i = lo(1), hi(1)
@@ -40,9 +39,7 @@
 !             enddo
 !          enddo
 !       enddo
-!       !$OMP END PARALLEL DO
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -54,7 +51,6 @@
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 end subroutine ca_axphase
 
 
@@ -79,7 +75,6 @@ end subroutine ca_axphase
 
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -87,7 +82,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_axepot
 
@@ -113,7 +107,6 @@ end subroutine ca_axphase
 
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -143,7 +136,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_axekin
 
@@ -172,7 +164,6 @@ end subroutine ca_axphase
       !Unfortunately, the interpolation argorithm sometimes yields a small negative density
       !if the density is close to zero in a specific area. We can't allow that and set it to zero. 
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3)-2, hi(3)+2                                                                                                                                                          
          do j = lo(2)-2, hi(2)+2                                                                                                                                                       
             do i = lo(1)-2, hi(1)+2
@@ -182,9 +173,7 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -195,7 +184,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_axekinrho
 
@@ -218,14 +206,14 @@ end subroutine ca_axphase
       double precision delta(3), xlo(3), time, dt, diff(3)
       double precision ekinv(ekinv_l1:ekinv_h1,ekinv_l2:ekinv_h2,ekinv_l3:ekinv_h3,nk)
       double precision dat(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3,nc)
-      double precision phase(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3)
+      !double precision phase(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3)
+      double precision phase(lo(1)-1:hi(1)+1,lo(2)-1:hi(2)+1,lo(3)-1:hi(3)+1)
       integer    level, grid_no
 
       integer i, j, k
 
       if (nc .eq. 3) then !We solve AxDens,AxIm,AxRe 
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3)-1, hi(3)+1                                                                                                                                                          
          do j = lo(2)-1, hi(2)+1                                                                                                                                                       
             do i = lo(1)-1, hi(1)+1
@@ -237,9 +225,7 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -266,11 +252,9 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       else !We solve UAXDENS, UAXMOMX, UAXMOMY, UAXMOMZ
          
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -284,7 +268,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
                   
       endif
 
@@ -315,7 +298,6 @@ end subroutine ca_axphase
 
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3)-1, hi(3)+1                                                                                                                                                          
          do j = lo(2)-1, hi(2)+1                                                                                                                                                       
             do i = lo(1)-1, hi(1)+1
@@ -327,9 +309,7 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -347,7 +327,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_axvel
 
@@ -376,7 +355,6 @@ end subroutine ca_axphase
 
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -389,7 +367,6 @@ end subroutine ca_axphase
             enddo 
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_axangmom_x
 
@@ -417,7 +394,6 @@ end subroutine ca_axphase
 
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -430,7 +406,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_axangmom_y
 
@@ -458,7 +433,6 @@ end subroutine ca_axphase
 
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -471,9 +445,117 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_axangmom_z
+
+!-----------------------------------------------------------------------
+
+
+      subroutine ca_lohnererror(err,err_l1,err_l2,err_l3,err_h1,err_h2,err_h3,nk, &
+                                dat,dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc, &
+                                lo,hi,domlo,domhi,delta,xlo,time,dt,bc,level,grid_no)
+      !
+      ! This routine calculates the error estimator for the fdm velocity (AxRe,AxIm) 
+      ! according to R. Loehner (1987) eq.4
+      !
+
+      use fdm_params_module, only : epsilon_l, mindens
+
+      implicit none
+
+      integer          lo(3), hi(3)
+      integer          err_l1,err_l2,err_l3,err_h1,err_h2,err_h3,nk
+      integer          dat_l1,dat_l2,dat_l3,dat_h1,dat_h2,dat_h3,nc
+      integer          domlo(3), domhi(3)
+      integer          bc(3,2,nc)
+      double precision delta(3), xlo(3), time, dt
+      double precision err(err_l1:err_h1,err_l2:err_h2,err_l3:err_h3,nk)
+      double precision    dat(dat_l1:dat_h1,dat_l2:dat_h2,dat_l3:dat_h3,nc)
+      integer    level, grid_no
+
+      double precision top, bottom, eps
+      integer i, j, k
+
+      eps = 0.2
+
+      do k = lo(3), hi(3)                                                                                                                                      
+         do j = lo(2), hi(2)                                                                                                                                              
+            do i = lo(1), hi(1)
+               
+               err(i,j,k,1) = 0.0
+              
+               ! print *, "dat",dat(i,j,k,1),dat(i,j,k,2)
+
+               if ( (dat(i,j,k,1).ge.mindens) .and. (dat(i,j,k,2).ne.0.0) ) then
+
+               top =       (dat(i+1,j  ,k  ,2)-dat(i  ,j  ,k  ,2)-dat(i  ,j  ,k  ,2)+dat(i-1,j  ,k  ,2))**2 + &
+                           (dat(i  ,j+1,k  ,2)-dat(i  ,j  ,k  ,2)-dat(i  ,j  ,k  ,2)+dat(i  ,j-1,k  ,2))**2 + &
+                           (dat(i  ,j  ,k+1,2)-dat(i  ,j  ,k  ,2)-dat(i  ,j  ,k  ,2)+dat(i  ,j  ,k-1,2))**2 + &
+                     0.125*(dat(i+1,j+1,k  ,2)-dat(i+1,j-1,k  ,2)-dat(i-1,j+1,k  ,2)+dat(i-1,j-1,k  ,2))**2 + &
+                     0.125*(dat(i+1,j  ,k+1,2)-dat(i+1,j  ,k-1,2)-dat(i-1,j  ,k+1,2)+dat(i-1,j  ,k-1,2))**2 + &
+                     0.125*(dat(i  ,j+1,k+1,2)-dat(i  ,j+1,k-1,2)-dat(i  ,j-1,k+1,2)+dat(i  ,j-1,k-1,2))**2
+
+               bottom =      (abs(dat(i+1,j  ,k  ,2) -    dat(i  ,j  ,k  ,2))+abs(dat(i  ,j  ,k  ,2) -    dat(i-1,j  ,k  ,2))      + &
+                         eps*(abs(dat(i+1,j  ,k  ,2))+abs(dat(i  ,j  ,k  ,2))+abs(dat(i  ,j  ,k  ,2))+abs(dat(i-1,j  ,k  ,2))))**2 + &
+                             (abs(dat(i  ,j+1,k  ,2) -    dat(i  ,j  ,k  ,2))+abs(dat(i  ,j  ,k  ,2) -    dat(i  ,j-1,k  ,2))      + &
+                         eps*(abs(dat(i  ,j+1,k  ,2))+abs(dat(i  ,j  ,k  ,2))+abs(dat(i  ,j  ,k  ,2))+abs(dat(i  ,j-1,k  ,2))))**2 + &
+                             (abs(dat(i  ,j  ,k+1,2) -    dat(i  ,j  ,k  ,2))+abs(dat(i  ,j  ,k  ,2) -    dat(i  ,j  ,k-1,2))      + &
+                         eps*(abs(dat(i  ,j  ,k+1,2))+abs(dat(i  ,j  ,k  ,2))+abs(dat(i  ,j  ,k  ,2))+abs(dat(i  ,j  ,k-1,2))))**2 + &
+                        (0.5*(abs(dat(i+1,j+1,k  ,2) -    dat(i-1,j+1,k  ,2))+abs(dat(i+1,j-1,k  ,2) -    dat(i-1,j-1,k  ,2)))     + &
+                         eps*(abs(dat(i+1,j+1,k  ,2))+abs(dat(i-1,j+1,k  ,2))+abs(dat(i+1,j-1,k  ,2))+abs(dat(i-1,j-1,k  ,2))))**2 + &
+                        (0.5*(abs(dat(i+1,j+1,k  ,2) -    dat(i+1,j-1,k  ,2))+abs(dat(i-1,j+1,k  ,2) -    dat(i-1,j-1,k  ,2)))     + &
+                         eps*(abs(dat(i+1,j+1,k  ,2))+abs(dat(i+1,j-1,k  ,2))+abs(dat(i-1,j+1,k  ,2))+abs(dat(i-1,j-1,k  ,2))))**2 + &
+                        (0.5*(abs(dat(i+1,j  ,k+1,2) -    dat(i-1,j  ,k+1,2))+abs(dat(i+1,j  ,k-1,2) -    dat(i-1,j  ,k-1,2)))     + &
+                         eps*(abs(dat(i+1,j  ,k+1,2))+abs(dat(i-1,j  ,k+1,2))+abs(dat(i+1,j  ,k-1,2))+abs(dat(i-1,j  ,k-1,2))))**2 + &
+                        (0.5*(abs(dat(i+1,j  ,k+1,2) -    dat(i+1,j  ,k-1,2))+abs(dat(i-1,j  ,k+1,2) -    dat(i-1,j  ,k-1,2)))     + &
+                         eps*(abs(dat(i+1,j  ,k+1,2))+abs(dat(i+1,j  ,k-1,2))+abs(dat(i-1,j  ,k+1,2))+abs(dat(i-1,j  ,k-1,2))))**2 + &
+                        (0.5*(abs(dat(i  ,j+1,k+1,2) -    dat(i  ,j-1,k+1,2))+abs(dat(i  ,j+1,k-1,2) -    dat(i  ,j-1,k-1,2)))     + &
+                         eps*(abs(dat(i  ,j+1,k+1,2))+abs(dat(i  ,j-1,k+1,2))+abs(dat(i  ,j+1,k-1,2))+abs(dat(i  ,j-1,k-1,2))))**2 + &
+                        (0.5*(abs(dat(i  ,j+1,k+1,2) -    dat(i  ,j+1,k-1,2))+abs(dat(i  ,j-1,k+1,2) -    dat(i  ,j-1,k-1,2)))     + &
+                         eps*(abs(dat(i  ,j+1,k+1,2))+abs(dat(i  ,j+1,k-1,2))+abs(dat(i  ,j-1,k+1,2))+abs(dat(i  ,j-1,k-1,2))))**2
+
+               err(i,j,k,1) = sqrt(top/bottom)
+               endif
+
+               if ( (dat(i,j,k,1).ge.mindens) .and. (dat(i,j,k,3).ne.0.0) ) then
+
+               top =       (dat(i+1,j  ,k  ,3)-dat(i  ,j  ,k  ,3)-dat(i  ,j  ,k  ,3)+dat(i-1,j  ,k  ,3))**2 + &
+                           (dat(i  ,j+1,k  ,3)-dat(i  ,j  ,k  ,3)-dat(i  ,j  ,k  ,3)+dat(i  ,j-1,k  ,3))**2 + &
+                           (dat(i  ,j  ,k+1,3)-dat(i  ,j  ,k  ,3)-dat(i  ,j  ,k  ,3)+dat(i  ,j  ,k-1,3))**2 + &
+                     0.125*(dat(i+1,j+1,k  ,3)-dat(i+1,j-1,k  ,3)-dat(i-1,j+1,k  ,3)+dat(i-1,j-1,k  ,3))**2 + &
+                     0.125*(dat(i+1,j  ,k+1,3)-dat(i+1,j  ,k-1,3)-dat(i-1,j  ,k+1,3)+dat(i-1,j  ,k-1,3))**2 + &
+                     0.125*(dat(i  ,j+1,k+1,3)-dat(i  ,j+1,k-1,3)-dat(i  ,j-1,k+1,3)+dat(i  ,j-1,k-1,3))**2
+
+               bottom =      (abs(dat(i+1,j  ,k  ,3) -    dat(i  ,j  ,k  ,3))+abs(dat(i  ,j  ,k  ,3) -    dat(i-1,j  ,k  ,3))      + &
+                         eps*(abs(dat(i+1,j  ,k  ,3))+abs(dat(i  ,j  ,k  ,3))+abs(dat(i  ,j  ,k  ,3))+abs(dat(i-1,j  ,k  ,3))))**2 + &
+                             (abs(dat(i  ,j+1,k  ,3) -    dat(i  ,j  ,k  ,3))+abs(dat(i  ,j  ,k  ,3) -    dat(i  ,j-1,k  ,3))      + &
+                         eps*(abs(dat(i  ,j+1,k  ,3))+abs(dat(i  ,j  ,k  ,3))+abs(dat(i  ,j  ,k  ,3))+abs(dat(i  ,j-1,k  ,3))))**2 + &
+                             (abs(dat(i  ,j  ,k+1,3) -    dat(i  ,j  ,k  ,3))+abs(dat(i  ,j  ,k  ,3) -    dat(i  ,j  ,k-1,3))      + &
+                         eps*(abs(dat(i  ,j  ,k+1,3))+abs(dat(i  ,j  ,k  ,3))+abs(dat(i  ,j  ,k  ,3))+abs(dat(i  ,j  ,k-1,3))))**2 + &
+                        (0.5*(abs(dat(i+1,j+1,k  ,3) -    dat(i-1,j+1,k  ,3))+abs(dat(i+1,j-1,k  ,3) -    dat(i-1,j-1,k  ,3)))     + &
+                         eps*(abs(dat(i+1,j+1,k  ,3))+abs(dat(i-1,j+1,k  ,3))+abs(dat(i+1,j-1,k  ,3))+abs(dat(i-1,j-1,k  ,3))))**2 + &
+                        (0.5*(abs(dat(i+1,j+1,k  ,3) -    dat(i+1,j-1,k  ,3))+abs(dat(i-1,j+1,k  ,3) -    dat(i-1,j-1,k  ,3)))     + &
+                         eps*(abs(dat(i+1,j+1,k  ,3))+abs(dat(i+1,j-1,k  ,3))+abs(dat(i-1,j+1,k  ,3))+abs(dat(i-1,j-1,k  ,3))))**2 + &
+                        (0.5*(abs(dat(i+1,j  ,k+1,3) -    dat(i-1,j  ,k+1,3))+abs(dat(i+1,j  ,k-1,3) -    dat(i-1,j  ,k-1,3)))     + &
+                         eps*(abs(dat(i+1,j  ,k+1,3))+abs(dat(i-1,j  ,k+1,3))+abs(dat(i+1,j  ,k-1,3))+abs(dat(i-1,j  ,k-1,3))))**2 + &
+                        (0.5*(abs(dat(i+1,j  ,k+1,3) -    dat(i+1,j  ,k-1,3))+abs(dat(i-1,j  ,k+1,3) -    dat(i-1,j  ,k-1,3)))     + &
+                         eps*(abs(dat(i+1,j  ,k+1,3))+abs(dat(i+1,j  ,k-1,3))+abs(dat(i-1,j  ,k+1,3))+abs(dat(i-1,j  ,k-1,3))))**2 + &
+                        (0.5*(abs(dat(i  ,j+1,k+1,3) -    dat(i  ,j-1,k+1,3))+abs(dat(i  ,j+1,k-1,3) -    dat(i  ,j-1,k-1,3)))     + &
+                         eps*(abs(dat(i  ,j+1,k+1,3))+abs(dat(i  ,j-1,k+1,3))+abs(dat(i  ,j+1,k-1,3))+abs(dat(i  ,j-1,k-1,3))))**2 + &
+                        (0.5*(abs(dat(i  ,j+1,k+1,3) -    dat(i  ,j+1,k-1,3))+abs(dat(i  ,j-1,k+1,3) -    dat(i  ,j-1,k-1,3)))     + &
+                         eps*(abs(dat(i  ,j+1,k+1,3))+abs(dat(i  ,j+1,k-1,3))+abs(dat(i  ,j-1,k+1,3))+abs(dat(i  ,j-1,k-1,3))))**2
+
+                  err(i,j,k,1) = max(err(i,j,k,1),sqrt(top/bottom))
+
+                  endif
+
+                  ! print *, 'err',err(i,j,k,1)
+
+            enddo
+         enddo
+      enddo
+
+      end subroutine ca_lohnererror
 
 !-----------------------------------------------------------------------
 
@@ -503,7 +585,6 @@ end subroutine ca_axphase
       double precision secondder, firstder, meanvalue
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                      
          do j = lo(2), hi(2)                                                                                                                                              
             do i = lo(1), hi(1)
@@ -520,7 +601,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_dererrx
 
@@ -551,7 +631,6 @@ end subroutine ca_axphase
       double precision secondder, firstder, meanvalue
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -568,7 +647,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_dererry
 
@@ -599,7 +677,6 @@ end subroutine ca_axphase
       double precision secondder, firstder, meanvalue
       integer i, j, k
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k)
       do k = lo(3), hi(3)                                                                                                                                                          
          do j = lo(2), hi(2)                                                                                                                                                       
             do i = lo(1), hi(1)
@@ -616,7 +693,6 @@ end subroutine ca_axphase
             enddo
          enddo
       enddo
-      !$OMP END PARALLEL DO
 
       end subroutine ca_dererrz
 ````

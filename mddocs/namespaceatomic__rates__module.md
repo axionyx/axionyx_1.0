@@ -417,4 +417,4 @@ subroutine atomic_rates_module::fort_tabulate_rates ()
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/EOS/atomic_rates.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/EOS/atomic_rates.f90`

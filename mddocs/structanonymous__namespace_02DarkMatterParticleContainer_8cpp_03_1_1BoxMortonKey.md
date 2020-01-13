@@ -59,4 +59,4 @@ uint64_t anonymous_namespace{DarkMatterParticleContainer.cpp}::BoxMortonKey::mor
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/DarkMatterParticleContainer.cpp`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/DarkMatterParticleContainer.cpp`

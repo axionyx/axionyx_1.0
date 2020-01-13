@@ -133,4 +133,4 @@ subroutine update_gaussian_beams_wkb (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/FDM/update_fdm_particles_3d.f90`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/FDM/update_fdm_particles_3d.f90`

@@ -14,17 +14,10 @@ Here are the classes, structs, unions and interfaces with brief descriptions:
 * **class** [**NyxParticleContainer**](classNyxParticleContainer.md)   
 * **class** [**NyxParticleContainerBase**](classNyxParticleContainerBase.md)   
 * **class** [**StochasticForcing**](classStochasticForcing.md)   
+* **class** [**Stopwatch**](classStopwatch.md) _def for debugging missing stoplap calls._   
 * **namespace** [**adjust\_heat\_cool\_module**](namespaceadjust__heat__cool__module.md)   
 * **namespace** [**agn\_params\_module**](namespaceagn__params__module.md)   
 * **namespace** [**amrex**](namespaceamrex.md)   
-  * **class** [**Amr**](classamrex_1_1Amr.md) _Manage hierarchy of levels for time-dependent AMR computations._   
-  * **class** [**AmrCore**](classamrex_1_1AmrCore.md) _Provide basic functionalities to set up an AMR hierarchy._   
-  * **class** [**AmrLevel**](classamrex_1_1AmrLevel.md) _Virtual base class for managing individual levels._ [_**AmrLevel**_](classamrex_1_1AmrLevel.md) _functions both as a container for state data on a level and also manages the advancement of data in time._  
-  * **class** [**FillPatchIterator**](classamrex_1_1FillPatchIterator.md)   
-  * **class** [**FillPatchIteratorHelper**](classamrex_1_1FillPatchIteratorHelper.md)   
-  * **class** [**MFGraph**](classamrex_1_1MFGraph.md) 
-  * **namespace** [**anonymous\_namespace{AMReX\_Amr.cpp}**](namespaceamrex_1_1anonymous__namespace_02AMReX__Amr_8cpp_03.md)   
-  * **namespace** [**anonymous\_namespace{AMReX\_AmrCore.cpp}**](namespaceamrex_1_1anonymous__namespace_02AMReX__AmrCore_8cpp_03.md)   
 * **namespace** [**amrex\_constants\_module**](namespaceamrex__constants__module.md) 
 * **namespace** [**amrex\_error\_module**](namespaceamrex__error__module.md) 
 * **namespace** [**amrex\_fort\_module**](namespaceamrex__fort__module.md) 
@@ -60,8 +53,6 @@ Here are the classes, structs, unions and interfaces with brief descriptions:
 * **namespace** [**fnvector\_serial**](namespacefnvector__serial.md) 
 * **namespace** [**forcing\_spect\_module**](namespaceforcing__spect__module.md)   
 * **namespace** [**fundamental\_constants\_module**](namespacefundamental__constants__module.md)   
-* **namespace** [**hacc**](namespacehacc.md)   
-  * **class** [**Dfft**](classhacc_1_1Dfft.md)   
 * **namespace** [**interpolate\_module**](namespaceinterpolate__module.md)   
 * **namespace** [**iso\_c\_binding**](namespaceiso__c__binding.md) 
 * **namespace** [**meth\_params\_module**](namespacemeth__params__module.md)   

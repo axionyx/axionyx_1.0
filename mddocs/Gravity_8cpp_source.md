@@ -345,7 +345,7 @@ Gravity::solve_for_new_phi (int               level,
       {
         AddParticlesToRhs(level,Rhs,ngrow_for_solve);
         AddVirtualParticlesToRhs(level,Rhs,ngrow_for_solve);
-    AddGhostParticlesToRhs(level,Rhs);
+    AddGhostParticlesToRhs(level,Rhs,ngrow_for_solve);
       }
 
 #ifdef FDM
@@ -382,7 +382,7 @@ Gravity::solve_for_phi (int               level,
         amrex::Print() << " ... solve for phi at level " << level << '\n';
 
     // This is a correction for fully periodic domains only
-    if (Geometry::isAllPeriodic())
+    if (parent->Geom(level).isAllPeriodic())
         CorrectRhsUsingOffset(level,Rhs);
 
     Rhs.mult(Ggravity);
@@ -530,10 +530,9 @@ Gravity::gravity_sync (int crse_level, int fine_level, int iteration, int ncycle
     // Add the contribution of grad(delta_phi) to the flux register below if necessary.
     if (crse_level > 0 && iteration == ncycle)
     {
-        for (MFIter mfi(*delta_phi[0]); mfi.isValid(); ++mfi)
-            for (int n = 0; n < BL_SPACEDIM; ++n)
-                phi_flux_reg[crse_level]->FineAdd((*ec_gdPhi[0][n])[mfi], n,
-                          mfi.index(), 0, 0, 1, 1);
+        for (int n = 0; n < BL_SPACEDIM; ++n) {
+            phi_flux_reg[crse_level]->FineAdd(*ec_gdPhi[0][n], n, 0, 0, 1, 1.0);
+        }
     }
 
     for (int lev = crse_level; lev <= fine_level; lev++) {
@@ -725,8 +724,8 @@ Gravity::actual_multilevel_solve (int                       level,
 
     const auto& rpp = amrex::GetVecOfPtrs(Rhs_particles);
     AddParticlesToRhs(level,finest_level,ngrow_for_solve,rpp);
-    AddGhostParticlesToRhs(level,rpp);
-    AddVirtualParticlesToRhs(finest_level,rpp);
+    AddGhostParticlesToRhs(level,rpp,ngrow_for_solve);
+    AddVirtualParticlesToRhs(finest_level,rpp,ngrow_for_solve);
 
     Nyx* cs = dynamic_cast<Nyx*>(&parent->getLevel(level));
 
@@ -822,7 +821,7 @@ Gravity::actual_multilevel_solve (int                       level,
 // *****************************************************************************
 
     // This correction is for fully periodic domains only.
-    if (Geometry::isAllPeriodic())
+    if (parent->Geom(level).isAllPeriodic())
     {
         if (verbose)
             amrex::Print() << " ... subtracting average density " << mass_offset
@@ -1083,12 +1082,9 @@ Gravity::add_to_fluxes(int level, int iteration, int ncycle)
 
     if (phi_current && (iteration == ncycle))
     {
-      MultiFab& phi_curr = LevelData[level]->get_new_data(PhiGrav_Type);
-      for (MFIter mfi(phi_curr); mfi.isValid(); ++mfi)
-      {
-         for (int n=0; n<BL_SPACEDIM; ++n)
-         phi_current->FineAdd((*grad_phi_curr[level][n])[mfi],n,mfi.index(),0,0,1,area[n]);
-      }
+        for (int n=0; n<BL_SPACEDIM; ++n) {
+            phi_current->FineAdd(*grad_phi_curr[level][n],n,0,0,1,area[n]);
+        }
     }
 }
 
@@ -1489,14 +1485,14 @@ Gravity::AddVirtualParticlesToRhs (int               level,
 }
 
 void
-Gravity::AddVirtualParticlesToRhs(int finest_level, const Vector<MultiFab*>& Rhs_particles)
+Gravity::AddVirtualParticlesToRhs(int finest_level, const Vector<MultiFab*>& Rhs_particles, int ngrow)
 {
     BL_PROFILE("Gravity::AddVirtualParticlesToRhsML()");
     if (finest_level < parent->finestLevel())
     {
         // Should only need ghost cells for virtual particles if they're near
         // the simulation boundary and even then only maybe
-        MultiFab VirtPartMF(grids[finest_level], dmap[finest_level], 1, 1);
+        MultiFab VirtPartMF(grids[finest_level], dmap[finest_level], 1, ngrow);
         VirtPartMF.setVal(0.0);
 
         for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
@@ -1509,13 +1505,14 @@ Gravity::AddVirtualParticlesToRhs(int finest_level, const Vector<MultiFab*>& Rhs
 
 void
 Gravity::AddGhostParticlesToRhs (int               level,
-                                 MultiFab&         Rhs)
+                                 MultiFab&         Rhs,
+                 int ngrow)
 {
     BL_PROFILE("Gravity::AddGhostParticlesToRhs()");
     if (level > 0)
     {
         // If we have ghost particles, add their density to the single level solve
-        MultiFab ghost_mf(grids[level], dmap[level], 1, 1);
+        MultiFab ghost_mf(grids[level], dmap[level], 1, ngrow);
 
         for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
         {
@@ -1527,7 +1524,7 @@ Gravity::AddGhostParticlesToRhs (int               level,
 }
 
 void
-Gravity::AddGhostParticlesToRhs(int level, const Vector<MultiFab*>& Rhs_particles)
+Gravity::AddGhostParticlesToRhs(int level, const Vector<MultiFab*>& Rhs_particles, int ngrow)
 {
     BL_PROFILE("Gravity::AddGhostParticlesToRhsML()");
     if (level > 0)
@@ -1535,7 +1532,7 @@ Gravity::AddGhostParticlesToRhs(int level, const Vector<MultiFab*>& Rhs_particle
         // We require one ghost cell in GhostPartMF because that's how we handle
         // particles near fine-fine boundaries.  However we don't add any ghost
         // cells from GhostPartMF to the RHS.
-        MultiFab GhostPartMF(grids[level], dmap[level], 1, 1);
+        MultiFab GhostPartMF(grids[level], dmap[level], 1, ngrow);
         GhostPartMF.setVal(0.0);
 
         // Get the Ghost particle mass function. Note that Ghost particles should

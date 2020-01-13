@@ -39,11 +39,13 @@ Nyx::write_info ()
     }
 #endif
 #ifdef FDM
-        Real mass=0.0, epot=0.0, ekinrho=0.0, ekinv=0.0, etot=0.0;
+        Real mass=0.0, epot=0.0, ekinrho=0.0, ekinv=0.0, ekin=0.0, etot=0.0;
         Real angmom_x=0.0, angmom_y=0.0, angmom_z=0.0, grav_pot=0.0, phase=0.0;
-        compute_axion_quantities(mass, epot, ekinrho, ekinv, angmom_x, angmom_y, angmom_z, grav_pot, phase);
-    etot = epot + ekinrho + ekinv;
-    Real max_dens = get_new_data(Axion_Type).max(Nyx::AxDens);
+        compute_axion_quantities(mass, epot, ekinrho, ekinv, ekin, angmom_x, angmom_y, angmom_z, grav_pot, phase);
+    etot = epot + ekin;//ekinrho + ekinv;
+    Real max_dens = 0.0;
+    for (int lev = 0; lev <= parent->finestLevel(); lev++)
+      max_dens = std::max(max_dens, get_level(lev).get_new_data(Axion_Type).max(Nyx::AxDens));
 #endif
 
 #ifdef NO_HYDRO
@@ -69,6 +71,7 @@ Nyx::write_info ()
                  data_loga << std::setw(14) <<  "     Epot";
                  data_loga << std::setw(14) <<  "  Ekinrho";
                  data_loga << std::setw(14) <<  "    Ekinv";
+                 data_loga << std::setw(14) <<  "     Ekin";
                  data_loga << std::setw(14) <<  "     Etot";
                  data_loga << std::setw(14) <<  " max_dens";
 #endif
@@ -102,6 +105,7 @@ Nyx::write_info ()
                  data_loga << std::setw(14) <<  std::setprecision(6) << epot;
                  data_loga << std::setw(14) <<  std::setprecision(6) << ekinrho;
                  data_loga << std::setw(14) <<  std::setprecision(6) << ekinv;
+                 data_loga << std::setw(14) <<  std::setprecision(6) << ekin;
                  data_loga << std::setw(14) <<  std::setprecision(6) << etot;
                  data_loga << std::setw(14) <<  std::setprecision(6) << max_dens;
 #endif
@@ -138,6 +142,7 @@ Nyx::write_info ()
                  data_loga << std::setw(14) <<  std::setprecision(6) << epot;
                  data_loga << std::setw(14) <<  std::setprecision(6) << ekinrho;
                  data_loga << std::setw(14) <<  std::setprecision(6) << ekinv;
+                 data_loga << std::setw(14) <<  std::setprecision(6) << ekin;
                  data_loga << std::setw(14) <<  std::setprecision(6) << etot;
                  data_loga << std::setw(14) <<  std::setprecision(6) << max_dens;
 #endif

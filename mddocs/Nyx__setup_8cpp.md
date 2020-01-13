@@ -192,4 +192,4 @@ static Box the_same_box (
 
 
 ------------------------------
-The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/Nyx/axionyx/Source/Initialization/Nyx_setup.cpp`
+The documentation for this class was generated from the following file `/home/uni06/cosmo/cbehren2/AXIONYX/axionyx/Source/Initialization/Nyx_setup.cpp`

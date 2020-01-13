@@ -355,159 +355,172 @@
         arg2 = abs(cpq+cpqtemp)/abs(cpq)
 
         if( (arg1 .gt. 0.1) .and. (arg2 .gt. 0.1) ) then
-           test = .false.
+           particles(n)%mass = 0.8*dt
         else
-           if ( arg1 .le. arg2 ) then
-              cpq = cpqtemp
-           else
-              cpq = -cpqtemp
-           endif
-           test = .true.
+           particles(n)%mass = 0.0
         endif
-!                                                                                                                                                                                                                  
-        if (test .eqv. .false.) then
-           nn_hi = 10
-           cpqold = cpq
-           do nn=1, nn_hi
-!                                                                                                                                                                                                                  
-              zz = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm) &
-                   + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_fdm                    
-!                                                                                                                                                                                                      
-              det = (zz(1,1)*zz(2,2)*zz(3,3) - zz(1,1)*zz(2,3)*zz(3,2) &
-                   - zz(1,2)*zz(2,1)*zz(3,3) + zz(1,2)*zz(2,3)*zz(3,1) &
-                   + zz(1,3)*zz(2,1)*zz(3,2) - zz(1,3)*zz(2,2)*zz(3,1))
-!                                                                                                                                                                                                           
-              cpqtemp = sqrt(det)
-              arg1 = abs(cpq-cpqtemp)/abs(cpq)
-              arg2 = abs(cpq+cpqtemp)/abs(cpq)
-              if ( (arg1 .gt. 0.1) .and. (arg2 .gt. 0.1) ) then
-                 test = .false.
-                 exit
-              else
-                 if ( arg1 .le. arg2 ) then
-                    cpq = cpqtemp
-                 else
-                    cpq = -cpqtemp
-                 endif
-                 test = .true.
-              endif
-           enddo
+           
+        if ( arg1 .le. arg2 ) then
+           cpq = cpqtemp
+        else
+           cpq = -cpqtemp
         endif
-!                                                                                                                                                                                                                
-        if (test .eqv. .false.) then
-           nn_hi = 100
-           cpq = cpqold
-           do nn=1, nn_hi
-!                                                                                                                                                                                                                
-              zz = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm) &
-                   + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_fdm                    
-!                                                                                                                                                                                                                
-              det = (zz(1,1)*zz(2,2)*zz(3,3) - zz(1,1)*zz(2,3)*zz(3,2) &
-                   - zz(1,2)*zz(2,1)*zz(3,3) + zz(1,2)*zz(2,3)*zz(3,1) &
-                   + zz(1,3)*zz(2,1)*zz(3,2) - zz(1,3)*zz(2,2)*zz(3,1))
-!                                                                                                                                                                                                                
-              cpqtemp = sqrt(det)
-              arg1 = abs(cpq-cpqtemp)/abs(cpq)
-              arg2 = abs(cpq+cpqtemp)/abs(cpq)
-              if ( (arg1 .gt. 0.1) .and. (arg2 .gt. 0.1) ) then
-                 test = .false.
-                 exit
-              else
-                 if ( arg1 .le. arg2 ) then
-                    cpq = cpqtemp
-                 else
-                    cpq = -cpqtemp
-                 endif
-                 test = .true.
-              endif
-           enddo
-        endif
-!                                                                                                                                                                                                                
-        if (test .eqv. .false.) then
-           nn_hi = 1000
-           cpq = cpqold
-           do nn=1, nn_hi
-!                                                                                                                                                                                                                
-              zz = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm) &
-                   + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_fdm                    
-!                                                                                                                                                                                                              
-              det = (zz(1,1)*zz(2,2)*zz(3,3) - zz(1,1)*zz(2,3)*zz(3,2) &
-                   - zz(1,2)*zz(2,1)*zz(3,3) + zz(1,2)*zz(2,3)*zz(3,1) &
-                   + zz(1,3)*zz(2,1)*zz(3,2) - zz(1,3)*zz(2,2)*zz(3,1))
-!                                                                                                                                                                                                                
-              cpqtemp = sqrt(det)
-              arg1 = abs(cpq-cpqtemp)/abs(cpq)
-              arg2 = abs(cpq+cpqtemp)/abs(cpq)
-              if ( (arg1 .gt. 0.1) .and. (arg2 .gt. 0.1) ) then
-                 test = .false.
-                 exit
-              else
-                 if ( arg1 .le. arg2 ) then
-                    cpq = cpqtemp
-                 else
-                    cpq = -cpqtemp
-                 endif
-                 test = .true.
-              endif
-           enddo
-        endif
-!                                                                                                                                                                                                                
-        if (test .eqv. .false.) then
-           nn_hi = 10000
-           cpq = cpqold
-           do nn=1, nn_hi
-!                                                                                                                                                                                                                
-              zz = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm) &
-                   + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_fdm
-!                                                                                                                                                                                                              
-              det = (zz(1,1)*zz(2,2)*zz(3,3) - zz(1,1)*zz(2,3)*zz(3,2) &
-                   - zz(1,2)*zz(2,1)*zz(3,3) + zz(1,2)*zz(2,3)*zz(3,1) &
-                   + zz(1,3)*zz(2,1)*zz(3,2) - zz(1,3)*zz(2,2)*zz(3,1))
-!                                                                                                                                                                                                               
-              cpqtemp = sqrt(det)
-              arg1 = abs(cpq-cpqtemp)/abs(cpq)
-              arg2 = abs(cpq+cpqtemp)/abs(cpq)
-              if ( (arg1 .gt. 0.1) .and. (arg2 .gt. 0.1) ) then
-                 test = .false.
-                 exit
-              else
-                 if ( arg1 .le. arg2 ) then
-                    cpq = cpqtemp
-                 else
-                    cpq = -cpqtemp
-                 endif
-                 test = .true.
-              endif
-           enddo
-        endif
-!                                                                                                                                                                                                                
-        if (test .eqv. .false.) then
-           nn_hi = 100000
-           cpq = cpqold
-           do nn=1, nn_hi
-!                                                                                                                                                                                                                
-              zz = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm) &
-                   + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_fdm
-!                                                                                                                                                                                                                
-              det = (zz(1,1)*zz(2,2)*zz(3,3) - zz(1,1)*zz(2,3)*zz(3,2) &
-                   - zz(1,2)*zz(2,1)*zz(3,3) + zz(1,2)*zz(2,3)*zz(3,1) &
-                   + zz(1,3)*zz(2,1)*zz(3,2) - zz(1,3)*zz(2,2)*zz(3,1))
-!                                                                                                                                                                                                                
-              cpqtemp = sqrt(det)
-              arg1 = abs(cpq-cpqtemp)/abs(cpq)
-              arg2 = abs(cpq+cpqtemp)/abs(cpq)
-              if ( (arg1 .gt. 0.1) .and. (arg2 .gt. 0.1) ) then
-                 print *, "Error: functional determinant is changing too fast! Arguments are: ",arg1, arg2, cpqtemp, cpq, nn, nn_hi
-                 call amrex_error('Aborting in update_gaussian_beams')
-              else
-                 if ( arg1 .le. arg2 ) then
-                    cpq = cpqtemp
-                 else
-                    cpq = -cpqtemp
-                 endif
-              endif
-           enddo
-        endif
+
+
+!         if( (Arg1 .gt. 0.1) .and. (Arg2 .gt. 0.1) ) then
+!            test = .false.
+!         else
+!            if ( Arg1 .le. Arg2 ) then
+!               Cpq = Cpqtemp
+!            else
+!               Cpq = -Cpqtemp
+!            endif
+!            test = .true.
+!         endif
+! !                                                                                                                                                                                                                  
+!         if (test .eqv. .false.) then
+!            nn_hi = 10
+!            Cpqold = Cpq
+!            do nn=1, nn_hi
+! !                                                                                                                                                                                                                  
+!               ZZ = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm) &
+!                    + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_fdm                    
+! !                                                                                                                                                                                                      
+!               det = (ZZ(1,1)*ZZ(2,2)*ZZ(3,3) - ZZ(1,1)*ZZ(2,3)*ZZ(3,2) &
+!                    - ZZ(1,2)*ZZ(2,1)*ZZ(3,3) + ZZ(1,2)*ZZ(2,3)*ZZ(3,1) &
+!                    + ZZ(1,3)*ZZ(2,1)*ZZ(3,2) - ZZ(1,3)*ZZ(2,2)*ZZ(3,1))
+! !                                                                                                                                                                                                           
+!               Cpqtemp = sqrt(det)
+!               Arg1 = abs(Cpq-Cpqtemp)/abs(Cpq)
+!               Arg2 = abs(Cpq+Cpqtemp)/abs(Cpq)
+!               if ( (Arg1 .gt. 0.1) .and. (Arg2 .gt. 0.1) ) then
+!                  test = .false.
+!                  exit
+!               else
+!                  if ( Arg1 .le. Arg2 ) then
+!                     Cpq = Cpqtemp
+!                  else
+!                     Cpq = -Cpqtemp
+!                  endif
+!                  test = .true.
+!               endif
+!            enddo
+!         endif
+! !                                                                                                                                                                                                                
+!         if (test .eqv. .false.) then
+!            nn_hi = 100
+!            Cpq = Cpqold
+!            do nn=1, nn_hi
+! !                                                                                                                                                                                                                
+!               ZZ = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm) &
+!                    + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_fdm                    
+! !                                                                                                                                                                                                                
+!               det = (ZZ(1,1)*ZZ(2,2)*ZZ(3,3) - ZZ(1,1)*ZZ(2,3)*ZZ(3,2) &
+!                    - ZZ(1,2)*ZZ(2,1)*ZZ(3,3) + ZZ(1,2)*ZZ(2,3)*ZZ(3,1) &
+!                    + ZZ(1,3)*ZZ(2,1)*ZZ(3,2) - ZZ(1,3)*ZZ(2,2)*ZZ(3,1))
+! !                                                                                                                                                                                                                
+!               Cpqtemp = sqrt(det)
+!               Arg1 = abs(Cpq-Cpqtemp)/abs(Cpq)
+!               Arg2 = abs(Cpq+Cpqtemp)/abs(Cpq)
+!               if ( (Arg1 .gt. 0.1) .and. (Arg2 .gt. 0.1) ) then
+!                  test = .false.
+!                  exit
+!               else
+!                  if ( Arg1 .le. Arg2 ) then
+!                     Cpq = Cpqtemp
+!                  else
+!                     Cpq = -Cpqtemp
+!                  endif
+!                  test = .true.
+!               endif
+!            enddo
+!         endif
+! !                                                                                                                                                                                                                
+!         if (test .eqv. .false.) then
+!            nn_hi = 1000
+!            Cpq = Cpqold
+!            do nn=1, nn_hi
+! !                                                                                                                                                                                                                
+!               ZZ = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm) &
+!                    + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_fdm                    
+! !                                                                                                                                                                                                              
+!               det = (ZZ(1,1)*ZZ(2,2)*ZZ(3,3) - ZZ(1,1)*ZZ(2,3)*ZZ(3,2) &
+!                    - ZZ(1,2)*ZZ(2,1)*ZZ(3,3) + ZZ(1,2)*ZZ(2,3)*ZZ(3,1) &
+!                    + ZZ(1,3)*ZZ(2,1)*ZZ(3,2) - ZZ(1,3)*ZZ(2,2)*ZZ(3,1))
+! !                                                                                                                                                                                                                
+!               Cpqtemp = sqrt(det)
+!               Arg1 = abs(Cpq-Cpqtemp)/abs(Cpq)
+!               Arg2 = abs(Cpq+Cpqtemp)/abs(Cpq)
+!               if ( (Arg1 .gt. 0.1) .and. (Arg2 .gt. 0.1) ) then
+!                  test = .false.
+!                  exit
+!               else
+!                  if ( Arg1 .le. Arg2 ) then
+!                     Cpq = Cpqtemp
+!                  else
+!                     Cpq = -Cpqtemp
+!                  endif
+!                  test = .true.
+!               endif
+!            enddo
+!         endif
+! !                                                                                                                                                                                                                
+!         if (test .eqv. .false.) then
+!            nn_hi = 10000
+!            Cpq = Cpqold
+!            do nn=1, nn_hi
+! !                                                                                                                                                                                                                
+!               ZZ = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm) &
+!                    + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_fdm
+! !                                                                                                                                                                                                              
+!               det = (ZZ(1,1)*ZZ(2,2)*ZZ(3,3) - ZZ(1,1)*ZZ(2,3)*ZZ(3,2) &
+!                    - ZZ(1,2)*ZZ(2,1)*ZZ(3,3) + ZZ(1,2)*ZZ(2,3)*ZZ(3,1) &
+!                    + ZZ(1,3)*ZZ(2,1)*ZZ(3,2) - ZZ(1,3)*ZZ(2,2)*ZZ(3,1))
+! !                                                                                                                                                                                                               
+!               Cpqtemp = sqrt(det)
+!               Arg1 = abs(Cpq-Cpqtemp)/abs(Cpq)
+!               Arg2 = abs(Cpq+Cpqtemp)/abs(Cpq)
+!               if ( (Arg1 .gt. 0.1) .and. (Arg2 .gt. 0.1) ) then
+!                  test = .false.
+!                  exit
+!               else
+!                  if ( Arg1 .le. Arg2 ) then
+!                     Cpq = Cpqtemp
+!                  else
+!                     Cpq = -Cpqtemp
+!                  endif
+!                  test = .true.
+!               endif
+!            enddo
+!         endif
+! !                                                                                                                                                                                                                
+!         if (test .eqv. .false.) then
+!            nn_hi = 100000
+!            Cpq = Cpqold
+!            do nn=1, nn_hi
+! !                                                                                                                                                                                                                
+!               ZZ = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm) &
+!                    + (((ppold*(nn_hi-nn)+nn*pp)/nn_hi)-2.0*ii*hbaroverm*particles(n)%width*((qpold*(nn_hi-nn)+nn*qp)/nn_hi))*gamma_fdm
+! !                                                                                                                                                                                                                
+!               det = (ZZ(1,1)*ZZ(2,2)*ZZ(3,3) - ZZ(1,1)*ZZ(2,3)*ZZ(3,2) &
+!                    - ZZ(1,2)*ZZ(2,1)*ZZ(3,3) + ZZ(1,2)*ZZ(2,3)*ZZ(3,1) &
+!                    + ZZ(1,3)*ZZ(2,1)*ZZ(3,2) - ZZ(1,3)*ZZ(2,2)*ZZ(3,1))
+! !                                                                                                                                                                                                                
+!               Cpqtemp = sqrt(det)
+!               Arg1 = abs(Cpq-Cpqtemp)/abs(Cpq)
+!               Arg2 = abs(Cpq+Cpqtemp)/abs(Cpq)
+!               if ( (Arg1 .gt. 0.1) .and. (Arg2 .gt. 0.1) ) then
+!                  print *, "Error: functional determinant is changing too fast! Arguments are: ",Arg1, Arg2, Cpqtemp, Cpq, nn, nn_hi
+!                  call amrex_error('Aborting in update_gaussian_beams')
+!               else
+!                  if ( Arg1 .le. Arg2 ) then
+!                     Cpq = Cpqtemp
+!                  else
+!                     Cpq = -Cpqtemp
+!                  endif
+!               endif
+!            enddo
+!         endif
 
         particles(n)%amp(1) = real(real(cpq))
         particles(n)%amp(2) = real(aimag(cpq))
@@ -870,154 +883,160 @@
         arg2 = abs(cpq+cpqtemp)/abs(cpq)
 
         if( (arg1 .gt. 0.1) .and. (arg2 .gt. 0.1) ) then
-           test = .false.
+           particles(n)%mass = 0.8*dt
         else
-           if ( arg1 .le. arg2 ) then
-              cpq = cpqtemp
-           else
-              cpq = -cpqtemp
-           endif
-           test = .true.
+           particles(n)%mass = 0.0
         endif
-!                                                                                                                                                                                                               
-        if (test .eqv. .false.) then
-           nn_hi = 10
-           cpqold = cpq
-           do nn=1, nn_hi
-!                                                                                                                                                                                                               
-              zz = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm)
-!                                                                                                                                                                                                      
-              det = (zz(1,1)*zz(2,2)*zz(3,3) - zz(1,1)*zz(2,3)*zz(3,2) &
-                   - zz(1,2)*zz(2,1)*zz(3,3) + zz(1,2)*zz(2,3)*zz(3,1) &
-                   + zz(1,3)*zz(2,1)*zz(3,2) - zz(1,3)*zz(2,2)*zz(3,1))
-!                                                                                                                                                                                                           
-              cpqtemp = sqrt(det)
-              arg1 = abs(cpq-cpqtemp)/abs(cpq)
-              arg2 = abs(cpq+cpqtemp)/abs(cpq)
-              if ( (arg1 .gt. 0.1) .and. (arg2 .gt. 0.1) ) then
-                 test = .false.
-                 exit
-              else
-                 if ( arg1 .le. arg2 ) then
-                    cpq = cpqtemp
-                 else
-                    cpq = -cpqtemp
-                 endif
-                 test = .true.
-              endif
-           enddo
+           
+        ! if( (Arg1 .gt. 0.1) .and. (Arg2 .gt. 0.1) ) then
+        !    test = .false.
+        ! else
+        if ( arg1 .le. arg2 ) then
+           cpq = cpqtemp
+        else
+           cpq = -cpqtemp
         endif
-!                                                                                                                                                                                                                
-        if (test .eqv. .false.) then
-           nn_hi = 100
-           cpq = cpqold
-           do nn=1, nn_hi
-!                                                                                                                                                                                                                
-              zz = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm)
-!                                                                                                                                                                                                                
-              det = (zz(1,1)*zz(2,2)*zz(3,3) - zz(1,1)*zz(2,3)*zz(3,2) &
-                   - zz(1,2)*zz(2,1)*zz(3,3) + zz(1,2)*zz(2,3)*zz(3,1) &
-                   + zz(1,3)*zz(2,1)*zz(3,2) - zz(1,3)*zz(2,2)*zz(3,1))
-!                                                                                                                                                                                                                
-              cpqtemp = sqrt(det)
-              arg1 = abs(cpq-cpqtemp)/abs(cpq)
-              arg2 = abs(cpq+cpqtemp)/abs(cpq)
-              if ( (arg1 .gt. 0.1) .and. (arg2 .gt. 0.1) ) then
-                 test = .false.
-                 exit
-              else
-                 if ( arg1 .le. arg2 ) then
-                    cpq = cpqtemp
-                 else
-                    cpq = -cpqtemp
-                 endif
-                 test = .true.
-              endif
-           enddo
-        endif
-!                                                                                                                                                                                                                
-        if (test .eqv. .false.) then
-           nn_hi = 1000
-           cpq = cpqold
-           do nn=1, nn_hi
-!                                                                                                                                                                                                                
-              zz = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm)
-!                                                                                                                                                                                                              
-              det = (zz(1,1)*zz(2,2)*zz(3,3) - zz(1,1)*zz(2,3)*zz(3,2) &
-                   - zz(1,2)*zz(2,1)*zz(3,3) + zz(1,2)*zz(2,3)*zz(3,1) &
-                   + zz(1,3)*zz(2,1)*zz(3,2) - zz(1,3)*zz(2,2)*zz(3,1))
-!                                                                                                                                                                                                                
-              cpqtemp = sqrt(det)
-              arg1 = abs(cpq-cpqtemp)/abs(cpq)
-              arg2 = abs(cpq+cpqtemp)/abs(cpq)
-              if ( (arg1 .gt. 0.1) .and. (arg2 .gt. 0.1) ) then
-                 test = .false.
-                 exit
-              else
-                 if ( arg1 .le. arg2 ) then
-                    cpq = cpqtemp
-                 else
-                    cpq = -cpqtemp
-                 endif
-                 test = .true.
-              endif
-           enddo
-        endif
-!                                                                                                                                                                                                                
-        if (test .eqv. .false.) then
-           nn_hi = 10000
-           cpq = cpqold
-           do nn=1, nn_hi
-!                                                                                                                                                                                                                
-              zz = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm)
-!                                                                                                                                                                                                              
-              det = (zz(1,1)*zz(2,2)*zz(3,3) - zz(1,1)*zz(2,3)*zz(3,2) &
-                   - zz(1,2)*zz(2,1)*zz(3,3) + zz(1,2)*zz(2,3)*zz(3,1) &
-                   + zz(1,3)*zz(2,1)*zz(3,2) - zz(1,3)*zz(2,2)*zz(3,1))
-!                                                                                                                                                                                                               
-              cpqtemp = sqrt(det)
-              arg1 = abs(cpq-cpqtemp)/abs(cpq)
-              arg2 = abs(cpq+cpqtemp)/abs(cpq)
-              if ( (arg1 .gt. 0.1) .and. (arg2 .gt. 0.1) ) then
-                 test = .false.
-                 exit
-              else
-                 if ( arg1 .le. arg2 ) then
-                    cpq = cpqtemp
-                 else
-                    cpq = -cpqtemp
-                 endif
-                 test = .true.
-              endif
-           enddo
-        endif
-!                                                                                                                                                                                                                
-        if (test .eqv. .false.) then
-           nn_hi = 100000
-           cpq = cpqold
-           do nn=1, nn_hi
-!                                                                                                                                                                                                                
-              zz = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm)
-!                                                                                                                                                                                                                
-              det = (zz(1,1)*zz(2,2)*zz(3,3) - zz(1,1)*zz(2,3)*zz(3,2) &
-                   - zz(1,2)*zz(2,1)*zz(3,3) + zz(1,2)*zz(2,3)*zz(3,1) &
-                   + zz(1,3)*zz(2,1)*zz(3,2) - zz(1,3)*zz(2,2)*zz(3,1))
-!                                                                                                                                                                                                                
-              cpqtemp = sqrt(det)
-              arg1 = abs(cpq-cpqtemp)/abs(cpq)
-              arg2 = abs(cpq+cpqtemp)/abs(cpq)
-              if ( (arg1 .gt. 0.1) .and. (arg2 .gt. 0.1) ) then
-                 print *, "Error: functional determinant is changing too fast! Arguments are: ",arg1, arg2, cpqtemp, cpq, nn, nn_hi
-                 call amrex_error('Aborting in update_gaussian_beams')
-              else
-                 if ( arg1 .le. arg2 ) then
-                    cpq = cpqtemp
-                 else
-                    cpq = -cpqtemp
-                 endif
-              endif
-           enddo
-        endif
+!            test = .true.
+!         endif
+! !                                                                                                                                                                                                               
+!         if (test .eqv. .false.) then
+!            nn_hi = 10
+!            Cpqold = Cpq
+!            do nn=1, nn_hi
+! !                                                                                                                                                                                                               
+!               ZZ = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm)
+! !                                                                                                                                                                                                      
+!               det = (ZZ(1,1)*ZZ(2,2)*ZZ(3,3) - ZZ(1,1)*ZZ(2,3)*ZZ(3,2) &
+!                    - ZZ(1,2)*ZZ(2,1)*ZZ(3,3) + ZZ(1,2)*ZZ(2,3)*ZZ(3,1) &
+!                    + ZZ(1,3)*ZZ(2,1)*ZZ(3,2) - ZZ(1,3)*ZZ(2,2)*ZZ(3,1))
+! !                                                                                                                                                                                                           
+!               Cpqtemp = sqrt(det)
+!               Arg1 = abs(Cpq-Cpqtemp)/abs(Cpq)
+!               Arg2 = abs(Cpq+Cpqtemp)/abs(Cpq)
+!               if ( (Arg1 .gt. 0.1) .and. (Arg2 .gt. 0.1) ) then
+!                  test = .false.
+!                  exit
+!               else
+!                  if ( Arg1 .le. Arg2 ) then
+!                     Cpq = Cpqtemp
+!                  else
+!                     Cpq = -Cpqtemp
+!                  endif
+!                  test = .true.
+!               endif
+!            enddo
+!         endif
+! !                                                                                                                                                                                                                
+!         if (test .eqv. .false.) then
+!            nn_hi = 100
+!            Cpq = Cpqold
+!            do nn=1, nn_hi
+! !                                                                                                                                                                                                                
+!               ZZ = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm)
+! !                                                                                                                                                                                                                
+!               det = (ZZ(1,1)*ZZ(2,2)*ZZ(3,3) - ZZ(1,1)*ZZ(2,3)*ZZ(3,2) &
+!                    - ZZ(1,2)*ZZ(2,1)*ZZ(3,3) + ZZ(1,2)*ZZ(2,3)*ZZ(3,1) &
+!                    + ZZ(1,3)*ZZ(2,1)*ZZ(3,2) - ZZ(1,3)*ZZ(2,2)*ZZ(3,1))
+! !                                                                                                                                                                                                                
+!               Cpqtemp = sqrt(det)
+!               Arg1 = abs(Cpq-Cpqtemp)/abs(Cpq)
+!               Arg2 = abs(Cpq+Cpqtemp)/abs(Cpq)
+!               if ( (Arg1 .gt. 0.1) .and. (Arg2 .gt. 0.1) ) then
+!                  test = .false.
+!                  exit
+!               else
+!                  if ( Arg1 .le. Arg2 ) then
+!                     Cpq = Cpqtemp
+!                  else
+!                     Cpq = -Cpqtemp
+!                  endif
+!                  test = .true.
+!               endif
+!            enddo
+!         endif
+! !                                                                                                                                                                                                                
+!         if (test .eqv. .false.) then
+!            nn_hi = 1000
+!            Cpq = Cpqold
+!            do nn=1, nn_hi
+! !                                                                                                                                                                                                                
+!               ZZ = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm)
+! !                                                                                                                                                                                                              
+!               det = (ZZ(1,1)*ZZ(2,2)*ZZ(3,3) - ZZ(1,1)*ZZ(2,3)*ZZ(3,2) &
+!                    - ZZ(1,2)*ZZ(2,1)*ZZ(3,3) + ZZ(1,2)*ZZ(2,3)*ZZ(3,1) &
+!                    + ZZ(1,3)*ZZ(2,1)*ZZ(3,2) - ZZ(1,3)*ZZ(2,2)*ZZ(3,1))
+! !                                                                                                                                                                                                                
+!               Cpqtemp = sqrt(det)
+!               Arg1 = abs(Cpq-Cpqtemp)/abs(Cpq)
+!               Arg2 = abs(Cpq+Cpqtemp)/abs(Cpq)
+!               if ( (Arg1 .gt. 0.1) .and. (Arg2 .gt. 0.1) ) then
+!                  test = .false.
+!                  exit
+!               else
+!                  if ( Arg1 .le. Arg2 ) then
+!                     Cpq = Cpqtemp
+!                  else
+!                     Cpq = -Cpqtemp
+!                  endif
+!                  test = .true.
+!               endif
+!            enddo
+!         endif
+! !                                                                                                                                                                                                                
+!         if (test .eqv. .false.) then
+!            nn_hi = 10000
+!            Cpq = Cpqold
+!            do nn=1, nn_hi
+! !                                                                                                                                                                                                                
+!               ZZ = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm)
+! !                                                                                                                                                                                                              
+!               det = (ZZ(1,1)*ZZ(2,2)*ZZ(3,3) - ZZ(1,1)*ZZ(2,3)*ZZ(3,2) &
+!                    - ZZ(1,2)*ZZ(2,1)*ZZ(3,3) + ZZ(1,2)*ZZ(2,3)*ZZ(3,1) &
+!                    + ZZ(1,3)*ZZ(2,1)*ZZ(3,2) - ZZ(1,3)*ZZ(2,2)*ZZ(3,1))
+! !                                                                                                                                                                                                               
+!               Cpqtemp = sqrt(det)
+!               Arg1 = abs(Cpq-Cpqtemp)/abs(Cpq)
+!               Arg2 = abs(Cpq+Cpqtemp)/abs(Cpq)
+!               if ( (Arg1 .gt. 0.1) .and. (Arg2 .gt. 0.1) ) then
+!                  test = .false.
+!                  exit
+!               else
+!                  if ( Arg1 .le. Arg2 ) then
+!                     Cpq = Cpqtemp
+!                  else
+!                     Cpq = -Cpqtemp
+!                  endif
+!                  test = .true.
+!               endif
+!            enddo
+!         endif
+! !                                                                                                                                                                                                                
+!         if (test .eqv. .false.) then
+!            nn_hi = 100000
+!            Cpq = Cpqold
+!            do nn=1, nn_hi
+! !                                                                                                                                                                                                                
+!               ZZ = particles(n)%width*((qqold*(nn_hi-nn)+nn*qq)/nn_hi)-((pqold*(nn_hi-nn)+nn*pq)/nn_hi)/(2.0*ii*hbaroverm)
+! !                                                                                                                                                                                                                
+!               det = (ZZ(1,1)*ZZ(2,2)*ZZ(3,3) - ZZ(1,1)*ZZ(2,3)*ZZ(3,2) &
+!                    - ZZ(1,2)*ZZ(2,1)*ZZ(3,3) + ZZ(1,2)*ZZ(2,3)*ZZ(3,1) &
+!                    + ZZ(1,3)*ZZ(2,1)*ZZ(3,2) - ZZ(1,3)*ZZ(2,2)*ZZ(3,1))
+! !                                                                                                                                                                                                                
+!               Cpqtemp = sqrt(det)
+!               Arg1 = abs(Cpq-Cpqtemp)/abs(Cpq)
+!               Arg2 = abs(Cpq+Cpqtemp)/abs(Cpq)
+!               if ( (Arg1 .gt. 0.1) .and. (Arg2 .gt. 0.1) ) then
+!                  print *, "Error: functional determinant is changing too fast! Arguments are: ",Arg1, Arg2, Cpqtemp, Cpq, nn, nn_hi
+!                  call amrex_error('Aborting in update_gaussian_beams')
+!               else
+!                  if ( Arg1 .le. Arg2 ) then
+!                     Cpq = Cpqtemp
+!                  else
+!                     Cpq = -Cpqtemp
+!                  endif
+!               endif
+!            enddo
+!         endif
 
         particles(n)%amp(1) = real(real(cpq))
         particles(n)%amp(2) = real(aimag(cpq))
