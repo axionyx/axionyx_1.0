@@ -238,7 +238,7 @@ Nyx::advance_particles_only (Real time,
     //
     // Advance Particles
     //
-    if (Nyx::theActiveParticles().size() > 0 && false)
+    if (Nyx::theActiveParticles().size() > 0)
     {
         // Advance the particle velocities to the half-time and the positions to the new time
         // We use the cell-centered gravity to correctly interpolate onto particle locations
