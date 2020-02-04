@@ -53,7 +53,7 @@ Nyx::advance_particles_only (Real time,
     //      We define ghost cells at the coarser level to cover all iterations so
     //      we can't reduce this number as iteration increases.
  
-    int ghost_width = ncycle + stencil_deposition_width;
+    int ghost_width = parent->nCycle(level+1) + stencil_deposition_width;
 
     // *** where_width ***  is used
     //   *) to set how many cells the Where call in moveKickDrift tests =
@@ -164,8 +164,8 @@ Nyx::advance_particles_only (Real time,
         }
     }
 
-    const Real prev_time = state[PhiGrav_Type].prevTime();
-    const Real cur_time  = state[PhiGrav_Type].curTime();
+    const Real prev_time = state[Gravity_Type].prevTime();
+    const Real cur_time  = state[Gravity_Type].curTime();
 
     const Real a_old     = get_comoving_a(prev_time);
     const Real a_new     = get_comoving_a(cur_time);
@@ -252,18 +252,18 @@ Nyx::advance_particles_only (Real time,
             for (int lev = level; lev <= finest_level_to_advance; lev++)
             {
                 // We need grav_n_grow grow cells to track boundary particles
-                const auto& ba = get_level(lev).get_new_data(PhiGrav_Type).boxArray();
-                const auto& dm = get_level(lev).get_new_data(PhiGrav_Type).DistributionMap();
+                const auto& ba = get_level(lev).get_old_data(Gravity_Type).boxArray();
+                const auto& dm = get_level(lev).get_old_data(Gravity_Type).DistributionMap();
                 MultiFab grav_vec_old(ba, dm, BL_SPACEDIM, grav_n_grow);
-                get_level(lev).gravity->get_old_grav_vector(lev, grav_vec_old, time);
+                get_level(lev).gravity->get_old_grav_vector(lev, grav_vec_old, prev_time);
                 
                 for (int i = 0; i < Nyx::theActiveParticles().size(); i++)
-                    Nyx::theActiveParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_old, a_half, where_width);
+                    Nyx::theActiveParticles()[i]->moveKickDrift(grav_vec_old, lev, dt, a_old, a_half, iteration);
 
                 // Only need the coarsest virtual particles here.
                 if (lev == level && level < finest_level)
                     for (int i = 0; i < Nyx::theVirtualParticles().size(); i++)
-                        Nyx::theVirtualParticles()[i]->moveKickDrift(grav_vec_old, level, dt, a_old, a_half,where_width);
+                        Nyx::theVirtualParticles()[i]->moveKickDrift(grav_vec_old, level, dt, a_old, a_half,iteration);
 
                 // Miiiight need all Ghosts
                 for (int i = 0; i < Nyx::theGhostParticles().size(); i++)
@@ -272,9 +272,9 @@ Nyx::advance_particles_only (Real time,
 #ifdef FDM
 		MultiFab& Phi_old = get_level(lev).get_old_data(PhiGrav_Type);
 		if(Nyx::theFDMPC())
-		  Nyx::theFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width);
+		  Nyx::theFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,iteration);
 		if(Nyx::theFDMwkbPC())
-		  Nyx::theFDMwkbPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width);
+		  Nyx::theFDMwkbPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,iteration);
 
 		//Need to do this only when reconstructing the density from GBs on this level.
 		if(levelmethod[lev]==GBlevel){
@@ -282,16 +282,16 @@ Nyx::advance_particles_only (Real time,
 		  int where_width_fdm =  ghost_width_fdm + (1-iteration)  - 1;
 		  int grav_n_grow_fdm = ghost_width_fdm + stencil_interpolation_width + 1;
 		  MultiFab grav_vec_old_fdm(ba, dm, BL_SPACEDIM, grav_n_grow_fdm);
-		  get_level(lev).gravity->get_old_grav_vector(lev, grav_vec_old_fdm, time);
+		  get_level(lev).gravity->get_old_grav_vector(lev, grav_vec_old_fdm, prev_time);
 
 		  if(Nyx::theGhostFDMPC())
 		    Nyx::theGhostFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow_fdm, grav_vec_old_fdm, lev, dt, a_old, a_half,where_width_fdm);
 		  if(Nyx::theVirtFDMPC())
-		    Nyx::theVirtFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow_fdm, grav_vec_old_fdm, lev, dt, a_old, a_half,where_width_fdm);
+		    Nyx::theVirtFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow_fdm, grav_vec_old_fdm, lev, dt, a_old, a_half,iteration);
 		  if(Nyx::theGhostFDMwkbPC())
 		    Nyx::theGhostFDMwkbPC()->moveKickDriftFDM(Phi_old, grav_n_grow_fdm, grav_vec_old_fdm, lev, dt, a_old, a_half,where_width_fdm);
 		  if(Nyx::theVirtFDMwkbPC())
-		    Nyx::theVirtFDMwkbPC()->moveKickDriftFDM(Phi_old, grav_n_grow_fdm, grav_vec_old_fdm, lev, dt, a_old, a_half,where_width_fdm);
+		    Nyx::theVirtFDMwkbPC()->moveKickDriftFDM(Phi_old, grav_n_grow_fdm, grav_vec_old_fdm, lev, dt, a_old, a_half,iteration);
 		}
 #endif
             }
@@ -337,7 +337,7 @@ Nyx::advance_particles_only (Real time,
                                fill_interior, grav_n_grow);
     }
 
-    if (Nyx::theActiveParticles().size() > 0 && false)
+    if (Nyx::theActiveParticles().size() > 0)
     {
         // Advance the particle velocities by dt/2 to the new time. We use the
         // cell-centered gravity to correctly interpolate onto particle
@@ -379,7 +379,7 @@ Nyx::advance_particles_only (Real time,
 		  int where_width_fdm =  ghost_width_fdm + (1-iteration)  - 1;
 		  int grav_n_grow_fdm = ghost_width_fdm + stencil_interpolation_width + 1;
 		  MultiFab grav_vec_new_fdm(ba, dm, BL_SPACEDIM, grav_n_grow_fdm);
-		  get_level(lev).gravity->get_new_grav_vector(lev, grav_vec_new_fdm, time);
+		  get_level(lev).gravity->get_new_grav_vector(lev, grav_vec_new_fdm, cur_time);
 
 		  if(Nyx::theGhostFDMPC())
 		    Nyx::theGhostFDMPC()->moveKickFDM(Phi_new, grav_n_grow_fdm, grav_vec_new_fdm, lev, dt, a_new, a_half);

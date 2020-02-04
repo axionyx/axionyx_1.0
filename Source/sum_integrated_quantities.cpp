@@ -266,7 +266,7 @@ Nyx::compute_average_density ()
     average_ax_density /= crse_geom.ProbSize();
     average_total_density += average_ax_density;
     //theDMPC is only used for gravitational potential but is not an actual physical field contributing to average_total_density. 
-    average_total_density -= average_dm_density;
+    // average_total_density -= average_dm_density;
 #endif
 
     if (verbose > 0 && ParallelDescriptor::IOProcessor())
