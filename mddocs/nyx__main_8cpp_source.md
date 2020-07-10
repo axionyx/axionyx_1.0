@@ -102,7 +102,7 @@ nyx_main (int argc, char* argv[])
     pp.query("stop_time", stop_time);
     
     
-    int stopwatch_level=3;
+    int stopwatch_level=-1;
     pp.query("stopwatch.level",stopwatch_level);
     
 

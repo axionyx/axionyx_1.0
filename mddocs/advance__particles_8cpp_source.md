@@ -216,14 +216,38 @@ Nyx::advance_particles_only (Real time,
 
 
 #else
+
+// #ifdef FDM
+//         // for(int lev = level; lev <= finest_level_to_advance && lev < finest_level; lev++)
+//         for(int lev = finest_level_to_advance+1; lev < finest_level; lev++)
+//         {
+//    if(levelmethod[lev+1]==Nyx::GBlevel)
+//      get_level(lev).setup_ghost_particles(ghost_width);
+//         }
+// #endif
+
         gravity->multilevel_solve_for_old_phi(level, finest_level, grav_n_grow,
                                               use_previous_phi_as_guess);
+
+// #ifdef FDM
+//         // for(int lev = level; lev <= finest_level_to_advance && lev < finest_level; lev++)
+//         for(int lev = finest_level_to_advance+1; lev < finest_level; lev++)
+//         {
+//    if(levelmethod[lev+1]==Nyx::GBlevel){
+//      if(theGhostFDMPC())
+//        theGhostFDMPC()->RemoveParticlesAtLevel(lev+1);
+//    if(theGhostFDMwkbPC())
+//      theGhostFDMwkbPC()->RemoveParticlesAtLevel(lev+1);
+//    }
+//  }
+// #endif
+
 #endif
     }
     //
     // Advance Particles
     //
-    if (Nyx::theActiveParticles().size() > 0)
+    if (Nyx::theActiveParticles().size() > 0 && false)
     {
         // Advance the particle velocities to the half-time and the positions to the new time
         // We use the cell-centered gravity to correctly interpolate onto particle locations
@@ -322,7 +346,7 @@ Nyx::advance_particles_only (Real time,
                                fill_interior, grav_n_grow);
     }
 
-    if (Nyx::theActiveParticles().size() > 0)
+    if (Nyx::theActiveParticles().size() > 0 && false)
     {
         // Advance the particle velocities by dt/2 to the new time. We use the
         // cell-centered gravity to correctly interpolate onto particle
@@ -401,17 +425,17 @@ Nyx::advance_particles_only (Real time,
 
       //Deposit Gaussian Beams                                                                                                                                                                                   
       if(Nyx::theFDMPC())
-    Nyx::theFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new);
+        Nyx::theFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new);
       if(Nyx::theGhostFDMPC())
-    Nyx::theGhostFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new);
+        Nyx::theGhostFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new);
       if(Nyx::theVirtFDMPC())
-    Nyx::theVirtFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new);
+        Nyx::theVirtFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new);
       if(Nyx::theFDMwkbPC())
-    Nyx::theFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new);
+        Nyx::theFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new,Nyx::theta_fdm,hbaroverm);
       if(Nyx::theGhostFDMwkbPC())
-    Nyx::theGhostFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new);
+        Nyx::theGhostFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new,Nyx::theta_fdm,hbaroverm);
       if(Nyx::theVirtFDMwkbPC())
-    Nyx::theVirtFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new);
+        Nyx::theVirtFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new,Nyx::theta_fdm,hbaroverm);
 
       //Update real part in FDM state                                                                                                                                                                           
       Ax_new.ParallelCopy(fdmreal, 0, Nyx::AxRe, 1, fdmreal.nGrow(),
@@ -426,8 +450,6 @@ Nyx::advance_particles_only (Real time,
       AmrLevel* amrlev = &parent->getLevel(lev);
       for (amrex::FillPatchIterator fpi(*amrlev,  Ax_new); fpi.isValid(); ++fpi)
         {
-          if (Ax_new[fpi].contains_nan())
-        amrex::Abort("Nans in state just before FDM density update");
           BL_FORT_PROC_CALL(FORT_FDM_FIELDS, fort_fdm_fields)
             (BL_TO_FORTRAN(Ax_new[fpi]));
           if (Ax_new[fpi].contains_nan())
