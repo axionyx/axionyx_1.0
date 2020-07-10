@@ -18,9 +18,12 @@ void divergence (Box const& bx, Array4<Real> const& div,
   for     (int k = lo.z; k <= hi.z; ++k) {
     for   (int j = lo.y; j <= hi.y; ++j) {
       for (int i = lo.x; i <= hi.x; ++i) {
-    div(i,j,k,0) = (vel(i+1,j,k,0)-vel(i-1,j,k,0))/dx[0]*a/2.0
-                  +(vel(i,j+1,k,1)-vel(i,j-1,k,1))/dx[1]*a/2.0
-                  +(vel(i,j,k+1,2)-vel(i,j,k-1,2))/dx[2]*a/2.0;
+    // div(i,j,k,0) = (vel(i+1,j,k,0)-vel(i-1,j,k,0))/dx[0]*a/2.0
+    //               +(vel(i,j+1,k,1)-vel(i,j-1,k,1))/dx[1]*a/2.0
+    //               +(vel(i,j,k+1,2)-vel(i,j,k-1,2))/dx[2]*a/2.0;
+    div(i,j,k,0) = (vel(i+1,j,k,1)-vel(i-1,j,k,1))/dx[0]*a/2.0
+                  +(vel(i,j+1,k,2)-vel(i,j-1,k,2))/dx[1]*a/2.0
+                  +(vel(i,j,k+1,3)-vel(i,j,k-1,3))/dx[2]*a/2.0;
       }
     }
   }

@@ -552,11 +552,11 @@ Nyx::advance_hydro_plus_particles (Real time,
       if(Nyx::theVirtFDMPC())
     Nyx::theVirtFDMPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new);
       if(Nyx::theFDMwkbPC())
-    Nyx::theFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new);
+    Nyx::theFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new,Nyx::theta_fdm,hbaroverm);
       if(Nyx::theGhostFDMwkbPC())
-    Nyx::theGhostFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new);
+    Nyx::theGhostFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new,Nyx::theta_fdm,hbaroverm);
       if(Nyx::theVirtFDMwkbPC())
-    Nyx::theVirtFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new);
+    Nyx::theVirtFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new,Nyx::theta_fdm,hbaroverm);
       
       //Update real part in FDM state                                                                                                                                                       
       Ax_new.ParallelCopy(fdmreal, 0, Nyx::AxRe, 1, fdmreal.nGrow(),

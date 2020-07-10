@@ -879,10 +879,10 @@
                + zz(1,3)*zz(2,1)*zz(3,2) - zz(1,3)*zz(2,2)*zz(3,1))
 
         cpqtemp = sqrt(det)
-        arg1 = abs(cpq-cpqtemp)/abs(cpq)
-        arg2 = abs(cpq+cpqtemp)/abs(cpq)
+        arg1 = abs(cpq-cpqtemp)/(abs(cpq)+abs(cpqtemp))
+        arg2 = abs(cpq+cpqtemp)/(abs(cpq)+abs(cpqtemp))
 
-        if( (arg1 .gt. 0.1) .and. (arg2 .gt. 0.1) ) then
+        if( (arg1 .gt. 0.3) .and. (arg2 .gt. 0.3) ) then
            particles(n)%mass = 0.8*dt
         else
            particles(n)%mass = 0.0
