@@ -1,3 +1,5 @@
+axionyx is a modification of the the [Nyx code](https://github.com/AMReX-Astro/Nyx.git) for dealing with Fuzzy Dark Matter.
+
 # Contents
 [Documentation](#Documentation)  
 [Installation](#installation)  
@@ -16,40 +18,9 @@ A detailed documentation is not available yet. But you can find an API reference
 
 # Installation
 
-This installs Nyx with the Intel compilers.
+clone both the axionyx and the amrex4axionyx repo. axionyx expects amrex to live in ../amrex. You will need FFTW3 for axionyx to compile. Try building e.g. Exec/Test_FDM_lin_growth by running make. Adapt the GNUmakefile as needed
 
-`mkdir nyx`  
-`cd nyx`  
-`#clone amrex`  
-`git clone `<https://github.com/AMReX-Codes/amrex.git>  
-`#clone Nyx`  
-`git clone `<https://github.com/AMReX-Astro/Nyx.git>  
-`#load intel compiler and MPI`  
-`module load intel/compiler/64/2017/17.0.2`  
-`module load intel/mpi/64/current/2.174`  
-`#necessary to force the intel compilers to be used `  
-`export I_MPI_CXX=icpc`  
-`export I_MPI_CC=icc`  
-`export I_MPI_F90=ifort`  
-  
-`#build amrex`  
-`cd amrex`  
-`./configure --comp intel --with-omp yes`  
-`#note; I think it is technically not necessary to build amrex. Whatever needs to be built will be built when we compile Nyx. `  
-`#However, it is not a bad practice to build amrex first, because it makes it easier to  isolate problems with the environment.`  
-`make -j12`  
-`#build a random problem in Nyx - note that not all predefined problems with actually compile!`  
-`cd ../Nyx/Exec/AMR-density`  
-`make -j12 `
-
-A typical problem that one encounters is that the compiler is set to gcc
-for a given problem. You need to adapt the corresponding GNUMakefile in
-this case.
-
-Nyx expects amrex to exist in <nyx repo>/..; if it is somewhere else,
-you need to set the AMREX\_HOME variable accordingly. on startup.
-
-# File structure of Nyx
+# File structure
 
   - Source/ contains the baseline source files
   - the actually compileable problems (executables) live in sub
@@ -82,31 +53,8 @@ you need to set the AMREX\_HOME variable accordingly. on startup.
         refining cells, the latter adds these criteria to the existing
         list of such criteria.
 
-# More file structure
-
-The AMReX that operates in the background of Nyx is at the very heart of everything that happens in Nyx. Each level (in our case, we have only one) is represented by a [Nyx](https://github.com/cbehren/axionyx/blob/master/Source/Nyx.H) object that is derived from the base class [AmrLevel](https://github.com/AMReX-Codes/amrex/blob/master/Src/Amr/AMReX_AmrLevel.H). All levels are held together by an [Amr](https://github.com/AMReX-Codes/amrex/blob/master/Src/Amr/AMReX_Amr.H) object. The role of the Nyx class is to implement the specific routines needed to solve the problem we want to solve, e.g. the [advance](https://github.com/cbehren/axionyx/blob/master/Source/Nyx_advance.cpp) routine declared, but not defined in the base class, see [here](https://github.com/AMReX-Codes/amrex/blob/9e3aaa7053499b9f7f0c786a92ef860c6322f10d/Src/Amr/AMReX_AmrLevel.H#L160). What this structure means is that you might have functions that apparently are never called in Nyx. They are, however, called in the AMReX base classes. advance is one of those routines. It is called by the Amr class, looping over all levels (if there is more than one) if necessary in [timeStep](https://github.com/AMReX-Codes/amrex/blob/9e3aaa7053499b9f7f0c786a92ef860c6322f10d/Src/Amr/AMReX_Amr.cpp#L1950). 
-
-# Call graph of Axionyx
-
-TBD
-
-# Output
-
-Nyx outputs certain global diagnostics at each timestep and plot files at regular
-intervals, or at user-specified redshifts. Visualization packages
-[VisIt](https://wci.llnl.gov/simulation/computer-codes/visit),
-[Paraview](https://www.paraview.org/)
-and [yt](http://yt-project.org/)
-have built-in support for the AMReX file format used by Nyx.
-
-In addition, Nyx interfaces with two post-processing suites, Reeber and Gimlet. Reeber
-uses topological methods to construct merge trees of scalar fields, which Nyx in
-turn uses to find halos. Gimlet computes a variety of quantities
-related to the Lyman-alpha forest science. These suites are fully MPI-parallel and can
-be run either "in situ" or "in-transit", or with a combination of both.
-
 
 # License
-Nyx is released under the LBL's modified BSD license, see the [license.txt](license.txt) file for details.
+axionyx is released under the LBL's modified BSD license, see the [license.txt](license.txt) file for details.
 
 
