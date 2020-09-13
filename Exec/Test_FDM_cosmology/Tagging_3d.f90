@@ -193,3 +193,72 @@
       enddo
 
       end subroutine tag_lohner
+
+      subroutine tag_overdensity_fdm_halo(tag,tagl1,tagl2,tagl3,tagh1,tagh2,tagh3, &
+                                 set,clear, &
+                                 den,denl1,denl2,denl3,denh1,denh2,denh3, &
+                                 lo,hi,nc,domlo,domhi,delta,level,avg_den)
+
+      use probdata_module
+      use comoving_module, only : comoving_h, comoving_OmAx
+      use fdm_params_module, only : halo_pos_x, halo_pos_y, halo_pos_z
+      implicit none
+
+      integer set, clear, nc, level
+      integer tagl1,tagl2,tagl3,tagh1,tagh2,tagh3
+      integer denl1,denl2,denl3,denh1,denh2,denh3
+      integer lo(3), hi(3), domlo(3), domhi(3)
+      integer tag(tagl1:tagh1,tagl2:tagh2,tagl3:tagh3)
+      double precision den(denl1:denh1,denl2:denh2,denl3:denh3,nc)
+      double precision delta(3), avg_den, critdens
+
+      double precision :: over_den
+
+      integer i, j, k, del
+      double precision ih, jh, kh
+
+      over_den = 2.0d0**(3*(level-4)) * avg_den
+!     Tag on regions of overdensity
+      if(over_den.ne.0.0) then
+      if ( (level.ge.5).and.(level.le.9) ) then
+         do k = lo(3), hi(3)
+            do j = lo(2), hi(2)
+               do i = lo(1), hi(1)
+                  if ( den(i,j,k,1) .gt. over_den ) then
+                     tag(i,j,k) = set
+                  endif
+               enddo
+            enddo
+         enddo
+      endif
+      endif
+
+!     Tag on selected halo
+      if(.true.) then
+
+!         over_den = max(8,2.0d0**(3*(level-8))) * avg_den
+         ih = halo_pos_x/delta(1)
+         jh = halo_pos_y/delta(2)
+         kh = halo_pos_z/delta(3)
+!         del = 60 ! 64 ! 8 !
+         del = max(8,2**(level-5))
+         
+         do k = lo(3), hi(3)
+            if( (k.ge.(kh-del)) .and. (k.lt.(kh+del)) ) then
+               do j = lo(2), hi(2)
+                  if( (j.ge.(jh-del)) .and. (j.lt.(jh+del)) ) then
+                     do i = lo(1), hi(1)
+                        if( (i.ge.(ih-del)) .and. (i.lt.(ih+del)) ) then
+!                           if ( (den(i,j,k,1) .gt. over_den) .or. (level.lt.9) ) then
+                           tag(i,j,k) = set
+!                           endif
+                        endif
+                     enddo
+                  endif
+               enddo
+            endif
+         enddo
+
+      endif
+
+      end subroutine tag_overdensity_fdm_halo

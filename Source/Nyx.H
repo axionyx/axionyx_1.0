@@ -19,6 +19,7 @@
 #ifdef FDM
 #include "FDMParticleContainer.H"
 #include "FDMwkbParticleContainer.H"
+#include "FDMphaseParticleContainer.H"
 #endif
 
 #include <iostream>
@@ -632,6 +633,9 @@ public:
     static FDMwkbParticleContainer* theFDMwkbPC();
     static FDMwkbParticleContainer* theVirtFDMwkbPC();
     static FDMwkbParticleContainer* theGhostFDMwkbPC();
+    static FDMphaseParticleContainer* theFDMphasePC();
+    static FDMphaseParticleContainer* theVirtFDMphasePC();
+    static FDMphaseParticleContainer* theGhostFDMphasePC();
 #endif
 
     static int NUM_STATE;
@@ -663,6 +667,7 @@ public:
     static amrex::Real alpha_fdm;
     static amrex::Real ratio_fdm;
     static int wkb_approx;
+    static int phase_approx;
     static amrex::Real beam_cfl;
     //! missing doc
     static amrex::Real vonNeumann_dt;
@@ -874,14 +879,20 @@ protected:
   static amrex::Real mass_seed;
 #endif
 
-    // Average value of gas, dark matter, neutrino and total density, computed every coarse timestep
-    static amrex::Real average_gas_density;
-    static amrex::Real average_dm_density;
-    static amrex::Real average_neutr_density;
-    static amrex::Real average_total_density;
+  // Average value of gas, dark matter, neutrino and total density, computed every coarse timestep
+  static amrex::Real average_gas_density;
+  static amrex::Real average_dm_density;
+  static amrex::Real average_neutr_density;
+  static amrex::Real average_total_density;
 #ifdef FDM
-    static amrex::Real average_ax_density;
+  static amrex::Real average_ax_density;
 #endif
+
+#ifdef FDM
+  static bool fdm_halo;
+  static amrex::Vector<amrex::Real> fdm_halo_pos;
+#endif
+
 
   //! for keeping track of the amount of CPU time used -- this will persist
   //! after restarts

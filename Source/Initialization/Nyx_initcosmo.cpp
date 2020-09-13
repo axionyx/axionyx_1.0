@@ -408,8 +408,10 @@ void Nyx::initcosmo()
 
     	if(wkb_approx)
     	  Nyx::theFDMwkbPC()->InitCosmo1ppcMultiLevel(particle_mf, phase, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
+    	else if(phase_approx)
+    	  Nyx::theFDMphasePC()->InitCosmo1ppcMultiLevel(particle_mf, phase, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
     	else
-	  amrex::Abort("FDM cosmology only works with wkb_approx=1!");
+	  amrex::Abort("FDM cosmology only works with wkb_approx=1 or phase_approx=1!");
 	// Nyx::theFDMPC()->InitCosmo1ppcMultiLevel(particle_mf, phase, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
       }
     }

@@ -1,7 +1,7 @@
 #ifdef FDM
 #include <stdint.h>
 #include <complex> 
-#include "FDMwkbParticleContainer.H"
+#include "FDMphaseParticleContainer.H"
 #include "fdm_F.H"
 
 using namespace amrex;
@@ -75,14 +75,14 @@ namespace {
 }
 
 void
-FDMwkbParticleContainer::moveKickDrift (amrex::MultiFab&       acceleration,
+FDMphaseParticleContainer::moveKickDrift (amrex::MultiFab&       acceleration,
 		                            int                    lev,
                     			    amrex::Real            dt,
 		                	    amrex::Real            a_old,
 					    amrex::Real            a_half,
 					    int                    where_width)
 {
-    BL_PROFILE("FDMwkbParticleContainer::moveKickDrift()");
+    BL_PROFILE("FDMphaseParticleContainer::moveKickDrift()");
 
     //If there are no particles at this level
     if (lev >= this->GetParticles().size())
@@ -122,7 +122,7 @@ FDMwkbParticleContainer::moveKickDrift (amrex::MultiFab&       acceleration,
         {
            const Box& ac_box = (*ac_ptr)[pti].box();
 
-           update_fdm_particles_wkb(&Np, particles.data(),
+           update_fdm_particles_phase(&Np, particles.data(),
 	   			    (*ac_ptr)[pti].dataPtr(),
 	   			    ac_box.loVect(), ac_box.hiVect(),
 	   			    plo,dx,dt,a_old,a_half,&do_move);
@@ -170,13 +170,13 @@ FDMwkbParticleContainer::moveKickDrift (amrex::MultiFab&       acceleration,
 }
 
 void
-FDMwkbParticleContainer::moveKick (MultiFab&       acceleration,
+FDMphaseParticleContainer::moveKick (MultiFab&       acceleration,
                                        int             lev,
                                        Real            dt,
                                        Real            a_new,
                                        Real            a_half) 
 {
-    BL_PROFILE("FDMwkbParticleContainer::moveKick()");
+    BL_PROFILE("FDMphaseParticleContainer::moveKick()");
 
     const Real* dx = Geom(lev).CellSize();
 
@@ -212,7 +212,7 @@ FDMwkbParticleContainer::moveKick (MultiFab&       acceleration,
         {
            const Box& ac_box = (*ac_ptr)[pti].box();
 
-           update_fdm_particles_wkb(&Np, particles.data(),
+           update_fdm_particles_phase(&Np, particles.data(),
 	   			    (*ac_ptr)[pti].dataPtr(),
 	   			    ac_box.loVect(), ac_box.hiVect(),
 	   			    plo,dx,dt,a_half,a_new,&do_move);
@@ -223,7 +223,7 @@ FDMwkbParticleContainer::moveKick (MultiFab&       acceleration,
 }
 
 void
-FDMwkbParticleContainer::moveKickDriftFDM (amrex::MultiFab&       phi,
+FDMphaseParticleContainer::moveKickDriftFDM (amrex::MultiFab&       phi,
 					int                    grav_n_grow,
 					amrex::MultiFab&       acceleration,
 					int                    lev,
@@ -232,7 +232,7 @@ FDMwkbParticleContainer::moveKickDriftFDM (amrex::MultiFab&       phi,
 					amrex::Real            a_half,
 					int                    where_width)
 {
-    BL_PROFILE("FDMwkbParticleContainer::moveKickDrift()");
+    BL_PROFILE("FDMphaseParticleContainer::moveKickDrift()");
 
     //If there are no particles at this level
     if (lev >= this->GetParticles().size())
@@ -282,7 +282,7 @@ FDMwkbParticleContainer::moveKickDriftFDM (amrex::MultiFab&       phi,
            const Box& ac_box = (*ac_ptr)[pti].box();
            const Box& phi_box = (*phi_ptr)[pti].box();
 
-           update_gaussian_beams_wkb(&Np, particles.data(),
+           update_gaussian_beams_phase(&Np, particles.data(),
 	   			     (*ac_ptr)[pti].dataPtr(),
 	   			     ac_box.loVect(), ac_box.hiVect(),
 	   			     (*phi_ptr)[pti].dataPtr(),
@@ -333,7 +333,7 @@ FDMwkbParticleContainer::moveKickDriftFDM (amrex::MultiFab&       phi,
 }
 
 void
-FDMwkbParticleContainer::moveKickFDM (amrex::MultiFab& phi,
+FDMphaseParticleContainer::moveKickFDM (amrex::MultiFab& phi,
 				   int              grav_n_grow,
 				   amrex::MultiFab& acceleration,
 				   int              lev,
@@ -341,7 +341,7 @@ FDMwkbParticleContainer::moveKickFDM (amrex::MultiFab& phi,
 				   Real             a_new,
 				   Real             a_half) 
 {
-    BL_PROFILE("FDMwkbParticleContainer::moveKick()");
+    BL_PROFILE("FDMphaseParticleContainer::moveKick()");
 
     const Real* dx = Geom(lev).CellSize();
 
@@ -387,7 +387,7 @@ FDMwkbParticleContainer::moveKickFDM (amrex::MultiFab& phi,
            const Box& ac_box = (*ac_ptr)[pti].box();
            const Box& phi_box = (*phi_ptr)[pti].box();
 
-           update_gaussian_beams_wkb(&Np, particles.data(),
+           update_gaussian_beams_phase(&Np, particles.data(),
 	   			     (*ac_ptr)[pti].dataPtr(),
 	   			     ac_box.loVect(), ac_box.hiVect(),
 	   			     (*phi_ptr)[pti].dataPtr(),
@@ -401,9 +401,9 @@ FDMwkbParticleContainer::moveKickFDM (amrex::MultiFab& phi,
 }
 
 void
-FDMwkbParticleContainer::CreateGhostParticlesFDM (int level, int lev, int nGrow, AoS& ghosts) const
+FDMphaseParticleContainer::CreateGhostParticlesFDM (int level, int lev, int nGrow, AoS& ghosts) const
 {
-  BL_PROFILE("FDMwkbParticleContainer::CreateGhostParticlesFDM()");
+  BL_PROFILE("FDMphaseParticleContainer::CreateGhostParticlesFDM()");
   BL_ASSERT(ghosts.empty());
   BL_ASSERT(level < finestLevel());
 
@@ -437,9 +437,9 @@ FDMwkbParticleContainer::CreateGhostParticlesFDM (int level, int lev, int nGrow,
 */
 
 void                                                                                                                                                                                                            
-FDMwkbParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_imag, int lev, amrex::Real a, amrex::Real theta_fdm, amrex::Real hbaroverm) const
+FDMphaseParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_imag, int lev, amrex::Real a, amrex::Real theta_fdm, amrex::Real hbaroverm) const
 {
-  BL_PROFILE("FDMwkbParticleContainer::DepositFDMParticles()");
+  BL_PROFILE("FDMphaseParticleContainer::DepositFDMParticles()");
 
   MultiFab* mf_pointer_real;
 
@@ -505,12 +505,13 @@ FDMwkbParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_ima
     for(int i=0; i<np; ++i)
       {  
       	const auto& p = pstruct[i];
-	if(p.rdata(0)==0.0){
-      	//std::complex<Real> amp(8.9e+5,0.0);
-	std::complex<Real> amp(p.rdata(5),p.rdata(6));
+	//	if(p.rdata(0)==0.0){
+	Real amp = 1.0;
+	Real width = 1.0;
+	  //	std::complex<Real> amp(p.rdata(5),p.rdata(6));
       	std::complex<Real> phi(0.0,0.0);
       	std::complex<Real> iimag(0.0,1.0);
-      	int rad = std::ceil(theta_fdm/sqrt(2.0*p.rdata(7))/dx[0]);
+      	int rad = std::ceil(theta_fdm/sqrt(2.0*width)/dx[0]);
       	Real kernelsize;
       	Real lx = (p.pos(0) - plo[0])/dx[0] + 0.5;
       	Real ly = (p.pos(1) - plo[1])/dx[1] + 0.5;
@@ -526,7 +527,7 @@ FDMwkbParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_ima
       	      {
       		kernelsize = ((static_cast<Real>(xint+ii)+1.0-lx)*dx[0]*(static_cast<Real>(xint+ii)+1.0-lx)*dx[0]
       			      +(static_cast<Real>(yint+jj)+1.0-ly)*dx[1]*(static_cast<Real>(yint+jj)+1.0-ly)*dx[1]
-      			      +(static_cast<Real>(zint+kk)+1.0-lz)*dx[2]*(static_cast<Real>(zint+kk)+1.0-lz)*dx[2])*p.rdata(7);
+      			      +(static_cast<Real>(zint+kk)+1.0-lz)*dx[2]*(static_cast<Real>(zint+kk)+1.0-lz)*dx[2])*width;
 		
       		if (kernelsize <= (theta_fdm*theta_fdm/2.0)){
 		  
@@ -546,7 +547,7 @@ FDMwkbParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_ima
 		  
       		}
 	      }
-	}
+	//   }
       }
   }
   // If mf_real is not defined on the particle_box_array, then we need                                                                                                                                   
@@ -570,17 +571,17 @@ FDMwkbParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_ima
 
     ParallelDescriptor::ReduceRealMax(stoptime,ParallelDescriptor::IOProcessorNumber());
 
-    amrex::Print() << "FDMwkbParticleContainer::DepositFDMParticles time: " << stoptime << '\n';
+    amrex::Print() << "FDMphaseParticleContainer::DepositFDMParticles time: " << stoptime << '\n';
   }
 }
 
 amrex::Real
-FDMwkbParticleContainer::estTimestepFDM(amrex::MultiFab&       phi,
+FDMphaseParticleContainer::estTimestepFDM(amrex::MultiFab&       phi,
 					amrex::Real              a,
 					int                    lev,
 					amrex::Real            cfl) const
 {
-  BL_PROFILE("FDMwkbParticleContainer::estTimestep()");
+  BL_PROFILE("FDMphaseParticleContainer::estTimestep()");
   amrex::Real            dt               = 1e50;
   BL_ASSERT(lev >= 0);
 
@@ -666,7 +667,7 @@ FDMwkbParticleContainer::estTimestepFDM(amrex::MultiFab&       phi,
 
       if (amrex::ParallelDescriptor::IOProcessor())
         {
-	  std::cout << "FDMwkbParticleContainer::estTimestep() time: " << stoptime << '\n';
+	  std::cout << "FDMphaseParticleContainer::estTimestep() time: " << stoptime << '\n';
         }
     }
 
@@ -674,7 +675,7 @@ FDMwkbParticleContainer::estTimestepFDM(amrex::MultiFab&       phi,
 }
 
 void
-FDMwkbParticleContainer::InitCosmo1ppcMultiLevel(amrex::Vector<std::unique_ptr<amrex::MultiFab> >& mf,
+FDMphaseParticleContainer::InitCosmo1ppcMultiLevel(amrex::Vector<std::unique_ptr<amrex::MultiFab> >& mf,
 						 amrex::Vector<amrex::MultiFab*>& phase,
 						 const Real gamma_ax, const Real particleMass,
 						 BoxArray &baWhereNot, int lev, int nlevs)
@@ -711,8 +712,6 @@ FDMwkbParticleContainer::InitCosmo1ppcMultiLevel(amrex::Vector<std::unique_ptr<a
   long outcount[3]={0,0,0};
   long outcountminus[3]={0,0,0};
   long totalcount=0;
-
-  Real Amp;
 
   // for (int lev = 0; lev<nlevs; lev++)
     for (MFIter mfi(*(mf[lev])); mfi.isValid(); ++mfi)
@@ -756,36 +755,7 @@ FDMwkbParticleContainer::InitCosmo1ppcMultiLevel(amrex::Vector<std::unique_ptr<a
 		  p.id()      = ParticleType::NextID();
 		  p.cpu()     = MyProc;
 
-		  // Amp = std::sqrt(myFab(indices));
-		  Amp = pow(myFab(indices,0),1.0/3.0)*dx[0]*dx[0]/M_PI;
-		  // Amp = std::sqrt(0.5);
-		  //set phase                                                                                                                                                                                    
 		  p.rdata( 4) = phaseFab(indices,0);
-		  //set amplitude                                                                                                                                                                                
-		  p.rdata( 5) = pow(gamma_ax*Amp,1.5);
-		  p.rdata( 6) = 0.0;
-		  //set width                                                                                                                                                                                    
-		  p.rdata( 7) = gamma_ax;
-		  //set Jacobian qq                                                                                                                                                                              
-		  p.rdata( 8) = Amp;
-		  p.rdata( 9) = 0.0;
-		  p.rdata(10) = 0.0;
-		  p.rdata(11) = 0.0;
-		  p.rdata(12) = Amp;
-		  p.rdata(13) = 0.0;
-		  p.rdata(14) = 0.0;
-		  p.rdata(15) = 0.0;
-		  p.rdata(16) = Amp;
-		  //set Jacobian pq                                                                                                                                                                              
-		  p.rdata(17) = 0.0;
-		  p.rdata(18) = 0.0;
-		  p.rdata(19) = 0.0;
-		  p.rdata(20) = 0.0;
-		  p.rdata(21) = 0.0;
-		  p.rdata(22) = 0.0;
-		  p.rdata(23) = 0.0;
-		  p.rdata(24) = 0.0;
-		  p.rdata(25) = 0.0;
 
 		  if (!this->Where(p, pld))
                     {
@@ -838,7 +808,7 @@ FDMwkbParticleContainer::InitCosmo1ppcMultiLevel(amrex::Vector<std::unique_ptr<a
 }
 
 void
-FDMwkbParticleContainer::InitCosmo1ppcMultiLevel(MultiFab& vel, MultiFab& phase, MultiFab& dens,
+FDMphaseParticleContainer::InitCosmo1ppcMultiLevel(MultiFab& vel, MultiFab& phase, MultiFab& dens,
 						 const Real gamma_ax, const Real particleMass,
 						 BoxArray &baWhereNot, int lev, int nlevs)
 {
@@ -874,8 +844,6 @@ FDMwkbParticleContainer::InitCosmo1ppcMultiLevel(MultiFab& vel, MultiFab& phase,
   long outcount[3]={0,0,0};
   long outcountminus[3]={0,0,0};
   long totalcount=0;
-
-  Real Amp;
 
   // for (int lev = 0; lev<nlevs; lev++)
     for (MFIter mfi(dens); mfi.isValid(); ++mfi)
@@ -919,39 +887,8 @@ FDMwkbParticleContainer::InitCosmo1ppcMultiLevel(MultiFab& vel, MultiFab& phase,
 		  p.rdata(0)  = 0.0;//particleMass;
 		  p.id()      = ParticleType::NextID();
 		  p.cpu()     = MyProc;
-
-		  // Amp = std::sqrt(myFab(indices));
-		  Amp = pow(densFab(indices,0),1.0/3.0)*dx[0]*dx[0]/M_PI;
-		  // Amp = std::sqrt(0.5);
-		  //set phase                                                                                                                                                                                    
+                                       
 		  p.rdata( 4) = phaseFab(indices,0);
-		  if(p.rdata( 4)!=p.rdata( 4))
-		    amrex::Abort("Nans in FDM beam phase!!");
-		  //set amplitude                                                                                                                                                                                
-		  p.rdata( 5) = pow(gamma_ax*Amp,1.5);
-		  p.rdata( 6) = 0.0;
-		  //set width                                                                                                                                                                                    
-		  p.rdata( 7) = gamma_ax;
-		  //set Jacobian qq                                                                                                                                                                              
-		  p.rdata( 8) = Amp;
-		  p.rdata( 9) = 0.0;
-		  p.rdata(10) = 0.0;
-		  p.rdata(11) = 0.0;
-		  p.rdata(12) = Amp;
-		  p.rdata(13) = 0.0;
-		  p.rdata(14) = 0.0;
-		  p.rdata(15) = 0.0;
-		  p.rdata(16) = Amp;
-		  //set Jacobian pq                                                                                                                                                                              
-		  p.rdata(17) = 0.0;
-		  p.rdata(18) = 0.0;
-		  p.rdata(19) = 0.0;
-		  p.rdata(20) = 0.0;
-		  p.rdata(21) = 0.0;
-		  p.rdata(22) = 0.0;
-		  p.rdata(23) = 0.0;
-		  p.rdata(24) = 0.0;
-		  p.rdata(25) = 0.0;
 
 		  if (!this->Where(p, pld))
                     {
@@ -1005,9 +942,9 @@ FDMwkbParticleContainer::InitCosmo1ppcMultiLevel(MultiFab& vel, MultiFab& phase,
 
 
 void
-FDMwkbParticleContainer::InitCosmo1ppc(MultiFab& mf, const Real vel_fac[], const Real particleMass)
+FDMphaseParticleContainer::InitCosmo1ppc(MultiFab& mf, const Real vel_fac[], const Real particleMass)
 {
-    BL_PROFILE("FDMwkbParticleContainer::InitCosmo1ppc()");
+    BL_PROFILE("FDMphaseParticleContainer::InitCosmo1ppc()");
     const int       MyProc   = ParallelDescriptor::MyProc();
     const Geometry& geom     = m_gdb->Geom(0);
     const Real*     dx       = geom.CellSize();
@@ -1074,7 +1011,7 @@ FDMwkbParticleContainer::InitCosmo1ppc(MultiFab& mf, const Real vel_fac[], const
       		        this->PeriodicShift(p);
                         
                         if (!this->Where(p, pld))
-                            amrex::Abort("FDMwkbParticleContainer::InitCosmo1ppc(): invalid particle");
+                            amrex::Abort("FDMphaseParticleContainer::InitCosmo1ppc(): invalid particle");
 		    }
 
 	            BL_ASSERT(pld.m_lev >= 0 && pld.m_lev <= this->finestLevel());
@@ -1089,7 +1026,7 @@ FDMwkbParticleContainer::InitCosmo1ppc(MultiFab& mf, const Real vel_fac[], const
 }
 
 void
-FDMwkbParticleContainer::InitCosmo(
+FDMphaseParticleContainer::InitCosmo(
             MultiFab& mf, const Real vel_fac[], const Vector<int> n_part, const Real particleMass)
 {
     Real shift[] = {0,0,0};
@@ -1097,10 +1034,10 @@ FDMwkbParticleContainer::InitCosmo(
 }
 
 void
-FDMwkbParticleContainer::InitCosmo(
+FDMphaseParticleContainer::InitCosmo(
             MultiFab& mf, const Real vel_fac[], const Vector<int> n_part, const Real particleMass, const Real shift[])
 {
-    BL_PROFILE("FDMwkbParticleContainer::InitCosmo()");
+    BL_PROFILE("FDMphaseParticleContainer::InitCosmo()");
     const int       MyProc   = ParallelDescriptor::MyProc();
     const int       IOProc   = ParallelDescriptor::IOProcessorNumber();
     const Real      strttime = ParallelDescriptor::second();
@@ -1145,7 +1082,7 @@ FDMwkbParticleContainer::InitCosmo(
     // We will need one ghost cell, so check wether we have one.
     //
     if (mf.nGrow() < 1)
-        amrex::Abort("FDMwkbParticleContainer::InitCosmo: mf needs at least one correctly filled ghost zone!");
+        amrex::Abort("FDMphaseParticleContainer::InitCosmo: mf needs at least one correctly filled ghost zone!");
 
     if ( !(n_part[0] == n_part[1] && n_part[1] == n_part[2]) )
     {
@@ -1210,7 +1147,7 @@ FDMwkbParticleContainer::InitCosmo(
       		            this->PeriodicShift(p);
 
                             if (!this->Where(p, pld))
-                                amrex::Abort("FDMwkbParticleContainer::InitCosmo(): invalid particle");
+                                amrex::Abort("FDMphaseParticleContainer::InitCosmo(): invalid particle");
 		        }
 
 	                BL_ASSERT(pld.m_lev >= 0 && pld.m_lev <= m_gdb->finestLevel());
@@ -1284,7 +1221,7 @@ FDMwkbParticleContainer::InitCosmo(
 	        this->PeriodicShift(p);
 
                 if (!this->Where(p, pld))
-                    amrex::Abort("FDMwkbParticleContainer::InitCosmo(): invalid particle");
+                    amrex::Abort("FDMphaseParticleContainer::InitCosmo(): invalid particle");
 	    }
 
             this->Reset(p, true);
@@ -1314,9 +1251,9 @@ FDMwkbParticleContainer::InitCosmo(
 }
 
 void 
-FDMwkbParticleContainer::InitFromBinaryMortonFile(const std::string& particle_directory,
+FDMphaseParticleContainer::InitFromBinaryMortonFile(const std::string& particle_directory,
 						      int nextra, int skip_factor) {
-  BL_PROFILE("FDMwkbParticleContainer::InitFromBinaryMortonFile");
+  BL_PROFILE("FDMphaseParticleContainer::InitFromBinaryMortonFile");
   
   ParticleMortonFileHeader hdr;
   ReadHeader(particle_directory, "Header", hdr);    
@@ -1418,7 +1355,7 @@ FDMwkbParticleContainer::InitFromBinaryMortonFile(const std::string& particle_di
 }
 
 void
-FDMwkbParticleContainer::InitVarCount (MultiFab& mf, long num_particle_fdm, BoxArray &baWhereNot, int lev, int nlevs)
+FDMphaseParticleContainer::InitVarCount (MultiFab& mf, long num_particle_fdm, BoxArray &baWhereNot, int lev, int nlevs)
 {
   const int       MyProc      = ParallelDescriptor::MyProc();
   const Geometry& geom        = m_gdb->Geom(lev);
@@ -1519,7 +1456,7 @@ FDMwkbParticleContainer::InitVarCount (MultiFab& mf, long num_particle_fdm, BoxA
 			    this->PeriodicShift(p);
 			    
 			    if (!this->Where(p, new_pld))
-			      amrex::Abort("FDMwkbParticleContainer::InitVarCount():invalid particle");
+			      amrex::Abort("FDMphaseParticleContainer::InitVarCount():invalid particle");
 			  }
 			particles[new_pld.m_lev][std::make_pair(new_pld.m_grid,
 								new_pld.m_tile)].push_back(p);
@@ -1551,146 +1488,6 @@ FDMwkbParticleContainer::InitVarCount (MultiFab& mf, long num_particle_fdm, BoxA
     {
       std::cout << "Redistribute done" << '\n';
     }
-}
-
-void
-FDMwkbParticleContainer::InitGaussianBeams (long num_particle_fdm, int lev, int nlevs, const Real hbaroverm, const Real sigma_ax, const Real gamma_ax, const Real fact, const Real alpha, const Real a)
-{
-  const int       MyProc      = ParallelDescriptor::MyProc();
-  const int       nprocs      = ParallelDescriptor::NProcs();
-  const Geometry& geom        = m_gdb->Geom(lev);
-  const Real*     dx          = geom.CellSize();
-
-  static Vector<int> calls;
-  calls.resize(nlevs);
-  calls[lev]++;
-  if (calls[lev] > 1) return;
-  Vector<ParticleLevel>& particles = this->GetParticles();
-
-  int  npart = num_particle_fdm;
-  int  npart_tot = nprocs*npart; //Each processor initializes num_particle_fdm beams
-  Real q[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
-  Real p[]  = {0.0,0.0,0.0};
-  Real q0[]  = {(geom.ProbHi(0)+geom.ProbLo(0))/2.0, (geom.ProbHi(1)+geom.ProbLo(1))/2.0, (geom.ProbHi(2)+geom.ProbLo(2))/2.0};
-  Real p0[] = {0.0,0.0,0.0};
-  Real phi, Amp;
-  Real sigma = 0.5/sqrt(alpha);
-
-  particles.reserve(15);  // So we don't ever have to do any copying on a resize.
-  particles.resize(nlevs);
-
-  for (int i = 0; i < particles.size(); i++)
-    {
-      BL_ASSERT(particles[i].empty());
-    }
-
-  ParticleType part;
-  ParticleLocData pld;
-
-  amrex::InitRandom(MyProc);
-
-  for(int index=0;index<npart;index++){
-	
-    q[0] = generateGaussianNoise(q0[0],sigma*sqrt(2.0));
-    q[1] = generateGaussianNoise(q0[1],sigma*sqrt(2.0));
-    q[2] = generateGaussianNoise(q0[2],sigma*sqrt(2.0));
-    phi  = 0.0;
-    p[0] = p0[0];
-    p[1] = p0[1];
-    p[2] = p0[2];
-    Amp  = pow(100.0*fact/npart_tot/npart_tot,1.0/3.0)/M_PI/(alpha/M_PI);
-    
-    if(q[0]>geom.ProbLo(0) && q[0]<geom.ProbHi(0) && q[1]>geom.ProbLo(1) && q[1]<geom.ProbHi(1) && q[2]>geom.ProbLo(2) && q[2]<geom.ProbHi(2)){
-
-      part.id()      = ParticleType::NextID();
-      part.cpu()     = MyProc;
-
-      //set position
-      for (int n = 0; n < BL_SPACEDIM; n++)
-	part.pos( n) = q[n];
-      //set mass                                                                                                                                                                
-      part.rdata( 0) =  1.0/(npart_tot * dx[0] * dx[1] * dx[2]);
-      //set velocity
-      part.rdata( 1) = p[0]/a;
-      part.rdata( 2) = p[1]/a;
-      part.rdata( 3) = p[2]/a;
-      //set phase
-      part.rdata( 4) = phi;
-      //set amplitude
-      part.rdata( 5) = pow(gamma_ax*Amp,1.5);
-      part.rdata( 6) = 0.0;
-      //set width
-      part.rdata( 7) = gamma_ax;
-      //set Jacobian qq
-      part.rdata( 8) = Amp;
-      part.rdata( 9) = 0.0;
-      part.rdata(10) = 0.0;
-      part.rdata(11) = 0.0;
-      part.rdata(12) = Amp;
-      part.rdata(13) = 0.0;
-      part.rdata(14) = 0.0;
-      part.rdata(15) = 0.0;
-      part.rdata(16) = Amp;
-      //set Jacobian pq
-      part.rdata(17) = 0.0;
-      part.rdata(18) = 0.0;
-      part.rdata(19) = 0.0;
-      part.rdata(20) = 0.0;
-      part.rdata(21) = 0.0;
-      part.rdata(22) = 0.0;
-      part.rdata(23) = 0.0;
-      part.rdata(24) = 0.0;
-      part.rdata(25) = 0.0;
-
-      if (!this->Where(part,pld))
-	amrex::Abort("ParticleContainer<N>::InitGaussianBeams(): invalid particle");
-
-      //add particle
-      particles[pld.m_lev][std::make_pair(pld.m_grid, pld.m_tile)].push_back(part);
-    }
-    else
-      index--;
-  }
-
-  if (ParallelDescriptor::IOProcessor() && m_verbose)
-    {
-      std::cout << "Done with Gaussian Beam initilization" << '\n';
-    }
-  //
-  // Let Redistribute() sort out where the particles belong.
-  //
-  Redistribute();
-  
-  if (ParallelDescriptor::IOProcessor() && m_verbose)
-    {
-      std::cout << "Redistribute done" << '\n';
-    }
-  
-}
-
-amrex::Real
-FDMwkbParticleContainer::generateGaussianNoise(const amrex::Real &mean, const amrex::Real &stdDev) {
-
-  static bool hasSpare = false;
-  static amrex::Real spare;
-
-  if(hasSpare) {
-    hasSpare = false;
-    return mean + stdDev * spare;
-  }
-
-  hasSpare = true;
-  static amrex::Real u, v, s;
-  do {
-    u = (rand() / ((amrex::Real) RAND_MAX)) * 2.0 - 1.0;
-    v = (rand() / ((amrex::Real) RAND_MAX)) * 2.0 - 1.0;
-    s = u * u + v * v;
-  }
-  while( (s >= 1.0) || (s == 0.0) );
-
-  s = sqrt(-2.0 * log(s) / s);
-  spare = v * s;
-  return mean + stdDev * u * s;
 }
 
 #endif /*FDM*/

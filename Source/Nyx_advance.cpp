@@ -321,6 +321,12 @@ Nyx::advance_hydro_plus_particles (Real time,
 		  Nyx::theGhostFDMwkbPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm);
 		if(Nyx::theVirtFDMwkbPC())
 		  Nyx::theVirtFDMwkbPC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm);
+		if(Nyx::theFDMphasePC())
+		  Nyx::theFDMphasePC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm);
+		if(Nyx::theGhostFDMphasePC())
+		  Nyx::theGhostFDMphasePC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm);
+		if(Nyx::theVirtFDMphasePC())
+		  Nyx::theVirtFDMphasePC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,where_width_fdm);
 #endif
             }
         }
@@ -513,6 +519,12 @@ Nyx::advance_hydro_plus_particles (Real time,
 		  Nyx::theGhostFDMwkbPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_new, a_half);
 		if(Nyx::theVirtFDMwkbPC())
 		  Nyx::theVirtFDMwkbPC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_new, a_half);
+		if(Nyx::theFDMphasePC())
+		  Nyx::theFDMphasePC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_new, a_half);
+		if(Nyx::theGhostFDMphasePC())
+		  Nyx::theGhostFDMphasePC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_new, a_half);
+		if(Nyx::theVirtFDMphasePC())
+		  Nyx::theVirtFDMphasePC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_new, a_half);
 #endif
 	    }
 	}
@@ -550,6 +562,12 @@ Nyx::advance_hydro_plus_particles (Real time,
 	Nyx::theGhostFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new,Nyx::theta_fdm,hbaroverm);
       if(Nyx::theVirtFDMwkbPC())
 	Nyx::theVirtFDMwkbPC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new,Nyx::theta_fdm,hbaroverm);
+      if(Nyx::theFDMphasePC())
+	Nyx::theFDMphasePC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new,Nyx::theta_fdm,hbaroverm);
+      if(Nyx::theGhostFDMphasePC())
+	Nyx::theGhostFDMphasePC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new,Nyx::theta_fdm,hbaroverm);
+      if(Nyx::theVirtFDMphasePC())
+	Nyx::theVirtFDMphasePC()->DepositFDMParticles(fdmreal,fdmimag,lev,a_new,Nyx::theta_fdm,hbaroverm);
       
       //Update real part in FDM state                                                                                                                                                       
       Ax_new.ParallelCopy(fdmreal, 0, Nyx::AxRe, 1, fdmreal.nGrow(),

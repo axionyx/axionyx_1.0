@@ -273,7 +273,7 @@ Nyx::hydro_setup()
 #ifdef FDM
         store_in_checkpoint = true;
         desc_lst.addDescriptor(Axion_Type, IndexType::TheCellType(),
-                               StateDescriptor::Point, 0, NUM_AX, &quartic_interp,
+                               StateDescriptor::Point, 0, NUM_AX, interp, //&quartic_interp,
                                state_data_extrap, store_in_checkpoint);
 #endif
 
@@ -930,7 +930,7 @@ Nyx::no_hydro_setup()
 #ifdef FDM
     store_in_checkpoint = true;
     desc_lst.addDescriptor(Axion_Type, IndexType::TheCellType(),
-                           StateDescriptor::Point, 0, NUM_AX, &quartic_interp,
+                           StateDescriptor::Point, 0, NUM_AX, &cell_cons_interp, //&quartic_interp,
                            state_data_extrap, store_in_checkpoint);
 #endif
 

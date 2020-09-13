@@ -310,6 +310,7 @@
            delta,prob_lo,prob_hi,dt, &
            courno,a_old,a_half,a_new,verbose)
 
+      use amrex_error_module
       use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM, UAXPHAS
       use fdm_params_module, only : hbaroverm, ii
       use fundamental_constants_module
@@ -346,18 +347,28 @@
       allocate(   V(  p_l1:p_h1  ,  p_l2:p_h2  ,  p_l3:p_h3  ) )
 
       psi = cmplx(uin(:,:,:,UAXRE),uin(:,:,:,UAXIM))
+!      psi = sqrt(max(0,uin(:,:,:,UAXDENS)))/abs(psi)*psi
+!      print *, psi
+!      call amrex_error('Aborting fort_advance_fdm_fd')
+
+      !print *, 'uin bounds = ',lbound(uin),ubound(uin),lbound(psi),ubound(psi),uin_l1,uin_h1,uin_l2,uin_h2,uin_l3,uin_h3
       ! psi = sqrt(uin(:,:,:,UAXDENS))/abs(psi)*psi
-      ! do k = uin_l3, uin_h3
-      !    do j = uin_l2, uin_h2
-      !       do i = uin_l1, uin_h1
-      !          if(abs(psi(i,j,k)) .gt. 0.0) then
-      !             psi = sqrt(uin(i,j,k,UAXDENS))/abs(psi(i,j,k))*psi
-      !          else
-      !             print *, 'psi = 0!',i,j,k
-      !          endif
-      !       enddo
-      !    enddo
-      ! enddo
+      do k = uin_l3, uin_h3
+         do j = uin_l2, uin_h2
+            do i = uin_l1, uin_h1
+!!               psi(i,j,k) = cmplx(uin(i,j,k,UAXRE),uin(i,j,k,UAXIM))
+!               if(abs(psi(i,j,k)) .gt. 0.0) then
+               if( (uin(i,j,k,UAXDENS).gt.0.0).and.(abs(psi(i,j,k)).gt.0.0) ) then
+!                  continue
+                  psi(i,j,k) = sqrt(uin(i,j,k,UAXDENS))/abs(psi(i,j,k))*psi(i,j,k)
+!               else
+!                  psi(i,j,k) = 0.d0
+!                  print *, 'psi = 0!',abs(psi(i,j,k)),psi(i,j,k),uin(i,j,k,UAXDENS),i,j,k
+!                  call amrex_error('Aborting fort_advance_fdm_fd')
+               endif
+            enddo
+         enddo
+      enddo
 
       ! psi = sqrt(uin(:,:,:,UAXDENS))*cmplx(cos(uin(:,:,:,UAXPHAS)),sin(uin(:,:,:,UAXPHAS)))
       k1  = 0.d0

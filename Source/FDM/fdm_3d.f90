@@ -83,7 +83,9 @@ subroutine deposit_fdm_particles_wkb(particles, np, state_real, &
 
   do n = 1, np
 
-     amp = cmplx(particles(n)%amp(1),particles(n)%amp(2))
+!     if(particles(n)%amp(1)*particles(n)%amp(1)+particles(n)%amp(2)*particles(n)%amp(2).lt.1e+21) then
+
+     amp = (1.1d8,0.0) !cmplx(particles(n)%amp(1),particles(n)%amp(2))
      rad = ceiling(theta_fdm/sqrt(2.0*particles(n)%width)/dx(1))
      pos = (particles(n)%pos - plo)/dx + 0.5d0
 
@@ -121,6 +123,8 @@ subroutine deposit_fdm_particles_wkb(particles, np, state_real, &
            enddo
         endif
      enddo
+
+!     endif
      
   enddo
 
@@ -235,3 +239,17 @@ subroutine fort_set_ratio(ratio) &
   ratio_fdm = ratio
   
 end subroutine fort_set_ratio
+
+subroutine fort_set_fdm_halo_pos(pos_x, pos_y, pos_z) &
+     bind(C, name="fort_set_fdm_halo_pos")
+  
+  use amrex_fort_module, only : rt => amrex_real
+  use fdm_params_module, only: halo_pos_x, halo_pos_y, halo_pos_z
+  
+  real(rt), intent(in) :: pos_x, pos_y, pos_z
+  
+  halo_pos_x = pos_x
+  halo_pos_y = pos_y
+  halo_pos_z = pos_z
+  
+end subroutine fort_set_fdm_halo_pos

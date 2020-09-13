@@ -60,4 +60,15 @@ module particle_mod
      integer(c_int)  :: cpu
   end type fdm_particle_wkb_t
 
+  public  fdm_particle_phase_t
+  
+  type, bind(C)  :: fdm_particle_phase_t
+     real(c_real)    :: pos(3)     !< Position
+     real(c_real)    :: mass       !< Particle mass
+     real(c_real)    :: vel(3)     !< Particle velocity
+     real(c_real)    :: phase      !< Particle phase 
+     integer(c_int)  :: id
+     integer(c_int)  :: cpu
+  end type fdm_particle_phase_t
+
 end module

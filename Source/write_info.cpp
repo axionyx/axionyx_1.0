@@ -68,6 +68,12 @@ Nyx::write_info ()
                  data_loga << std::setw(14) <<  "     Etot";
                  data_loga << std::setw(22) <<  " max_dens";
                  data_loga << std::setw(22) <<  " max_dens_nb";
+		 if(fdm_halo)
+		 {
+		   data_loga << std::setw(22) <<  " fdm_halo_x";
+		   data_loga << std::setw(22) <<  " fdm_halo_y";
+		   data_loga << std::setw(22) <<  " fdm_halo_z";
+		 }
 #endif
                  data_loga << std::setw(14) <<  "        a";
 #ifndef NO_HYDRO
@@ -103,6 +109,12 @@ Nyx::write_info ()
                  data_loga << std::setw(14) <<  std::setprecision(6) << etot;
                  data_loga << std::setw(22) <<  std::setprecision(6) << max_dens;
                  data_loga << std::setw(22) <<  std::setprecision(6) << max_dens_nb;
+		 if(fdm_halo)
+		 {
+		   data_loga << std::setw(22) <<  std::setprecision(6) << fdm_halo_pos[0];
+		   data_loga << std::setw(22) <<  std::setprecision(6) << fdm_halo_pos[1];
+		   data_loga << std::setw(22) <<  std::setprecision(6) << fdm_halo_pos[2];
+		 }
 #endif
                 data_loga << std::setw(14) <<  std::setprecision(6) << old_a;
 #ifndef NO_HYDRO
@@ -141,6 +153,12 @@ Nyx::write_info ()
                  data_loga << std::setw(14) <<  std::setprecision(6) << etot;
                  data_loga << std::setw(22) <<  std::setprecision(10) << max_dens;
                  data_loga << std::setw(22) <<  std::setprecision(10) << max_dens_nb;
+		 if(fdm_halo)
+		 {
+		   data_loga << std::setw(22) <<  std::setprecision(6) << fdm_halo_pos[0];
+		   data_loga << std::setw(22) <<  std::setprecision(6) << fdm_halo_pos[1];
+		   data_loga << std::setw(22) <<  std::setprecision(6) << fdm_halo_pos[2];
+		 }
 #endif
                 data_loga << std::setw(14) <<  std::setprecision(6) << new_a;
 #ifndef NO_HYDRO

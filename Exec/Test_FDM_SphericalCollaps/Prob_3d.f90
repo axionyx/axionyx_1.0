@@ -81,7 +81,7 @@
       use atomic_rates_module, only : XHYDROGEN
       use meth_params_module, only : URHO, UMX, UMY, UMZ, UEDEN, UEINT,&
                                      UFS, small_dens, TEMP_COMP, &
-                                     NE_COMP, UAXDENS, UAXRE, UAXIM
+                                     NE_COMP, UAXDENS, UAXRE, UAXIM, UAXPHAS
       use amrex_constants_module, only : M_PI
       use fdm_params_module
       use comoving_module, only : comoving_h, comoving_OmAx
@@ -135,14 +135,15 @@
                   state(i,j,k,UFS+1) = (1.d0 - XHYDROGEN)
                end if
 
-               r = dsqrt((xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1) - center(1))**2 + &                                                                                                                     
-                    (xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2) - center(2))**2 + &                                                                                                                     
-                    (xlo(3)+(k-lo(3))*delta(3) + 0.5d0*delta(3) - center(3))**2)                                                                                                                        
-               ! axion(i,j,k,UAXDENS) = axion(i,j,k,UAXDENS) + meandens/((1.d0+9.1d-2*(r/rc)**2.d0)**8.0d0)/length                                                                                            
-               axion(i,j,k,UAXDENS) = ratio_fdm*(1.0d-1*meandens*exp(-(r/rc)**2.d0)+meandens)                                                                                            
-               ! axion(i,j,k,UAXDENS) = ratio_fdm*meandens                                                                                            
-               axion(i,j,k,UAXRE)   = dsqrt(axion(i,j,k,UAXDENS))                                                                                                                                           
-               axion(i,j,k,UAXIM)   = 0.0d0                                                                                                                                                                 
+               r = dsqrt((xlo(1)+(i-lo(1))*delta(1) + 0.5d0*delta(1) - center(1))**2 + &
+                    (xlo(2)+(j-lo(2))*delta(2) + 0.5d0*delta(2) - center(2))**2 + &
+                    (xlo(3)+(k-lo(3))*delta(3) + 0.5d0*delta(3) - center(3))**2)
+               ! axion(i,j,k,UAXDENS) = axion(i,j,k,UAXDENS) + meandens/((1.d0+9.1d-2*(r/rc)**2.d0)**8.0d0)/length
+               axion(i,j,k,UAXDENS) = ratio_fdm*(1.0d-1*meandens*exp(-(r/rc)**2.d0)+meandens)
+               ! axion(i,j,k,UAXDENS) = ratio_fdm*meandens
+               axion(i,j,k,UAXRE)   = dsqrt(axion(i,j,k,UAXDENS))
+               axion(i,j,k,UAXIM)   = 0.0d0
+               axion(i,j,k,UAXPHAS) = 0.0d0
                
             enddo
          enddo

@@ -3,4 +3,4 @@
 using namespace amrex;
 void divergence(Box const& bx, Array4<Real> const& div,
 		Array4<Real const> const& vel, 
-		const amrex::Real* dx, const amrex::Real a);
+		const Real* dx, const Real a);
