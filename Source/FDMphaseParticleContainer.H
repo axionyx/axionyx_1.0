@@ -40,6 +40,8 @@ public:
 
   void DepositFDMParticles (amrex::MultiFab& mf_real, amrex::MultiFab& mf_imag, int level, amrex::Real a, amrex::Real theta_fdm, amrex::Real hbaroverm) const;
 
+  void DepositFDMParticlesCWA (amrex::MultiFab& mf_real, amrex::MultiFab& mf_imag, int level, amrex::Real a, amrex::Real theta_fdm, amrex::Real hbaroverm) const;
+
     amrex::Real estTimestepFDM(amrex::MultiFab& phi, amrex::Real a, int lev, amrex::Real cfl) const;
 
     virtual void moveKickDrift (amrex::MultiFab& acceleration, int level, amrex::Real timestep,

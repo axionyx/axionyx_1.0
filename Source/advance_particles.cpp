@@ -99,9 +99,9 @@ Nyx::advance_particles_only (Real time,
 #ifdef FDM
 	// Need virtual and ghost particles for Gaussian beam deposition
         for(int lev = level; lev < finest_level; lev++){
-	  if(levelmethod[lev]==GBlevel)
+	  if(levelmethod[lev]==GBlevel || levelmethod[lev]==CWlevel)
 	    setup_virtual_particles();
-	  if(levelmethod[lev+1]==GBlevel)
+	  if(levelmethod[lev+1]==GBlevel || levelmethod[lev]==CWlevel)
 	    get_level(lev).setup_ghost_particles(ghost_width);
 	}
 #endif
@@ -281,7 +281,7 @@ Nyx::advance_particles_only (Real time,
 		  Nyx::theFDMphasePC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,iteration);
 
 		//Need to do this only when reconstructing the density from GBs on this level.
-		if(levelmethod[lev]==GBlevel){
+		if(levelmethod[lev]==GBlevel || levelmethod[lev]==CWlevel){
 		  int ghost_width_fdm = parent->nCycle(lev)+ceil(Nyx::sigma_fdm*Nyx::theta_fdm/get_level(lev).Geom().CellSize()[0]);
 		  int where_width_fdm =  ghost_width_fdm + (1-iteration)  - 1;
 		  int grav_n_grow_fdm = ghost_width_fdm + stencil_interpolation_width + 1;
@@ -384,7 +384,7 @@ Nyx::advance_particles_only (Real time,
 		  Nyx::theFDMphasePC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_new, a_half);
 
 		//Need to do this only when reconstructing the density from GBs on this level.
-		if(levelmethod[lev]==GBlevel){
+		if(levelmethod[lev]==GBlevel || levelmethod[lev]==CWlevel){
 		  int ghost_width_fdm = parent->nCycle(lev)+ceil(Nyx::sigma_fdm*Nyx::theta_fdm/get_level(lev).Geom().CellSize()[0]);
 		  int where_width_fdm =  ghost_width_fdm + (1-iteration)  - 1;
 		  int grav_n_grow_fdm = ghost_width_fdm + stencil_interpolation_width + 1;
@@ -414,8 +414,7 @@ Nyx::advance_particles_only (Real time,
     for (int lev = level; lev <= finest_level_to_advance; lev++){
 
       //Only construct wavefunction from Gaussian beams on GBlevels
-      if(levelmethod[lev]!=GBlevel || parent->levelSteps(lev)%1024!=1)
-	continue;
+      if(levelmethod[lev]==GBlevel){
 
       amrex::Print() << "levelSteps " << lev << " "<< parent->levelSteps(lev) << '\n';
 
@@ -468,6 +467,50 @@ Nyx::advance_particles_only (Real time,
           if (Ax_new[fpi].contains_nan())
 	    amrex::Abort("Nans in state just after FDM density update");
         }
+      } else if (levelmethod[lev]==CWlevel){
+
+      amrex::Print() << "levelSteps " << lev << " "<< parent->levelSteps(lev) << '\n';
+
+      //Define neccessary number of ghost cells                                                                                                                                                                 
+      int ng = parent->nCycle(lev)+2.0*ceil(Nyx::sigma_fdm*Nyx::theta_fdm/get_level(lev).Geom().CellSize()[0]);
+
+      //Initialize MultiFabs                                                                                                                                                                                    
+      MultiFab& Ax_new = get_level(lev).get_new_data(Axion_Type);
+      Ax_new.setVal(0.);
+      MultiFab fdmreal(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
+      fdmreal.setVal(0.);
+      MultiFab fdmimag(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
+      fdmimag.setVal(0.);
+
+      //Deposit Gaussian Beams                                                                                                                                                                                   
+      if(Nyx::theFDMphasePC())
+      	Nyx::theFDMphasePC()->DepositFDMParticlesCWA(fdmreal,fdmimag,lev,a_new,Nyx::theta_fdm,hbaroverm);
+      if(Nyx::theGhostFDMphasePC())
+      	Nyx::theGhostFDMphasePC()->DepositFDMParticlesCWA(fdmreal,fdmimag,lev,a_new,Nyx::theta_fdm,hbaroverm);
+      if(Nyx::theVirtFDMphasePC())
+      	Nyx::theVirtFDMphasePC()->DepositFDMParticlesCWA(fdmreal,fdmimag,lev,a_new,Nyx::theta_fdm,hbaroverm);
+
+      //Update real part in FDM state                                                                                                                                                                           
+      Ax_new.ParallelCopy(fdmreal, 0, Nyx::AxRe, 1, fdmreal.nGrow(),
+                          Ax_new.nGrow(), parent->Geom(lev).periodicity(),FabArrayBase::ADD);
+
+      //Update imaginary part in FDM state                                                                                                                                                                      
+      Ax_new.ParallelCopy(fdmimag, 0, Nyx::AxIm, 1, fdmimag.nGrow(),
+                          Ax_new.nGrow(), parent->Geom(lev).periodicity(),FabArrayBase::ADD);
+
+
+      //Update density in FDM state                                                                                                                                                                            
+      AmrLevel* amrlev = &parent->getLevel(lev);
+      for (amrex::FillPatchIterator fpi(*amrlev,  Ax_new); fpi.isValid(); ++fpi)
+        {
+          BL_FORT_PROC_CALL(FORT_FDM_FIELDS2, fort_fdm_fields2)
+            (BL_TO_FORTRAN(Ax_new[fpi]));
+          if (Ax_new[fpi].contains_nan())
+	    amrex::Abort("Nans in state just after FDM density update");
+        }
+
+      } else
+	continue;
     }
 #endif
 

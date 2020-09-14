@@ -2179,7 +2179,7 @@ Nyx::setup_ghost_particles(int ngrow)
     if(Nyx::theFDMphasePC() != 0)
       {
     	for (int lev = level+1; lev <= parent->finestLevel(); lev++){
-    	  if(levelmethod[lev]==GBlevel){
+    	  if(levelmethod[lev]==GBlevel || levelmethod[lev]==CWlevel){
     	    FDMphaseParticleContainer::AoS ghosts;
     	    int ng = parent->nCycle(lev)+ceil(sigma_fdm*theta_fdm/parent->Geom(lev).CellSize()[0]);
     	    Nyx::theFDMphasePC()->CreateGhostParticlesFDM(level, lev, ng, ghosts);

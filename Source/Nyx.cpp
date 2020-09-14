@@ -118,6 +118,7 @@ int Nyx::FDlevel = 0;
 int Nyx::GBlevel = 1;
 int Nyx::NBlevel = 2;
 int Nyx::PSlevel = 3;
+int Nyx::CWlevel = 4;
 bool Nyx::partlevel = false;
 Vector<int> Nyx::levelmethod;
 Real Nyx::theta_fdm = 1.0;

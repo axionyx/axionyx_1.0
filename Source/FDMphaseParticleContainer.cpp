@@ -575,6 +575,145 @@ FDMphaseParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_i
   }
 }
 
+void                                                                                                                                                                                                            
+FDMphaseParticleContainer::DepositFDMParticlesCWA(MultiFab& mf_real, MultiFab& mf_imag, int lev, amrex::Real a, amrex::Real theta_fdm, amrex::Real hbaroverm) const
+{
+  BL_PROFILE("FDMphaseParticleContainer::DepositFDMParticles()");
+
+  MultiFab* mf_pointer_real;
+
+  if (OnSameGrids(lev, mf_real)) {
+    // If we are already working with the internal mf defined on the                                                                                                                                             
+    // particle_box_array, then we just work with this.                                                                                                                                                          
+    mf_pointer_real = &mf_real;
+  }
+  else {
+
+    amrex::Print() <<"FDM:: mf_real different!!\n";
+    
+    // If mf_real is not defined on the particle_box_array, then we need                                                                                                                                 
+    // to make a temporary here and copy into mf_real at the end.                                                                                                                                        
+    mf_pointer_real = new MultiFab(ParticleBoxArray(lev),
+				   ParticleDistributionMap(lev),
+				   1, mf_real.nGrow());
+    
+    for (MFIter mfi(*mf_pointer_real); mfi.isValid(); ++mfi) {
+      (*mf_pointer_real)[mfi].setVal(0);
+    }
+  }
+
+  MultiFab* mf_pointer_imag;
+  
+  if (OnSameGrids(lev, mf_imag)) {
+    // If we are already working with the internal mf defined on the                                                                                                                                             
+    // particle_box_array, then we just work with this.                                                                                                                                                          
+    mf_pointer_imag = &mf_imag;
+  }
+  else {
+    
+    amrex::Print() <<"FDM:: mf_imag different!!\n";
+    
+    // If mf_imag is not defined on the particle_box_array, then we need                                                                                                                                 
+    // to make a temporary here and copy into mf_imag at the end.                                                                                                                                        
+    mf_pointer_imag = new MultiFab(ParticleBoxArray(lev),
+				   ParticleDistributionMap(lev),
+				   1, mf_imag.nGrow());
+    
+    for (MFIter mfi(*mf_pointer_imag); mfi.isValid(); ++mfi) {
+      (*mf_pointer_imag)[mfi].setVal(0);
+    }
+  }
+  
+  const Real      strttime    = amrex::second();
+  const Geometry& gm          = Geom(lev);
+  const Real*     plo         = gm.ProbLo();
+  const Real*     dx          = gm.CellSize();
+   
+  for (MyConstParIter pti(*this, lev); pti.isValid(); ++pti) {
+    const auto& particles = pti.GetArrayOfStructs();
+    const auto pstruct = particles().data();
+    const long np = pti.numParticles();
+    FArrayBox& fab_real = (*mf_pointer_real)[pti];
+    FArrayBox& fab_imag = (*mf_pointer_imag)[pti];
+    Array4<Real> const& realarr = fab_real.array();
+    Array4<Real> const& imagarr = fab_imag.array();
+
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+    for(int i=0; i<np; ++i)
+      {  
+      	const auto& p = pstruct[i];
+	//	if(p.rdata(0)==0.0){
+	Real amp = 1.0;
+	Real width = 1.0;
+	  //	std::complex<Real> amp(p.rdata(5),p.rdata(6));
+      	std::complex<Real> phi(0.0,0.0);
+      	std::complex<Real> iimag(0.0,1.0);
+      	int rad = std::ceil(theta_fdm/sqrt(2.0*width)/dx[0]);
+      	Real kernelsize;
+      	Real lx = (p.pos(0) - plo[0])/dx[0] + 0.5;
+      	Real ly = (p.pos(1) - plo[1])/dx[1] + 0.5;
+      	Real lz = (p.pos(2) - plo[2])/dx[2] + 0.5;
+
+      	int xint  = std::floor(lx);
+      	int yint  = std::floor(ly);
+      	int zint  = std::floor(lz);
+	
+      	for (int ii=-rad; ii<=rad; ii++)
+      	  for (int jj=-rad; jj<=rad; jj++)
+      	    for (int kk=-rad; kk<=rad; kk++)
+      	      {
+      		kernelsize = ((static_cast<Real>(xint+ii)+1.0-lx)*dx[0]*(static_cast<Real>(xint+ii)+1.0-lx)*dx[0]
+      			      +(static_cast<Real>(yint+jj)+1.0-ly)*dx[1]*(static_cast<Real>(yint+jj)+1.0-ly)*dx[1]
+      			      +(static_cast<Real>(zint+kk)+1.0-lz)*dx[2]*(static_cast<Real>(zint+kk)+1.0-lz)*dx[2])*width;
+		
+      		if (kernelsize <= (theta_fdm*theta_fdm/2.0)){
+		  
+      		  phi = amp*std::exp(-kernelsize)*std::exp(iimag*(p.rdata(4)
+      								  +p.rdata(1)*a*(static_cast<Real>(xint+ii)+1.0-lx)*dx[0]
+      								  +p.rdata(2)*a*(static_cast<Real>(yint+jj)+1.0-ly)*dx[1]
+      								  +p.rdata(3)*a*(static_cast<Real>(zint+kk)+1.0-lz)*dx[2] )/hbaroverm);
+
+#ifdef _OPENMP
+#pragma omp atomic update
+#endif
+      		  realarr(xint+ii, yint+jj, zint+kk)+= phi.real();
+#ifdef _OPENMP
+#pragma omp atomic update
+#endif
+      		  imagarr(xint+ii, yint+jj, zint+kk)+= phi.imag();
+		  
+      		}
+	      }
+	//   }
+      }
+  }
+  // If mf_real is not defined on the particle_box_array, then we need                                                                                                                                   
+  // to copy here from mf_pointer_real into mf_real. I believe that we don't                                                                                                                                  
+  // need any information in ghost cells so we don't copy those.                                                                                                                                                 
+  if (mf_pointer_real != &mf_real) {
+    mf_real.copy(*mf_pointer_real,0,0,1);
+    delete mf_pointer_real;
+  }
+
+  // If mf_imag is not defined on the particle_box_array, then we need                                                                                                                                   
+  // to copy here from mf_pointer_imag into mf_imag. I believe that we don't                                                                                                                                  
+  // need any information in ghost cells so we don't copy those.                                                                                                                                                 
+  if (mf_pointer_imag != &mf_imag) {
+    mf_imag.copy(*mf_pointer_imag,0,0,1);
+    delete mf_pointer_imag;
+  }
+
+  if (m_verbose > 1) {
+    Real stoptime = amrex::second() - strttime;
+
+    ParallelDescriptor::ReduceRealMax(stoptime,ParallelDescriptor::IOProcessorNumber());
+
+    amrex::Print() << "FDMphaseParticleContainer::DepositFDMParticles time: " << stoptime << '\n';
+  }
+}
+
 amrex::Real
 FDMphaseParticleContainer::estTimestepFDM(amrex::MultiFab&       phi,
 					amrex::Real              a,

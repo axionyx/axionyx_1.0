@@ -659,6 +659,7 @@ public:
     static int GBlevel;
     static int NBlevel;
     static int PSlevel;
+    static int CWlevel;
     static bool partlevel;
     static amrex::Vector<int> levelmethod;
     static amrex::Real theta_fdm;

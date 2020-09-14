@@ -144,6 +144,22 @@ subroutine fort_fdm_fields(state, state_l1,state_l2,state_l3,state_h1,state_h2,s
 
 end subroutine fort_fdm_fields
 
+subroutine fort_fdm_fields2(state, state_l1,state_l2,state_l3,state_h1,state_h2,state_h3)
+        
+  use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM, UAXPHAS
+
+  implicit none
+  
+  integer          state_l1,state_l2,state_l3,state_h1,state_h2,state_h3
+  double precision state( state_l1:state_h1, state_l2:state_h2, state_l3:state_h3, NAXVAR)
+  
+  state(:,:,:,UAXPHAS) = atan2(state(:,:,:,UAXIM),state(:,:,:,UAXRE))
+  state(:,:,:,UAXRE) = sqrt(state(:,:,:,UAXDENS))*cos(state(:,:,:,UAXPHAS))
+  state(:,:,:,UAXIM) = sqrt(state(:,:,:,UAXDENS))*sin(state(:,:,:,UAXPHAS))
+ 
+end subroutine fort_fdm_fields2
+
+
 subroutine fort_set_mtt(mtt) &
      bind(C, name="fort_set_mtt")
 
