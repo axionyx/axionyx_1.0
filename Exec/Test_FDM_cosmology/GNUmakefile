@@ -1,7 +1,7 @@
 FFTW_DIR ?= /usr/users/cbehren2/local_libs/lib
 
 # AMREX_HOME defines the directory in which we will find all the BoxLib code
-AMREX_HOME ?= ../../../amrex4axionyx
+AMREX_HOME ?= ../../../amrex
 
 HPGMG_DIR ?= ../../Util/hpgmg/finite-volume
 
@@ -24,7 +24,7 @@ USE_HPGMG = FALSE
 USE_FDM = TRUE
 
 PRECISION = DOUBLE
-DEBUG     = TRUE
+DEBUG     = FALSE
 
 # physics
 DIM      = 3
