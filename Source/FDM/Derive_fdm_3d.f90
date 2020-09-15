@@ -203,7 +203,8 @@ end subroutine ca_axphase
 
       integer i, j, k
 
-      if (nc .eq. 3) then !We solve AxDens,AxIm,AxRe 
+      ! if (nc .eq. 3) then !We solve AxDens,AxIm,AxRe 
+      if (.true.) then !We solve AxDens,AxIm,AxRe 
 
       do k = lo(3)-1, hi(3)+1                                                                                                                                                          
          do j = lo(2)-1, hi(2)+1                                                                                                                                                       

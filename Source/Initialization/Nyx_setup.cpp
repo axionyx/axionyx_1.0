@@ -202,7 +202,8 @@ Nyx::hydro_setup()
     AxDens     = 0;
     AxRe       = 1;
     AxIm       = 2;
-    NUM_AX     = 3;
+    AxPhas     = 3;
+    NUM_AX     = 4;
 #endif
 
     // Define NUM_GROW from the f90 module.
@@ -272,7 +273,7 @@ Nyx::hydro_setup()
 #ifdef FDM
         store_in_checkpoint = true;
         desc_lst.addDescriptor(Axion_Type, IndexType::TheCellType(),
-                               StateDescriptor::Point, 0, NUM_AX, interp,
+                               StateDescriptor::Point, 0, NUM_AX, interp, //&quartic_interp,
                                state_data_extrap, store_in_checkpoint);
 #endif
 
@@ -300,6 +301,7 @@ Nyx::hydro_setup()
     set_scalar_bc(bc, phys_bc);  bcs_ax[0] = bc;  name_ax[0] = "AxDens";
     set_scalar_bc(bc, phys_bc);  bcs_ax[1] = bc;  name_ax[1] = "AxRe";
     set_scalar_bc(bc, phys_bc);  bcs_ax[2] = bc;  name_ax[2] = "AxIm";
+    set_scalar_bc(bc, phys_bc);  bcs_ax[3] = bc;  name_ax[3] = "AxPhas";
 #endif
     for (int i = 0; i < NumAdv; ++i)
     {
@@ -422,11 +424,14 @@ Nyx::hydro_setup()
     set_scalar_bc(bc, phys_bc);
     desc_lst.setComponent(Axion_Type, 0, "AxDens", bc,
                           BndryFunc(generic_fill));
-                          set_scalar_bc(bc, phys_bc);
+    set_scalar_bc(bc, phys_bc);
     desc_lst.setComponent(Axion_Type, 1, "AxRe", bc,
                           BndryFunc(generic_fill));
     set_scalar_bc(bc, phys_bc);
     desc_lst.setComponent(Axion_Type, 2, "AxIm", bc,
+                          BndryFunc(generic_fill));
+    set_scalar_bc(bc, phys_bc);
+    desc_lst.setComponent(Axion_Type, 3, "AxPhas", bc,
                           BndryFunc(generic_fill));
     //
     // Phase of axion field ( set to zero when density < 1.0d-5 )
@@ -834,7 +839,8 @@ Nyx::no_hydro_setup()
     AxDens     = 0;
     AxRe       = 1;
     AxIm       = 2;
-    NUM_AX     = 3;
+    AxPhas     = 3;
+    NUM_AX     = 4;
 #endif
     int NDIAG_C = -1;
 
@@ -922,10 +928,9 @@ Nyx::no_hydro_setup()
     }
 
 #ifdef FDM
-    Interpolater* interp = &cell_cons_interp;
     store_in_checkpoint = true;
     desc_lst.addDescriptor(Axion_Type, IndexType::TheCellType(),
-                           StateDescriptor::Point, 0, NUM_AX, interp,
+                           StateDescriptor::Point, 0, NUM_AX, &cell_cons_interp, //&quartic_interp,
                            state_data_extrap, store_in_checkpoint);
 #endif
 
@@ -938,6 +943,9 @@ Nyx::no_hydro_setup()
                              BndryFunc(generic_fill));
        set_scalar_bc(bc, phys_bc);
        desc_lst.setComponent(Axion_Type, 2, "AxIm", bc,
+                             BndryFunc(generic_fill));
+       set_scalar_bc(bc, phys_bc);
+       desc_lst.setComponent(Axion_Type, 3, "AxPhas", bc,
                              BndryFunc(generic_fill));
     //
     // Phase of axion field ( set to zero when density < 1.0d-5 )

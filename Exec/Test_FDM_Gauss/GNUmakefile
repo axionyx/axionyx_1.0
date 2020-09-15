@@ -7,7 +7,7 @@ HPGMG_DIR ?= ../../Util/hpgmg/finite-volume
 TOP = ../..
 
 # compilation options
-COMP    = gnu  # intel
+COMP    = intel  # gnu
 
 USE_MPI = TRUE
 USE_OMP = FALSE
@@ -19,7 +19,7 @@ USE_HPGMG = FALSE
 USE_FDM = TRUE
 
 PRECISION = DOUBLE
-DEBUG     = TRUE
+DEBUG     = FALSE
 
 # physics
 DIM      = 3
@@ -31,8 +31,8 @@ Blocs := .
 
 #some stuff for using fftw3
 
-LIBRARIES += -L$(HOME)/local/lib -lfftw3_mpi -lfftw3
-INCLUDE_LOCATIONS       += $(HOME)/local/include
+LIBRARIES += -L$(HOME)/local/lib -lfftw3_mpi -lfftw3 -L$(FFTW_DIR)
+INCLUDE_LOCATIONS       += $(HOME)/local/include $(FFTW_DIR)/../include
 
 include $(AMREX_HOME)/Src/Extern/SWFFT/Make.package
 INCLUDE_LOCATIONS       += $(AMREX_HOME)/Src/Extern/SWFFT

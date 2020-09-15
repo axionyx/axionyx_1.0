@@ -20,7 +20,7 @@ Nyx::advance_FDM_FD (amrex::Real time,
     // const amrex::Real cur_time     = state[State_Type].curTime();
     // const int  finest_level = parent->finestLevel();
 
-    const amrex::Real a_half = 0.5 * (a_old + a_new);
+    const amrex::Real a_half = get_comoving_a(time);//0.5 * (a_old + a_new);
 
     amrex::MultiFab&  Ax_old = get_old_data(Axion_Type);
     amrex::MultiFab&  Ax_new = get_new_data(Axion_Type);
@@ -30,7 +30,7 @@ Nyx::advance_FDM_FD (amrex::Real time,
     if (verbose && amrex::ParallelDescriptor::IOProcessor() ){
 	std::cout << "Advancing the axions at level " << level <<  "...\n";
     }
-#ifndef NDEBUG
+    //#ifndef NDEBUG
     if (Ax_old.contains_nan(0, Ax_old.nComp(), 0))
     {
         for (int i = 0; i < Ax_old.nComp(); i++)
@@ -42,9 +42,35 @@ Nyx::advance_FDM_FD (amrex::Real time,
             }
         }
     }
+
+    int angold = Ax_old.nGrow();
+
+    for (int i = 0; i < Ax_old.nComp(); i++)
+      {
+	if (Ax_old.contains_nan(i, 1, angold))
+	  {
+	    std::cout << "Testing component i for NaNs: " << i << std::endl;
+	    amrex::Abort("Ax_old has NaNs _in ghostzones_ in this component::advance_FDM_FD()");
+	  }
+      }
+
+
     if (Phi_old.contains_nan(0, 1, 0))
       amrex::Abort("Phi_new has NaNs::advance_FDM_FD()");
-#endif
+
+    angold = Phi_old.nGrow();
+
+    for (int i = 0; i < Phi_old.nComp(); i++)
+      {
+	if (Phi_old.contains_nan(i, 1, angold))
+	  {
+	    std::cout << "Testing component i for NaNs: " << i << std::endl;
+	    amrex::Abort("Phi_old has NaNs _in ghostzones_ in this component::advance_FDM_FD()");
+	  }
+      }
+
+
+    //#endif
 
     const amrex::Real* dx      = geom.CellSize();
     amrex::Real        courno  = -1.0e+200;
@@ -77,7 +103,7 @@ Nyx::advance_FDM_FD (amrex::Real time,
       //       fpi.isValid() && pfpi.isValid();
       //       ++fpi,++pfpi)
       for (amrex::FillPatchIterator 
-	     fpi(*this,  Ax_new, 4, time, Axion_Type,   0, Nyx::NUM_AX),
+	     fpi(*this, Ax_old, 4, time, Axion_Type,   0, Nyx::NUM_AX),
 	     pfpi(*this, Phi_old, 4, time, PhiGrav_Type, 0, 1);
 	     fpi.isValid() && pfpi.isValid();
 	     ++fpi,++pfpi)
@@ -110,6 +136,7 @@ Nyx::advance_FDM_FD (amrex::Real time,
     }
 
     grav_vector.clear();
+    Ax_new.FillBoundary();
 
     amrex::ParallelDescriptor::ReduceRealMax(courno);
 
@@ -122,7 +149,7 @@ Nyx::advance_FDM_FD (amrex::Real time,
         amrex::Abort("CFL is too high at this level -- go back to a checkpoint and restart with lower cfl number");
     }
 
-#ifndef NDEBUG
+    //#ifndef NDEBUG
 
     for (int i = 0; i < Ax_new.nComp(); i++)
     {
@@ -142,7 +169,7 @@ Nyx::advance_FDM_FD (amrex::Real time,
             amrex::Abort("Ax_new has NaNs _in ghostzones_ in this component::advance_FDM_FD()");
         }
     }
-#endif
+    //#endif
 
 
 }

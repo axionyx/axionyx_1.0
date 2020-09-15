@@ -30,6 +30,19 @@ extern "C"
 				   const amrex::Real* dx, const amrex::Real& dt, 
 				   const amrex::Real& a_prev, const amrex::Real& a_cur, const int* do_move);
 
+    void update_fdm_particles_phase(const int* np, void* particles,
+				  const amrex::Real* accel, const int* accel_lo, const int* accel_hi,
+				  const amrex::Real* prob_lo, 
+				  const amrex::Real* dx, const amrex::Real& dt, 
+				  const amrex::Real& a_prev, const amrex::Real& a_cur, const int* do_move);
+
+    void update_gaussian_beams_phase(const int* np, void* particles,
+				   const amrex::Real* accel, const int* accel_lo, const int* accel_hi,
+				   const amrex::Real* phi, const int* phi_lo, const int* phi_hi,
+				   const amrex::Real* prob_lo, 
+				   const amrex::Real* dx, const amrex::Real& dt, 
+				   const amrex::Real& a_prev, const amrex::Real& a_cur, const int* do_move);
+
   void divergence( const amrex::Real* div, const amrex::Real* vel, const int* vel_lo, const int* vel_hi, const amrex::Real* dx);
 
   void initpart(const int* level, const double* time,
@@ -55,6 +68,8 @@ extern "C"
   void fort_set_gamma(const amrex::Real& gamma_fdm);
   void fort_set_meandens(const amrex::Real& meandens);
   void fort_set_a(const amrex::Real& a);
+  void fort_set_ratio(const amrex::Real& ratio_fdm);
+  void fort_set_fdm_halo_pos(const amrex::Real& halo_pos_x, const amrex::Real& fdm_halo_pos_y, const amrex::Real& fdm_halo_pos_z);
 
 #ifdef __cplusplus
 }

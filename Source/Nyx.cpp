@@ -49,6 +49,9 @@ using std::string;
 
 #ifdef FDM
 #include "fdm_F.H"
+#include "fdm.H"
+#include <AMReX_MultiFabUtil.H>
+#include <AMReX_MultiFabUtil_C.H>
 #endif
 
 using namespace amrex;
@@ -106,6 +109,7 @@ int Nyx::Zmom = -1;
 int Nyx::AxDens = -1;
 int Nyx::AxRe   = -1;
 int Nyx::AxIm   = -1;
+int Nyx::AxPhas = -1;
 int Nyx::NUM_AX = -1;
 Real Nyx::m_tt = 2.5;
 Real Nyx::hbaroverm = 0.01917152 / m_tt;
@@ -114,16 +118,21 @@ int Nyx::FDlevel = 0;
 int Nyx::GBlevel = 1;
 int Nyx::NBlevel = 2;
 int Nyx::PSlevel = 3;
+int Nyx::CWlevel = 4;
 bool Nyx::partlevel = false;
 Vector<int> Nyx::levelmethod;
 Real Nyx::theta_fdm = 1.0;
 Real Nyx::sigma_fdm = 1.0;
 Real Nyx::gamma_fdm = 1.0;
 Real Nyx::alpha_fdm = 1.0;
-int  Nyx::wkb_approx = 1;
+Real Nyx::ratio_fdm = 1.0;
+int  Nyx::wkb_approx = 0;
+int  Nyx::phase_approx = 0;
 Real Nyx::beam_cfl = 0.2;
 Real Nyx::vonNeumann_dt = 0.0;
 int  Nyx::order = 6;
+bool Nyx::fdm_halo = false;
+Vector<Real> Nyx::fdm_halo_pos;
 #endif
 int  Nyx::stencil_deposition_width = 1;
 
@@ -300,7 +309,10 @@ Nyx::read_params ()
     gamma_fdm = 0.5/sigma_fdm/sigma_fdm;
     fort_set_gamma(gamma_fdm);
     pp_nyx.query("alpha_fdm", alpha_fdm);
+    pp_nyx.query("ratio_fdm", ratio_fdm);
+    fort_set_ratio(ratio_fdm);
     pp_nyx.query("wkb_approx", wkb_approx);
+    pp_nyx.query("phase_approx", phase_approx);
     pp_nyx.query("order", order);
     pp_nyx.query("beam_cfl", beam_cfl);
     ParmParse ppp("particles");
@@ -318,6 +330,17 @@ Nyx::read_params ()
       }
     else
       amrex::Abort("Need to specify levelmethod for FDM routines");
+    pp_nyx.query("fdm_halo", fdm_halo);
+    if(fdm_halo)
+      if (pp_nyx.contains("fdm_halo_pos"))
+	{
+	  int num_fhp = pp_nyx.countval("fdm_halo_pos");
+	  fdm_halo_pos.resize(num_fhp);
+	  pp_nyx.queryarr("fdm_halo_pos",fdm_halo_pos,0,num_fhp);
+	  fort_set_fdm_halo_pos(fdm_halo_pos[0],fdm_halo_pos[1],fdm_halo_pos[2]);
+	}
+      else
+	amrex::Abort("If fdm_halo its fdm_halo_pos is required");
 #endif
     pp_nyx.query("dump_old", dump_old);
 
@@ -1442,6 +1465,10 @@ Nyx::post_timestep (int iteration)
 	  theFDMwkbPC()->Redistribute(level,
 				   theFDMwkbPC()->finestLevel(),
 				   iteration);
+	if(theFDMphasePC())
+	  theFDMphasePC()->Redistribute(level,
+				   theFDMphasePC()->finestLevel(),
+				   iteration);
 #endif
     }
 
@@ -1738,6 +1765,50 @@ Nyx::postCoarseTimeStep (Real cumtime)
 #ifdef AGN
    halo_find(parent->dtLevel(level));
 #endif 
+
+#ifdef FDM
+   if(fdm_halo && false){
+     IntVect maxdist(10);
+     for(int lev=parent->finestLevel();lev>=0;lev--){
+       MultiFab& Ax_new = get_level(lev).get_new_data(Axion_Type);
+       const Geometry& geomlev = parent->Geom(lev);
+       const Real* dx = geomlev.CellSize();
+       IntVect fhp;
+       AMREX_D_TERM(fhp[0]=floor((fdm_halo_pos[0] - geomlev.ProbLo(0))/dx[0]);,
+		    fhp[1]=floor((fdm_halo_pos[1] - geomlev.ProbLo(1))/dx[1]);,
+		    fhp[2]=floor((fdm_halo_pos[2] - geomlev.ProbLo(2))/dx[2]););
+       Box b = Box(fhp-maxdist, fhp+maxdist);
+       Real densmax = Ax_new.max(b,Nyx::AxDens);
+       if(densmax>std::numeric_limits<Real>::lowest()){
+	 fhp = Ax_new.maxIndex(b,Nyx::AxDens);
+	 fdm_halo_pos[0] = (fhp[0]+0.5)*dx[0]+geomlev.ProbLo(0);
+	 fdm_halo_pos[1] = (fhp[1]+0.5)*dx[1]+geomlev.ProbLo(1);
+	 fdm_halo_pos[2] = (fhp[2]+0.5)*dx[2]+geomlev.ProbLo(2);
+	 fort_set_fdm_halo_pos(fdm_halo_pos[0],fdm_halo_pos[1],fdm_halo_pos[2]);
+	 break;
+       }}}
+
+   if(fdm_halo){
+     IntVect maxdist(4);
+     for(int lev=parent->finestLevel();lev>=0;lev--){
+       MultiFab& phi = get_level(lev).get_new_data(PhiGrav_Type);
+       const Geometry& geomlev = parent->Geom(lev);
+       const Real* dx = geomlev.CellSize();
+       IntVect fhp;
+       AMREX_D_TERM(fhp[0]=floor((fdm_halo_pos[0] - geomlev.ProbLo(0))/dx[0]);,
+		    fhp[1]=floor((fdm_halo_pos[1] - geomlev.ProbLo(1))/dx[1]);,
+		    fhp[2]=floor((fdm_halo_pos[2] - geomlev.ProbLo(2))/dx[2]););
+       Box b = Box(fhp-maxdist, fhp+maxdist);
+       Real phimax = phi.max(b,0);
+       if(phimax>std::numeric_limits<Real>::lowest()){
+	 fhp = phi.maxIndex(b,0);
+	 fdm_halo_pos[0] = (fhp[0]+0.5)*dx[0]+geomlev.ProbLo(0);
+	 fdm_halo_pos[1] = (fhp[1]+0.5)*dx[1]+geomlev.ProbLo(1);
+	 fdm_halo_pos[2] = (fhp[2]+0.5)*dx[2]+geomlev.ProbLo(2);
+	 fort_set_fdm_halo_pos(fdm_halo_pos[0],fdm_halo_pos[1],fdm_halo_pos[2]);
+	 break;
+       }}}
+#endif
 
 #ifdef GIMLET
    LyA_statistics();
@@ -2644,6 +2715,9 @@ Nyx::CreateLevelDirectory (const std::string &dir)
       }
       if(Nyx::theFDMPC()) {
         Nyx::theFDMPC()->SetLevelDirectoriesCreated(true);
+      }
+      if(Nyx::theFDMphasePC()) {
+        Nyx::theFDMphasePC()->SetLevelDirectoriesCreated(true);
       }
 #endif
     }

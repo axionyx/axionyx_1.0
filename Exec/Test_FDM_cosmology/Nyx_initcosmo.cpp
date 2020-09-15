@@ -352,7 +352,7 @@ void Nyx::initcosmo()
     //Nyx::theDMPC()->InitCosmo(mf, vel_fac, n_part, particleMass, part_dx, part_vx);
 
 #ifdef FDM
-     if(partlevel && level==(parent->initialBaLevels())){                                                                                                                                          
+     if(level==(parent->initialBaLevels())){                                                                                                                                          
       
       Vector<std::unique_ptr<MultiFab> > particle_mf;
       Vector<std::unique_ptr<MultiFab> > div(parent->initialBaLevels()+1);
@@ -396,6 +396,7 @@ void Nyx::initcosmo()
       gravity->solve_with_MLMG(0, parent->initialBaLevels(), phase, amrex::GetVecOfConstPtrs(div),
     		      grad_phase_aa, crse_bcdata, rel_eps, abs_eps);
 
+      if(partlevel){
       for(int lev=0;lev<=parent->initialBaLevels();lev++){
     	BoxArray baWhereNotfdm;
     	if (lev < parent->initialBaLevels())
@@ -408,16 +409,47 @@ void Nyx::initcosmo()
 
     	if(wkb_approx)
     	  Nyx::theFDMwkbPC()->InitCosmo1ppcMultiLevel(particle_mf, phase, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
-    	else if(phase_approx)
-    	  Nyx::theFDMphasePC()->InitCosmo1ppcMultiLevel(particle_mf, phase, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
     	else
-	  amrex::Abort("FDM cosmology only works with wkb_approx=1 or phase_approx=1!");
+	  amrex::Abort("FDM cosmology only works with wkb_approx=1!");
 	// Nyx::theFDMPC()->InitCosmo1ppcMultiLevel(particle_mf, phase, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
-      }
+      }}
+
+      for(int lev=0;lev<=parent->initialBaLevels();lev++){
+      MultiFab& Ax_new = get_level(lev).get_new_data(Axion_Type);
+      Ax_new.setVal(0.);
+
+      Ax_new.ParallelCopy(*(particle_mf[lev]), 0, Nyx::AxDens, 1, 0, Ax_new.nGrow(),parent->Geom(level).periodicity(), FabArrayBase::COPY);      
+      Ax_new.ParallelCopy(*(phase[lev]), 0, Nyx::AxPhas, 1, 0, Ax_new.nGrow(),parent->Geom(level).periodicity(), FabArrayBase::COPY);      
+
+      for (MFIter mfi(Ax_new,false); mfi.isValid(); ++mfi){
+	Array4<Real> const& arr = Ax_new[mfi].array();
+	// 	Array4<Real> const& axold = Ax_old[mfi].array();
+	const Box& bx = mfi.validbox();
+	const Dim3 lo = amrex::lbound(bx);
+	const Dim3 hi = amrex::ubound(bx);
+	const Dim3 w ={hi.x-lo.x+1,hi.y-lo.y+1,hi.z-lo.z+1};
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+	for(size_t i=0; i<(size_t)w.x; i++) {
+	  for(size_t j=0; j<(size_t)w.y; j++) {
+	    for(size_t k=0; k<(size_t)w.z; k++) {
+	      //	      size_t local_indx_threaded = (size_t)w.y*(size_t)w.z*i+(size_t)w.z*j+k;
+	      //complex_t temp = a[local_indx_threaded];
+ 	      arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxRe)=std::sqrt(arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxDens))*std::cos(arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas)/hbaroverm);
+	      arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxIm)=std::sqrt(arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxDens))*std::sin(arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas)/hbaroverm);
+	      //	      arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxDens)=std::real(temp)*std::real(temp)+std::imag(temp)*std::imag(temp);
+	      //arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas) = std::arg(temp);
+	    }}}
+      }}
+
+      MultiFab& Ax_new = get_new_data(Axion_Type);
+      Ax_new.FillBoundary(geom.periodicity());
+
     }
 
-    MultiFab& Ax_new = get_new_data(Axion_Type);
-    Ax_new.setVal(0.);
+     //MultiFab& Ax_new = get_new_data(Axion_Type);
+     //Ax_new.setVal(0.);
 
 
     // if(partlevel){

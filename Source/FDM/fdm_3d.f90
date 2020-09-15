@@ -83,7 +83,9 @@ subroutine deposit_fdm_particles_wkb(particles, np, state_real, &
 
   do n = 1, np
 
-     amp = cmplx(particles(n)%amp(1),particles(n)%amp(2))
+!     if(particles(n)%amp(1)*particles(n)%amp(1)+particles(n)%amp(2)*particles(n)%amp(2).lt.1e+21) then
+
+     amp = (1.1d8,0.0) !cmplx(particles(n)%amp(1),particles(n)%amp(2))
      rad = ceiling(theta_fdm/sqrt(2.0*particles(n)%width)/dx(1))
      pos = (particles(n)%pos - plo)/dx + 0.5d0
 
@@ -121,6 +123,8 @@ subroutine deposit_fdm_particles_wkb(particles, np, state_real, &
            enddo
         endif
      enddo
+
+!     endif
      
   enddo
 
@@ -128,7 +132,7 @@ end subroutine deposit_fdm_particles_wkb
 
 subroutine fort_fdm_fields(state, state_l1,state_l2,state_l3,state_h1,state_h2,state_h3)
         
-  use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM
+  use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM, UAXPHAS
 
   implicit none
   
@@ -136,8 +140,25 @@ subroutine fort_fdm_fields(state, state_l1,state_l2,state_l3,state_h1,state_h2,s
   double precision state( state_l1:state_h1, state_l2:state_h2, state_l3:state_h3, NAXVAR)
   
   state(:,:,:,UAXDENS) = state(:,:,:,UAXRE)**2+state(:,:,:,UAXIM)**2
+  state(:,:,:,UAXPHAS) = atan2(state(:,:,:,UAXIM),state(:,:,:,UAXRE))
 
 end subroutine fort_fdm_fields
+
+subroutine fort_fdm_fields2(state, state_l1,state_l2,state_l3,state_h1,state_h2,state_h3)
+        
+  use meth_params_module, only : NAXVAR, UAXDENS, UAXRE, UAXIM, UAXPHAS
+
+  implicit none
+  
+  integer          state_l1,state_l2,state_l3,state_h1,state_h2,state_h3
+  double precision state( state_l1:state_h1, state_l2:state_h2, state_l3:state_h3, NAXVAR)
+  
+  state(:,:,:,UAXPHAS) = atan2(state(:,:,:,UAXIM),state(:,:,:,UAXRE))
+  state(:,:,:,UAXRE) = sqrt(state(:,:,:,UAXDENS))*cos(state(:,:,:,UAXPHAS))
+  state(:,:,:,UAXIM) = sqrt(state(:,:,:,UAXDENS))*sin(state(:,:,:,UAXPHAS))
+ 
+end subroutine fort_fdm_fields2
+
 
 subroutine fort_set_mtt(mtt) &
      bind(C, name="fort_set_mtt")
@@ -222,3 +243,29 @@ subroutine fort_set_a(scalefactor) &
   a = scalefactor
   
 end subroutine fort_set_a
+
+subroutine fort_set_ratio(ratio) &
+     bind(C, name="fort_set_ratio")
+  
+  use amrex_fort_module, only : rt => amrex_real
+  use fdm_params_module, only: ratio_fdm
+  
+  real(rt), intent(in) :: ratio
+  
+  ratio_fdm = ratio
+  
+end subroutine fort_set_ratio
+
+subroutine fort_set_fdm_halo_pos(pos_x, pos_y, pos_z) &
+     bind(C, name="fort_set_fdm_halo_pos")
+  
+  use amrex_fort_module, only : rt => amrex_real
+  use fdm_params_module, only: halo_pos_x, halo_pos_y, halo_pos_z
+  
+  real(rt), intent(in) :: pos_x, pos_y, pos_z
+  
+  halo_pos_x = pos_x
+  halo_pos_y = pos_y
+  halo_pos_z = pos_z
+  
+end subroutine fort_set_fdm_halo_pos

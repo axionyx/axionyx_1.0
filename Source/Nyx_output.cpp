@@ -191,6 +191,11 @@ Nyx::writePlotFile (const std::string& dir,
                     derive_names.push_back(it->name());
                     num_derive++;
 		  }
+                if (Nyx::theFDMphasePC())
+		  {
+                    derive_names.push_back(it->name());
+                    num_derive++;
+		  }
 #endif
             } else if (it->name() == "Rank") {
                 derive_names.push_back(it->name());
@@ -608,6 +613,11 @@ Nyx::particle_plot_file (const std::string& dir)
           {
             Nyx::theFDMwkbPC()->WriteNyxPlotFile(dir, fdm_plt_particle_file);
           }
+
+        if (Nyx::theFDMphasePC())
+          {
+            Nyx::theFDMphasePC()->WriteNyxPlotFile(dir, fdm_plt_particle_file);
+          }
 #endif
 
 #ifdef NO_HYDRO
@@ -691,6 +701,19 @@ Nyx::particle_plot_file (const std::string& dir)
             File << particle_plotfile_format << '\n';
             File.close();
         }
+
+        if (Nyx::theFDMphasePC() && ParallelDescriptor::IOProcessor())
+        {
+            std::string FileName = dir + "/" + fdm_plt_particle_file + "/precision";
+            std::ofstream File;
+            File.open(FileName.c_str(), std::ios::out|std::ios::trunc);
+            if ( ! File.good()) {
+                amrex::FileOpenFailed(FileName);
+	    }
+            File.precision(15);
+            File << particle_plotfile_format << '\n';
+            File.close();
+        }
 #endif
     }
 }
@@ -720,6 +743,11 @@ Nyx::particle_check_point (const std::string& dir)
       if (Nyx::theFDMwkbPC())
         {
           Nyx::theFDMwkbPC()->NyxCheckpoint(dir, fdm_chk_particle_file);
+        }
+
+      if (Nyx::theFDMphasePC())
+        {
+          Nyx::theFDMphasePC()->NyxCheckpoint(dir, fdm_chk_particle_file);
         }
 #endif
 
@@ -918,6 +946,9 @@ Nyx::checkPoint (const std::string& dir,
     if(Nyx::theFDMwkbPC()) {
       Nyx::theFDMwkbPC()->SetLevelDirectoriesCreated(false);
     }
+    if(Nyx::theFDMphasePC()) {
+      Nyx::theFDMphasePC()->SetLevelDirectoriesCreated(false);
+    }
 #endif
 
 }
@@ -940,6 +971,9 @@ Nyx::checkPointPre (const std::string& dir,
   }
   if(Nyx::theFDMwkbPC()) {
     Nyx::theFDMwkbPC()->CheckpointPre();
+  }
+  if(Nyx::theFDMphasePC()) {
+    Nyx::theFDMphasePC()->CheckpointPre();
   }
 #endif
 
@@ -964,6 +998,9 @@ Nyx::checkPointPost (const std::string& dir,
   }
   if(Nyx::theFDMwkbPC()) {
     Nyx::theFDMwkbPC()->CheckpointPost();
+  }
+  if(Nyx::theFDMphasePC()) {
+    Nyx::theFDMphasePC()->CheckpointPost();
   }
 #endif
 }

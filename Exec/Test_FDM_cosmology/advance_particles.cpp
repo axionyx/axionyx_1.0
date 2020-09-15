@@ -414,7 +414,7 @@ Nyx::advance_particles_only (Real time,
     for (int lev = level; lev <= finest_level_to_advance; lev++){
 
       //Only construct wavefunction from Gaussian beams on GBlevels
-      if(levelmethod[lev]==GBlevel){
+      if(levelmethod[lev]==GBlevel && parent->levelSteps(lev)%1024==1){
 
       amrex::Print() << "levelSteps " << lev << " "<< parent->levelSteps(lev) << '\n';
 

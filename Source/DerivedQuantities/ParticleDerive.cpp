@@ -58,6 +58,15 @@ Nyx::particle_derive (const std::string& name, Real time, int ngrow)
 	MultiFab::Copy(*derive_dat, temp_dat, 0, 0, 1, 0);                                                                                                                                                       
         return derive_dat;                                                                                                                                                                                       
       }
+    else if (Nyx::theFDMphasePC() && name == "fdm_particle_count")                                                                                                                                                
+      {                                                                                                                                                                                                          
+	std::unique_ptr<MultiFab> derive_dat(new MultiFab(grids, dmap, 1, 0));                                                                                                          
+        MultiFab temp_dat(grids, dmap, 1, 0);                                                                                                                                                               
+        temp_dat.setVal(0);                                                                                                                                                                                      
+	Nyx::theFDMphasePC()->Increment(temp_dat, level);                                                                                                                                                         
+	MultiFab::Copy(*derive_dat, temp_dat, 0, 0, 1, 0);                                                                                                                                                       
+        return derive_dat;                                                                                                                                                                                       
+      }
 #endif
     else if (Nyx::theDMPC() && name == "total_particle_count")
     {

@@ -12,18 +12,19 @@ TOP = ../..
 COMP    = intel #gnu  # intel
 
 USE_MPI = TRUE
-USE_OMP = TRUE
+USE_OMP = FALSE
 
 # Analysis
 REEBER = FALSE
+
+PROFILE=FALSE
+TINY_PROFILE=TRUE
 
 USE_HPGMG = FALSE
 USE_FDM = TRUE
 
 PRECISION = DOUBLE
 DEBUG     = FALSE
-
-#NO_HYDRO = TRUE
 
 # physics
 DIM      = 3
