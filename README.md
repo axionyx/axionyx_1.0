@@ -18,7 +18,33 @@ A detailed documentation is not available yet. But you can find an API reference
 
 # Installation
 
-clone both the axionyx and the amrex4axionyx repo. axionyx expects amrex to live in ../amrex. You will need FFTW3 for axionyx to compile. Try building e.g. Exec/Test_FDM_lin_growth by running make. Adapt the GNUmakefile as needed
+clone both the axionyx and the amrex4axionyx repo. axionyx expects amrex to live in ../amrex. You will need FFTW3 for axionyx to compile. Try building e.g. Exec/Test_FDM_lin_growth by running make. Adapt the GNUmakefile as needed.
+
+## Installation in 5 minutes
+
+Clone both repositories and switch branches
+
+    git clone https://github.com/axionyx/amrex4axionyx_1.0.git amrex
+    git clone https://github.com/axionyx/axionyx_1.0.git
+    cd axionyx_1.0
+    git checkout mixed_dm
+
+Configure your compiler. You can do so by editing the ´´GNUMakefile´´ in any of the Exec/Test_FDM_* problems. To tell axionyx where to find FFTW3, you might want to set 
+
+    export FFTW_DIR=path/to/fftw/lib
+To compile one of the test problems run
+   
+    cd Exec/Test_FDM_condensation
+    make
+And to do a quick run, you can use  
+  
+    mpirun -np 1 ./Nyx.3d.[...] inputs
+
+
+
+
+    
+
 
 # File structure
 
