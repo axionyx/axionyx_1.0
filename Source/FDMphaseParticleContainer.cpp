@@ -576,7 +576,7 @@ FDMphaseParticleContainer::DepositFDMParticles(MultiFab& mf_real, MultiFab& mf_i
 }
 
 void                                                                                                                                                                                                            
-FDMphaseParticleContainer::DepositFDMParticlesCWA(MultiFab& mf_real, MultiFab& mf_imag, int lev, amrex::Real a, amrex::Real theta_fdm, amrex::Real hbaroverm) const
+FDMphaseParticleContainer::DepositFDMParticlesCWA(MultiFab& mf_real, MultiFab& mf_imag, int lev, amrex::Real a, amrex::Real theta_fdm, amrex::Real hbaroverm) const // theta_fdm = xi_cwa
 {
   BL_PROFILE("FDMphaseParticleContainer::DepositFDMParticles()");
 
@@ -628,6 +628,7 @@ FDMphaseParticleContainer::DepositFDMParticlesCWA(MultiFab& mf_real, MultiFab& m
   const Geometry& gm          = Geom(lev);
   const Real*     plo         = gm.ProbLo();
   const Real*     dx          = gm.CellSize();
+  const Real pi = 4 * std::atan(1.0);
    
   for (MyConstParIter pti(*this, lev); pti.isValid(); ++pti) {
     const auto& particles = pti.GetArrayOfStructs();
@@ -645,12 +646,13 @@ FDMphaseParticleContainer::DepositFDMParticlesCWA(MultiFab& mf_real, MultiFab& m
       {  
       	const auto& p = pstruct[i];
 	//	if(p.rdata(0)==0.0){
-	Real amp = 1.0;
-	Real width = 1.0;
+	Real amp = 3.0/(pi*theta_fdm*theta_fdm*theta_fdm);
+	// Real width = 1.0; // not required for CWA
 	  //	std::complex<Real> amp(p.rdata(5),p.rdata(6));
       	std::complex<Real> phi(0.0,0.0);
       	std::complex<Real> iimag(0.0,1.0);
-      	int rad = std::ceil(theta_fdm/sqrt(2.0*width)/dx[0]);
+      	// int rad = std::ceil(theta_fdm/sqrt(2.0*width)/dx[0]); 
+	int rad = std::ceil(theta_fdm); // use xi_cwa as rad for loops
       	Real kernelsize;
       	Real lx = (p.pos(0) - plo[0])/dx[0] + 0.5;
       	Real ly = (p.pos(1) - plo[1])/dx[1] + 0.5;
@@ -664,13 +666,13 @@ FDMphaseParticleContainer::DepositFDMParticlesCWA(MultiFab& mf_real, MultiFab& m
       	  for (int jj=-rad; jj<=rad; jj++)
       	    for (int kk=-rad; kk<=rad; kk++)
       	      {
-      		kernelsize = ((static_cast<Real>(xint+ii)+1.0-lx)*dx[0]*(static_cast<Real>(xint+ii)+1.0-lx)*dx[0]
+      		kernelsize = ((static_cast<Real>(xint+ii)+1.0-lx)*dx[0]*(static_cast<Real>(xint+ii)+1.0-lx)*dx[0] // distance squared to particle
       			      +(static_cast<Real>(yint+jj)+1.0-ly)*dx[1]*(static_cast<Real>(yint+jj)+1.0-ly)*dx[1]
-      			      +(static_cast<Real>(zint+kk)+1.0-lz)*dx[2]*(static_cast<Real>(zint+kk)+1.0-lz)*dx[2])*width;
+      			      +(static_cast<Real>(zint+kk)+1.0-lz)*dx[2]*(static_cast<Real>(zint+kk)+1.0-lz)*dx[2]); 
 		
-      		if (kernelsize <= (theta_fdm*theta_fdm/2.0)){
+      		if (kernelsize <= (theta_fdm*theta_fdm*dx[0]*dx[0])){
 		  
-      		  phi = amp*std::exp(-kernelsize)*std::exp(iimag*(p.rdata(4)
+      		  phi = std::sqrt(p.rdata(0)*amp*(1.0 - std::sqrt(kernelsize)/(theta_fdm*dx[0])))*std::exp(iimag*(p.rdata(4)
       								  +p.rdata(1)*a*(static_cast<Real>(xint+ii)+1.0-lx)*dx[0]
       								  +p.rdata(2)*a*(static_cast<Real>(yint+jj)+1.0-ly)*dx[1]
       								  +p.rdata(3)*a*(static_cast<Real>(zint+kk)+1.0-lz)*dx[2] )/hbaroverm);
