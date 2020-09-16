@@ -420,6 +420,7 @@ Nyx::advance_particles_only (Real time,
 
       //Define neccessary number of ghost cells                                                                                                                                                                 
       int ng = parent->nCycle(lev)+2.0*ceil(Nyx::sigma_fdm*Nyx::theta_fdm/get_level(lev).Geom().CellSize()[0]);
+      
 
       //Initialize MultiFabs                                                                                                                                                                                    
       MultiFab& Ax_new = get_level(lev).get_new_data(Axion_Type);
@@ -472,7 +473,8 @@ Nyx::advance_particles_only (Real time,
       amrex::Print() << "levelSteps " << lev << " "<< parent->levelSteps(lev) << '\n';
 
       //Define neccessary number of ghost cells                                                                                                                                                                 
-      int ng = parent->nCycle(lev)+2.0*ceil(Nyx::sigma_fdm*Nyx::theta_fdm/get_level(lev).Geom().CellSize()[0]);
+      //int ng = parent->nCycle(lev)+2.0*ceil(Nyx::sigma_fdm*Nyx::theta_fdm/get_level(lev).Geom().CellSize()[0]);
+      int ng = parent->nCycle(lev) + 2.0*ceil(Nyx::theta_fdm);
 
       //Initialize MultiFabs                                                                                                                                                                                    
       MultiFab& Ax_new = get_level(lev).get_new_data(Axion_Type);
@@ -481,8 +483,10 @@ Nyx::advance_particles_only (Real time,
       fdmreal.setVal(0.);
       MultiFab fdmimag(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng);
       fdmimag.setVal(0.);
+      MultiFab fdmdens(Ax_new.boxArray(), Ax_new.DistributionMap(), 1, ng); // multifab for N-body density
+      fdmdens.setVal(0.); 
 
-      //Deposit Gaussian Beams                                                                                                                                                                                   
+      //Deposit CWA                                                                                                                                         
       if(Nyx::theFDMphasePC())
       	Nyx::theFDMphasePC()->DepositFDMParticlesCWA(fdmreal,fdmimag,lev,a_new,Nyx::theta_fdm,hbaroverm);
       if(Nyx::theGhostFDMphasePC())
@@ -490,16 +494,35 @@ Nyx::advance_particles_only (Real time,
       if(Nyx::theVirtFDMphasePC())
       	Nyx::theVirtFDMphasePC()->DepositFDMParticlesCWA(fdmreal,fdmimag,lev,a_new,Nyx::theta_fdm,hbaroverm);
 
-      //Update real part in FDM state                                                                                                                                                                           
+      // Assign N-body density and add it to Ax_new
+
+      if(Nyx::theFDMphasePC()){
+	Nyx::theFDMphasePC()->AssignDensitySingleLevel(fdmdens,lev); 
+	MultiFab::Add(Ax_new,fdmdens, 0, Nyx::AxDens, 1, 0);
+      }
+      if(Nyx::theGhostFDMphasePC()){
+	Nyx::theGhostFDMphasePC()->AssignDensitySingleLevel(fdmdens,lev);
+	MultiFab::Add(Ax_new,fdmdens, 0, Nyx::AxDens, 1, 0);
+      }
+      if(Nyx::theVirtFDMphasePC()){
+	Nyx::theVirtFDMphasePC()->AssignDensitySingleLevel(fdmdens,lev);
+	MultiFab::Add(Ax_new,fdmdens, 0, Nyx::AxDens, 1, 0);
+      }
+
+      Ax_new.FillBoundary(Nyx::AxDens, 1, parent->Geom(lev).periodicity());
+
+
+      //Update real part in FDM state                                                                                                                                                    
       Ax_new.ParallelCopy(fdmreal, 0, Nyx::AxRe, 1, fdmreal.nGrow(),
                           Ax_new.nGrow(), parent->Geom(lev).periodicity(),FabArrayBase::ADD);
 
-      //Update imaginary part in FDM state                                                                                                                                                                      
+      //Update imaginary part in FDM state                                                                                                                                                         
       Ax_new.ParallelCopy(fdmimag, 0, Nyx::AxIm, 1, fdmimag.nGrow(),
                           Ax_new.nGrow(), parent->Geom(lev).periodicity(),FabArrayBase::ADD);
 
 
-      //Update density in FDM state                                                                                                                                                                            
+      //Update density in FDM state 
+
       AmrLevel* amrlev = &parent->getLevel(lev);
       for (amrex::FillPatchIterator fpi(*amrlev,  Ax_new); fpi.isValid(); ++fpi)
         {
