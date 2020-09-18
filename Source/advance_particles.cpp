@@ -281,8 +281,28 @@ Nyx::advance_particles_only (Real time,
 		  Nyx::theFDMphasePC()->moveKickDriftFDM(Phi_old, grav_n_grow, grav_vec_old, lev, dt, a_old, a_half,iteration);
 
 		//Need to do this only when reconstructing the density from GBs on this level.
-		if(levelmethod[lev]==GBlevel || levelmethod[lev]==CWlevel){
+		if(levelmethod[lev]==GBlevel){
 		  int ghost_width_fdm = parent->nCycle(lev)+ceil(Nyx::sigma_fdm*Nyx::theta_fdm/get_level(lev).Geom().CellSize()[0]);
+		  int where_width_fdm =  ghost_width_fdm + (1-iteration)  - 1;
+		  int grav_n_grow_fdm = ghost_width_fdm + stencil_interpolation_width + 1;
+		  MultiFab grav_vec_old_fdm(ba, dm, BL_SPACEDIM, grav_n_grow_fdm);
+		  get_level(lev).gravity->get_old_grav_vector(lev, grav_vec_old_fdm, prev_time);
+
+		  if(Nyx::theGhostFDMPC())
+		    Nyx::theGhostFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow_fdm, grav_vec_old_fdm, lev, dt, a_old, a_half,where_width_fdm);
+		  if(Nyx::theVirtFDMPC())
+		    Nyx::theVirtFDMPC()->moveKickDriftFDM(Phi_old, grav_n_grow_fdm, grav_vec_old_fdm, lev, dt, a_old, a_half,iteration);
+		  if(Nyx::theGhostFDMwkbPC())
+		    Nyx::theGhostFDMwkbPC()->moveKickDriftFDM(Phi_old, grav_n_grow_fdm, grav_vec_old_fdm, lev, dt, a_old, a_half,where_width_fdm);
+		  if(Nyx::theVirtFDMwkbPC())
+		    Nyx::theVirtFDMwkbPC()->moveKickDriftFDM(Phi_old, grav_n_grow_fdm, grav_vec_old_fdm, lev, dt, a_old, a_half,iteration);
+		  if(Nyx::theGhostFDMphasePC())
+		    Nyx::theGhostFDMphasePC()->moveKickDriftFDM(Phi_old, grav_n_grow_fdm, grav_vec_old_fdm, lev, dt, a_old, a_half,where_width_fdm);
+		  if(Nyx::theVirtFDMphasePC())
+		    Nyx::theVirtFDMphasePC()->moveKickDriftFDM(Phi_old, grav_n_grow_fdm, grav_vec_old_fdm, lev, dt, a_old, a_half,iteration);
+		}
+		else if (levelmethod[lev]==CWlevel){
+		  int ghost_width_fdm = parent->nCycle(lev)+ceil(Nyx::theta_fdm);
 		  int where_width_fdm =  ghost_width_fdm + (1-iteration)  - 1;
 		  int grav_n_grow_fdm = ghost_width_fdm + stencil_interpolation_width + 1;
 		  MultiFab grav_vec_old_fdm(ba, dm, BL_SPACEDIM, grav_n_grow_fdm);
@@ -384,8 +404,28 @@ Nyx::advance_particles_only (Real time,
 		  Nyx::theFDMphasePC()->moveKickFDM(Phi_new, grav_n_grow, grav_vec_new, lev, dt, a_new, a_half);
 
 		//Need to do this only when reconstructing the density from GBs on this level.
-		if(levelmethod[lev]==GBlevel || levelmethod[lev]==CWlevel){
+		if(levelmethod[lev]==GBlevel){
 		  int ghost_width_fdm = parent->nCycle(lev)+ceil(Nyx::sigma_fdm*Nyx::theta_fdm/get_level(lev).Geom().CellSize()[0]);
+		  int where_width_fdm =  ghost_width_fdm + (1-iteration)  - 1;
+		  int grav_n_grow_fdm = ghost_width_fdm + stencil_interpolation_width + 1;
+		  MultiFab grav_vec_new_fdm(ba, dm, BL_SPACEDIM, grav_n_grow_fdm);
+		  get_level(lev).gravity->get_new_grav_vector(lev, grav_vec_new_fdm, cur_time);
+
+		  if(Nyx::theGhostFDMPC())
+		    Nyx::theGhostFDMPC()->moveKickFDM(Phi_new, grav_n_grow_fdm, grav_vec_new_fdm, lev, dt, a_new, a_half);
+		  if(Nyx::theVirtFDMPC())
+		    Nyx::theVirtFDMPC()->moveKickFDM(Phi_new, grav_n_grow_fdm, grav_vec_new_fdm, lev, dt, a_new, a_half);
+		  if(Nyx::theGhostFDMwkbPC())
+		    Nyx::theGhostFDMwkbPC()->moveKickFDM(Phi_new, grav_n_grow_fdm, grav_vec_new_fdm, lev, dt, a_new, a_half);
+		  if(Nyx::theVirtFDMwkbPC())
+		    Nyx::theVirtFDMwkbPC()->moveKickFDM(Phi_new, grav_n_grow_fdm, grav_vec_new_fdm, lev, dt, a_new, a_half);
+		  if(Nyx::theGhostFDMphasePC())
+		    Nyx::theGhostFDMphasePC()->moveKickFDM(Phi_new, grav_n_grow_fdm, grav_vec_new_fdm, lev, dt, a_new, a_half);
+		  if(Nyx::theVirtFDMphasePC())
+		    Nyx::theVirtFDMphasePC()->moveKickFDM(Phi_new, grav_n_grow_fdm, grav_vec_new_fdm, lev, dt, a_new, a_half);
+		}
+		else if (levelmethod[lev]==CWlevel){
+		  int ghost_width_fdm = parent->nCycle(lev)+ceil(Nyx::theta_fdm);
 		  int where_width_fdm =  ghost_width_fdm + (1-iteration)  - 1;
 		  int grav_n_grow_fdm = ghost_width_fdm + stencil_interpolation_width + 1;
 		  MultiFab grav_vec_new_fdm(ba, dm, BL_SPACEDIM, grav_n_grow_fdm);
@@ -496,20 +536,20 @@ Nyx::advance_particles_only (Real time,
 
       // Assign N-body density and add it to Ax_new
 
-      if(Nyx::theFDMphasePC()){
-	Nyx::theFDMphasePC()->AssignDensitySingleLevel(fdmdens,lev); 
-	MultiFab::Add(Ax_new,fdmdens, 0, Nyx::AxDens, 1, 0);
-      }
-      if(Nyx::theGhostFDMphasePC()){
-	Nyx::theGhostFDMphasePC()->AssignDensitySingleLevel(fdmdens,lev);
-	MultiFab::Add(Ax_new,fdmdens, 0, Nyx::AxDens, 1, 0);
-      }
-      if(Nyx::theVirtFDMphasePC()){
-	Nyx::theVirtFDMphasePC()->AssignDensitySingleLevel(fdmdens,lev);
-	MultiFab::Add(Ax_new,fdmdens, 0, Nyx::AxDens, 1, 0);
-      }
+      // if(Nyx::theFDMphasePC()){
+      // 	Nyx::theFDMphasePC()->AssignDensitySingleLevel(fdmdens,lev); 
+      // 	MultiFab::Add(Ax_new,fdmdens, 0, Nyx::AxDens, 1, 0);
+      // }
+      // if(Nyx::theGhostFDMphasePC()){
+      // 	Nyx::theGhostFDMphasePC()->AssignDensitySingleLevel(fdmdens,lev);
+      // 	MultiFab::Add(Ax_new,fdmdens, 0, Nyx::AxDens, 1, 0);
+      // }
+      // if(Nyx::theVirtFDMphasePC()){
+      // 	Nyx::theVirtFDMphasePC()->AssignDensitySingleLevel(fdmdens,lev);
+      // 	MultiFab::Add(Ax_new,fdmdens, 0, Nyx::AxDens, 1, 0);
+      // }
 
-      Ax_new.FillBoundary(Nyx::AxDens, 1, parent->Geom(lev).periodicity());
+      // Ax_new.FillBoundary(Nyx::AxDens, 1, parent->Geom(lev).periodicity());
 
 
       //Update real part in FDM state                                                                                                                                                    
@@ -526,7 +566,7 @@ Nyx::advance_particles_only (Real time,
       AmrLevel* amrlev = &parent->getLevel(lev);
       for (amrex::FillPatchIterator fpi(*amrlev,  Ax_new); fpi.isValid(); ++fpi)
         {
-          BL_FORT_PROC_CALL(FORT_FDM_FIELDS2, fort_fdm_fields2)
+          BL_FORT_PROC_CALL(FORT_FDM_FIELDS, fort_fdm_fields) // fort_fdm_fields2 if N-body is used 
             (BL_TO_FORTRAN(Ax_new[fpi]));
           if (Ax_new[fpi].contains_nan())
 	    amrex::Abort("Nans in state just after FDM density update");
