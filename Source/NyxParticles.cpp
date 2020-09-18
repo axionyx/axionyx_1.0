@@ -655,6 +655,19 @@ Nyx::init_particles ()
 	    // moved to Nyx_initcosmo.cpp                                                                                                                                                                            
 	  }
 #ifdef FDM
+	//else if (particle_init_type == "CWA")
+	//  {
+	//    if (verbose)
+	//      {
+	//	amrex::Print() << "\nInitializing DM particles for FDM gravitational potential...\n\n";
+	//	if (init_with_sph_particles == 1)
+	//	  amrex::Error("FDM computations are not supported for sph particles.");
+	//      }
+	//    if (num_particle_dm > 1)
+	//      DMPC->InitCWA(num_particle_dm, level, parent->initialBaLevels()+1, a);
+	//  }
+
+
 	else if (particle_init_type == "GaussianBeams")// && partlevel)
 	  {
 	    if (verbose)
@@ -678,9 +691,14 @@ Nyx::init_particles ()
 	      }
 	    DMPC->InitSphericalCollapse(get_level(level).get_new_data(Axion_Type), level, parent->initialBaLevels()+1,Nyx::AxDens,ratio_fdm);
 	  }
+
+	else if (particle_init_type == "CWA"){
+	  // DMPC not needed for this particle init type
+	}
 #endif
         else
-        {
+	  {
+	    amrex::Print() << particle_init_type << std::endl; 
             amrex::Error("not a valid input for nyx.particle_init_type");
         }
 
@@ -1120,6 +1138,18 @@ Nyx::init_particles ()
         {
 	  // moved to Nyx_initcosmo.cpp                                                                                                                                                                      
         }
+
+      else if (particle_init_type == "CWA")
+	{
+	  if (!do_dm_particles)
+	    amrex::Print() << "\n DM particles are needed for the construction of the gravitational potential!!\n\n";
+
+	  if (num_particle_fdm > 0)
+	    FDMphasePC->InitCWA(num_particle_fdm, level, parent->initialBaLevels()+1, hbaroverm, a);
+
+	  MultiFab& Ax_new = get_level(level).get_new_data(Axion_Type);
+	  Ax_new.setVal(0.);
+	}
       //do init                                                                                                                                                                                                  
       // else if(particle_init_type == "Bosonstar")
       //   {
