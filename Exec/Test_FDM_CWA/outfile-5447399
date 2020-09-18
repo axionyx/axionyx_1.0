@@ -1,0 +1,46 @@
+Module for Intel Parallel Studio XE Composer Edition (version 2019 Update 5) loaded.
+Module for Intel-MPI (version 2018.5) loaded.
+Module for fftw3 (Version 3.3.8) loaded.
+Module for hdf5 (Version 1.10.5) loaded.
+MPI initialized with 8 MPI processes
+OMP initialized with 1 OMP threads
+AMReX (eb99cf11a79a) initialized
+Successfully read inputs file ... 
+Nyx::setting init_sb_vels to 0 since do_santa_barbara = 0
+Successfully read inputs file ... 
+Starting to call amrex_probinit ... 
+amrex_probinit max time   = 0.001129719
+amrex_probinit total time = 0.001130889
+Successfully run amrex_probinit
+Getting Gconst from nyx_constants: 4.300927161e-09
+Using -5.404704468e-08 for 4 pi G in Gravity.cpp 
+Installing Gravity level 0
+Setting the gravity type to amrex::amrex::amrex::amrex::PoissonGrav
+Initializing the data at level 0
+amrex::Error::1::ErrorErrornot a valid input for nyx.particle_init_type:: !!!
+5::::amrex::Error::0::not a valid input for nyx.particle_init_type !!!
+SIGABRT
+SIGABRT
+Error::6::not a valid input for nyx.particle_init_type !!!
+SIGABRT
+Error::4::not a valid input for nyx.particle_init_type !!!
+SIGABRT
+7::not a valid input for nyx.particle_init_type !!!
+not a valid input for nyx.particle_init_typeSIGABRT
+ !!!
+SIGABRT
+amrex::Error::2::not a valid input for nyx.particle_init_type !!!
+SIGABRT
+amrex::Error::3::not a valid input for nyx.particle_init_type !!!
+SIGABRT
+See Backtrace.0.0 file for details
+See Backtrace.4.0 file for details
+See Backtrace.6.0 file for details
+See See Backtrace.7.0 file for details
+See Backtrace.1.0 file for detailsBacktrace.2.0
+See Backtrace.5.0 file for details
+See Backtrace.3.0 file for details
+ file for details
+application called MPI_Abort(MPI_COMM_WORLD, 6) - process 0
+application called MPI_Abort(MPI_COMM_WORLD, 6) - process 4
+application called MPI_Abort(MPI_COMM_WORLD, 6) - process 6
