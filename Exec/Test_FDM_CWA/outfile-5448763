@@ -1,0 +1,173 @@
+Module for Intel Parallel Studio XE Composer Edition (version 2019 Update 5) loaded.
+Module for Intel-MPI (version 2018.5) loaded.
+Module for fftw3 (Version 3.3.8) loaded.
+Module for hdf5 (Version 1.10.5) loaded.
+MPI initialized with 8 MPI processes
+OMP initialized with 1 OMP threads
+AMReX (eb99cf11a79a) initialized
+Successfully read inputs file ... 
+Nyx::setting init_sb_vels to 0 since do_santa_barbara = 0
+Successfully read inputs file ... 
+Starting to call amrex_probinit ... 
+amrex_probinit max time   = 0.001304556
+amrex_probinit total time = 0.001305617
+Successfully run amrex_probinit
+multilevel init not implemented, yet!multilevel init not implemented, yet!multilevel init not implemented, yet!multilevel init not implemented, yet!multilevel init not implemented, yet!
+multilevel init not implemented, yet!
+
+Getting Gconst from nyx_constants: 4.300927161e-09
+Using -5.404704468e-08 for 4 pi G in Gravity.cpp 
+Installing Gravity level 0
+Setting the gravity type to PoissonGrav
+Initializing the data at level 0
+multilevel init not implemented, yet!
+
+multilevel init not implemented, yet!
+
+
+ParticleContainer::AssignCellDensitySingleLevel) time: 0.001642796
+Average       dm density 0
+Average   axion density 1.36022534e+11
+Average    total density 1.36022534e+11
+Done initializing the level 0 data
+NyxParticleContainer<NSR,NSI,NAR,NAI>::estTimestep() time: 0.0005171298981
+...there are no particles at level 0
+NyxParticleContainer<NSR,NSI,NAR,NAI>::estTimestep() time: 0.0004079341888
+FDMParticleContainer::estTimestep() time: 0.0004138946533
+...there are no FDM beams at level 0
+...estdt after call to comoving   : 1.431609117e-07
+...change in a is 0.9996324954 percent
+Nyx::est_time_step at level 0:  estdt = 1.431609117e-07
+Integrating a from time 0 by dt = 1.431609117e-07
+Old / new A time      0 1.431609117e-07
+Old / new A           0.01 0.01009996325
+Old / new z           99 98.01026125
+Setting the current time in the state data to 0
+BA SIZE 0
+FLEV    0
+Calling redistribute because the size of BoxArray changed 
+ParticleContainer byte spread across MPI nodes: [0 (0) ... 0 (0)] total particles: (0)
+ParticleContainer::Redistribute() time: 0.001225985
+
+ParticleContainer byte spread across MPI nodes: [0 (0) ... 0 (0)] total particles: (0)
+ParticleContainer::Redistribute() time: 0.000307497
+
+Gravity ... defining average density in Gravity::set_mass_offset to be 0
+Gravity ... multilevel solve for new phi at base level 0 to finest level 0
+ParticleContainer::AssignCellDensitySingleLevel) time: 0.001122986
+ ... subtracting average density 0 from RHS at each level 
+ ... subtracting 0 to ensure solvability 
+MLMG: # of AMR levels: 1
+      # of MG levels on the coarsest AMR level: 4
+MLMG: Initial rhs               = 0
+MLMG: Initial residual (resid0) = 0
+MLMG: No iterations needed
+MLMG: Timers: Solve = 0.00427187 Iter = 0 Bottom = 0
+ParticleContainer::AssignCellDensitySingleLevel) time: 0.000839623
+Average       dm density 0
+Average   axion density 1.36022534e+11
+Average    total density 1.36022534e+11
+ParticleContainer::AssignCellDensitySingleLevel) time: 0.000822292
+INITIAL GRIDS 
+  Level 0   8 grids  32768 cells  100 % of domain
+ 0: ((0,0,0) (15,15,15) (0,0,0))   16 16 16 :: 0
+ 0: ((16,0,0) (31,15,15) (0,0,0))   16 16 16 :: 1
+ 0: ((0,16,0) (15,31,15) (0,0,0))   16 16 16 :: 2
+ 0: ((16,16,0) (31,31,15) (0,0,0))   16 16 16 :: 3
+ 0: ((0,0,16) (15,15,31) (0,0,0))   16 16 16 :: 4
+ 0: ((16,0,16) (31,15,31) (0,0,0))   16 16 16 :: 5
+ 0: ((0,16,16) (15,31,31) (0,0,0))   16 16 16 :: 6
+ 0: ((16,16,16) (31,31,31) (0,0,0))   16 16 16 :: 7
+
+CHECKPOINT: file = /home/nipbegge/inflatonstar/testproblem1/chk_test100000
+ParticleContainer::Checkpoint() time: 0.004735718
+ParticleContainer::Checkpoint() time: 0.000998657
+checkPoint() time = 0.057080385 secs.
+PLOTFILE: file = /home/nipbegge/inflatonstar/testproblem1/plt_test100000
+ParticleContainer::AssignCellDensitySingleLevel) time: 0.00377509
+ParticleContainer::Checkpoint() time: 0.006361432
+ParticleContainer::Checkpoint() time: 0.000808843
+Write plotfile time = 0.024872054  seconds
+
+[    0s]: ; starting clock
+NyxParticleContainer<NSR,NSI,NAR,NAI>::estTimestep() time: 0.00289297103882
+...there are no particles at level 0
+NyxParticleContainer<NSR,NSI,NAR,NAI>::estTimestep() time: 0.000392913818359
+FDMParticleContainer::estTimestep() time: 0.000380039215088
+...there are no FDM beams at level 0
+...advancing from old_a_time rather than new_a_time! 
+...estdt after call to comoving   : 1.43160911724e-07
+...change in a is 0.999632495383 percent
+Nyx::est_time_step at level 0:  estdt = 1.43160911724e-07
+Re-integrating a from time 0 by dt = 1.43160911724e-07
+Old / new A time         0 1.43160911724e-07
+Old / new A              0.01 0.0100999632495
+Old / new z              99 98.0102612547
+[Level 0 step 1] ADVANCE with dt = 1.43160911724e-07
+Gravity ... multilevel solve for old phi at base level 0 to finest level 0
+ParticleContainer::AssignCellDensitySingleLevel) time: 0.002524733
+ ... subtracting average density 0 from RHS at each level 
+ ... subtracting 0 to ensure solvability 
+MLMG: # of AMR levels: 1
+      # of MG levels on the coarsest AMR level: 4
+MLMG: Initial rhs               = 0
+MLMG: Initial residual (resid0) = 0
+MLMG: No iterations needed
+MLMG: Timers: Solve = 0.003019332 Iter = 0 Bottom = 0
+moveKickDrift ... updating particle positions and velocity
+Gravity ... single level solve for new phi at level 0
+ParticleContainer::AssignCellDensitySingleLevel) time: 0.005799453
+ ... solve for phi at level 0
+ ... subtracting average density from RHS in solve ... 0
+ ... subtracting 0 to ensure solvability 
+MLMG: # of AMR levels: 1
+      # of MG levels on the coarsest AMR level: 4
+MLMG: Initial rhs               = 0
+MLMG: Initial residual (resid0) = 0
+MLMG: No iterations needed
+MLMG: Timers: Solve = 0.003758788 Iter = 0 Bottom = 0
+moveKick ... updating velocity only
+levelSteps 0 0
+[Level 0 step 1] Advanced 32768 cells
+ParticleContainer byte spread across MPI nodes: [0 (0) ... 0 (0)] total particles: (0)
+ParticleContainer::Redistribute() time: 0.00272038200001
+
+ParticleContainer byte spread across MPI nodes: [0 (0) ... 0 (0)] total particles: (0)
+ParticleContainer::Redistribute() time: 0.000245587000002
+
+ParticleContainer::AssignCellDensitySingleLevel) time: 0.000828821000006
+
+[STEP 1] Coarse TimeStep time: 43.898694412
+[STEP 1] FAB kilobyte spread across MPI nodes: [7139226 ... 7139226]
+
+STEP = 1 TIME = 1.43160911724e-07 DT = 1.43160911724e-07
+
+PLOTFILE: file = /home/nipbegge/inflatonstar/testproblem1/plt_test100001
+ParticleContainer::AssignCellDensitySingleLevel) time: 0.004063238
+ParticleContainer::Checkpoint() time: 0.021822809
+ParticleContainer::Checkpoint() time: 0.001360583
+Write plotfile time = 0.045950391  seconds
+
+[   43s]: coarseTimeStep; finished in 43.946s
+Time w/o init: 43.9465339184
+CHECKPOINT: file = /home/nipbegge/inflatonstar/testproblem1/chk_test100001
+ParticleContainer::Checkpoint() time: 0.00612911
+ParticleContainer::Checkpoint() time: 0.00129581300001
+checkPoint() time = 0.044842443 secs.
+Deleting gravity in variable_cleanup...
+Run time = 44.1405410767
+[   44s]: ; stopping clock; 44s
+Unused ParmParse Variables:
+  [TOP]::particles.write_in_plotfile(nvals = 1)  :: [0]
+  [TOP]::gravity.use_previous_phi_as_guess(nvals = 1)  :: [0]
+  [TOP]::mg.bottom_solver(nvals = 1)  :: [1]
+  [TOP]::nyx.n_particles(nvals = 3)  :: [1, 1, 1]
+  [TOP]::nyx.show_timings(nvals = 1)  :: [1]
+  [TOP]::mg.show_timings(nvals = 1)  :: [1]
+  [TOP]::nyx.nu_cfl(nvals = 1)  :: [0.9]
+  [TOP]::mg.v(nvals = 1)  :: [2]
+  [TOP]::amr.ref_ratio(nvals = 5)  :: [2, 2, 2, 2, 2]
+  [TOP]::amr.regrid_int(nvals = 1)  :: [400000]
+
+[The  Pinned Arena] space (MB) used spread across MPI: [43 ... 43]
+AMReX (eb99cf11a79a) finalized

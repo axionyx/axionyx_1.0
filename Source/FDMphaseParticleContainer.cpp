@@ -1627,6 +1627,84 @@ FDMphaseParticleContainer::InitFromBinaryMortonFile(const std::string& particle_
   Redistribute();
 }
 
+
+void
+FDMphaseParticleContainer::InitCWA(long num_particle_fdm, int lev, int nlevs, const Real hbaroverm, const Real a)
+{
+  const int       MyProc      = ParallelDescriptor::MyProc();
+  const int       nprocs      = ParallelDescriptor::NProcs();
+  const Geometry& geom        = m_gdb->Geom(lev);
+  const Real*     dx          = geom.CellSize();
+
+  static Vector<int> calls;
+  calls.resize(nlevs);
+  calls[lev]++;
+  if (calls[lev] > 1) return;
+  Vector<ParticleLevel>& particles = this->GetParticles();
+
+  int  npart = num_particle_fdm;
+  int  npart_tot = nprocs*npart; //Each processor initializes num_particle_fdm beams
+  
+  particles.reserve(15);  // So we don't ever have to do any copying on a resize.
+  particles.resize(nlevs);
+
+  for (int i = 0; i < particles.size(); i++)
+    {
+      BL_ASSERT(particles[i].empty());
+    }
+
+  ParticleType part;
+  ParticleLocData pld;
+  
+  amrex::InitRandom(MyProc);
+
+  if (ParallelDescriptor::IOProcessor() && m_verbose){
+
+    for(int index=0;index<npart;index++){
+
+      part.id()      = ParticleType::NextID();
+      part.cpu()     = MyProc;
+
+      // set position
+      for (int n = 0; n < BL_SPACEDIM; n++)
+	part.pos(n) = (geom.ProbHi(0)+geom.ProbLo(0))/2.0;
+      
+      // set mass
+      part.rdata(0) = 1.0;
+      // set velocity
+      part.rdata(1) = M_PI/8.0/a;
+      part.rdata(2) = M_PI/8.0/a;
+      part.rdata(3) = M_PI/8.0/a;
+      // set phase
+      part.rdata(4) = 1.0;
+
+      if (!this->Where(part,pld))
+	amrex::Abort("ParticleContainer<N>::InitCWA(): invalid particle");
+
+      // add particle
+      particles[pld.m_lev][std::make_pair(pld.m_grid, pld.m_tile)].push_back(part);
+     
+
+    }
+  
+  }
+
+  if (ParallelDescriptor::IOProcessor() && m_verbose){
+    std::cout << "Done with CWA initilization" << '\n';
+  }
+
+  // Let Redistribute() sort out where the particles belong
+  Redistribute();
+  
+  if (ParallelDescriptor::IOProcessor() && m_verbose){
+    std::cout << "Redistribute done" << '\n';
+  }
+    
+
+}
+
+
+
 void
 FDMphaseParticleContainer::InitVarCount (MultiFab& mf, long num_particle_fdm, BoxArray &baWhereNot, int lev, int nlevs)
 {

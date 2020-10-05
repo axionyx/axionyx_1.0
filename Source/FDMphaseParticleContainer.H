@@ -62,6 +62,8 @@ public:
  
     void InitVarCount (amrex::MultiFab& mf, long n_axpart, amrex::BoxArray &baWhereNot, int lev, int nlevs);
 
+    void InitCWA (long n_axpart, int lev, int nlevs, const amrex::Real hbaroverm, const amrex::Real a);
+
 };
 
 #endif /* _FDMphaseParticleContainer_H_ */
