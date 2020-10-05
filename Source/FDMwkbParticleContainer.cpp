@@ -1003,6 +1003,171 @@ FDMwkbParticleContainer::InitCosmo1ppcMultiLevel(MultiFab& vel, MultiFab& phase,
   Redistribute();
 }
 
+void
+FDMwkbParticleContainer::InitCosmo1ppcMultiLevel(MultiFab& densvel, MultiFab& phase,
+						 const Real gamma_ax, const Real particleMass,
+						 BoxArray &baWhereNot, int lev, int nlevs)
+{
+  /*Only initialize Gauss beams on finest initial level*/
+  if( lev != (nlevs-1) )
+    return;
+
+  BL_PROFILE("FDMParticleContainer::InitCosmo1ppcMultiLevel()");
+  const int       MyProc   = ParallelDescriptor::MyProc();
+  const Geometry& geom     = m_gdb->Geom(lev);
+  const Real*     dx       = geom.CellSize();
+
+  static Vector<int> calls;
+
+  calls.resize(nlevs);
+
+  calls[lev]++;
+
+  if (calls[lev] > 1) return;
+
+  Vector<ParticleLevel>& particles = this->GetParticles();
+
+  particles.reserve(15);  // So we don't ever have to do any copying on a resize.                                                                                                                                
+
+  particles.resize(nlevs);
+
+  ParticleType p;
+
+  //                                                                                                                                                                                                             
+  // The mf should be initialized according to the ics...                                                                                                                                                        
+  //                                                                                                                                                                                                             
+  int outside_counter=0;
+  long outcount[3]={0,0,0};
+  long outcountminus[3]={0,0,0};
+  long totalcount=0;
+
+  Real Amp;
+
+  // for (int lev = 0; lev<nlevs; lev++)
+    for (MFIter mfi(densvel); mfi.isValid(); ++mfi)
+    {
+      FArrayBox&  densvelFab  = densvel[mfi];
+      FArrayBox&  phaseFab  = phase[mfi];
+      const Box&  vbx    = mfi.validbox();
+      const int  *fab_lo = vbx.loVect();
+      const int  *fab_hi = vbx.hiVect();
+      ParticleLocData pld;
+      
+      for (int kx = fab_lo[2]; kx <= fab_hi[2]; kx++)
+        {
+	  for (int jx = fab_lo[1]; jx <= fab_hi[1]; jx++)
+            {
+	      for (int ix = fab_lo[0]; ix <= fab_hi[0]; ix++)
+                {
+
+		  IntVect indices(D_DECL(ix, jx, kx));
+		  totalcount++;
+		  if (baWhereNot.contains(indices))
+                    {
+		      continue;
+                    }
+		  for (int n = 0; n < BL_SPACEDIM; n++)
+                    {
+                      //                                                                                                                                                                                           
+                      // Set positions (1 p per cell in the center of the cell)                                                                                                                                    
+                      //                                                                                                                                                                                           
+                      p.pos(n) = geom.ProbLo(n) +
+                        (indices[n]+Real(0.5))*dx[n];
+                      //                                                                                                                                                                                           
+                      // Set velocities                                                                                                                                                                            
+                      //                                                                                                                                                                                           
+                      p.rdata(n+1) =  densvelFab(indices,n+1);
+                    }
+		  //                                                                                                                                                                                             
+		  // Set the mass of the particle from the input value.                                                                                                                                          
+		  //                                                                                                                                                                                             
+		  p.rdata(0)  = 0.0;//particleMass;
+		  p.id()      = ParticleType::NextID();
+		  p.cpu()     = MyProc;
+
+		  // Amp = std::sqrt(myFab(indices));
+		  Amp = pow(densvelFab(indices,0),1.0/3.0)*dx[0]*dx[0]/M_PI;
+		  // Amp = std::sqrt(0.5);
+		  //set phase                                                                                                                                                                                    
+		  p.rdata( 4) = phaseFab(indices,0);
+		  if(p.rdata( 4)!=p.rdata( 4))
+		    amrex::Abort("Nans in FDM beam phase!!");
+		  //set amplitude                                                                                                                                                                                
+		  p.rdata( 5) = pow(gamma_ax*Amp,1.5);
+		  p.rdata( 6) = 0.0;
+		  //set width                                                                                                                                                                                    
+		  p.rdata( 7) = gamma_ax;
+		  //set Jacobian qq                                                                                                                                                                              
+		  p.rdata( 8) = Amp;
+		  p.rdata( 9) = 0.0;
+		  p.rdata(10) = 0.0;
+		  p.rdata(11) = 0.0;
+		  p.rdata(12) = Amp;
+		  p.rdata(13) = 0.0;
+		  p.rdata(14) = 0.0;
+		  p.rdata(15) = 0.0;
+		  p.rdata(16) = Amp;
+		  //set Jacobian pq                                                                                                                                                                              
+		  p.rdata(17) = 0.0;
+		  p.rdata(18) = 0.0;
+		  p.rdata(19) = 0.0;
+		  p.rdata(20) = 0.0;
+		  p.rdata(21) = 0.0;
+		  p.rdata(22) = 0.0;
+		  p.rdata(23) = 0.0;
+		  p.rdata(24) = 0.0;
+		  p.rdata(25) = 0.0;
+
+		  if (!this->Where(p, pld))
+                    {
+		      this->PeriodicShift(p);
+
+		      if (!this->Where(p, pld))
+			amrex::Abort("FDMParticleContainer::InitCosmo1ppcMultiLevel():invalid particle");
+                    }
+
+		  BL_ASSERT(pld.m_lev >= 0 && pld.m_lev <= m_gdb->finestLevel());
+		  //handle particles that ran out of this level into a finer one.                                                                                                                                
+		  if (baWhereNot.contains(pld.m_cell))
+                    {
+                      outside_counter++;
+                      ParticleType newp[8];
+                      ParticleLocData new_pld;
+                      for (int i=0;i<8;i++)
+		  	{
+                          newp[i].rdata(0)   = particleMass/8.0;
+                          newp[i].id()       = ParticleType::NextID();
+                          newp[i].cpu()      = MyProc;
+                          for (int dim=0;dim<BL_SPACEDIM;dim++)
+		  	    {
+                              newp[i].pos(dim)=p.pos(dim)+(2*((i/(1 << dim)) % 2)-1)*dx[dim]/4.0;
+                              newp[i].rdata(dim+1)=p.rdata(dim+1);
+		  	    }
+                          if (!this->Where(newp[i], new_pld))
+		  	    {
+                              this->PeriodicShift(newp[i]);
+
+                              if (!this->Where(newp[i], new_pld))
+		  		amrex::Abort("FDMParticleContainer::InitCosmo1ppcMultiLevel():invalid particle");
+		  	    }
+                          particles[new_pld.m_lev][std::make_pair(new_pld.m_grid,
+                                                                  new_pld.m_tile)].push_back(newp[i]);
+		  	}
+
+                    }
+
+		  //                                                                                                                                                                                             
+		  // Add it to the appropriate PBox at the appropriate level.                                                                                                                                    
+		  //                                                                                                                                                                                             
+		  else
+		    particles[pld.m_lev][std::make_pair(pld.m_grid, pld.m_tile)].push_back(p);
+                }
+            }
+        }
+    }
+  Redistribute();
+}
+
 
 void
 FDMwkbParticleContainer::InitCosmo1ppc(MultiFab& mf, const Real vel_fac[], const Real particleMass)

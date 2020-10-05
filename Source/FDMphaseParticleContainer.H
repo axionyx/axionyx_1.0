@@ -36,6 +36,10 @@ public:
 			       const amrex::Real gamma_fdm, const amrex::Real particleMass, 
 			       amrex::BoxArray &baWhereNot, int lev, int nlevs);
 
+  void InitCosmo1ppcMultiLevel(amrex::MultiFab& densvel, amrex::MultiFab& phase,
+			       const amrex::Real gamma_fdm, const amrex::Real particleMass, 
+			       amrex::BoxArray &baWhereNot, int lev, int nlevs);
+
     void CreateGhostParticlesFDM (int level, int lev, int nGrow, AoS& ghosts) const;
 
   void DepositFDMParticles (amrex::MultiFab& mf_real, amrex::MultiFab& mf_imag, int level, amrex::Real a, amrex::Real theta_fdm, amrex::Real hbaroverm) const;

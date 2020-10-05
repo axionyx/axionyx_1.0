@@ -268,12 +268,12 @@ void Nyx::initcosmo()
 #endif
        }
 
-// #ifdef FDM
-       // baryon_den = 0;
-       // baryon_vx = 1;
-       // part_dx = 4;
-       // part_vx = 7;
-// #endif
+#ifdef FDM
+       baryon_den = 0;
+       baryon_vx = 1;
+       part_dx = 4;
+       part_vx = 7;
+#endif
 
        for (int n=0; n < BL_SPACEDIM; n++)
        {
@@ -343,62 +343,103 @@ void Nyx::initcosmo()
     
     // we also have to restrict the creation of particles to non refined parts of the domain.
 //    if (level == 0)
-    Nyx::theDMPC()->InitCosmo1ppcMultiLevel(mf, dis_fac, vel_fac, 
-					    particleMass, 
-					    part_dx, part_vx,
-					    myBaWhereNot,
-					    level, parent->initialBaLevels()+1);
+
+    if(do_dm_particles){
+      Nyx::theDMPC()->InitCosmo1ppcMultiLevel(mf, dis_fac, vel_fac, 
+					      particleMass, 
+					      part_dx, part_vx,
+					      myBaWhereNot,
+					      level, parent->initialBaLevels()+1);
+    }
+
 //    Nyx::theDMPC()->InitCosmo(mf, vel_fac, n_part, particleMass);
     //Nyx::theDMPC()->InitCosmo(mf, vel_fac, n_part, particleMass, part_dx, part_vx);
 
 #ifdef FDM
-     if(partlevel && level==(parent->initialBaLevels())){                                                                                                                                          
-      
-      Vector<std::unique_ptr<MultiFab> > particle_mf;
+
+    /*Copy density & velocity from baryon to axion state*/
+    MultiFab& Ax_new = get_level(level).get_new_data(Axion_Type);
+    Ax_new.setVal(0.);
+    Ax_new.ParallelCopy(mf, baryon_den, 0, 4, 0, Ax_new.nGrow(),parent->Geom(level).periodicity(), FabArrayBase::COPY);
+    Ax_new.plus(1, 0, 1, Ax_new.nGrow());
+    Ax_new.mult(rhoD, 0, 1, Ax_new.nGrow());
+    Ax_new.mult(vel_fac[0], 1, 1, Ax_new.nGrow());
+    Ax_new.mult(vel_fac[1], 2, 1, Ax_new.nGrow());
+    Ax_new.mult(vel_fac[2], 3, 1, Ax_new.nGrow());
+
+    /*Once velocity is defined on all levels, construct phase from velocity divergence*/
+    if(level==(parent->initialBaLevels())){                                                                          
+
       Vector<std::unique_ptr<MultiFab> > div(parent->initialBaLevels()+1);
       Vector<MultiFab*> phase(parent->initialBaLevels()+1);
       Vector<Vector<std::unique_ptr<MultiFab> > > grad_phase(parent->initialBaLevels()+1);
       Vector<std::array<MultiFab*,AMREX_SPACEDIM> > grad_phase_aa;
 
-      Nyx::theDMPC()->AssignDensityAndVels(particle_mf);
-
       for(int lev=0;lev<=parent->initialBaLevels();lev++){
 
-    	const BoxArray& ba = parent->boxArray()[lev];
-    	const DistributionMapping& dmap = parent->DistributionMap()[lev]; 
-    	div[lev].reset(new MultiFab(ba, dmap, 1, 0));
-    	div[lev]->setVal(0.0);
-    	phase[lev] = new MultiFab(ba, dmap, 1, 1);
-    	phase[lev]->setVal(0.0);
+	const BoxArray& ba = parent->boxArray()[lev];
+	const DistributionMapping& dmap = parent->DistributionMap()[lev]; 
+	div[lev].reset(new MultiFab(ba, dmap, 1, 0));
+	div[lev]->setVal(0.0);
+	phase[lev] = new MultiFab(ba, dmap, 1, 1);
+	phase[lev]->setVal(0.0);
+	
+	MultiFab& Axvel = get_level(lev).get_new_data(Axion_Type);
+	for (MFIter mfi(Axvel); mfi.isValid(); ++mfi){
 
-    	for (MFIter mfi(*(particle_mf[lev])); mfi.isValid(); ++mfi){
-    	  FArrayBox&  vel  = (*(particle_mf[lev]))[mfi];
-    	  const Box& box = mfi.tilebox();
-    	  const int* lo = box.loVect();
-    	  const int* hi = box.hiVect();
-	  const Real* dx_lev = parent->Geom(lev).CellSize();
-    	  Array4<Real> const& div_array = (*(div[lev]))[mfi].array();
-    	  Array4<Real const> const& vel_array = vel.array();
-    	  divergence(box,div_array,vel_array,dx_lev,comoving_a);
-    	}
+	   const Box& bx = mfi.validbox();
+	   const Dim3 lo = amrex::lbound(bx);
+	   const Dim3 hi = amrex::ubound(bx);
+	   Array4<Real> const& divarr = (*(div[lev]))[mfi].array();
+	   Array4<Real> const& velarr = Axvel.array(mfi);
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+	   for (int k = lo.z; k <= hi.z; ++k) {
+	     for (int j = lo.y; j <= hi.y; ++j) {
+	       for (int i = lo.x; i <= hi.x; ++i) {
+		 divarr(i,j,k,0) = (velarr(i+1,j,k,1)-velarr(i-1,j,k,1))/dx[0]*comoving_a/2.0
+		   +(velarr(i,j+1,k,2)-velarr(i,j-1,k,2))/dx[1]*comoving_a/2.0
+		   +(velarr(i,j,k+1,3)-velarr(i,j,k-1,3))/dx[2]*comoving_a/2.0;
+	       }
+	     }
+	   }
 
-    	grad_phase[lev].resize(BL_SPACEDIM);
-    	for (int n = 0; n < BL_SPACEDIM; ++n)
-    	  grad_phase[lev][n].reset(new MultiFab(BoxArray(ba).surroundingNodes(n), dmap, 1, 1));
-        grad_phase_aa.push_back({AMREX_D_DECL(GetVecOfVecOfPtrs(grad_phase)[lev][0],
-    					      GetVecOfVecOfPtrs(grad_phase)[lev][1],
-    					      GetVecOfVecOfPtrs(grad_phase)[lev][2])});
+	}
+     
+	for (int i = 0; i < (*(div[lev])).nComp(); i++)
+	  {
+	    if ((*(div[lev])).contains_nan(i,1,0))
+	      {
+		std::cout << "Testing component i for NaNs: " << i << std::endl;
+		amrex::Abort("div has NaNs in this component::initcosmo");
+	      }
+	    if ((*(div[lev])).contains_nan(i, 1, (*(div[lev])).nGrow()))
+	      {
+		std::cout << "Testing component i for NaNs: " << i << std::endl;
+		amrex::Abort("div has NaNs _in ghostzones_ in this component::initcosmo");
+	      }
+	  }
+
+	grad_phase[lev].resize(BL_SPACEDIM);
+	for (int n = 0; n < BL_SPACEDIM; ++n)
+	  grad_phase[lev][n].reset(new MultiFab(BoxArray(ba).surroundingNodes(n), dmap, 1, 1));
+	grad_phase_aa.push_back({AMREX_D_DECL(GetVecOfVecOfPtrs(grad_phase)[lev][0],
+					      GetVecOfVecOfPtrs(grad_phase)[lev][1],
+					      GetVecOfVecOfPtrs(grad_phase)[lev][2])});
       }
-
+      
       const MultiFab* crse_bcdata = nullptr;
       Real rel_eps = 1.e-10;
       Real abs_eps = 0.;
       gravity->solve_with_MLMG(0, parent->initialBaLevels(), phase, amrex::GetVecOfConstPtrs(div),
-    		      grad_phase_aa, crse_bcdata, rel_eps, abs_eps);
+			       grad_phase_aa, crse_bcdata, rel_eps, abs_eps);
 
+      /*Fill FDM particle container and axion state with initial information*/
       for(int lev=0;lev<=parent->initialBaLevels();lev++){
-    	BoxArray baWhereNotfdm;
-    	if (lev < parent->initialBaLevels())
+
+	BoxArray baWhereNotfdm;
+	if (lev < parent->initialBaLevels())
     	  baWhereNotfdm = parent->initialBa(lev+1);
     	BoxArray myBaWhereNotfdm(baWhereNotfdm.size());
     	for (int i=0; i < baWhereNotfdm.size(); i++)
@@ -406,23 +447,314 @@ void Nyx::initcosmo()
     	if (lev < parent->initialBaLevels())
     	  myBaWhereNotfdm.coarsen(parent->refRatio(lev));
 
-    	if(wkb_approx)
-    	  Nyx::theFDMwkbPC()->InitCosmo1ppcMultiLevel(particle_mf, phase, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
-    	else if(phase_approx)
-    	  Nyx::theFDMphasePC()->InitCosmo1ppcMultiLevel(particle_mf, phase, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
-    	else
-	  amrex::Abort("FDM cosmology only works with wkb_approx=1 or phase_approx=1!");
-	// Nyx::theFDMPC()->InitCosmo1ppcMultiLevel(particle_mf, phase, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
+	MultiFab& Ax_new = get_level(lev).get_new_data(Axion_Type);
+	
+	if(partlevel){
+	  if(wkb_approx)
+	    Nyx::theFDMwkbPC()->InitCosmo1ppcMultiLevel(Ax_new, (*phase[lev]), gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
+	  else if(phase_approx)
+	    Nyx::theFDMphasePC()->InitCosmo1ppcMultiLevel(Ax_new, (*phase[lev]), gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
+	  else
+	    amrex::Abort("Particle based FDM cosmology only works with wkb_approx=1 or phase_approx=1!");
+	}
+
+	Ax_new.ParallelCopy((*phase[lev]), 0, Nyx::AxPhas, 1, 0, Ax_new.nGrow(),parent->Geom(lev).periodicity(), FabArrayBase::COPY);
+	for (MFIter mfi(Ax_new,false); mfi.isValid(); ++mfi){
+	  Array4<Real> const& arr = Ax_new[mfi].array();   
+	  const Box& bx = mfi.validbox();
+	  const Dim3 lo = amrex::lbound(bx);
+	  const Dim3 hi = amrex::ubound(bx);
+	  const Dim3 w ={hi.x-lo.x+1,hi.y-lo.y+1,hi.z-lo.z+1};
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+	  for(size_t i=0; i<(size_t)w.x; i++) {
+	    for(size_t j=0; j<(size_t)w.y; j++) {
+	      for(size_t k=0; k<(size_t)w.z; k++) {
+		arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxRe)=std::sqrt(arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxDens))*std::cos(arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas)/hbaroverm);
+		arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxIm)=std::sqrt(arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxDens))*std::sin(arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas)/hbaroverm);
+	      }}}
+	}
+	Ax_new.FillBoundary(geom.periodicity());
       }
     }
 
-    MultiFab& Ax_new = get_new_data(Axion_Type);
+    /*const BoxArray& ba = parent->boxArray(level);
+    const DistributionMapping& dmap = parent->DistributionMap(level); 
+    MultiFab vel(ba, dmap, AMREX_SPACEDIM, 1);
+    vel.ParallelCopy(mf, baryon_vx, 0, AMREX_SPACEDIM, mf.nGrow(), vel.nGrow(), 
+		     parent->Geom(level).periodicity(), FabArrayBase::COPY);
+    vel.mult(vel_fac[0], 0, 1, vel.nGrow());
+    vel.mult(vel_fac[1], 1, 1, vel.nGrow());
+    vel.mult(vel_fac[2], 2, 1, vel.nGrow());
+
+    for (int i = 0; i < vel.nComp(); i++)
+      {
+	if (vel.contains_nan(i,1,0))
+	  {
+	    std::cout << "Testing component i for NaNs: " << i << std::endl;
+	    amrex::Abort("vel has NaNs in this component::initcosmo");
+	  }
+        if (vel.contains_nan(i, 1, vel.nGrow()))
+          {
+	    std::cout << "Testing component i for NaNs: " << i << std::endl;
+	    amrex::Abort("vel has NaNs _in ghostzones_ in this component::initcosmo");
+          }
+      }
+    
+      MultiFab dens(ba, dmap, 1, 0);
+    MultiFab::Copy(dens, mf, baryon_den, 0, 1, dens.nGrow());
+    dens.plus(1, 0, 1, dens.nGrow());
+    dens.mult(rhoD, 0, 1, dens.nGrow());
+
+    for (int i = 0; i < dens.nComp(); i++)
+      {
+	if (dens.contains_nan(i,1,0))
+	  {
+	    std::cout << "Testing component i for NaNs: " << i << std::endl;
+	    amrex::Abort("dens has NaNs in this component::initcosmo");
+	  }
+        if (dens.contains_nan(i, 1, dens.nGrow()))
+          {
+	    std::cout << "Testing component i for NaNs: " << i << std::endl;
+	    amrex::Abort("dens has NaNs _in ghostzones_ in this component::initcosmo");
+          }
+      }
+
+      MultiFab div(ba, dmap, 1, 0);
+    for (MFIter mfi(vel); mfi.isValid(); ++mfi){
+      const Box& bx = mfi.validbox();
+      const Dim3 lo = amrex::lbound(bx);
+      const Dim3 hi = amrex::ubound(bx);
+      Array4<Real> const& divarr = div.array(mfi);
+      Array4<Real> const& velarr = vel.array(mfi);
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+      for (int k = lo.z; k <= hi.z; ++k) {
+	for (int j = lo.y; j <= hi.y; ++j) {
+	  for (int i = lo.x; i <= hi.x; ++i) {
+	    divarr(i,j,k,0) = (velarr(i+1,j,k,0)-velarr(i-1,j,k,0))/dx[0]*comoving_a/2.0
+	      +(velarr(i,j+1,k,1)-velarr(i,j-1,k,1))/dx[1]*comoving_a/2.0
+	      +(velarr(i,j,k+1,2)-velarr(i,j,k-1,2))/dx[2]*comoving_a/2.0;
+	  }
+	}
+      }
+
+    }
+
+    for (int i = 0; i < div.nComp(); i++)
+      {
+	if (div.contains_nan(i,1,0))
+	  {
+	    std::cout << "Testing component i for NaNs: " << i << std::endl;
+	    amrex::Abort("div has NaNs in this component::initcosmo");
+	  }
+        if (div.contains_nan(i, 1, div.nGrow()))
+          {
+	    std::cout << "Testing component i for NaNs: " << i << std::endl;
+	    amrex::Abort("div has NaNs _in ghostzones_ in this component::initcosmo");
+          }
+      }
+
+
+    // divergence(mfi.validbox(),div.array(mfi),vel.array(mfi),dx,comoving_a);
+    MultiFab phase(ba, dmap, 1, 1);
+    Vector<std::unique_ptr<MultiFab> > grad_phase;
+    Vector<std::array<MultiFab*,AMREX_SPACEDIM> > grad_phase_aa;
+    grad_phase.resize(BL_SPACEDIM);
+    for (int n = 0; n < BL_SPACEDIM; ++n)
+      grad_phase[n].reset(new MultiFab(BoxArray(ba).surroundingNodes(n), dmap, 1, 1));
+    grad_phase_aa.push_back({AMREX_D_DECL(GetVecOfPtrs(grad_phase)[0],
+					  GetVecOfPtrs(grad_phase)[1],
+					  GetVecOfPtrs(grad_phase)[2])});
+    const MultiFab* crse_bcdata = nullptr;
+    Real rel_eps = 1.e-8;
+    Real abs_eps = 0.;
+    gravity->solve_with_MLMG(level, level, {&phase}, {&div},
+			     grad_phase_aa, crse_bcdata, rel_eps, abs_eps);
+      
+    for (int i = 0; i < phase.nComp(); i++)
+      {
+	if (phase.contains_nan(i,1,0))
+	  {
+	    std::cout << "Testing component i for NaNs: " << i << std::endl;
+	    amrex::Abort("phase has NaNs in this component::initcosmo");
+	  }
+        if (phase.contains_nan(i, 1, phase.nGrow()))
+          {
+	    std::cout << "Testing component i for NaNs: " << i << std::endl;
+	    amrex::Abort("phase has NaNs _in ghostzones_ in this component::initcosmo");
+          }
+      }
+
+    if (phase.contains_nan())
+      {
+	std::cout << "Found NaNs in initial FDM phase. " << std::endl;
+	amrex::Abort("Nyx::init_particles: Your initial FDM phase contain NaNs!");
+      }
+
+
+    if(partlevel){
+      if(wkb_approx)
+	Nyx::theFDMwkbPC()->InitCosmo1ppcMultiLevel(vel, phase, dens, gamma_fdm, particleMass, myBaWhereNot, level, parent->initialBaLevels()+1);
+      else if(phase_approx)
+	Nyx::theFDMphasePC()->InitCosmo1ppcMultiLevel(vel, phase, dens, gamma_fdm, particleMass, myBaWhereNot, level, parent->initialBaLevels()+1);
+      else
+	amrex::Abort("FDM cosmology only works with wkb_approx=1 or phase_approx=1!");
+      // Nyx::theFDMPC()->InitCosmo1ppcMultiLevel(particle_mf, phase, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
+      //}
+
+      //    if(partlevel && level==(parent->initialBaLevels())){                                                                                                      
+      if(level==(parent->initialBaLevels())){                                                                          
+                          
+       Vector<std::unique_ptr<MultiFab> > particle_mf;
+       Vector<std::unique_ptr<MultiFab> > div(parent->initialBaLevels()+1);
+       Vector<MultiFab*> phase(parent->initialBaLevels()+1);
+       Vector<Vector<std::unique_ptr<MultiFab> > > grad_phase(parent->initialBaLevels()+1);
+       Vector<std::array<MultiFab*,AMREX_SPACEDIM> > grad_phase_aa;
+
+       if(wkb_approx)
+	 Nyx::theFDMwkbPC()->AssignDensityAndVels(particle_mf);
+       else if(phase_approx)
+	 Nyx::theFDMphasePC()->AssignDensityAndVels(particle_mf);
+       else
+	 amrex::Abort("FDM cosmology only works with wkb_approx=1 or phase_approx=1!");
+       
+
+       for(int lev=0;lev<=parent->initialBaLevels();lev++){
+
+	 const BoxArray& ba = parent->boxArray()[lev];
+	 const DistributionMapping& dmap = parent->DistributionMap()[lev]; 
+	 div[lev].reset(new MultiFab(ba, dmap, 1, 0));
+	 div[lev]->setVal(0.0);
+	 phase[lev] = new MultiFab(ba, dmap, 1, 1);
+	 phase[lev]->setVal(0.0);
+
+	 for (MFIter mfi(*(particle_mf[lev])); mfi.isValid(); ++mfi){
+	   FArrayBox&  vel  = (*(particle_mf[lev]))[mfi];
+	   const Box& bx = mfi.validbox();
+	   const Dim3 lo = amrex::lbound(bx);
+	   const Dim3 hi = amrex::ubound(bx);
+	   Array4<Real> const& divarr = div.array(mfi);
+	   Array4<Real> const& velarr = vel.array(mfi);
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+	   for (int k = lo.z; k <= hi.z; ++k) {
+	     for (int j = lo.y; j <= hi.y; ++j) {
+	       for (int i = lo.x; i <= hi.x; ++i) {
+		 divarr(i,j,k,0) = (velarr(i+1,j,k,1)-velarr(i-1,j,k,1))/dx[0]*comoving_a/2.0
+		   +(velarr(i,j+1,k,2)-velarr(i,j-1,k,2))/dx[1]*comoving_a/2.0
+		   +(velarr(i,j,k+1,3)-velarr(i,j,k-1,3))/dx[2]*comoving_a/2.0;
+	       }
+	     }
+	   }
+
+	 }
+
+	 for (int i = 0; i < div.nComp(); i++)
+	   {
+	     if (div.contains_nan(i,1,0))
+	       {
+		 std::cout << "Testing component i for NaNs: " << i << std::endl;
+		 amrex::Abort("div has NaNs in this component::initcosmo");
+	       }
+	     if (div.contains_nan(i, 1, div.nGrow()))
+	       {
+		 std::cout << "Testing component i for NaNs: " << i << std::endl;
+		 amrex::Abort("div has NaNs _in ghostzones_ in this component::initcosmo");
+	       }
+	   }
+	 
+
+
+
+	 //for (MFIter mfi(*(particle_mf[lev])); mfi.isValid(); ++mfi){
+	 //  FArrayBox&  vel  = (*(particle_mf[lev]))[mfi];
+	 //  const Box& box = mfi.tilebox();
+	 //  const int* lo = box.loVect();
+	 //  const int* hi = box.hiVect();
+	 //  const Real* dx_lev = parent->Geom(lev).CellSize();
+	 //  Array4<Real> const& div_array = (*(div[lev]))[mfi].array();
+	 //  Array4<Real const> const& vel_array = vel.array();
+	 //  divergence(box,div_array,vel_array,dx_lev,comoving_a);
+	 //}
+	 
+	 grad_phase[lev].resize(BL_SPACEDIM);
+	 for (int n = 0; n < BL_SPACEDIM; ++n)
+	   grad_phase[lev][n].reset(new MultiFab(BoxArray(ba).surroundingNodes(n), dmap, 1, 1));
+	 grad_phase_aa.push_back({AMREX_D_DECL(GetVecOfVecOfPtrs(grad_phase)[lev][0],
+					       GetVecOfVecOfPtrs(grad_phase)[lev][1],
+					       GetVecOfVecOfPtrs(grad_phase)[lev][2])});
+       }
+
+       const MultiFab* crse_bcdata = nullptr;
+       Real rel_eps = 1.e-10;
+       Real abs_eps = 0.;
+       gravity->solve_with_MLMG(0, parent->initialBaLevels(), phase, amrex::GetVecOfConstPtrs(div),
+				grad_phase_aa, crse_bcdata, rel_eps, abs_eps);
+
+       for(int lev=0;lev<=parent->initialBaLevels();lev++){
+	 BoxArray baWhereNotfdm;
+	 if (lev < parent->initialBaLevels())
+    //	  baWhereNotfdm = parent->initialBa(lev+1);
+    //	BoxArray myBaWhereNotfdm(baWhereNotfdm.size());
+    //	for (int i=0; i < baWhereNotfdm.size(); i++)
+    //	  myBaWhereNotfdm.set(i, baWhereNotfdm[i]);
+    //	if (lev < parent->initialBaLevels())
+    //	  myBaWhereNotfdm.coarsen(parent->refRatio(lev));
+
+    //if(wkb_approx)
+    //Nyx::theFDMwkbPC()->InitCosmo1ppcMultiLevel(particle_mf, phase, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
+    //else if(phase_approx)
+    //Nyx::theFDMphasePC()->InitCosmo1ppcMultiLevel(particle_mf, phase, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
+    //else
+    //amrex::Abort("FDM cosmology only works with wkb_approx=1 or phase_approx=1!");
+	// Nyx::theFDMPC()->InitCosmo1ppcMultiLevel(particle_mf, phase, gamma_fdm, particleMass, myBaWhereNotfdm, lev, parent->initialBaLevels()+1);
+    //}
+    //}
+
+//for(int lev=0;lev<=parent->initialBaLevels();lev++){
+    MultiFab& Ax_new = get_level(level).get_new_data(Axion_Type);
     Ax_new.setVal(0.);
+
+    Ax_new.ParallelCopy(dens, 0, Nyx::AxDens, 1, 0, Ax_new.nGrow(),parent->Geom(level).periodicity(), FabArrayBase::COPY);
+    Ax_new.ParallelCopy(phase, 0, Nyx::AxPhas, 1, 0, Ax_new.nGrow(),parent->Geom(level).periodicity(), FabArrayBase::COPY);
+
+    for (MFIter mfi(Ax_new,false); mfi.isValid(); ++mfi){
+      Array4<Real> const& arr = Ax_new[mfi].array();
+      //      Array4<Real> const& axold = Ax_old[mfi].array();                                                                                                           
+      const Box& bx = mfi.validbox();
+      const Dim3 lo = amrex::lbound(bx);
+      const Dim3 hi = amrex::ubound(bx);
+      const Dim3 w ={hi.x-lo.x+1,hi.y-lo.y+1,hi.z-lo.z+1};
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+      for(size_t i=0; i<(size_t)w.x; i++) {
+	for(size_t j=0; j<(size_t)w.y; j++) {
+	  for(size_t k=0; k<(size_t)w.z; k++) {
+	    //              size_t local_indx_threaded = (size_t)w.y*(size_t)w.z*i+(size_t)w.z*j+k;                                                                      
+	    //complex_t temp = a[local_indx_threaded];                                                                                                                   
+	    arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxRe)=std::sqrt(arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxDens))*std::cos(arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas)/hbaroverm);
+	    arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxIm)=std::sqrt(arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxDens))*std::sin(arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas)/hbaroverm);
+	    //              arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxDens)=std::real(temp)*std::real(temp)+std::imag(temp)*std::imag(temp);                                       
+	    //arr(i+lo.x,j+lo.y,k+lo.z,Nyx::AxPhas) = std::arg(temp);                                                                                                    
+	  }}}
+    }//}
+
+//MultiFab& Ax_new = get_new_data(Axion_Type);
+    Ax_new.FillBoundary(geom.periodicity());
+
+    //}
+
+    //MultiFab& Ax_new = get_new_data(Axion_Type);
+    //Ax_new.setVal(0.);
 
 
     // if(partlevel){
       
-    //   /*Construct velocity from baryon velocity*/
     //   const BoxArray& ba = parent->boxArray(level);
     //   const DistributionMapping& dmap = parent->DistributionMap(level); 
     //   MultiFab vel(ba, dmap, AMREX_SPACEDIM, 1);
@@ -432,13 +764,11 @@ void Nyx::initcosmo()
     //   vel.mult(vel_fac[1], 1, 1, vel.nGrow());
     //   vel.mult(vel_fac[2], 2, 1, vel.nGrow());
 
-    //   /*Construct density from baryon density*/
     //   MultiFab dens(ba, dmap, 1, 0);
     //   MultiFab::Copy(dens, mf, baryon_den, 0, 1, dens.nGrow());
     //   dens.plus(1, 0, 1, dens.nGrow());
     //   dens.mult(rhoD, 0, 1, dens.nGrow());
       
-    //   /*Calculate phase from velocity divergence*/
     //   MultiFab div(ba, dmap, 1, 0);
     //   for (MFIter mfi(vel); mfi.isValid(); ++mfi)
     // 	divergence(mfi.validbox(),div.array(mfi),vel.array(mfi),dx,comoving_a);
@@ -463,7 +793,6 @@ void Nyx::initcosmo()
     // 	  amrex::Abort("Nyx::init_particles: Your initial FDM phase contain NaNs!");
     // 	}
       
-    //   /*Construct cosmological initial condition for wkb approximated Gaussian beams*/
     //   BoxArray baWhereNotfdm;
     //   if (level < parent->initialBaLevels())
     // 	baWhereNotfdm = parent->initialBa(level+1);
@@ -481,7 +810,7 @@ void Nyx::initcosmo()
 
     // MultiFab& Ax_new = get_new_data(Axion_Type);
     // Ax_new.setVal(0.);
-
+    */
 #endif
 
 #ifndef NO_HYDRO
