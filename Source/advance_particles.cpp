@@ -536,20 +536,20 @@ Nyx::advance_particles_only (Real time,
 
       // Assign N-body density and add it to Ax_new
 
-      // if(Nyx::theFDMphasePC()){
-      // 	Nyx::theFDMphasePC()->AssignDensitySingleLevel(fdmdens,lev); 
-      // 	MultiFab::Add(Ax_new,fdmdens, 0, Nyx::AxDens, 1, 0);
-      // }
-      // if(Nyx::theGhostFDMphasePC()){
-      // 	Nyx::theGhostFDMphasePC()->AssignDensitySingleLevel(fdmdens,lev);
-      // 	MultiFab::Add(Ax_new,fdmdens, 0, Nyx::AxDens, 1, 0);
-      // }
-      // if(Nyx::theVirtFDMphasePC()){
-      // 	Nyx::theVirtFDMphasePC()->AssignDensitySingleLevel(fdmdens,lev);
-      // 	MultiFab::Add(Ax_new,fdmdens, 0, Nyx::AxDens, 1, 0);
-      // }
-
-      // Ax_new.FillBoundary(Nyx::AxDens, 1, parent->Geom(lev).periodicity());
+      if(Nyx::theFDMphasePC()){
+       	Nyx::theFDMphasePC()->AssignDensitySingleLevel(fdmdens,lev); 
+       	MultiFab::Add(Ax_new,fdmdens, 0, Nyx::AxDens, 1, 0);
+      }
+      if(Nyx::theGhostFDMphasePC()){
+       	Nyx::theGhostFDMphasePC()->AssignDensitySingleLevel(fdmdens,lev);
+       	MultiFab::Add(Ax_new,fdmdens, 0, Nyx::AxDens, 1, 0);
+      }
+      if(Nyx::theVirtFDMphasePC()){
+       	Nyx::theVirtFDMphasePC()->AssignDensitySingleLevel(fdmdens,lev);
+       	MultiFab::Add(Ax_new,fdmdens, 0, Nyx::AxDens, 1, 0);
+      }
+      
+      Ax_new.FillBoundary(Nyx::AxDens, 1, parent->Geom(lev).periodicity());
 
 
       //Update real part in FDM state                                                                                                                                                    
@@ -566,7 +566,7 @@ Nyx::advance_particles_only (Real time,
       AmrLevel* amrlev = &parent->getLevel(lev);
       for (amrex::FillPatchIterator fpi(*amrlev,  Ax_new); fpi.isValid(); ++fpi)
         {
-          BL_FORT_PROC_CALL(FORT_FDM_FIELDS, fort_fdm_fields) // fort_fdm_fields2 if N-body is used 
+          BL_FORT_PROC_CALL(FORT_FDM_FIELDS2, fort_fdm_fields2) 
             (BL_TO_FORTRAN(Ax_new[fpi]));
           if (Ax_new[fpi].contains_nan())
 	    amrex::Abort("Nans in state just after FDM density update");

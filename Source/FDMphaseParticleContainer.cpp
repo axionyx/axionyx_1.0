@@ -646,7 +646,7 @@ FDMphaseParticleContainer::DepositFDMParticlesCWA(MultiFab& mf_real, MultiFab& m
       {  
       	const auto& p = pstruct[i];
 	//	if(p.rdata(0)==0.0){
-	Real amp = 3.0/(pi*theta_fdm*theta_fdm*theta_fdm);
+	Real amp = 3.0/(pi*theta_fdm*dx[0]*theta_fdm*dx[1]*theta_fdm*dx[2]);
 	// Real width = 1.0; // not required for CWA
 	  //	std::complex<Real> amp(p.rdata(5),p.rdata(6));
       	std::complex<Real> phi(0.0,0.0);
@@ -1025,7 +1025,7 @@ FDMphaseParticleContainer::InitCosmo1ppcMultiLevel(MultiFab& vel, MultiFab& phas
 		  //                                                                                                                                                                                             
 		  // Set the mass of the particle from the input value.                                                                                                                                          
 		  //                                                                                                                                                                                             
-		  p.rdata(0)  = 0.0;//particleMass;
+		  p.rdata(0)  = densFab(indices,0);;//particleMass;
 		  p.id()      = ParticleType::NextID();
 		  p.cpu()     = MyProc;
                                        
@@ -1157,7 +1157,7 @@ FDMphaseParticleContainer::InitCosmo1ppcMultiLevel(MultiFab& densvel, MultiFab& 
 		  //                                                                                                                                                                                             
 		  // Set the mass of the particle from the input value.                                                                                                                                          
 		  //                                                                                                                                                                                             
-		  p.rdata(0)  = 0.0;//particleMass;
+		  p.rdata(0)  = densvelFab(indices,0);//particleMass;
 		  p.id()      = ParticleType::NextID();
 		  p.cpu()     = MyProc;
                                        
