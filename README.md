@@ -1,4 +1,4 @@
-axionyx is a modification of the the [Nyx code](https://github.com/AMReX-Astro/Nyx.git) for dealing with Fuzzy Dark Matter. The AxioNyx paper https://arxiv.org/abs/2007.08256 was produced using the mixed_dm branch.
+AxioNyx is a publicly available code for simulations of fuzzy dark matter (FDM). It is based on the [Nyx code](https://github.com/AMReX-Astro/Nyx.git) and features adaptive mesh refinement. The AxioNyx paper https://arxiv.org/abs/2007.08256 was produced using the mixed_dm branch.
 
 # Contents
 [Documentation](#Documentation)  
