@@ -18,7 +18,38 @@ A detailed documentation is not available yet. But you can find an API reference
 
 # Installation
 
-clone both the axionyx and the amrex4axionyx repo. axionyx expects amrex to live in ../amrex. You will need FFTW3 for axionyx to compile. Try building e.g. Exec/Test_FDM_lin_growth by running make. Adapt the GNUmakefile as needed.
+## Dependencies 
+
+### amrex4axionyx
+
+AxioNyx depends on amrex4axionyx, but amrex4axionyx does not need to be compiled. Both repositories should be cloned in the same folder and then the location of amrex4axionyx specified in AxioNyx GNUmakefile with e.g.
+    
+    AMREX_HOME ?= ../../../amrex4axionyx_1.0
+
+### FFTW3
+
+AxioNyx depends on FFTW3, which can be downloaded from:
+[http://www.fftw.org/download.html](http://www.fftw.org/download.html)
+
+and installed locally, e.g. in $HOME/local using 
+
+    ./configure --enable-mpi --enable-openmp --enable-shared --prefix=$HOME/local
+    make
+    make install
+
+This ensures that both MPI and OpenMP are supported. Additionally, one can specify a gcc compiler at the end of the configuration command with e.g.
+
+    CC=gcc-10
+
+In AxioNyx GNUmakefile the FFTW3 directory location should then be specified and libraries linked with 
+
+    HOME ?= /your/home/path
+    LIBRARIES += -L$(HOME)/local/lib -lfftw3_mpi -lfftw3_omp -lfftw3
+    INCLUDE_LOCATIONS       += $(HOME)/local/include
+
+If building with Intel compilers, some systems use Intel MKL which includes FFTW. Simply use:
+
+    LIBRARIES += -mkl
 
 ## Installation in 5 minutes
 
