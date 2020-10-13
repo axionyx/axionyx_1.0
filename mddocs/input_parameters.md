@@ -13,10 +13,12 @@ This section briefly describes the parameter available in the inputs file.
 There are some restrictions to what these parameters are allowed to be.
 
 Rules: 
+0) `amr.n_cell` = N should always be a power of 2. 
 1) number of MPI ranks (m) has to be 2^(3*i), where i=0,1,2,3,... so m = 1,8,64,512,...  
-2) amr.max_grid_size should always be set to (N^3 /m)^1/3, where N = amr.n_cell
+2) amr.max_grid_size should always be set to (N^3 /m)^1/3
 
 Explanation:  
+
 The 3-dimensional grid with the size N^3 is distributed to m MPI processors. But pencil decomposition that is used to parallelise the Fourier transform also requires that the grid be split into powers of 2 along one dimension. So in 3 dimensions, m has to be of the form 2^(3*i).
 
 It follows then that `amr.max_grid_size` or the size of the subgrid along one dimension is (total volume / number of MPI ranks)^1/3. 
@@ -26,6 +28,7 @@ So in the above example with
 `amr.n_cell = 64 64 64` 
 
 one woudl use  
+
 `amr.max_grid_size = 64` for 1 MPI rank  
 `amr.max_grid_size = 32` for  8 ranks  
 `amr.max_grid_size = 16` for 64 ranks and so on. 
