@@ -12,10 +12,10 @@ This section briefly describes the parameter available in the inputs file.
 
 There are some restrictions to what these parameters are allowed to be.
 
-Rules: 
-0) `amr.n_cell` = N should always be a power of 2. 
-1) number of MPI ranks (m) has to be 2^(3*i), where i=0,1,2,3,... so m = 1,8,64,512,...  
-2) amr.max_grid_size should always be set to (N^3 /m)^1/3
+Rules:  
+0. `amr.n_cell` = N should always be a power of 2.  
+1. number of MPI ranks (m) has to be 2^(3*i), where i=0,1,2,3,... so m = 1,8,64,512,...  
+2. amr.max_grid_size should always be set to (N^3 /m)^1/3
 
 Explanation:  
 
