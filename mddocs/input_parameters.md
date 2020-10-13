@@ -6,7 +6,7 @@ This section briefly describes the parameter available in the inputs file.
 
 #### Resolution Parameters 
 
-`amr.n_cell           = 64 64 64`  - the number of grid points along one dimension, for a cubic 3D grid this is repeated 3-times.  
+`amr.n_cell           = 64 64 64`  - the number of grid points along one dimension, for a cubic 3D grid this is repeated 3 times.  
 `amr.max_grid_size    = 16` - the maximum size of a subgrid.  
 `amr.blocking_factor  = 16` - the minumum size of a subgrid when using refinement. Without refinement, this can be set to the same value as `amr.max_grid_size`.  
 
@@ -14,7 +14,7 @@ There are some restrictions to what these parameters are allowed to be.
 
 Rules:  
 1. `amr.n_cell` = N should always be a power of 2.  
-2. number of MPI ranks (m) has to be 2^(3*i), where i=0,1,2,3,... so m = 1,8,64,512,...  
+2. number of MPI ranks (m) has to be 2^(3*i), where i = 0,1,2,3,... so m = 1,8,64,512,...  
 3. amr.max_grid_size should always be set to (N^3 /m)^1/3
 
 Explanation:  
