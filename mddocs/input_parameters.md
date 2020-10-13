@@ -8,7 +8,7 @@ This section briefly describes the parameter available in the inputs file.
 
 `amr.n_cell           = 64 64 64`  - the number of grid points along one dimension, for a cubic 3D grid this is repeated 3 times.  
 `amr.max_grid_size    = 16` - the maximum size of a subgrid.  
-`amr.blocking_factor  = 16` - the minumum size of a subgrid when using refinement. Without refinement, this can be set to the same value as `amr.max_grid_size`.  
+`amr.blocking_factor  = 16` - the minimum size of a subgrid when using refinement. Without refinement, this can be set to the same value as `amr.max_grid_size`.  
 
 There are some restrictions to what these parameters are allowed to be.
 
@@ -27,7 +27,7 @@ So in the above example with
 
 `amr.n_cell = 64 64 64` 
 
-one woudl use  
+one would use  
 
 `amr.max_grid_size = 64` for 1 MPI rank  
 `amr.max_grid_size = 32` for  8 ranks  
