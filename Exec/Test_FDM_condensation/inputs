@@ -17,7 +17,7 @@ nyx.vonNeumann_dt = 10.0
 
 #This is how we restart from a checkpoint and write an ascii particle file
 #Leave this commented out in cvs version
-amr.restart = chk00000
+#amr.restart = chk00000
 nyx.dump_old = 1
 #particles.particle_output_file = particle_output
 particles.write_in_plotfile = 0
