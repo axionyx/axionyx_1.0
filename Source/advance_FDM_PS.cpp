@@ -37,7 +37,7 @@ void copy_fortran2c(std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALI
 void drift(hacc::Dfft &dfft, MultiFab &Ax_new, int const gridsize, Real const dt, Real const h, Real const a_half, 
 	   Real const hbaroverm, std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >* a,std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >* b);
 
-void fdm_timestep(hacc::Dfft &dfft, MultiFab &Ax_new, MultiFab &phi,  Gravity::Gravity *gravity, Geometry &geom,
+void fdm_timestep(hacc::Dfft &dfft, MultiFab &Ax_new, MultiFab &phi,  Gravity* gravity, Geometry &geom,
 		  int const level, int const gridsize, Real const h, Real const dt_c,  
 		  Real const a_c, Real const dt_d, Real const a_d, Real const a_new, 
 		  Real const hbaroverm,std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >* a,std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >* b);
@@ -552,7 +552,7 @@ void Nyx::advance_FDM_PS(amrex::Real time,
     dfft.makePlans(&a[0],&b[0],&a[0],&b[0]);
 
     for (MFIter mfi(Ax_old,false); mfi.isValid(); ++mfi){
-      const Array4<Real> const& arr = Ax_old.array(mfi);
+      const Array4<Real> & arr = Ax_old.array(mfi);
       const Box& bx = mfi.validbox();
       const Dim3 lo = amrex::lbound(bx);
       const Dim3 hi = amrex::ubound(bx);
@@ -649,7 +649,7 @@ Stopwatch::stoplap();
 Stopwatch::stoplap("advance_FDM_PS");
 }
 
-inline void fdm_timestep(hacc::Dfft &dfft, MultiFab &Ax_new, MultiFab &phi,  Gravity::Gravity *gravity, Geometry &geom,
+inline void fdm_timestep(hacc::Dfft &dfft, MultiFab &Ax_new, MultiFab &phi, Gravity* gravity, Geometry &geom,
 			 int const level, int const gridsize, Real const h, Real const dt_c,  
 			 Real const a_c, Real const dt_d, Real const a_d, Real const a_new, 
 			 Real const hbaroverm,std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >* a,std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >* b)
@@ -802,8 +802,8 @@ inline void drift(hacc::Dfft &dfft, MultiFab &Ax_new,
 inline void copy_fortran2c(std::vector<complex_t, hacc::AlignedAllocator<complex_t, ALIGN> >& a, 
 			   MultiFab &refab, MultiFab &imfab, MFIter& mfi)
 {
- const Array4<Real> const& imarr = imfab[mfi].array();
- const Array4<Real> const& rearr = refab[mfi].array();
+ const Array4<Real> & imarr = imfab[mfi].array();
+ const Array4<Real> & rearr = refab[mfi].array();
  const Box& bx = mfi.validbox();
  const Dim3 lo = amrex::lbound(bx);
  const Dim3 hi = amrex::ubound(bx);
