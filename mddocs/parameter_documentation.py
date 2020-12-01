@@ -2,7 +2,13 @@ import sys
 import re
 import os
 import numpy as np
-
+"""
+this script can be used to generate a summary of the input parameters used in Axionyx. 
+It scans the source files and finds most places in which a parameter is read in through the ParmParse class. 
+To add a documentation string to such a parameter, add "\pparam <text>" as a line above the ParmParse call. 
+The script will find these text lines and put them together. By now, there is some manual interaction necessary
+to join the automated part with the manual documentation in input_parameters.md. The script will write its result to input_parameters_auto.md
+"""
 BASEPATH = os.path.dirname(os.path.abspath(__file__))
 dirs = [BASEPATH+"/../Source/",BASEPATH+"/../Exec/Test_Only_Axions/"]
 our_dict = {}
@@ -86,4 +92,4 @@ def write_params_doc(fname):
 scan_files(dirs,recursive=True)    
 print our_dict
 check_dict()
-write_params_doc(BASEPATH+"/input_parameters.md")
+write_params_doc(BASEPATH+"/input_parameters_auto.md")
