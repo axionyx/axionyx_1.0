@@ -363,7 +363,7 @@ Nyx::read_particle_params ()
     if(partlevel)
       //If Gaussian Beam Method is chosen for FDM evolution, we need dm_particles for the construction of the gravitational potential.
       do_dm_particles = 1;
-    pp.get("particle_init_type", particle_init_type);
+    pp.query("particle_init_type", particle_init_type);
 #endif
 #ifdef AGN
     pp.get("particle_init_type", particle_init_type);
